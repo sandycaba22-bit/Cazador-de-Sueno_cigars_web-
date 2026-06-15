@@ -1,0 +1,40 @@
+═══════════════════════════════════════════════════════════════
+  REGISTROS DNS — GoDaddy · cazadordesuenocigars.com
+═══════════════════════════════════════════════════════════════
+
+Ruta: GoDaddy → Mis Productos → cazadordesuenocigars.com → DNS → Administrar DNS
+
+PASO 1 — Eliminar registros viejos que entren en conflicto:
+  - A records duplicados apuntando a IPs antiguas
+  - CNAME www apuntando a otros destinos
+  - "Reenvío de dominio" o "Forwarding" en el panel (desactivar)
+
+PASO 2 — Crear estos registros (reemplaza IP con tu IP externa de GCP):
+
+┌─────────┬────────┬──────────────────────────────────┬─────┐
+│ Tipo    │ Nombre │ Valor                            │ TTL │
+├─────────┼────────┼──────────────────────────────────┼─────┤
+│ A       │ @      │ 35.237.216.105                   │ 600 │
+│ CNAME   │ www    │ cazadordesuenocigars.com.             │ 600 │
+└─────────┴────────┴──────────────────────────────────┴─────┘
+
+NOTA: El punto al final de "cazadordesuenocigars.com." en CNAME es correcto.
+
+ALTERNATIVA si CNAME en www da error en GoDaddy:
+
+┌─────────┬────────┬──────────────────────────────────┬─────┐
+│ A       │ @      │ 35.237.216.105                   │ 600 │
+│ A       │ www    │ 35.237.216.105                   │ 600 │
+└─────────┴────────┴──────────────────────────────────┴─────┘
+
+REDIRECCIÓN sin www → www:
+  No configures reenvío en GoDaddy. Nginx en el servidor hace:
+  cazadordesuenocigars.com → https://www.cazadordesuenocigars.com
+
+VERIFICAR (después de 15–60 min):
+  dig cazadordesuenocigars.com +short
+  dig www.cazadordesuenocigars.com +short
+
+Ambos deben resolver a tu IP de Google Cloud.
+
+═══════════════════════════════════════════════════════════════

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cazador de Sueños Cigars — Cigarros premium artesanales de San José de las Matas, República Dominicana. Donde la tradición familiar se encuentra con la precisión científica.">
+  <title>Cazador de Sueños Cigars | Cigarros Premium Artesanales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+  /* =========================================================
+     CAZADOR DE SUEÑOS CIGARS — Hoja única · Ultra Lujo
+     Paleta: Azul marino · Oro · Blanco crema · Negro
+     ========================================================= */
+  :root {
+    --navy: #0f2238;
+    --navy-deep: #0a1826;
+    --navy-light: #163050;
+    --gold: #c6a25a;
+    --gold-light: #e7d3a0;
+    --gold-dark: #93763c;
+    --cream: #f4efe2;
+    --gray-100: #e6ddca;
+    --gray-300: #aeb9c6;
+    --gray-500: #65717f;
+    --font-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+    --font-body: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+    --space-section: clamp(5.5rem, 11vw, 10rem);
+    --content-max: 1320px;
+    --transition: 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-slow: 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 18px; scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--navy-deep);
+    background-image:
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(22, 48, 80, 0.55) 0%, transparent 60%),
+      linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+    background-attachment: fixed;
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.85;
+    letter-spacing: 0.015em;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body.is-age-locked { overflow: hidden; height: 100vh; }
+  body.is-age-locked main,
+  body.is-age-locked .site-header,
+  body.is-age-locked .site-footer { display: none !important; }
+
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.15; }
+
+  .section-label {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    color: var(--cream);
+    letter-spacing: 0.02em;
+  }
+
+  .btn {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 0.84rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+  .btn:hover { background: var(--gold); color: var(--navy-deep); }
+
+  /* ============ AGE GATE ============ */
+  .age-gate {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: #050a12;
+    padding: 2rem;
+  }
+  .age-gate[hidden] { display: none; }
+  .age-gate__panel {
+    max-width: 540px; width: 100%; text-align: center;
+    border: 1px solid rgba(198, 162, 90, 0.25);
+    background: linear-gradient(170deg, rgba(15,34,56,0.6), rgba(7,17,29,0.9));
+    padding: clamp(2.5rem, 6vw, 4rem) clamp(2rem, 5vw, 3.5rem);
+  }
+  .age-gate__eyebrow { font-family: var(--font-display); letter-spacing: 0.34em; text-transform: uppercase; font-size: 0.72rem; color: var(--gold); }
+  .age-gate__title { font-size: clamp(2.2rem, 6vw, 3rem); color: var(--cream); margin: 1.5rem 0; }
+  .age-gate__text { font-size: 1rem; color: var(--gray-300); margin-bottom: 2.25rem; }
+  .age-gate__actions { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
+  .age-gate__no { font-family: var(--font-display); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.78rem; color: var(--gray-500); background: none; border: none; cursor: pointer; transition: color var(--transition); }
+  .age-gate__no:hover { color: var(--gray-300); }
+  .age-gate__legal { margin-top: 2rem; font-size: 0.72rem; color: var(--gray-500); letter-spacing: 0.06em; }
+
+  /* ============ HEADER (sticky) ============ */
+  .site-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem clamp(1.5rem, 4vw, 4rem);
+    background: rgba(7, 17, 29, 0.55);
+    backdrop-filter: blur(10px);
+    transition: background var(--transition), padding var(--transition);
+  }
+  .site-header--scrolled {
+    padding-top: 1rem; padding-bottom: 1rem;
+    background: rgba(7, 17, 29, 0.96);
+    box-shadow: 0 1px 0 rgba(198, 162, 90, 0.12);
+  }
+  .brand { font-family: var(--font-display); font-size: 1.35rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream); }
+  .brand span { color: var(--gold); }
+
+  .nav__links { list-style: none; display: flex; align-items: center; gap: clamp(1.5rem, 3vw, 2.75rem); }
+  .nav__links > li { position: relative; }
+  .nav__links a, .nav__menu-trigger {
+    font-family: var(--font-display); font-size: 0.92rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--gray-300);
+    background: none; border: none; cursor: pointer; transition: color var(--transition);
+  }
+  .nav__links a:hover, .nav__menu-trigger:hover { color: var(--cream); }
+  .nav__menu-trigger::after { content: '▾'; margin-left: 0.4rem; font-size: 0.7rem; }
+
+  .nav__menu {
+    position: absolute; top: calc(100% + 1.25rem); right: 0; min-width: 240px;
+    background: #07111d; border: 1px solid rgba(198, 162, 90, 0.18);
+    list-style: none; padding: 0.5rem 0;
+    opacity: 0; visibility: hidden; transform: translateY(-10px);
+    transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+  }
+  .nav__item--open .nav__menu { opacity: 1; visibility: visible; transform: translateY(0); }
+  .nav__menu li a { display: block; padding: 0.75rem 1.5rem; letter-spacing: 0.12em; }
+  .nav__menu li a:hover { background: rgba(198, 162, 90, 0.08); }
+  .nav__menu .nav__menu-desc { display: block; font-family: var(--font-body); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: none; color: var(--gold-dark); margin-top: 0.15rem; }
+
+  .nav__toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 0.5rem; }
+  .nav__toggle span { width: 26px; height: 1.5px; background: var(--cream); transition: var(--transition); }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 8rem 1.5rem 4rem;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 50%, rgba(22,48,80,0.4) 0%, transparent 70%),
+      linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+  }
+  .hero__eyebrow { font-family: var(--font-display); letter-spacing: 0.34em; text-transform: uppercase; font-size: 0.82rem; color: var(--gold); margin-bottom: 2rem; }
+  .hero__title { font-size: clamp(3rem, 9vw, 6.5rem); color: var(--cream); letter-spacing: 0.02em; max-width: 12ch; }
+  .hero__subtitle { margin-top: 2rem; font-size: clamp(1.05rem, 2.2vw, 1.35rem); font-style: italic; color: var(--gray-100); max-width: 32ch; }
+
+  /* ============ SECCIONES NARRATIVAS ============ */
+  .section { padding: var(--space-section) clamp(1.5rem, 4vw, 4rem); }
+
+  .legado__container { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2.5rem, 6vw, 6rem); align-items: center; }
+  .legado__frame { aspect-ratio: 4/5; border: 1px solid rgba(198,162,90,0.18); background: linear-gradient(160deg, var(--navy-light), var(--navy-deep)); display: flex; align-items: center; justify-content: center; }
+  .legado__frame img { width: 100%; height: 100%; object-fit: cover; }
+  .legado__frame--empty::after { content: 'CERRO ANGOLA'; font-family: var(--font-display); letter-spacing: 0.3em; color: var(--gold-dark); font-size: 0.9rem; }
+  .legado__lead { font-size: 1.2rem; color: var(--cream); margin-bottom: 1.5rem; line-height: 1.8; }
+  .legado__text p { color: var(--gray-300); margin-bottom: 1.25rem; line-height: 1.9; }
+  .legado__divider { width: 60px; height: 1px; background: var(--gold-dark); margin: 1.75rem 0; }
+  .legado__quote { margin-top: 2rem; padding-left: 1.5rem; border-left: 2px solid var(--gold-dark); }
+  .legado__quote p { font-family: var(--font-display); font-size: 1.5rem; font-style: italic; color: var(--gold-light); }
+  .legado__quote cite { display: block; margin-top: 0.75rem; font-style: normal; font-size: 0.85rem; letter-spacing: 0.1em; color: var(--gray-500); }
+
+  .maestria { background: var(--navy-deep); }
+  .maestria__header { max-width: 720px; margin: 0 auto clamp(3rem, 6vw, 5rem); text-align: center; }
+  .maestria__intro { margin-top: 1.5rem; color: var(--gray-300); font-size: 1.08rem; }
+  .maestria__grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(1.25rem, 2.5vw, 2rem); }
+  .maestria__card { background: var(--navy); border: 1px solid rgba(198,162,90,0.08); padding: 2.25rem 1.75rem; transition: background var(--transition); }
+  .maestria__card:hover { background: var(--navy-light); }
+  .maestria__card--wide { grid-column: span 1; }
+  .maestria__number { font-family: var(--font-display); font-size: 2.4rem; color: var(--gold-dark); display: block; margin-bottom: 0.75rem; }
+  .maestria__card h3 { font-size: 1.4rem; color: var(--cream); margin-bottom: 0.85rem; }
+  .maestria__card p { font-size: 0.94rem; color: var(--gray-300); line-height: 1.8; }
+
+  /* ============ COLECCIONES — GRID ============ */
+  .coleccion { background: var(--navy); }
+  .coleccion__header { max-width: 760px; margin: 0 auto clamp(3.5rem, 6vw, 5.5rem); text-align: center; }
+  .coleccion__intro { margin-top: 1.5rem; font-size: 1.1rem; color: var(--gray-300); }
+  .coleccion__grid { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3vw, 2.75rem); }
+
+  .coleccion-card { background: var(--navy-deep); border: 1px solid rgba(198,162,90,0.14); transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition); }
+  .coleccion-card:hover { border-color: rgba(198,162,90,0.45); transform: translateY(-6px); box-shadow: 0 28px 60px rgba(0,0,0,0.45); }
+  .coleccion-card__link { display: flex; flex-direction: column; height: 100%; }
+  .coleccion-card__media {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    padding: clamp(2rem, 3.5vw, 3rem); aspect-ratio: 4/3;
+    background-color: #0a1726;
+    background-image: radial-gradient(ellipse 70% 65% at 50% 42%, rgba(20,44,72,0.45) 0%, transparent 72%), url('img/texture-navy.jpg');
+    background-size: cover; background-position: center;
+    border-bottom: 1px solid rgba(198,162,90,0.12); overflow: hidden;
+  }
+  .coleccion-card__img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 18px 30px rgba(0,0,0,0.55)); transition: transform var(--transition-slow); }
+  .coleccion-card:hover .coleccion-card__img { transform: scale(1.04); }
+  .coleccion-card__body { padding: clamp(1.75rem, 3vw, 2.5rem); display: flex; flex-direction: column; flex: 1; }
+  .coleccion-card__line { font-family: var(--font-display); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); }
+  .coleccion-card__name { font-size: 1.9rem; color: var(--cream); margin: 0.4rem 0 1rem; letter-spacing: 0.04em; }
+  .coleccion-card__char { font-size: 0.98rem; color: var(--gray-300); line-height: 1.75; margin-bottom: 1.5rem; }
+  .coleccion-card__blend { border-top: 1px solid rgba(198,162,90,0.12); margin-bottom: 1.5rem; }
+  .coleccion-card__blend > div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid rgba(198,162,90,0.06); }
+  .coleccion-card__blend dt { font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gray-500); }
+  .coleccion-card__blend dd { font-size: 0.92rem; color: var(--gray-100); text-align: right; }
+  .coleccion-card__cta { margin-top: auto; align-self: flex-start; font-family: var(--font-display); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid rgba(198,162,90,0.35); padding-bottom: 0.35rem; transition: color var(--transition), border-color var(--transition); }
+  .coleccion-card:hover .coleccion-card__cta { color: var(--gold-light); border-color: var(--gold); }
+
+  /* ============ CONTACTO ============ */
+  .contacto { background: var(--navy-deep); }
+  .contacto__inner { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2.5rem, 6vw, 6rem); align-items: start; }
+  .contacto__lead { margin: 1.5rem 0 2.5rem; font-size: 1.08rem; color: var(--gray-300); }
+  .contacto__details { list-style: none; display: grid; gap: 1.5rem; }
+  .contacto__details li { color: var(--gray-100); line-height: 1.6; }
+  .contacto__details-label { display: block; font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.35rem; }
+  .contacto__details a { border-bottom: 1px solid var(--gold-dark); transition: color var(--transition); }
+  .contacto__details a:hover { color: var(--gold); }
+  .contacto__form { background: var(--navy); border: 1px solid rgba(198,162,90,0.14); padding: clamp(2rem, 4vw, 3rem); }
+  .field { margin-bottom: 1.5rem; }
+  .field label { display: block; font-family: var(--font-display); font-size: 0.74rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-300); margin-bottom: 0.6rem; }
+  .field input, .field textarea { width: 100%; padding: 0.9rem 1.1rem; background: var(--navy-deep); border: 1px solid rgba(198,162,90,0.22); color: var(--cream); font-family: var(--font-body); font-size: 0.98rem; transition: border-color var(--transition); }
+  .field textarea { resize: vertical; min-height: 120px; }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--gold); }
+  .contacto__submit { width: 100%; margin-top: 0.5rem; }
+  .contacto__form-note { margin-top: 1.25rem; font-size: 0.9rem; color: var(--gold); }
+  .contacto__form-note[hidden] { display: none; }
+
+  /* ============ FOOTER ============ */
+  .site-footer { background: var(--navy-deep); border-top: 1px solid rgba(198,162,90,0.15); padding: 4rem clamp(1.5rem, 4vw, 4rem) 2.5rem; text-align: center; }
+  .site-footer .brand { display: inline-block; margin-bottom: 1.25rem; }
+  .footer__tagline { color: var(--gray-500); font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; }
+  .footer__copy { margin-top: 2rem; font-size: 0.78rem; color: var(--gray-500); }
+
+  /* ============ REVEAL ============ */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .reveal--visible { opacity: 1; transform: none; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1024px) {
+    .coleccion__grid { grid-template-columns: repeat(2, 1fr); }
+    .maestria__grid { grid-template-columns: repeat(2, 1fr); }
+    .contacto__inner, .legado__container { grid-template-columns: 1fr; }
+    .legado__frame { aspect-ratio: 16/10; max-height: 420px; }
+  }
+  @media (max-width: 768px) {
+    html { font-size: 16px; }
+    .nav__links { position: fixed; inset: 0 0 0 auto; width: min(80vw, 320px); flex-direction: column; align-items: flex-start; justify-content: center; gap: 2rem; padding: 3rem 2.5rem; background: #07111d; transform: translateX(100%); transition: transform var(--transition); }
+    .nav--open .nav__links { transform: translateX(0); }
+    .nav__toggle { display: flex; z-index: 950; }
+    .nav__menu { position: static; opacity: 1; visibility: visible; transform: none; border: none; min-width: 0; padding: 0.5rem 0 0; background: transparent; }
+    .nav__item--has-menu .nav__menu { display: none; }
+    .nav__item--open .nav__menu { display: block; }
+  }
+  @media (max-width: 640px) {
+    .coleccion__grid { grid-template-columns: 1fr; max-width: 460px; }
+    .maestria__grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============ HERO CINEMATOGRÁFICO ============ */
+  .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8rem 1.5rem 4rem; overflow: hidden; background: var(--navy-deep); }
+  .hero__bg { position: absolute; inset: 0; background-image: url('img/hero-atmosphere.jpg'); background-size: cover; background-position: center center; transform: scale(1.04); animation: heroDrift 24s ease-in-out infinite alternate; z-index: 0; }
+  @keyframes heroDrift { from { transform: scale(1.04) translateY(0); } to { transform: scale(1.1) translateY(-1.5%); } }
+  .hero__overlay { position: absolute; inset: 0; z-index: 1; background: radial-gradient(ellipse 46% 32% at 50% 46%, rgba(7,17,29,0.72) 0%, rgba(7,17,29,0.3) 50%, transparent 74%), linear-gradient(180deg, rgba(7,17,29,0.6) 0%, transparent 24%, transparent 64%, rgba(7,17,29,0.45) 100%); }
+  .hero__content { position: relative; z-index: 2; max-width: 860px; padding: 0 1.5rem; }
+  .hero__eyebrow { font-family: var(--font-display); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.42em; text-transform: uppercase; color: var(--gold); margin-bottom: 2rem; }
+  .hero__title { font-size: clamp(3.4rem, 11vw, 8rem); font-weight: 500; line-height: 0.98; color: var(--cream); }
+  .hero__subtitle { margin: 2rem auto 0; max-width: 30ch; font-size: clamp(1.05rem, 2.2vw, 1.4rem); font-style: italic; color: var(--gray-100); line-height: 1.7; }
+  .hero__cta { display: inline-block; margin-top: 3rem; font-family: var(--font-display); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: var(--cream); padding: 1.1rem 2.75rem; border: 1px solid rgba(231,211,160,0.5); transition: background var(--transition), color var(--transition), border-color var(--transition); }
+  .hero__cta:hover { background: var(--gold); border-color: var(--gold); color: var(--navy-deep); }
+  .hero__scroll { position: absolute; left: 50%; bottom: 2.5rem; transform: translateX(-50%); z-index: 2; width: 1px; height: 64px; overflow: hidden; }
+  .hero__scroll span { display: block; width: 1px; height: 100%; background: linear-gradient(to bottom, transparent, var(--gold)); animation: scrollPulse 2.4s ease-in-out infinite; }
+  @keyframes scrollPulse { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(100%); } }
+
+  /* ============ MANIFIESTO ============ */
+  .manifiesto { padding: clamp(4.5rem, 9vw, 8rem) clamp(1.5rem, 4vw, 4rem); background: var(--navy-deep); border-top: 1px solid rgba(198,162,90,0.1); border-bottom: 1px solid rgba(198,162,90,0.1); }
+  .manifiesto__inner { max-width: 900px; margin: 0 auto; text-align: center; }
+  .manifiesto__text { font-family: var(--font-display); font-size: clamp(1.7rem, 4.5vw, 3rem); line-height: 1.4; color: var(--cream); }
+  .manifiesto__text em { font-style: italic; color: var(--gold); }
+
+  /* ============ LA FIRMA DE LA CASA ============ */
+  .firma { padding: var(--space-section) clamp(1.5rem, 4vw, 4rem); background: var(--navy); }
+  .firma__inner { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(2.5rem, 6vw, 6rem); align-items: center; }
+  .firma__media { position: relative; aspect-ratio: 5/4; display: flex; align-items: center; justify-content: center; padding: clamp(2rem, 4vw, 3.5rem); background-color: #0a1726; background-image: radial-gradient(ellipse 70% 65% at 50% 42%, rgba(20,44,72,0.45) 0%, transparent 72%), url('img/texture-navy.jpg'); background-size: cover; background-position: center; border: 1px solid rgba(198,162,90,0.16); overflow: hidden; }
+  .firma__media img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0 20px 36px rgba(0,0,0,0.55)); transition: transform var(--transition-slow); }
+  .firma:hover .firma__media img { transform: scale(1.05) rotate(-1deg); }
+  .firma__divider { width: 64px; height: 1px; background: var(--gold-dark); margin: 1.5rem 0 2rem; }
+  .firma__lead { font-size: 1.15rem; line-height: 1.85; color: var(--gray-100); margin-bottom: 1.25rem; }
+  .firma__note { font-family: var(--font-display); font-size: 1.25rem; font-style: italic; color: var(--gold-light); margin-bottom: 2.5rem; }
+  .firma__cta { display: inline-block; font-family: var(--font-display); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: var(--gold); padding-bottom: 0.5rem; border-bottom: 1px solid rgba(198,162,90,0.4); transition: color var(--transition), border-color var(--transition), letter-spacing var(--transition); }
+  .firma__cta:hover { color: var(--gold-light); border-color: var(--gold); letter-spacing: 0.3em; }
+  @media (max-width: 860px) {
+    .firma__inner { grid-template-columns: 1fr; gap: 2.5rem; }
+    .firma__media { max-width: 460px; margin: 0 auto; width: 100%; }
+  }
+  </style>
+</head>
+<body class="is-age-locked">
+
+  <!-- ===================== AGE GATE ===================== -->
+  <div class="age-gate" id="ageGate" role="dialog" aria-modal="true" aria-labelledby="ageTitle">
+    <div class="age-gate__panel">
+      <p class="age-gate__eyebrow">Verificación de Edad</p>
+      <h1 class="age-gate__title" id="ageTitle">Cazador de Sueños Cigars</h1>
+      <p class="age-gate__text">Este sitio contiene información sobre productos de tabaco reservados para mayores de edad. Confirme que tiene 21 años o más para continuar.</p>
+      <div class="age-gate__actions">
+        <button type="button" class="btn" id="ageEnter">Sí, tengo 21 años o más</button>
+        <button type="button" class="age-gate__no" id="ageExit">No, salir del sitio</button>
+      </div>
+      <p class="age-gate__legal">Al ingresar, usted confirma cumplir con la edad legal en su jurisdicción.</p>
+    </div>
+  </div>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header" id="siteHeader">
+    <a href="#hero" class="brand">Cazador de <span>Sueños</span></a>
+    <nav class="nav" id="nav" aria-label="Navegación principal">
+      <ul class="nav__links">
+        <li><a href="#legado">El Legado</a></li>
+        <li><a href="#maestria">Maestría</a></li>
+        <li class="nav__item nav__item--has-menu">
+          <button type="button" class="nav__menu-trigger" aria-haspopup="true" aria-expanded="false">Colecciones</button>
+          <ul class="nav__menu">
+            <li><a href="#vitola-emperador">El Emperador<span class="nav__menu-desc">El Primer Sueño</span></a></li>
+            <li><a href="#vitola-puro-habano">Puro Habano<span class="nav__menu-desc">Raíces Cubanas</span></a></li>
+            <li><a href="#vitola-exquisito">El Exquisito<span class="nav__menu-desc">Edición de Autor</span></a></li>
+            <li><a href="#vitola-rango">El Rango<span class="nav__menu-desc">Formato Figurado</span></a></li>
+            <li><a href="#vitola-ligero">Ligero 007<span class="nav__menu-desc">Obra Maestra</span></a></li>
+            <li><a href="#vitola-sultan">El Sultán<span class="nav__menu-desc">Valle del Cibao</span></a></li>
+          </ul>
+        </li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+    <button type="button" class="nav__toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="hero">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="hero__overlay" aria-hidden="true"></div>
+      <div class="hero__content">
+        <p class="hero__eyebrow">Cerro Angola · República Dominicana</p>
+        <h1 class="hero__title">Cazador de Sueños</h1>
+        <p class="hero__subtitle">Donde la tradición familiar se encuentra con la precisión científica.</p>
+        <a href="#colecciones" class="hero__cta">Descubrir la colección</a>
+      </div>
+      <a href="#manifiesto" class="hero__scroll" aria-label="Desplazar para descubrir"><span></span></a>
+    </section>
+
+    <!-- ===================== MANIFIESTO ===================== -->
+    <section class="manifiesto" id="manifiesto">
+      <div class="manifiesto__inner reveal">
+        <p class="manifiesto__text">Seis vitolas. Una sola obsesión:<br><em>el tiempo, bien guardado.</em></p>
+      </div>
+    </section>
+
+    <!-- ===================== NUESTRAS COLECCIONES ===================== -->
+    <section class="section coleccion reveal" id="colecciones">
+      <div class="coleccion__header">
+        <span class="section-label">Nuestras Colecciones</span>
+        <h2 class="section-title">Seis Vitolas de Autor</h2>
+        <p class="coleccion__intro">Cada formato, una expresión distinta de la casa. Fotografía macro de estudio, tabaquería declarada.</p>
+      </div>
+      <div class="coleccion__grid">
+
+        <article class="coleccion-card" id="vitola-emperador">
+          <a href="vitolas/el-emperador.html" class="coleccion-card__link" aria-label="Ver El Emperador">
+            <div class="coleccion-card__media">
+              <img class="coleccion-card__img" src="img/el-emperador-cigarro.jpg" alt="El Emperador — Gran Toro 58×6" loading="eager" decoding="async">
+            </div>
+            <div class="coleccion-card__body">
+              <span class="coleccion-card__line">El Primer Sueño</span>
+              <h3 class="coleccion-card__name">El Emperador</h3>
+              <p class="coleccion-card__char">Dominio y carácter. El cigarro fundacional de la casa, de fermentación especial familiar.</p>
+              <dl class="coleccion-card__blend">
+                <div><dt>Formato</dt><dd>Gran Toro 58 × 6″</dd></div>
+                <div><dt>Capa</dt><dd>San Andrés Madura</dd></div>
+                <div><dt>Fortaleza</dt><dd>Medio-Fuerte</dd></div>
+              </dl>
+              <span class="coleccion-card__cta">Ver vitola</span>
+            </div>
+          </a>
+        </article>
+
+        <article class="coleccion-card" id="vitola-puro-habano">
+          <a href="vitolas/puro-habano.html" class="coleccion-card__link" aria-label="Ver Puro Habano">
+            <div class="coleccion-card__media">
+              <img class="coleccion-card__img" src="img/puro-habano-cigarro.jpg" alt="Puro Habano — Churchill 48×7" loading="lazy" decoding="async">
+            </div>
+            <div class="coleccion-card__body">
+              <span class="coleccion-card__line">Raíces Cubanas</span>
+              <h3 class="coleccion-card__name">Puro Habano</h3>
+              <p class="coleccion-card__char">Liga de autor con capa Habana y balance extraordinario. Homenaje al Viejo Mundo.</p>
+              <dl class="coleccion-card__blend">
+                <div><dt>Formato</dt><dd>Churchill 48 × 7″</dd></div>
+                <div><dt>Tripa</dt><dd>Yamazá — Criollo 98</dd></div>
+                <div><dt>Fortaleza</dt><dd>Fuerte</dd></div>
+              </dl>
+              <span class="coleccion-card__cta">Ver vitola</span>
+            </div>
+          </a>
+        </article>
+
+        <article class="coleccion-card" id="vitola-exquisito">
+          <a href="vitolas/el-exquisito.html" class="coleccion-card__link" aria-label="Ver El Exquisito">
+            <div class="coleccion-card__media">
+              <img class="coleccion-card__img" src="img/el-exquisito-cigarro.jpg" alt="El Exquisito — Gran Toro 58×6" loading="lazy" decoding="async">
+            </div>
+            <div class="coleccion-card__body">
+              <span class="coleccion-card__line">Edición de Autor</span>
+              <h3 class="coleccion-card__name">El Exquisito</h3>
+              <p class="coleccion-card__char">Producción ultra limitada de Cerro Angola, con doble capote Nicaragua–Camerún.</p>
+              <dl class="coleccion-card__blend">
+                <div><dt>Origen</dt><dd>Cerro Angola, SJM</dd></div>
+                <div><dt>Capa</dt><dd>San Andrés Madura</dd></div>
+                <div><dt>Fortaleza</dt><dd>Fuerte · Sofisticado</dd></div>
+              </dl>
+              <span class="coleccion-card__cta">Ver vitola</span>
+            </div>
+          </a>
+        </article>
+
+        <article class="coleccion-card" id="vitola-rango">
+          <a href="vitolas/el-rango.html" class="coleccion-card__link" aria-label="Ver El Rango">
+            <div class="coleccion-card__media">
+              <img class="coleccion-card__img" src="img/el-rango-cigarro.jpg" alt="El Rango — Doble Perfecto 60×4½" loading="lazy" decoding="async">
+            </div>
+            <div class="coleccion-card__body">
+              <span class="coleccion-card__line">Formato Figurado</span>
+              <h3 class="coleccion-card__name">El Rango</h3>
+              <p class="coleccion-card__char">Doble Perfecto de alta artesanía. Sabor concentrado y combustión impecable.</p>
+              <dl class="coleccion-card__blend">
+                <div><dt>Formato</dt><dd>Doble Perfecto 60 × 4½″</dd></div>
+                <div><dt>Tripa</dt><dd>100% Nicaragua</dd></div>
+                <div><dt>Fortaleza</dt><dd>Medio-Fuerte</dd></div>
+              </dl>
+              <span class="coleccion-card__cta">Ver vitola</span>
+            </div>
+          </a>
+        </article>
+
+        <article class="coleccion-card" id="vitola-ligero">
+          <a href="vitolas/ligero-007.html" class="coleccion-card__link" aria-label="Ver Ligero 007">
+            <div class="coleccion-card__media">
+              <img class="coleccion-card__img" src="images/ligero-007/cigarro.jpg" alt="Ligero 007 — Toro 58×5" loading="lazy" decoding="async">
+            </div>
+            <div class="coleccion-card__body">
+              <span class="coleccion-card__line">Obra Maestra</span>
+              <h3 class="coleccion-card__name">Ligero 007</h3>
+              <p class="coleccion-card__char">Blend místico de siete tabacos de siete países. La maravilla de la casa.</p>
+              <dl class="coleccion-card__blend">
+                <div><dt>Formato</dt><dd>Toro 58 × 5″</dd></div>
+                <div><dt>Capa</dt><dd>San Andrés Madura</dd></div>
+                <div><dt>Fortaleza</dt><dd>Alta · Sofisticada</dd></div>
+              </dl>
+              <span class="coleccion-card__cta">Ver vitola</span>
+            </div>
+          </a>
+        </article>
+
+        <article class="coleccion-card" id="vitola-sultan">
+          <a href="vitolas/el-sultan.html" class="coleccion-card__link" aria-label="Ver El Sultán">
+            <div class="coleccion-card__media">
+              <img class="coleccion-card__img" src="img/el-sultan-cigarro.jpg" alt="El Sultán — Robusto 50×5" loading="lazy" decoding="async">
+            </div>
+            <div class="coleccion-card__body">
+              <span class="coleccion-card__line">Valle del Cibao</span>
+              <h3 class="coleccion-card__name">El Sultán</h3>
+              <p class="coleccion-card__char">Robusto de cuerpo pleno e impacto magistral, con tripa premium del Cibao.</p>
+              <dl class="coleccion-card__blend">
+                <div><dt>Formato</dt><dd>Robusto 50 × 5″</dd></div>
+                <div><dt>Tripa</dt><dd>Valle del Cibao</dd></div>
+                <div><dt>Fortaleza</dt><dd>Fuerte · Cuerpo pleno</dd></div>
+              </dl>
+              <span class="coleccion-card__cta">Ver vitola</span>
+            </div>
+          </a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ===================== LA FIRMA DE LA CASA ===================== -->
+    <section class="firma reveal" id="firma">
+      <div class="firma__inner">
+        <div class="firma__media">
+          <img src="images/ligero-007/cigarro.jpg" alt="Ligero 007 — la obra maestra de la casa" loading="lazy" decoding="async">
+        </div>
+        <div class="firma__text">
+          <span class="section-label">La Firma de la Casa</span>
+          <h2 class="section-title">Ligero 007</h2>
+          <div class="firma__divider"></div>
+          <p class="firma__lead">Siete tabacos de siete países, reunidos en una sola obra. Capa San Andrés Madura, capote Camerún y un Toro 58×5 de presencia imponente.</p>
+          <p class="firma__note">La pieza que define todo lo que somos.</p>
+          <a href="vitolas/ligero-007.html" class="firma__cta">Descubrir el Ligero 007</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== MAESTRÍA ===================== -->
+    <section class="section maestria reveal" id="maestria">
+      <div class="maestria__header">
+        <span class="section-label">Maestría Técnica</span>
+        <h2 class="section-title">Ciencia &amp; Precisión</h2>
+        <p class="maestria__intro">La excelencia de la casa descansa en un proceso riguroso: tradición refinada con metodología científica y la mentoría de los maestros del oficio tabacalero.</p>
+      </div>
+      <div class="maestria__grid">
+        <article class="maestria__card">
+          <span class="maestria__number">01</span>
+          <h3>Curación Controlada</h3>
+          <p>Monitoreo preciso de humedad y reposo para desarrollar el perfil aromático completo de cada capa.</p>
+        </article>
+        <article class="maestria__card">
+          <span class="maestria__number">02</span>
+          <h3>Fermentación</h3>
+          <p>Pilones gestionados con esmero para liberar amoníacos y catalizar la transformación de la hoja.</p>
+        </article>
+        <article class="maestria__card">
+          <span class="maestria__number">03</span>
+          <h3>Temperatura</h3>
+          <p>Control térmico milimétrico del secado al añejamiento, garantizando consistencia en cada producción.</p>
+        </article>
+        <article class="maestria__card">
+          <span class="maestria__number">04</span>
+          <h3>INTABACO &amp; Mentoría</h3>
+          <p>Formación técnica de primer nivel sumada a la herencia familiar, bajo la guía de Ruben y Papo.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===================== EL LEGADO ===================== -->
+    <section class="section legado reveal" id="legado">
+      <div class="legado__container">
+        <div class="legado__frame legado__frame--empty">
+          <img src="img/cerro-angola.jpg" alt="Cerro Angola — San José de las Matas" loading="lazy" onerror="this.remove();">
+        </div>
+        <div class="legado__text">
+          <span class="section-label">El Legado</span>
+          <h2 class="section-title">Raíces en la Montaña</h2>
+          <div class="legado__divider"></div>
+          <p class="legado__lead">En las cumbres de Cerro Angola de Rincón de Piedra, en San José de las Matas, mis abuelos —Miguel Ángel Antonio Abreu y Doña Juanica— forjaron el conocimiento más preciado que una familia puede legar: el dominio del tabaco.</p>
+          <p>Cazador de Sueños no nació en un despacho. Es la continuación de ese legado, escrito en humo y en tierra. Cada vitola lleva el alma de Cerro Angola y un compromiso innegociable con la excelencia.</p>
+          <blockquote class="legado__quote">
+            <p>«El tabaco no se apura. Se escucha.»</p>
+            <cite>— Miguel Ángel Antonio Abreu</cite>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACTO ===================== -->
+    <section class="section contacto reveal" id="contacto">
+      <div class="contacto__inner">
+        <div class="contacto__intro">
+          <span class="section-label">Contacto</span>
+          <h2 class="section-title">Experiencia Privada</h2>
+          <p class="contacto__lead">Para consultas, pedidos especiales o experiencias de cata, escríbanos. Atendemos a conocedores y coleccionistas con la discreción que merece la casa.</p>
+          <ul class="contacto__details">
+            <li><span class="contacto__details-label">Origen</span>San José de las Matas · Cerro Angola, República Dominicana</li>
+            <li><span class="contacto__details-label">Correo</span><a href="mailto:info@cazadordesuenocigars.com">info@cazadordesuenocigars.com</a></li>
+            <li><span class="contacto__details-label">Respuesta</span>24–48 horas hábiles</li>
+          </ul>
+        </div>
+        <form class="contacto__form" id="contactForm" novalidate>
+          <div class="field"><label for="cf-nombre">Nombre</label><input type="text" id="cf-nombre" name="nombre" autocomplete="name" required></div>
+          <div class="field"><label for="cf-email">Correo electrónico</label><input type="email" id="cf-email" name="email" autocomplete="email" required></div>
+          <div class="field"><label for="cf-asunto">Asunto</label><input type="text" id="cf-asunto" name="asunto"></div>
+          <div class="field"><label for="cf-mensaje">Mensaje</label><textarea id="cf-mensaje" name="mensaje" rows="5" required></textarea></div>
+          <button type="submit" class="btn contacto__submit">Enviar consulta</button>
+          <p class="contacto__form-note" id="formNote" hidden>Gracias. Su consulta ha sido registrada; le responderemos en breve.</p>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer">
+    <span class="brand">Cazador de <span>Sueños</span></span>
+    <p class="footer__tagline">Cerro Angola · San José de las Matas · República Dominicana</p>
+    <p class="footer__copy">© 2026 Cazador de Sueños Cigars. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <script>
+  (function () {
+    var KEY = 'cds-age-verified';
+    var gate = document.getElementById('ageGate');
+    var body = document.body;
+
+    function unlock() {
+      body.classList.remove('is-age-locked');
+      if (gate) gate.hidden = true;
+    }
+    if (sessionStorage.getItem(KEY) === '1') { unlock(); }
+    var enter = document.getElementById('ageEnter');
+    var exit = document.getElementById('ageExit');
+    if (enter) enter.addEventListener('click', function () { sessionStorage.setItem(KEY, '1'); unlock(); });
+    if (exit) exit.addEventListener('click', function () { window.location.href = 'https://www.google.com'; });
+
+    /* Header scroll state */
+    var header = document.getElementById('siteHeader');
+    window.addEventListener('scroll', function () {
+      header.classList.toggle('site-header--scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    /* Mobile menu toggle */
+    var nav = document.getElementById('nav');
+    var toggle = document.getElementById('navToggle');
+    if (toggle) toggle.addEventListener('click', function () {
+      var open = nav.classList.toggle('nav--open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    /* Colecciones dropdown */
+    var item = document.querySelector('.nav__item--has-menu');
+    var trigger = item ? item.querySelector('.nav__menu-trigger') : null;
+    var desktop = window.matchMedia('(min-width: 769px)');
+    if (trigger) {
+      trigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = item.classList.toggle('nav__item--open');
+        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      item.addEventListener('mouseenter', function () { if (desktop.matches) item.classList.add('nav__item--open'); });
+      item.addEventListener('mouseleave', function () { if (desktop.matches) item.classList.remove('nav__item--open'); });
+      document.addEventListener('click', function () { item.classList.remove('nav__item--open'); });
+    }
+    /* Close mobile nav after clicking a link */
+    nav.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { nav.classList.remove('nav--open'); if (toggle) toggle.setAttribute('aria-expanded', 'false'); });
+    });
+
+    /* Scroll reveal */
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('reveal--visible'); io.unobserve(en.target); } });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      reveals.forEach(function (el) { io.observe(el); });
+    } else {
+      reveals.forEach(function (el) { el.classList.add('reveal--visible'); });
+    }
+
+    /* Contact form */
+    var form = document.getElementById('contactForm');
+    if (form) form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      document.getElementById('formNote').hidden = false;
+      form.reset();
+    });
+  })();
+  </script>
+
+</body>
+</html>
