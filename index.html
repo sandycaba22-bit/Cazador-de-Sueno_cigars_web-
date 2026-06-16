@@ -626,6 +626,89 @@
   .manifiesto__text { font-family: var(--font-display); font-size: clamp(1.7rem, 4.5vw, 3rem); line-height: 1.4; color: var(--cream); }
   .manifiesto__text em { font-style: italic; color: var(--gold); }
 
+  /* ============ MISIÓN, VISIÓN Y VALORES ============ */
+  .mision-vision {
+    background: linear-gradient(180deg, var(--surface-base) 0%, var(--ink-900) 100%);
+    border-top: 1px solid var(--border-gold-soft);
+    border-bottom: 1px solid var(--border-gold-soft);
+  }
+  .mv-container {
+    max-width: var(--content-max);
+    margin: 0 auto;
+  }
+  .mv-header {
+    text-align: center;
+    margin-bottom: clamp(3rem, 6vw, 5rem);
+  }
+  .mv-intro {
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+    color: var(--gray-300);
+    line-height: 1.85;
+  }
+  .mv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: clamp(2rem, 4vw, 3rem);
+  }
+  .mv-card {
+    background: var(--surface-panel);
+    border: 1px solid var(--border-gold-soft);
+    padding: clamp(2rem, 4vw, 3rem);
+    transition: border-color var(--transition), transform var(--transition);
+  }
+  .mv-card:hover {
+    border-color: var(--border-gold-medium);
+    transform: translateY(-4px);
+  }
+  .mv-card__icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-gold-medium);
+    border-radius: 50%;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+  .mv-card__title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--cream);
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.08em;
+  }
+  .mv-card__text {
+    color: var(--gray-300);
+    line-height: 1.85;
+    font-size: 0.98rem;
+  }
+  .mv-card__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .mv-card__list li {
+    color: var(--gray-300);
+    line-height: 1.75;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-gold-hairline);
+  }
+  .mv-card__list li:last-child {
+    border-bottom: none;
+  }
+  .mv-card__list strong {
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+  @media (max-width: 768px) {
+    .mv-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
   </style>
 </head>
 <body class="is-age-locked">
@@ -790,6 +873,59 @@
           </div>
         </article>
 
+      </div>
+    </section>
+
+    <!-- ===================== MISIÓN, VISIÓN Y VALORES ===================== -->
+    <section class="section mision-vision reveal" id="mision-vision">
+      <div class="mv-container">
+        <div class="mv-header reveal">
+          <span class="section-label">Nuestra Identidad</span>
+          <h2 class="section-title">Misión, Visión y Valores</h2>
+          <p class="mv-intro">Cazador de Sueños Sigar SRL — Tradición, excelencia y compromiso</p>
+        </div>
+        
+        <div class="mv-grid">
+          <article class="mv-card mv-card--mision reveal">
+            <div class="mv-card__icon">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <h3 class="mv-card__title">Misión</h3>
+            <p class="mv-card__text">Producir cigarros de alta calidad utilizando las mejores hojas de tabaco y procesos especializados, satisfaciendo las expectativas de nuestros clientes mediante la excelencia, la responsabilidad, el respeto por nuestros colaboradores y el desarrollo sostenible de la industria tabacalera.</p>
+          </article>
+
+          <article class="mv-card mv-card--vision reveal">
+            <div class="mv-card__icon">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+            <h3 class="mv-card__title">Visión</h3>
+            <p class="mv-card__text">Ser una fábrica de cigarros reconocida a nivel nacional e internacional por la excelencia de nuestros productos, la tradición artesanal, la innovación constante y el compromiso con la calidad, llevando el sabor y la cultura del tabaco a los mercados más exigentes.</p>
+          </article>
+
+          <article class="mv-card mv-card--valores reveal">
+            <div class="mv-card__icon">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <h3 class="mv-card__title">Valores</h3>
+            <ul class="mv-card__list">
+              <li><strong>Calidad:</strong> Mantener los más altos estándares en cada etapa de producción.</li>
+              <li><strong>Compromiso:</strong> Cumplir responsablemente con clientes, colaboradores y socios.</li>
+              <li><strong>Tradición:</strong> Preservar el legado y la cultura del arte de elaborar cigarros.</li>
+              <li><strong>Integridad:</strong> Actuar con honestidad, ética y transparencia.</li>
+              <li><strong>Innovación:</strong> Mejorar continuamente nuestros procesos y productos.</li>
+              <li><strong>Trabajo en equipo:</strong> Fomentar la colaboración y el respeto mutuo.</li>
+              <li><strong>Responsabilidad social y ambiental:</strong> Contribuir al bienestar de la comunidad y al cuidado del medio ambiente.</li>
+            </ul>
+          </article>
+        </div>
       </div>
     </section>
 
