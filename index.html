@@ -709,6 +709,94 @@
     }
   }
 
+  /* ============ LANGUAGE SELECTOR ============ */
+  .lang-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: 1.5rem;
+  }
+  .lang-selector__button {
+    background: transparent;
+    border: 1px solid var(--border-gold-soft);
+    color: var(--cream);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+  }
+  .lang-selector__button:hover {
+    border-color: var(--border-gold-medium);
+    background: var(--surface-panel);
+  }
+  .lang-selector__icon {
+    flex-shrink: 0;
+  }
+  .lang-selector__current {
+    font-family: var(--font-body);
+    white-space: nowrap;
+  }
+  .lang-selector__dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: var(--surface-panel);
+    border: 1px solid var(--border-gold-soft);
+    border-radius: 4px;
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity var(--transition), visibility var(--transition), transform var(--transition);
+    z-index: 1000;
+    box-shadow: var(--shadow-premium);
+  }
+  .lang-selector__dropdown--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .lang-selector__option {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--cream);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .lang-selector__option:hover {
+    background: var(--surface-elevated);
+  }
+  .lang-selector__option:first-child {
+    border-radius: 4px 4px 0 0;
+  }
+  .lang-selector__option:last-child {
+    border-radius: 0 0 4px 4px;
+  }
+  @media (max-width: 768px) {
+    .lang-selector {
+      margin-left: 1rem;
+    }
+    .lang-selector__button {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+    .lang-selector__current {
+      display: none;
+    }
+  }
+
   </style>
 </head>
 <body class="is-age-locked">
@@ -751,6 +839,16 @@
     <button type="button" class="nav__toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
+    <div class="lang-selector">
+      <button type="button" class="lang-selector__button" aria-label="Seleccionar idioma">
+        <svg class="lang-selector__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <span class="lang-selector__current">🇪🇸 Español</span>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -1243,6 +1341,8 @@
   </script>
 
   <script src="hero-parallax.js" defer></script>
+  <script src="js/language-switcher.js" defer></script>
+  <script src="js/ecommerce-skeleton.js" defer></script>
 
 </body>
 </html>

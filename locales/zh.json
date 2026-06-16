@@ -1,0 +1,81 @@
+{
+  "language": "zh",
+  "direction": "ltr",
+  "translations": {
+    "age_gate": {
+      "title": "Cazador de Sueños Cigars",
+      "eyebrow": "年龄验证",
+      "text": "本网站包含仅限法定年龄成人使用的烟草产品信息。请确认您已年满21岁方可继续。",
+      "enter": "是的，我已年满21岁",
+      "exit": "不，离开网站",
+      "legal": "进入本网站即表示您确认符合您所在司法管辖区的法定年龄要求。"
+    },
+    "header": {
+      "brand": "Cazador de Sueños",
+      "nav": {
+        "legacy": "传承",
+        "mastery": "工艺",
+        "collections": "系列",
+        "contact": "联系"
+      }
+    },
+    "hero": {
+      "eyebrow": "Cerro Angola · 多米尼加共和国",
+      "title": "Cazador de Sueños",
+      "subtitle": "家族传统与科学精度的交汇之处。",
+      "cta": "探索系列"
+    },
+    "collections": {
+      "label": "我们的系列",
+      "title": "六款作者雪茄",
+      "intro": "每种规格，都是品牌的独特表达。工作室微距摄影，雪茄工艺宣言。"
+    },
+    "mission_vision": {
+      "label": "我们的身份",
+      "title": "使命、愿景和价值观",
+      "intro": "Cazador de Sueños Sigar SRL — 传统、卓越和承诺",
+      "mission": {
+        "title": "使命",
+        "text": "使用最优质的烟叶和专业工艺生产高品质雪茄，通过卓越、责任、对员工的尊重以及烟草行业的可持续发展来满足客户的期望。"
+      },
+      "vision": {
+        "title": "愿景",
+        "text": "成为在国内外因其产品卓越、手工传统、持续创新和对质量的承诺而认可的雪茄制造商，将雪茄的风味和文化带给最苛刻的市场。"
+      },
+      "values": {
+        "title": "价值观",
+        "items": [
+          {"key": "quality", "label": "质量", "text": "在生产每个阶段保持最高标准。"},
+          {"key": "commitment", "label": "承诺", "text": "负责任地满足客户、合作伙伴和员工的需求。"},
+          {"key": "tradition", "label": "传统", "text": "传承雪茄制作艺术的遗产和文化。"},
+          {"key": "integrity", "label": "诚信", "text": "以诚实、道德和透明的方式行事。"},
+          {"key": "innovation", "label": "创新", "text": "持续改进我们的工艺和产品。"},
+          {"key": "teamwork", "label": "团队合作", "text": "促进合作和相互尊重。"},
+          {"key": "responsibility", "label": "社会和环境责任", "text": "为社区福祉和环境保护做出贡献。"}
+        ]
+      }
+    },
+    "contact": {
+      "label": "联系",
+      "title": "私人体验",
+      "lead": "如需咨询、特殊订单或品鉴体验，请写信给我们。我们以品牌应有的谨慎为鉴赏家和收藏家提供服务。",
+      "channels": {
+        "title": "直接渠道",
+        "whatsapp": "WhatsApp · 直接订单",
+        "email": "官方企业邮箱",
+        "phone": "管理电话"
+      },
+      "form": {
+        "name": "姓名",
+        "email": "电子邮件地址",
+        "subject": "主题",
+        "message": "消息",
+        "submit": "发送咨询"
+      }
+    },
+    "footer": {
+      "tagline": "Cerro Angola · 圣何塞·德·拉斯·马塔斯 · 多米尼加共和国",
+      "copy": "© 2026 Cazador de Sueños Cigars. 版权所有。"
+    }
+  }
+}

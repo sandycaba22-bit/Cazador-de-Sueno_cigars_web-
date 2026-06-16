@@ -1,0 +1,81 @@
+{
+  "language": "en",
+  "direction": "ltr",
+  "translations": {
+    "age_gate": {
+      "title": "Cazador de Sueños Cigars",
+      "eyebrow": "Age Verification",
+      "text": "This site contains information about tobacco products reserved for adults of legal age. Please confirm that you are 21 years or older to continue.",
+      "enter": "Yes, I am 21 or older",
+      "exit": "No, leave site",
+      "legal": "By entering, you confirm that you meet the legal age requirement in your jurisdiction."
+    },
+    "header": {
+      "brand": "Cazador de Sueños",
+      "nav": {
+        "legacy": "The Legacy",
+        "mastery": "Mastery",
+        "collections": "Collections",
+        "contact": "Contact"
+      }
+    },
+    "hero": {
+      "eyebrow": "Cerro Angola · Dominican Republic",
+      "title": "Cazador de Sueños",
+      "subtitle": "Where family tradition meets scientific precision.",
+      "cta": "Discover the collection"
+    },
+    "collections": {
+      "label": "Our Collections",
+      "title": "Six Author Vitolas",
+      "intro": "Each format, a distinct expression of the house. Studio macro photography, declared cigar craftsmanship."
+    },
+    "mission_vision": {
+      "label": "Our Identity",
+      "title": "Mission, Vision and Values",
+      "intro": "Cazador de Sueños Sigar SRL — Tradition, excellence and commitment",
+      "mission": {
+        "title": "Mission",
+        "text": "To produce high-quality cigars using the finest tobacco leaves and specialized processes, satisfying our clients' expectations through excellence, responsibility, respect for our collaborators, and sustainable development of the tobacco industry."
+      },
+      "vision": {
+        "title": "Vision",
+        "text": "To be a cigar factory recognized nationally and internationally for the excellence of our products, artisanal tradition, constant innovation, and commitment to quality, bringing the flavor and culture of tobacco to the most demanding markets."
+      },
+      "values": {
+        "title": "Values",
+        "items": [
+          {"key": "quality", "label": "Quality", "text": "Maintain the highest standards at every stage of production."},
+          {"key": "commitment", "label": "Commitment", "text": "Fulfill responsibly with clients, collaborators, and partners."},
+          {"key": "tradition", "label": "Tradition", "text": "Preserve the legacy and culture of the cigar-making art."},
+          {"key": "integrity", "label": "Integrity", "text": "Act with honesty, ethics, and transparency."},
+          {"key": "innovation", "label": "Innovation", "text": "Continuously improve our processes and products."},
+          {"key": "teamwork", "label": "Teamwork", "text": "Foster collaboration and mutual respect."},
+          {"key": "responsibility", "label": "Social and Environmental Responsibility", "text": "Contribute to community welfare and environmental care."}
+        ]
+      }
+    },
+    "contact": {
+      "label": "Contact",
+      "title": "Private Experience",
+      "lead": "For inquiries, special orders, or tasting experiences, write to us. We serve connoisseurs and collectors with the discretion the house deserves.",
+      "channels": {
+        "title": "Direct Channels",
+        "whatsapp": "WhatsApp · Direct Orders",
+        "email": "Official Corporate Email",
+        "phone": "Management Phones"
+      },
+      "form": {
+        "name": "Name",
+        "email": "Email Address",
+        "subject": "Subject",
+        "message": "Message",
+        "submit": "Send Inquiry"
+      }
+    },
+    "footer": {
+      "tagline": "Cerro Angola · San José de las Matas · Dominican Republic",
+      "copy": "© 2026 Cazador de Sueños Cigars. All rights reserved."
+    }
+  }
+}
