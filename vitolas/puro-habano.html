@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Puro Habano | Raíces Cubanas — Cigarros Premium | Cazador de Sueños</title>
-  <meta name="description" content="Puro Habano — tributo a la tradición clásica. Churchill 48×7 con capa Habana, tripa Yamazá Criollo 98 y liga de autor. Cigarro premium artesanal de Cazador de Sueños.">
-  <meta name="keywords" content="Puro Habano, cigarros premium, Cazador de Sueños, puros artesanales, tabaco artesanal, cigarros dominicanos, San José de las Matas">
+  <title>Puro Habano | Cazador de Sueños Cigars SRL — Tabaco Dominicano Premium</title>
+  <meta name="description" content="Puro Habano — tributo a la tradición clásica de Cerro Angola. Churchill 48×7 con capa Habana, tripa Yamazá Criollo 98 y liga de autor. Cazador de Sueños Cigars SRL, Maestro Tabaquero, tabaco dominicano, INTABACO.">
+  <meta name="keywords" content="Puro Habano, Cazador de Sueños Cigars SRL, tabaco dominicano, Cerro Angola, San José de las Matas, Tamboril, Maestro Tabaquero, INTABACO, cigarros premium, puros artesanales">
   <meta name="author" content="Cazador de Sueños Cigars">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://www.cazadordesuenocigars.com/vitolas/puro-habano.html">
@@ -20,6 +20,16 @@
   <meta name="twitter:title" content="Puro Habano | Cazador de Sueños Cigars">
   <meta name="twitter:description" content="Raíces cubanas, liga de autor. Cigarro premium Churchill.">
   <meta name="twitter:image" content="https://www.cazadordesuenocigars.com/img/puro-habano-cigarro.jpg">
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BYRS7MGYXK');
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -93,9 +103,9 @@
 
   <main class="vitola-detail vitola-detail--habano">
 
-    <a href="../index.html#catalogo" class="vitola-detail__back">← Volver al catálogo</a>
+    <a href="../index.html#catalogo" class="vitola-detail__back" data-i18n="vitolas.back_to_catalog">← Volver al catálogo</a>
 
-    <div class="vitola-detail__badge vitola-detail__badge--habano">Raíces Cubanas</div>
+    <div class="vitola-detail__badge vitola-detail__badge--habano" data-i18n="vitolas.puro_habano.badge">Raíces Cubanas</div>
 
     <section class="ligero-gallery" aria-label="Galería Puro Habano">
       <figure class="ligero-gallery__frame ligero-gallery__frame--cigar">
@@ -109,7 +119,7 @@
           fetchpriority="high"
           decoding="sync"
         >
-        <figcaption class="ligero-gallery__label">Cigarro individual</figcaption>
+        <figcaption class="ligero-gallery__label" data-i18n="vitolas.gallery.single_cigar">Cigarro individual</figcaption>
       </figure>
       <figure class="ligero-gallery__frame ligero-gallery__frame--closed">
         <img
@@ -121,7 +131,7 @@
           loading="eager"
           decoding="async"
         >
-        <figcaption class="ligero-gallery__label">Caja cerrada</figcaption>
+        <figcaption class="ligero-gallery__label" data-i18n="vitolas.gallery.closed_box">Caja cerrada</figcaption>
       </figure>
       <figure class="ligero-gallery__frame ligero-gallery__frame--open">
         <img
@@ -133,23 +143,23 @@
           loading="eager"
           decoding="async"
         >
-        <figcaption class="ligero-gallery__label">Caja abierta</figcaption>
+        <figcaption class="ligero-gallery__label" data-i18n="vitolas.gallery.open_box">Caja abierta</figcaption>
       </figure>
     </section>
 
     <section class="ligero-identity habano-identity">
       <div class="ligero-identity__header">
-        <span class="section-label">Raíces Cubanas</span>
-        <h1 class="vitola-detail__title ligero-identity__title">Puro Habano</h1>
-        <p class="ligero-identity__subtitle">
+        <span class="section-label" data-i18n="vitolas.puro_habano.section_label">Raíces Cubanas</span>
+        <h1 class="vitola-detail__title ligero-identity__title" data-i18n="vitolas.puro_habano.title">Puro Habano</h1>
+        <p class="ligero-identity__subtitle" data-i18n="vitolas.puro_habano.subtitle">
           Una liga de autor de ultra lujo para los amantes de la tradición.
           Fuerza habanera, dulzor exótico de nuestra tierra y un balance sin precedentes.
         </p>
       </div>
 
       <div class="ligero-identity__concept habano-identity__concept">
-        <h2 class="ligero-identity__concept-title">El Concepto Único</h2>
-        <p class="ligero-identity__concept-text">
+        <h2 class="ligero-identity__concept-title" data-i18n="vitolas.puro_habano.concept_title">El Concepto Único</h2>
+        <p class="ligero-identity__concept-text" data-i18n="vitolas.puro_habano.concept_text">
           Un tributo a la <strong>tradición tabacalera clásica</strong>, enriquecido con una
           <strong>liga exclusiva de autor</strong> que equilibra la fuerza del viejo mundo con
           un <strong>dulzor exótico y único de nuestra tierra</strong>. No es nostalgia:
@@ -157,49 +167,49 @@
         </p>
         <div class="habano-identity__crest" aria-hidden="true">
           <span class="habano-identity__crest-line"></span>
-          <span class="habano-identity__crest-text">Liga de Autor · Tripa Yamazá</span>
+          <span class="habano-identity__crest-text" data-i18n="vitolas.puro_habano.crest">Liga de Autor · Tripa Yamazá</span>
           <span class="habano-identity__crest-line"></span>
         </div>
       </div>
     </section>
 
     <section class="ligero-specs" aria-labelledby="specs-title">
-      <h2 class="vitola-detail__section-title" id="specs-title">Especificaciones</h2>
+      <h2 class="vitola-detail__section-title" id="specs-title" data-i18n="vitolas.specs.title">Especificaciones</h2>
       <div class="ligero-specs__grid">
         <article class="ligero-specs__item">
-          <h3>Formato / Vitola</h3>
-          <p class="ligero-specs__value">Churchill 48 × 7″</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.format_label">Formato / Vitola</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.puro_habano.specs.format_value">Churchill 48 × 7″</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.puro_habano.specs.format_detail">
             El formato de los grandes conocedores; elegante, estilizado y de larga fumada.
           </p>
         </article>
         <article class="ligero-specs__item">
-          <h3>Capa</h3>
-          <p class="ligero-specs__value">Habana</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.wrapper_label">Capa</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.puro_habano.specs.wrapper_value">Habana</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.puro_habano.specs.wrapper_detail">
             Seleccionada por su textura rica, aceitosa y ese carácter especiado
             y tradicional tan distintivo.
           </p>
         </article>
         <article class="ligero-specs__item">
-          <h3>Capote</h3>
-          <p class="ligero-specs__value">Olor Dominicano</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.binder_label">Capote</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.puro_habano.specs.binder_value">Olor Dominicano</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.puro_habano.specs.binder_detail">
             Aportando una suavidad aromática impecable para domar la fuerza de la liga.
           </p>
         </article>
         <article class="ligero-specs__item habano-specs__yamaza">
-          <h3>Tripa</h3>
-          <p class="ligero-specs__value">Tripa Yamazá</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.filler_label">Tripa</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.puro_habano.specs.filler_value">Tripa Yamazá</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.puro_habano.specs.filler_detail">
             Criollo 98 — una selección especial que aporta una dulzura profunda, melosa
             y totalmente diferente al criollo original debido a su suelo arcilloso.
           </p>
         </article>
         <article class="ligero-specs__item ligero-specs__item--highlight habano-specs__fortaleza">
-          <h3>Fortaleza</h3>
-          <p class="ligero-specs__value">Fuerte</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.strength_label">Fortaleza</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.puro_habano.specs.strength_value">Fuerte</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.puro_habano.specs.strength_detail">
             Cuerpo pleno, pero con un balance extraordinario.
           </p>
         </article>
@@ -207,15 +217,15 @@
     </section>
 
     <section class="ligero-tasting" aria-labelledby="tasting-title">
-      <h2 class="vitola-detail__section-title" id="tasting-title">Notas de Cata / Experiencia de Fumada</h2>
-      <p class="ligero-tasting__lead">
+      <h2 class="vitola-detail__section-title" id="tasting-title" data-i18n="vitolas.tasting.title">Notas de Cata / Experiencia de Fumada</h2>
+      <p class="ligero-tasting__lead" data-i18n="vitolas.puro_habano.tasting_lead">
         Cuero, madera y el dulzor meloso de Yamazá — una liga de autor
         desplegada en tres actos de fuerza, equilibrio y distinción.
       </p>
       <div class="ligero-tasting__thirds">
         <article class="ligero-tasting__third">
-          <span class="ligero-tasting__third-label">Primer Tercio</span>
-          <p class="ligero-tasting__third-text">
+          <span class="ligero-tasting__third-label" data-i18n="vitolas.tasting.first_third">Primer Tercio</span>
+          <p class="ligero-tasting__third-text" data-i18n="vitolas.puro_habano.tasting.first">
             La apertura es imponente y ceremonial. La madera tostada y las
             especias firmes de la capa Habana saludan el paladar con autoridad
             — roble ahumado, cedro seco y un registro especiado profundamente
@@ -226,8 +236,8 @@
           </p>
         </article>
         <article class="ligero-tasting__third">
-          <span class="ligero-tasting__third-label">Segundo Tercio</span>
-          <p class="ligero-tasting__third-text">
+          <span class="ligero-tasting__third-label" data-i18n="vitolas.tasting.second_third">Segundo Tercio</span>
+          <p class="ligero-tasting__third-text" data-i18n="vitolas.puro_habano.tasting.second">
             La transición alcanza una complejidad absoluta. En el corazón de la
             fumada, el cuero viejo y el cacao emergen con nobleza — curtido,
             profundo, con la textura de una bodega centenaria — mientras el
@@ -238,8 +248,8 @@
           </p>
         </article>
         <article class="ligero-tasting__third">
-          <span class="ligero-tasting__third-label">Tercer Tercio</span>
-          <p class="ligero-tasting__third-text">
+          <span class="ligero-tasting__third-label" data-i18n="vitolas.tasting.third_third">Tercer Tercio</span>
+          <p class="ligero-tasting__third-text" data-i18n="vitolas.puro_habano.tasting.third">
             El desenlace es robusto, intenso y cargado de carácter terrenal.
             Matices de cuero y especias exóticas construyen un final memorable,
             donde la fortaleza fuerte se mantiene cremosa y limpia gracias al
@@ -254,13 +264,13 @@
 
     <section class="ligero-mystique habano-mystique">
       <blockquote class="ligero-mystique__quote">
-        <p>
+        <p data-i18n="vitolas.puro_habano.mystique">
           El Puro Habano no evoca Cuba: la honra. Es la liga de autor que une
           la tradición habanera con el dulzor secreto de Yamazá — el homenaje
           de quien conoce el viejo mundo y lo eleva desde nuestra tierra.
         </p>
       </blockquote>
-      <a href="../index.html#contacto" class="vitola-detail__inquire">Consultas privadas</a>
+      <a href="../index.html#contacto" class="vitola-detail__inquire" data-i18n="vitolas.inquire">Consultas privadas</a>
     </section>
 
   </main>

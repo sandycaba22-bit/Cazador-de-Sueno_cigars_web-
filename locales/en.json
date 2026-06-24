@@ -19,6 +19,22 @@
         "contact": "Contact"
       }
     },
+    "nav": {
+      "menu": {
+        "emperador": "The Emperor",
+        "emperador_desc": "The First Dream",
+        "puro_habano": "Puro Habano",
+        "puro_habano_desc": "Cuban Roots",
+        "exquisito": "The Exquisite",
+        "exquisito_desc": "Author Edition",
+        "rango": "The Range",
+        "rango_desc": "Figurado Format",
+        "ligero": "Ligero 007",
+        "ligero_desc": "Masterpiece",
+        "sultan": "The Sultan",
+        "sultan_desc": "Cibao Valley"
+      }
+    },
     "hero": {
       "eyebrow": "Cerro Angola · Dominican Republic",
       "title": "Cazador de Sueños",
@@ -28,7 +44,38 @@
     "collections": {
       "label": "Our Collections",
       "title": "Six Author Vitolas",
-      "intro": "Each format, a distinct expression of the house. Studio macro photography, declared cigar craftsmanship."
+      "intro": "Each format, a distinct expression of the house. Studio macro photography, declared cigar craftsmanship.",
+      "cta": "View Details",
+      "emperador": {
+        "line": "The First Dream",
+        "name": "The Emperor",
+        "description": "Dominion and character. The house's foundational cigar, with special family fermentation."
+      },
+      "puro_habano": {
+        "line": "Cuban Roots",
+        "name": "Puro Habano",
+        "description": "Author blend with Habano wrapper and extraordinary balance. Homage to the Old World."
+      },
+      "exquisito": {
+        "line": "Author Edition",
+        "name": "The Exquisite",
+        "description": "Ultra-limited production from Dominican Republic, with double binder Nicaragua–Cameroon."
+      },
+      "rango": {
+        "line": "Figurado Format",
+        "name": "The Range",
+        "description": "High-craftsmanship Double Perfecto. Concentrated flavor and impeccable combustion."
+      },
+      "ligero": {
+        "line": "Masterpiece",
+        "name": "Ligero 007",
+        "description": "Mystical blend of seven tobaccos from seven countries. The house's marvel."
+      },
+      "sultan": {
+        "line": "Cibao Valley",
+        "name": "The Sultan",
+        "description": "Full-bodied Robusto with masterful impact, featuring premium Cibao filler."
+      }
     },
     "mission_vision": {
       "label": "Our Identity",
@@ -59,6 +106,12 @@
       "label": "Contact",
       "title": "Private Experience",
       "lead": "For inquiries, special orders, or tasting experiences, write to us. We serve connoisseurs and collectors with the discretion the house deserves.",
+      "details": {
+        "origin_label": "Origin",
+        "origin": "Santiago de los Caballeros, Dominican Republic",
+        "response_label": "Response",
+        "response": "24–48 business hours"
+      },
       "channels": {
         "title": "Direct Channels",
         "whatsapp": "WhatsApp · Direct Orders",
@@ -70,12 +123,258 @@
         "email": "Email Address",
         "subject": "Subject",
         "message": "Message",
-        "submit": "Send Inquiry"
-      }
+        "submit": "Send Inquiry",
+        "success": "Thank you. Your inquiry has been registered; we will respond shortly."
+      },
+      "whatsapp_fab_label": "WhatsApp — Direct Orders"
     },
     "footer": {
-      "tagline": "Cerro Angola · San José de las Matas · Dominican Republic",
+      "tagline": "Factory located in Santiago de los Caballeros, Dominican Republic",
       "copy": "© 2026 Cazador de Sueños Cigars. All rights reserved."
+    },
+    "maestria": {
+      "label": "Mastery",
+      "title": "The Art of Patience",
+      "subtitle": "\"We don't make cigars. We cultivate legacies.\"",
+      "intro": "A visual journey from the Dominican mountains to the finished cigar: origin, cultivation, fermentation, expert hand, rest and legacy.",
+      "chapter1": {
+        "kicker": "The Origin · San José de las Matas",
+        "title": "This is where our story begins.",
+        "text": "In the lands of the Dominican Republic, among pines, mist and fresh earth, the memory of Cazador de Sueños begins. We don't come from an office. We come from the mountain.",
+        "note": "Cordillera Central · Dominican Republic"
+      },
+      "chapter2": {
+        "kicker": "The Seed",
+        "title": "It all starts here.",
+        "text": "The promise of a great leaf begins in silence: young plants, order, care and waiting. Each sprout demands discipline before becoming character.",
+        "note": "Nursery · Selection · Patience"
+      },
+      "chapter3": {
+        "kicker": "The Leaf",
+        "title": "Origin you can touch.",
+        "text": "The field defines identity. The leaf matures under the sun, accumulates strength and reveals its destiny in texture, color and elasticity.",
+        "note": "Field · Maturity · Selection"
+      },
+      "chapter4": {
+        "kicker": "The Pilón",
+        "title": "Science mastered by time.",
+        "text": "Under pressure and natural heat, tobacco breathes. Crude is refined, aroma is ordered and the leaf finds balance.",
+        "note": "Fermentation · Heat · Balance"
+      },
+      "chapter5": {
+        "kicker": "The Master Roller",
+        "title": "The hand that turns leaf into work.",
+        "text": "Each cigar is a unique piece. Tension, rhythm and cut belong to hands that know the exact point between firmness and breath.",
+        "note": "Table · Technique · Heritage"
+      },
+      "chapter6": {
+        "kicker": "The Aging",
+        "title": "Silence as an ingredient.",
+        "text": "Rest polishes what the hand built. In wood, shade and time, aroma becomes memory and character reaches depth.",
+        "note": "Cedar · Rest · Cava"
+      },
+      "chapter7": {
+        "kicker": "The Legacy",
+        "text1": "It all began in the northern region of the Dominican Republic, where an ancestor of our family dedicated his life to the cultivation and processing of tobacco. Over time, he mastered the secrets of fermentation, valuable knowledge that he passed on to subsequent generations as part of a legacy built with effort, patience and passion.",
+        "text2": "Over the years, each generation contributed their experience, preserving traditions and love for this noble craft. What began as a family teaching became an inheritance that strengthened our identity and our commitment to quality.",
+        "text3": "Inspired by that legacy and guided by the dream of sharing our passion with the world, Cazador de Sueños Cigars was born. Our name represents the perseverance of those who never stopped believing in their ideals and worked to turn them into reality.",
+        "text4": "Today, each cigar we craft is a tribute to our ancestors, to our land and to the dreams that made this path possible. More than a brand, we are the continuation of a family story that remains alive in every tobacco leaf and in every experience we offer.",
+        "note": "Cazador de Sueños Sigar SRL"
+      }
+    },
+    "vitolas": {
+      "back_to_catalog": "← Back to catalog",
+      "gallery": {
+        "single_cigar": "Single cigar",
+        "closed_box": "Closed box",
+        "open_box": "Open box"
+      },
+      "specs": {
+        "title": "Specifications",
+        "format_label": "Format / Vitola",
+        "wrapper_label": "Wrapper",
+        "binder_label": "Binder",
+        "filler_label": "Filler",
+        "strength_label": "Strength"
+      },
+      "tasting": {
+        "title": "Tasting Notes / Smoking Experience",
+        "first_third": "First Third",
+        "second_third": "Second Third",
+        "third_third": "Third Third"
+      },
+      "inquire": "Private inquiries",
+      "emperador": {
+        "badge": "The First Dream",
+        "section_label": "The Origin",
+        "title": "The Emperor",
+        "subtitle": "The first cigar born at the Cazador de Sueños factory. Living history, family heritage, and the dream that started it all.",
+        "concept_title": "The Unique Concept",
+        "concept_text": "The factory's foundational cigar, created under the secret of a special tobacco fermentation that my grandfather taught me. It's not just another vitola: it's the starting point of an entire house, the first smoke that gave name to a legacy.",
+        "seal": "Special Fermentation",
+        "specs": {
+          "format_value": "Gran Toro 58 × 6″",
+          "format_detail": "An imposing and majestic gauge that denotes dominion and character.",
+          "wrapper_value": "San Andrés Madura",
+          "wrapper_detail": "Mexico — selected for its perfect maturation, deep chocolate color and sweet, earthy notes.",
+          "binder_value": "Olor Dominicano",
+          "binder_detail": "Dominican Republic — providing unmatched aromatic smoothness.",
+          "filler_value": "Premium Selection",
+          "filler_detail": "Dominican Republic and other secret countries, cured with the family fermentation method.",
+          "strength_value": "Medium-Full",
+          "strength_detail": "A perfect balance between body and flavor."
+        },
+        "tasting_lead": "The special fermentation reveals its soul in three acts — a narrative of smoothness, richness and majesty worthy of the house's first dream.",
+        "tasting": {
+          "first": "The entrance is complex and voluptuously creamy. A soft, almost milky cocoa intertwines with fine cedar and young oak woods, while the San Andrés wrapper unfolds its earthy sweetness with refinement. The special fermentation manifests in that initial smoothness — a silky embrace that invites you to stay, like the first sigh of a great vintage just uncorked.",
+          "second": "The evolution reaches an impressive aromatic richness. Roasted coffee emerges with depth, accompanied by gentle spices — cinnamon, nutmeg — that dance with the floral elegance of Olor Dominicano. Here the secret fermentation unfolds all its complexity: layers that superimpose with the precision of a mature bouquet, revealing nuances that only time and ancestral knowledge can grant.",
+          "third": "The ending is robust but impeccably balanced. Tanned leather and dried fruits — almond, fig — build an imperial character finale, while a satisfying intensity demonstrates the mettle of a true Emperor. The aftertaste is memorable and clean: the silent signature of the special fermentation, a noble echo that remains long after the smoke dissipates."
+        },
+        "mystique": "Before being a brand, we were a dream. Before being a factory, we were a recipe whispered between grandfather and grandson. The Emperor is that first dawn — the smoke that ignited everything else."
+      },
+      "puro_habano": {
+        "badge": "Cuban Roots",
+        "section_label": "Cuban Roots",
+        "title": "Puro Habano",
+        "subtitle": "An ultra-luxury author blend for lovers of tradition. Habanero strength, exotic sweetness from our land, and an unprecedented balance.",
+        "concept_title": "The Unique Concept",
+        "concept_text": "A tribute to classic tobacco tradition, enriched with an exclusive author blend that balances the strength of the old world with an exotic and unique sweetness from our land. It's not nostalgia: it's elevated heritage, power tamed by the hand that knows the soil.",
+        "crest": "Author Blend · Yamazá Filler",
+        "specs": {
+          "format_value": "Churchill 48 × 7″",
+          "format_detail": "The format of great connoisseurs; elegant, stylized and long smoke.",
+          "wrapper_value": "Habana",
+          "wrapper_detail": "Selected for its rich, oily texture and that distinctive spicy and traditional character.",
+          "binder_value": "Olor Dominicano",
+          "binder_detail": "Providing impeccable aromatic smoothness to tame the blend's strength.",
+          "filler_value": "Yamazá Filler",
+          "filler_detail": "Criollo 98 — a special selection that provides a deep, molasses-like sweetness totally different from the original criollo due to its clay soil.",
+          "strength_value": "Full",
+          "strength_detail": "Full body, but with extraordinary balance."
+        },
+        "tasting_lead": "Leather, wood and the molasses sweetness of Yamazá — an author blend deployed in three acts of strength, balance and distinction.",
+        "tasting": {
+          "first": "The opening is imposing and ceremonial. Toasted wood and the firm spices of the Habana wrapper greet the palate with authority — smoked oak, dry cedar and a deeply traditional spicy register. But from the first instant, under that armor of character, begins to emerge the sweet and distinctive background of Yamazá tobacco: a molasses-like promise, almost candied, that anticipates the complexity of the author blend.",
+          "second": "The transition reaches absolute complexity. In the heart of the smoke, old leather and cocoa emerge with nobility — tanned, deep, with the texture of a centennial cellar — while Olor Dominicano contributes its impeccable aroma and the Yamazá filler unfolds its molasses sweetness with sommelier precision. Three layers dialogue in perfect balance: strength, smoothness and an exotic register that only the clay soil can grant.",
+          "third": "The ending is robust, intense and loaded with earthy character. Nuances of leather and exotic spices build a memorable finale, where the full strength remains creamy and clean thanks to the fermentation readjustment and Yamazá's unique sweetness. The aftertaste persists with dignity — power without harshness, intensity with refinement: the signature of a great Churchill that honors the old world from Dominican soil."
+        },
+        "mystique": "Puro Habano doesn't evoke Cuba: it honors it. It's the author blend that unites Habanero tradition with Yamazá's secret sweetness — the tribute of one who knows the old world and elevates it from our land."
+      },
+      "exquisito": {
+        "badge": "Author Limited Edition",
+        "rarity": "Ultra limited production · Extended aging",
+        "section_label": "Cerro Angola · San José de las Matas",
+        "title": "The Exquisite",
+        "subtitle": "Crown jewel of ultra-limited production. High royalty, full strength, and aging so rigorous that only a few units see the light each year.",
+        "concept_title": "The Unique Concept",
+        "concept_text": "An artwork of ultra-limited production. The tobacco used goes through a curing process and a special, historical fermentation inherited from my grandfather, performed exclusively on the slopes of the hills of Cerro Angola, Rincón de Piedras, San José de las Matas. This microclimate and method grant unique and unrepeatable nuances, impossible to find in traditional commercial brands.",
+        "origin_peak": "Cerro Angola",
+        "origin_place": "Rincón de Piedras",
+        "specs": {
+          "format_value": "Gran Toro 58 × 6″",
+          "format_detail": "Full body, imposing and with great presence.",
+          "wrapper_value": "San Andrés Madura",
+          "wrapper_detail": "Mexico — deep chocolate color, oily and with earthy sweetness matured to perfection.",
+          "binder_value": "Double Binder",
+          "binder_detail": "Nicaragua and Cameroon — a masterful combination that provides Nicaraguan structural strength and Cameroon's spicy and aromatic touch.",
+          "filler_value": "Premium Selection",
+          "filler_detail": "Aged with the house's secret and the rigor of the mountain's microclimate.",
+          "strength_value": "Full",
+          "strength_detail": "Intense, complex and highly sophisticated."
+        },
+        "tasting_lead": "The unique nuances of San José de las Matas fermentation — a symphony of mountain, earth and time deployed in three acts of worship.",
+        "tasting": {
+          "first": "The entrance is powerful and imposing, but the full strength presents itself with surprising elegance. Notes of damp earth and smoked wood evoke the pure air of Cerro Angola, while sweet and earthy flashes of the San Andrés Madura wrapper emerge with subtlety — like morning mist over the hills of Rincón de Piedras. It's the first sigh of a tobacco that has waited its moment with ancestral patience.",
+          "second": "The evolution reaches an untamable but impeccably balanced complexity. The double binder unfolds its magic: noble leather and loaded coffee intertwined with Cameroon's persistent spice. The secret fermentation then reveals its mineral richness and unique nuances — registers that only the mountain's microclimate and the grandfather's method can grant. Each draw is a new chapter, like a second aroma in a grand reserve glass reserved for few initiates.",
+          "third": "The ending is majestic: robust, dense and loaded with character. Bitter cocoa and toasted dried fruits build an imperial refinement climax, while a prolonged aftertaste leaves a clean and oily sensation, unforgettable. It's a cult smoke for true connoisseurs — the final tribute of a tobacco born in the mountain and matured in the silence of tradition."
+        },
+        "mystique": "Few units per year. Not by fabricated scarcity, but by time demanded. The Exquisite is not produced: it is awaited — on the slopes of Cerro Angola, as the grandfather taught."
+      },
+      "rango": {
+        "badge": "High Craftsmanship",
+        "craft": "Figurado format · Mastery in rolling",
+        "section_label": "Mastery in Rolling",
+        "title": "The Range",
+        "subtitle": "A spectacular cigar in figurado format. Concentrated complexity, impeccable combustion and the maximum dexterity of our master rollers.",
+        "concept_title": "The Unique Concept",
+        "concept_text": "A cigar of high tobacco craftsmanship. Being a figurado format, it represents the maximum dexterity of our master rollers, achieving a concentrated flavor evolution and an exceptional smoking dynamic. Each vitola is a smoke sculpture — short in length, imposing in gauge, infinite in personality.",
+        "figurado_label": "Double Perfecto",
+        "specs": {
+          "format_value": "Double Perfecto 60 × 4½″",
+          "format_detail": "A figurado cigar, imposing in its gauge but short in length, ideal for a rich and highly evolving smoke.",
+          "wrapper_value": "San Andrés",
+          "wrapper_detail": "Selected for its excellent texture and the perfect balance it contributes to the profile.",
+          "binder_value": "Premium Selection",
+          "binder_detail": "Nicaragua — providing structure and the characteristic character of its volcanic lands.",
+          "filler_value": "100% Nicaragua",
+          "filler_detail": "A balanced blend that highlights the richness of Central American tobacco.",
+          "strength_value": "Medium-Full",
+          "strength_detail": "A perfect balance between body, aroma and palate friendliness."
+        },
+        "tasting_lead": "Rich and smooth pepper as signature — a concentrated symphony that evolves with the Double Perfecto geometry.",
+        "tasting": {
+          "first": "The entrance is extremely interesting, dictated by the narrow tip of the Double Perfecto. Immediately impacts a smooth, rich and very aromatic pepper — precise, almost floral in its register — accompanied by light wood notes that prepare the stage. The combustion opens with impeccable regularity, testimony of the figurado rolling art: each draw is concentrated, intense and deliberately elegant.",
+          "second": "The smoke widens and becomes notably creamier in the center of the cigar, where the gauge reaches its maximum expression. Subtle earthy nuances and dried fruits — almond, walnut — awaken while that elegant pepper settles that stimulates the palate without saturating it. The Nicaraguan binder and filler unfold their balance with sommelier precision: volcanic structure tamed by friendliness and refinement.",
+          "third": "The closure is dense, flavorful and highly satisfying. The Medium-Full strength remains round and clean until the last ash, leaving a persistent aftertaste of sweet spices, toasted woods and that characteristic pepper that defines The Range's personality. It's the ending of a format that condenses in few centimeters what other vitolas take time to reveal — pure concentrated mastery."
+        },
+        "mystique": "The Range is not measured in inches: it's measured in dexterity. Each figurado is the signature of a master roller who converts form into flavor and combustion into art."
+      },
+      "ligero": {
+        "badge": "Masterpiece",
+        "section_label": "The House Marvel",
+        "title": "Ligero 007",
+        "subtitle": "An unprecedented creation. Mysticism, imposing presence and sommelier precision in each draw.",
+        "concept_title": "The Unique Concept",
+        "concept_text": "A mystical and exclusive blend composed of seven selected tobaccos from seven different countries. Seven origins converge in a single vitola that challenges the conventional, demands contemplation and redefines the connoisseur's experience.",
+        "specs": {
+          "format_value": "Toro 58 × 5″",
+          "format_detail": "An imposing gauge that denotes presence and high royalty.",
+          "wrapper_value": "San Andrés Madura",
+          "wrapper_detail": "Mexico — selected for its perfect maturation, deep chocolate color and subtly sweet notes.",
+          "binder_value": "Cameroon",
+          "binder_detail": "Africa — contributing a unique spicy balance.",
+          "filler_value": "Premium Selection",
+          "filler_detail": "Nicaragua and four other secret countries that complete the blend's seven tobaccos.",
+          "strength_value": "High and Sophisticated",
+          "strength_detail": "Premium ligero with full body and high-end refinement."
+        },
+        "tasting_lead": "Absolute complexity and evolution in each third — an olfactory symphony that unfolds with the precision of a great vintage.",
+        "tasting": {
+          "first": "The opening is imposing and ceremonial. A fine and precise pepper greets the palate, followed by noble woods — oak and cedar — that establish a structural framework of great elegance. The San Andrés Madura wrapper then reveals its signature: a subtle sweetness, almost candied, that wraps the entrance with seduction and anticipates the depth to come.",
+          "second": "The transition awakens absolute complexity. Bitter cocoa emerges with authority, intertwining with medium-high roast coffee and hazelnut notes. The Cameroon binder contributes a creamy and spicy richness that rounds the profile, while the seven tobaccos begin to dialogue in layers — each draw reveals a new nuance, like a second aroma in a grand reserve glass.",
+          "third": "The finale is memorable and without concessions. Robustness and refinement coexist in a climax of tanned leather, exotic spices and an earthy register that speaks of ligero's power. The evolution is intense until the last ash, demonstrating the strength of the seven tobaccos without sacrificing elegance — a worthy ending of the House Marvel."
+        },
+        "mystique": "Ligero 007 is not smoked: it's deciphered. Each country contributes a chapter; each third reveals a secret. It's the vitola that converts smoke into ritual."
+      },
+      "sultan": {
+        "badge": "Sixth Official Vitola",
+        "finale": "The catalog's crown · Cibao Character",
+        "section_label": "Cibao Valley",
+        "title": "The Sultan",
+        "subtitle": "Short in format, imposing in strength. The tobacco richness of our land concentrated in a Robusto of masterful impact.",
+        "concept_title": "The Unique Concept",
+        "concept_text": "The maximum expression of Dominican character concentrated in a classic format. A cigar designed for those seeking an intense, compact smoke replete with traditional, complex and deeply nuanced flavors. Little space, all the power of Cibao.",
+        "cibao_text": "Cibao Valley · Dominican Republic",
+        "specs": {
+          "format_value": "Robusto 50 × 5″",
+          "format_detail": "A classic format, comfortable in hand but with an extraordinary concentration of body and power.",
+          "wrapper_value": "San Andrés",
+          "wrapper_detail": "Contributing its characteristic deep color, oily texture and a subtle earthy balance.",
+          "binder_value": "Olor Dominicano",
+          "binder_detail": "Contributing a rich and traditional aromatic base that perfectly ties the blend's strength.",
+          "filler_value": "Premium Selection",
+          "filler_detail": "Cibao Valley — leaves of great strength that grant a unique, deep criollo character with much evolution.",
+          "strength_value": "Full",
+          "strength_detail": "Intense, with much body and an imposing flavor impact."
+        },
+        "tasting_lead": "Cibao and Olor in their maximum expression — three acts of concentrated power, criollo elegance and unforgettable aftertaste.",
+        "tasting": {
+          "first": "The start is extremely intense and spicy. Black pepper impacts with frankness, followed by noble wood — oak and cedar — that establishes a structural framework of authority. Smoke density is notable from the first puff: thick, creamy, deliberate. It's the strong character of The Sultan in pure state, with the rich provenance of Cibao filler manifesting without concessions.",
+          "second": "The smoke stabilizes towards an imposing complexity. Nuances of espresso coffee and toasted dried fruits — almond, hazelnut — emerge over a background of noble leather that gives depth to the profile. The unique aromaticity of Olor Dominicano binder balances power with mastery, maintaining the robust but highly elegant register. It's the heart of the Dominican blend: power tamed by aromatic tradition.",
+          "third": "The ending is dense, unctuous and of unforgettable criollo character. The full strength bids farewell in all its splendor with dark cocoa and dry earth, building a compact and masterful climax. The aftertaste is long, persistent and very clean — the signature of a Robusto that doesn't need length to leave a mark. A short smoke, but with an impact that crowns the catalog with imperial dignity."
+        },
+        "mystique": "The Sultan doesn't ask for time: it demands attention. It's the sixth vitola, the last word and the most Dominican of the house — Cibao converted into smoke, into power, into tradition."
+      }
     }
   }
 }

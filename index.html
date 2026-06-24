@@ -1,27 +1,30 @@
+<!-- Efecto de humo sutil con animación CSS para fondo -->
 <!DOCTYPE html>
+<!-- ADVERTENCIA: Este archivo está en producción. Modificar con precaución. -->
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Cazador de Sueños Cigars — Cigarros premium artesanales de San José de las Matas, República Dominicana. Donde la tradición familiar se encuentra con la precisión científica.">
+  <meta name="description" content="Cazador de Sueños Cigars SRL — Tabaco dominicano premium de Cerro Angola, San José de las Matas y Tamboril. Maestro Tabaquero con tradición familiar y precisión científica. Miembro de INTABACO.">
+  <meta name="keywords" content="Cazador de Sueños Cigars SRL, tabaco dominicano, Cerro Angola, San José de las Matas, Tamboril, Maestro Tabaquero, INTABACO, cigarros premium, puros artesanales, República Dominicana">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0a1826">
   <link rel="canonical" href="https://www.cazadordesuenos.com/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.cazadordesuenos.com/">
   <meta property="og:title" content="Cazador de Sueños Cigars | Cigarros Premium Artesanales">
-  <meta property="og:description" content="Cigarros premium artesanales de San José de las Matas, República Dominicana. Tradición familiar y precisión científica.">
+  <meta property="og:description" content="Cazador de Sueños Cigars SRL — Tabaco dominicano premium de Cerro Angola, San José de las Matas y Tamboril. Maestro Tabaquero con tradición familiar y precisión científica. Miembro de INTABACO.">
   <meta property="og:image" content="https://www.cazadordesuenos.com/images/legado-valle-tabaco.jpg">
   <meta property="og:locale" content="es_DO">
   <meta name="twitter:card" content="summary_large_image">
   
   <!-- Google Analytics 4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
+    gtag('config', 'G-BYRS7MGYXK');
   </script>
   
   <!-- Meta Pixel (Facebook) -->
@@ -120,6 +123,25 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  /* ============ SMOKE EFFECT LAYER ============ */
+  .smoke-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 30%, rgba(198, 162, 90, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 35% at 80% 70%, rgba(83, 114, 148, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 45% 30% at 50% 50%, rgba(244, 239, 226, 0.05) 0%, transparent 50%);
+    animation: smokeDrift 20s ease-in-out infinite alternate;
+  }
+  @keyframes smokeDrift {
+    0% { transform: translateX(0) translateY(0); }
+    50% { transform: translateX(20px) translateY(-15px); }
+    100% { transform: translateX(-10px) translateY(10px); }
   }
 
   body.is-age-locked { overflow: hidden; height: 100vh; }
@@ -839,39 +861,42 @@
 </head>
 <body class="is-age-locked">
 
+  <!-- Smoke Effect Layer -->
+  <div class="smoke-layer" aria-hidden="true"></div>
+
   <!-- ===================== AGE GATE ===================== -->
   <div class="age-gate" id="ageGate" role="dialog" aria-modal="true" aria-labelledby="ageTitle">
     <div class="age-gate__panel">
-      <p class="age-gate__eyebrow">Verificación de Edad</p>
-      <h1 class="age-gate__title" id="ageTitle">Cazador de Sueños Cigars</h1>
-      <p class="age-gate__text">Este sitio contiene información sobre productos de tabaco reservados para mayores de edad. Confirme que tiene 21 años o más para continuar.</p>
+      <p class="age-gate__eyebrow" data-i18n="age_gate.eyebrow">Verificación de Edad</p>
+      <h1 class="age-gate__title" id="ageTitle" data-i18n="age_gate.title">Cazador de Sueños Cigars</h1>
+      <p class="age-gate__text" data-i18n="age_gate.text">Este sitio contiene información sobre productos de tabaco reservados para mayores de edad. Confirme que tiene 21 años o más para continuar.</p>
       <div class="age-gate__actions">
-        <button type="button" class="btn" id="ageEnter">Sí, tengo 21 años o más</button>
-        <button type="button" class="age-gate__no" id="ageExit">No, salir del sitio</button>
+        <button type="button" class="btn" id="ageEnter" data-i18n="age_gate.enter">Sí, tengo 21 años o más</button>
+        <button type="button" class="age-gate__no" id="ageExit" data-i18n="age_gate.exit">No, salir del sitio</button>
       </div>
-      <p class="age-gate__legal">Al ingresar, usted confirma cumplir con la edad legal en su jurisdicción.</p>
+      <p class="age-gate__legal" data-i18n="age_gate.legal">Al ingresar, usted confirma cumplir con la edad legal en su jurisdicción.</p>
     </div>
   </div>
 
   <!-- ===================== HEADER ===================== -->
   <header class="site-header" id="siteHeader">
-    <a href="#hero" class="brand">Cazador de <span>Sueños</span></a>
+    <a href="#hero" class="brand" data-i18n="header.brand">Cazador de <span>Sueños</span></a>
     <nav class="nav" id="nav" aria-label="Navegación principal">
       <ul class="nav__links">
-        <li><a href="#legado">El Legado</a></li>
-        <li><a href="#maestria">Maestría</a></li>
+        <li><a href="#legado" data-i18n="header.nav.legacy">El Legado</a></li>
+        <li><a href="#maestria" data-i18n="header.nav.mastery">Maestría</a></li>
         <li class="nav__item nav__item--has-menu">
-          <button type="button" class="nav__menu-trigger" aria-haspopup="true" aria-expanded="false">Colecciones</button>
+          <button type="button" class="nav__menu-trigger" aria-haspopup="true" aria-expanded="false" data-i18n="header.nav.collections">Colecciones</button>
           <ul class="nav__menu">
-            <li><a href="#vitola-emperador">El Emperador<span class="nav__menu-desc">El Primer Sueño</span></a></li>
-            <li><a href="#vitola-puro-habano">Puro Habano<span class="nav__menu-desc">Raíces Cubanas</span></a></li>
-            <li><a href="#vitola-exquisito">El Exquisito<span class="nav__menu-desc">Edición de Autor</span></a></li>
-            <li><a href="#vitola-rango">El Rango<span class="nav__menu-desc">Formato Figurado</span></a></li>
-            <li><a href="#vitola-ligero">Ligero 007<span class="nav__menu-desc">Obra Maestra</span></a></li>
-            <li><a href="#vitola-sultan">El Sultán<span class="nav__menu-desc">Valle del Cibao</span></a></li>
+            <li><a href="#vitola-emperador" data-i18n="nav.menu.emperador">El Emperador<span class="nav__menu-desc" data-i18n="nav.menu.emperador_desc">El Primer Sueño</span></a></li>
+            <li><a href="#vitola-puro-habano" data-i18n="nav.menu.puro_habano">Puro Habano<span class="nav__menu-desc" data-i18n="nav.menu.puro_habano_desc">Raíces Cubanas</span></a></li>
+            <li><a href="#vitola-exquisito" data-i18n="nav.menu.exquisito">El Exquisito<span class="nav__menu-desc" data-i18n="nav.menu.exquisito_desc">Edición de Autor</span></a></li>
+            <li><a href="#vitola-rango" data-i18n="nav.menu.rango">El Rango<span class="nav__menu-desc" data-i18n="nav.menu.rango_desc">Formato Figurado</span></a></li>
+            <li><a href="#vitola-ligero" data-i18n="nav.menu.ligero">Ligero 007<span class="nav__menu-desc" data-i18n="nav.menu.ligero_desc">Obra Maestra</span></a></li>
+            <li><a href="#vitola-sultan" data-i18n="nav.menu.sultan">El Sultán<span class="nav__menu-desc" data-i18n="nav.menu.sultan_desc">Valle del Cibao</span></a></li>
           </ul>
         </li>
-        <li><a href="#contacto">Contacto</a></li>
+        <li><a href="#contacto" data-i18n="header.nav.contact">Contacto</a></li>
       </ul>
     </nav>
     <button type="button" class="nav__toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
@@ -898,7 +923,7 @@
           <img
             class="hero__photo"
             src="img/hero-atmosphere.jpg"
-            alt="Cazador de Sueños Cigars - Atmósfera premium de cigarros artesanales dominicanos con montañas de Cerro Angola al fondo"
+            alt="Cazador de Sueños Cigars - Atmósfera premium de cigarros artesanales dominicanos con montañas de República Dominicana al fondo"
             width="1920"
             height="1080"
             fetchpriority="high"
@@ -908,10 +933,10 @@
         <div class="hero__overlay"></div>
       </div>
       <div class="hero__content">
-        <p class="hero__eyebrow">Cerro Angola · República Dominicana</p>
-        <h1 class="hero__title"><span class="hero__title-line">Cazador</span><span class="hero__title-amp">de</span><span class="hero__title-line">Sueños</span></h1>
-        <p class="hero__subtitle">Donde la tradición familiar se encuentra con la precisión científica.</p>
-        <a href="#colecciones" class="hero__cta">Descubrir la colección</a>
+        <p class="hero__eyebrow" data-i18n="hero.eyebrow">Santiago de los Caballeros · República Dominicana</p>
+        <h1 class="hero__title"><span class="hero__title-line" data-i18n="hero.title">Cazador</span><span class="hero__title-amp">de</span><span class="hero__title-line">Sueños</span></h1>
+        <p class="hero__subtitle" data-i18n="hero.subtitle">Donde la tradición familiar se encuentra con la precisión científica.</p>
+        <a href="#colecciones" class="hero__cta" data-i18n="hero.cta">Descubrir la colección</a>
       </div>
       <a href="#colecciones" class="hero__scroll" aria-label="Desplazar para descubrir"><span></span></a>
     </section>
@@ -919,9 +944,9 @@
     <!-- ===================== NUESTRAS COLECCIONES ===================== -->
     <section class="section coleccion reveal" id="colecciones">
       <div class="coleccion__header">
-        <span class="section-label">Nuestras Colecciones</span>
-        <h2 class="section-title">Seis Vitolas de Autor</h2>
-        <p class="coleccion__intro">Cada formato, una expresión distinta de la casa. Fotografía macro de estudio, tabaquería declarada.</p>
+        <span class="section-label" data-i18n="collections.label">Nuestras Colecciones</span>
+        <h2 class="section-title" data-i18n="collections.title">Seis Vitolas de Autor</h2>
+        <p class="coleccion__intro" data-i18n="collections.intro">Cada formato, una expresión distinta de la casa. Fotografía macro de estudio, tabaquería declarada.</p>
       </div>
       <div class="coleccion__grid">
 
@@ -932,10 +957,10 @@
             </div>
           </a>
           <div class="coleccion-card__body">
-            <span class="coleccion-card__line">El Primer Sueño</span>
-            <h3 class="coleccion-card__name"><a href="vitolas/el-emperador.html">El Emperador</a></h3>
-            <p class="coleccion-card__char">Dominio y carácter. El cigarro fundacional de la casa, de fermentación especial familiar.</p>
-            <a href="vitolas/el-emperador.html" class="coleccion-card__cta">Consultar</a>
+            <span class="coleccion-card__line" data-i18n="collections.emperador.line">El Primer Sueño</span>
+            <h3 class="coleccion-card__name"><a href="vitolas/el-emperador.html" data-i18n="collections.emperador.name">El Emperador</a></h3>
+            <p class="coleccion-card__char" data-i18n="collections.emperador.description">Dominio y carácter. El cigarro fundacional de la casa, de fermentación especial familiar.</p>
+            <a href="vitolas/el-emperador.html" class="coleccion-card__cta" data-i18n="collections.cta">Consultar</a>
           </div>
         </article>
 
@@ -946,24 +971,24 @@
             </div>
           </a>
           <div class="coleccion-card__body">
-            <span class="coleccion-card__line">Raíces Cubanas</span>
-            <h3 class="coleccion-card__name"><a href="vitolas/puro-habano.html">Puro Habano</a></h3>
-            <p class="coleccion-card__char">Liga de autor con capa Habana y balance extraordinario. Homenaje al Viejo Mundo.</p>
-            <a href="vitolas/puro-habano.html" class="coleccion-card__cta">Consultar</a>
+            <span class="coleccion-card__line" data-i18n="collections.puro_habano.line">Raíces Cubanas</span>
+            <h3 class="coleccion-card__name"><a href="vitolas/puro-habano.html" data-i18n="collections.puro_habano.name">Puro Habano</a></h3>
+            <p class="coleccion-card__char" data-i18n="collections.puro_habano.description">Liga de autor con capa Habana y balance extraordinario. Homenaje al Viejo Mundo.</p>
+            <a href="vitolas/puro-habano.html" class="coleccion-card__cta" data-i18n="collections.cta">Consultar</a>
           </div>
         </article>
 
         <article class="coleccion-card" id="vitola-exquisito">
           <a href="vitolas/el-exquisito.html" class="coleccion-card__visual" aria-label="Ver El Exquisito">
             <div class="coleccion-card__media">
-              <img class="coleccion-card__img" src="img/el-exquisito-cigarro.jpg" alt="Cazador de Sueños El Exquisito - Cigarro premium Gran Toro 58×6 edición limitada Cerro Angola" width="1200" height="800" loading="lazy" decoding="async">
+              <img class="coleccion-card__img" src="img/el-exquisito-cigarro.jpg" alt="Cazador de Sueños El Exquisito - Cigarro premium Gran Toro 58×6 edición limitada República Dominicana" width="1200" height="800" loading="lazy" decoding="async">
             </div>
           </a>
           <div class="coleccion-card__body">
-            <span class="coleccion-card__line">Edición de Autor</span>
-            <h3 class="coleccion-card__name"><a href="vitolas/el-exquisito.html">El Exquisito</a></h3>
-            <p class="coleccion-card__char">Producción ultra limitada de Cerro Angola, con doble capote Nicaragua–Camerún.</p>
-            <a href="vitolas/el-exquisito.html" class="coleccion-card__cta">Consultar</a>
+            <span class="coleccion-card__line" data-i18n="collections.exquisito.line">Edición de Autor</span>
+            <h3 class="coleccion-card__name"><a href="vitolas/el-exquisito.html" data-i18n="collections.exquisito.name">El Exquisito</a></h3>
+            <p class="coleccion-card__char" data-i18n="collections.exquisito.description">Producción ultra limitada de República Dominicana, con doble capote Nicaragua–Camerún.</p>
+            <a href="vitolas/el-exquisito.html" class="coleccion-card__cta" data-i18n="collections.cta">Consultar</a>
           </div>
         </article>
 
@@ -974,10 +999,10 @@
             </div>
           </a>
           <div class="coleccion-card__body">
-            <span class="coleccion-card__line">Formato Figurado</span>
-            <h3 class="coleccion-card__name"><a href="vitolas/el-rango.html">El Rango</a></h3>
-            <p class="coleccion-card__char">Doble Perfecto de alta artesanía. Sabor concentrado y combustión impecable.</p>
-            <a href="vitolas/el-rango.html" class="coleccion-card__cta">Consultar</a>
+            <span class="coleccion-card__line" data-i18n="collections.rango.line">Formato Figurado</span>
+            <h3 class="coleccion-card__name"><a href="vitolas/el-rango.html" data-i18n="collections.rango.name">El Rango</a></h3>
+            <p class="coleccion-card__char" data-i18n="collections.rango.description">Doble Perfecto de alta artesanía. Sabor concentrado y combustión impecable.</p>
+            <a href="vitolas/el-rango.html" class="coleccion-card__cta" data-i18n="collections.cta">Consultar</a>
           </div>
         </article>
 
@@ -988,10 +1013,10 @@
             </div>
           </a>
           <div class="coleccion-card__body">
-            <span class="coleccion-card__line">Obra Maestra</span>
-            <h3 class="coleccion-card__name"><a href="vitolas/ligero-007.html">Ligero 007</a></h3>
-            <p class="coleccion-card__char">Blend místico de siete tabacos de siete países. La maravilla de la casa.</p>
-            <a href="vitolas/ligero-007.html" class="coleccion-card__cta">Consultar</a>
+            <span class="coleccion-card__line" data-i18n="collections.ligero.line">Obra Maestra</span>
+            <h3 class="coleccion-card__name"><a href="vitolas/ligero-007.html" data-i18n="collections.ligero.name">Ligero 007</a></h3>
+            <p class="coleccion-card__char" data-i18n="collections.ligero.description">Blend místico de siete tabacos de siete países. La maravilla de la casa.</p>
+            <a href="vitolas/ligero-007.html" class="coleccion-card__cta" data-i18n="collections.cta">Consultar</a>
           </div>
         </article>
 
@@ -1002,10 +1027,10 @@
             </div>
           </a>
           <div class="coleccion-card__body">
-            <span class="coleccion-card__line">Valle del Cibao</span>
-            <h3 class="coleccion-card__name"><a href="vitolas/el-sultan.html">El Sultán</a></h3>
-            <p class="coleccion-card__char">Robusto de cuerpo pleno e impacto magistral, con tripa premium del Cibao.</p>
-            <a href="vitolas/el-sultan.html" class="coleccion-card__cta">Consultar</a>
+            <span class="coleccion-card__line" data-i18n="collections.sultan.line">Valle del Cibao</span>
+            <h3 class="coleccion-card__name"><a href="vitolas/el-sultan.html" data-i18n="collections.sultan.name">El Sultán</a></h3>
+            <p class="coleccion-card__char" data-i18n="collections.sultan.description">Robusto de cuerpo pleno e impacto magistral, con tripa premium del Cibao.</p>
+            <a href="vitolas/el-sultan.html" class="coleccion-card__cta" data-i18n="collections.cta">Consultar</a>
           </div>
         </article>
 
@@ -1016,9 +1041,9 @@
     <section class="section mision-vision reveal" id="mision-vision">
       <div class="mv-container">
         <div class="mv-header reveal">
-          <span class="section-label">Nuestra Identidad</span>
-          <h2 class="section-title">Misión, Visión y Valores</h2>
-          <p class="mv-intro">Cazador de Sueños Sigar SRL — Tradición, excelencia y compromiso</p>
+          <span class="section-label" data-i18n="mission_vision.label">Nuestra Identidad</span>
+          <h2 class="section-title" data-i18n="mission_vision.title">Misión, Visión y Valores</h2>
+          <p class="mv-intro" data-i18n="mission_vision.intro">Cazador de Sueños Sigar SRL — Tradición, excelencia y compromiso</p>
         </div>
         
         <div class="mv-grid">
@@ -1029,8 +1054,8 @@
                 <path d="M12 6v6l4 2"/>
               </svg>
             </div>
-            <h3 class="mv-card__title">Misión</h3>
-            <p class="mv-card__text">Producir cigarros de alta calidad utilizando las mejores hojas de tabaco y procesos especializados, satisfaciendo las expectativas de nuestros clientes mediante la excelencia, la responsabilidad, el respeto por nuestros colaboradores y el desarrollo sostenible de la industria tabacalera.</p>
+            <h3 class="mv-card__title" data-i18n="mission_vision.mission.title">Misión</h3>
+            <p class="mv-card__text" data-i18n="mission_vision.mission.text">Producir cigarros de alta calidad utilizando las mejores hojas de tabaco y procesos especializados, satisfaciendo las expectativas de nuestros clientes mediante la excelencia, la responsabilidad, el respeto por nuestros colaboradores y el desarrollo sostenible de la industria tabacalera.</p>
           </article>
 
           <article class="mv-card mv-card--vision reveal">
@@ -1040,8 +1065,8 @@
                 <circle cx="12" cy="12" r="3"/>
               </svg>
             </div>
-            <h3 class="mv-card__title">Visión</h3>
-            <p class="mv-card__text">Ser una fábrica de cigarros reconocida a nivel nacional e internacional por la excelencia de nuestros productos, la tradición artesanal, la innovación constante y el compromiso con la calidad, llevando el sabor y la cultura del tabaco a los mercados más exigentes.</p>
+            <h3 class="mv-card__title" data-i18n="mission_vision.vision.title">Visión</h3>
+            <p class="mv-card__text" data-i18n="mission_vision.vision.text">Ser una fábrica de cigarros reconocida a nivel nacional e internacional por la excelencia de nuestros productos, la tradición artesanal, la innovación constante y el compromiso con la calidad, llevando el sabor y la cultura del tabaco a los mercados más exigentes.</p>
           </article>
 
           <article class="mv-card mv-card--valores reveal">
@@ -1050,15 +1075,15 @@
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
             </div>
-            <h3 class="mv-card__title">Valores</h3>
+            <h3 class="mv-card__title" data-i18n="mission_vision.values.title">Valores</h3>
             <ul class="mv-card__list">
-              <li><strong>Calidad:</strong> Mantener los más altos estándares en cada etapa de producción.</li>
-              <li><strong>Compromiso:</strong> Cumplir responsablemente con clientes, colaboradores y socios.</li>
-              <li><strong>Tradición:</strong> Preservar el legado y la cultura del arte de elaborar cigarros.</li>
-              <li><strong>Integridad:</strong> Actuar con honestidad, ética y transparencia.</li>
-              <li><strong>Innovación:</strong> Mejorar continuamente nuestros procesos y productos.</li>
-              <li><strong>Trabajo en equipo:</strong> Fomentar la colaboración y el respeto mutuo.</li>
-              <li><strong>Responsabilidad social y ambiental:</strong> Contribuir al bienestar de la comunidad y al cuidado del medio ambiente.</li>
+              <li><strong data-i18n="mission_vision.values.quality.label">Calidad:</strong> <span data-i18n="mission_vision.values.quality.text">Mantener los más altos estándares en cada etapa de producción.</span></li>
+              <li><strong data-i18n="mission_vision.values.commitment.label">Compromiso:</strong> <span data-i18n="mission_vision.values.commitment.text">Cumplir responsablemente con clientes, colaboradores y socios.</span></li>
+              <li><strong data-i18n="mission_vision.values.tradition.label">Tradición:</strong> <span data-i18n="mission_vision.values.tradition.text">Preservar el legado y la cultura del arte de elaborar cigarros.</span></li>
+              <li><strong data-i18n="mission_vision.values.integrity.label">Integridad:</strong> <span data-i18n="mission_vision.values.integrity.text">Actuar con honestidad, ética y transparencia.</span></li>
+              <li><strong data-i18n="mission_vision.values.innovation.label">Innovación:</strong> <span data-i18n="mission_vision.values.innovation.text">Mejorar continuamente nuestros procesos y productos.</span></li>
+              <li><strong data-i18n="mission_vision.values.teamwork.label">Trabajo en equipo:</strong> <span data-i18n="mission_vision.values.teamwork.text">Fomentar la colaboración y el respeto mutuo.</span></li>
+              <li><strong data-i18n="mission_vision.values.responsibility.label">Responsabilidad social y ambiental:</strong> <span data-i18n="mission_vision.values.responsibility.text">Contribuir al bienestar de la comunidad y al cuidado del medio ambiente.</span></li>
             </ul>
           </article>
         </div>
@@ -1069,25 +1094,25 @@
     <section class="maestria" id="maestria">
 
       <div class="maestria__head reveal">
-        <span class="section-label">Maestría</span>
-        <h2 class="section-title">El Arte de la Paciencia</h2>
-        <p class="maestria__subtitle">"No fabricamos cigarros. Cultivamos legados."</p>
-        <p class="maestria__intro">Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen, cultivo, fermentación, mano experta, reposo y legado.</p>
+        <span class="section-label" data-i18n="maestria.label">Maestría</span>
+        <h2 class="section-title" data-i18n="maestria.title">El Arte de la Paciencia</h2>
+        <p class="maestria__subtitle" data-i18n="maestria.subtitle">"No fabricamos cigarros. Cultivamos legados."</p>
+        <p class="maestria__intro" data-i18n="maestria.intro">Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen, cultivo, fermentación, mano experta, reposo y legado.</p>
       </div>
 
       <div class="maestria__narrative">
 
         <article class="maestria__chapter maestria__chapter--hero reveal">
           <div class="maestria__visual">
-            <img src="images/historia-montana.jpg" alt="Cazador de Sueños - Amanecer sobre Cerro Angola en San José de las Matas República Dominicana con neblina sobre bosque de pinos donde se cultiva tabaco premium" loading="lazy" decoding="async" width="1600" height="900">
+            <img src="images/historia-montana.jpg" alt="Cazador de Sueños - Amanecer sobre República Dominicana con neblina sobre bosque de pinos donde se cultiva tabaco premium" loading="lazy" decoding="async" width="1600" height="900">
           </div>
           <div class="maestria__copy">
             <span class="maestria__number">01</span>
-            <span class="maestria__kicker">El Origen · San José de las Matas</span>
-            <h3 class="maestria__title">Aquí nace nuestra historia.</h3>
+            <span class="maestria__kicker" data-i18n="maestria.chapter1.kicker">El Origen · San José de las Matas</span>
+            <h3 class="maestria__title" data-i18n="maestria.chapter1.title">Aquí nace nuestra historia.</h3>
             <div class="maestria__line"></div>
-            <p class="maestria__text">En las cumbres de Cerro Angola de Rincón de Piedra, entre pinos, neblina y tierra fresca, comienza la memoria de Cazador de Sueños. No venimos de un despacho. Venimos de la montaña.</p>
-            <span class="maestria__note">Cordillera Central · República Dominicana</span>
+            <p class="maestria__text" data-i18n="maestria.chapter1.text">En las tierras de República Dominicana, entre pinos, neblina y tierra fresca, comienza la memoria de Cazador de Sueños. No venimos de un despacho. Venimos de la montaña.</p>
+            <span class="maestria__note" data-i18n="maestria.chapter1.note">Cordillera Central · República Dominicana</span>
           </div>
         </article>
 
@@ -1097,11 +1122,11 @@
           </div>
           <div class="maestria__copy">
             <span class="maestria__number">02</span>
-            <span class="maestria__kicker">La Semilla</span>
-            <h3 class="maestria__title">Todo comienza aquí.</h3>
+            <span class="maestria__kicker" data-i18n="maestria.chapter2.kicker">La Semilla</span>
+            <h3 class="maestria__title" data-i18n="maestria.chapter2.title">Todo comienza aquí.</h3>
             <div class="maestria__line"></div>
-            <p class="maestria__text">La promesa de una gran hoja empieza en silencio: plantas jóvenes, orden, cuidado y espera. Cada brote exige disciplina antes de convertirse en carácter.</p>
-            <span class="maestria__note">Vivero · Selección · Paciencia</span>
+            <p class="maestria__text" data-i18n="maestria.chapter2.text">La promesa de una gran hoja empieza en silencio: plantas jóvenes, orden, cuidado y espera. Cada brote exige disciplina antes de convertirse en carácter.</p>
+            <span class="maestria__note" data-i18n="maestria.chapter2.note">Vivero · Selección · Paciencia</span>
           </div>
         </article>
 
@@ -1111,11 +1136,11 @@
           </div>
           <div class="maestria__copy">
             <span class="maestria__number">03</span>
-            <span class="maestria__kicker">La Hoja</span>
-            <h3 class="maestria__title">Origen que se puede tocar.</h3>
+            <span class="maestria__kicker" data-i18n="maestria.chapter3.kicker">La Hoja</span>
+            <h3 class="maestria__title" data-i18n="maestria.chapter3.title">Origen que se puede tocar.</h3>
             <div class="maestria__line"></div>
-            <p class="maestria__text">El campo define la identidad. La hoja madura bajo el sol, acumula fuerza y revela su destino en la textura, el color y la elasticidad.</p>
-            <span class="maestria__note">Campo · Madurez · Selección</span>
+            <p class="maestria__text" data-i18n="maestria.chapter3.text">El campo define la identidad. La hoja madura bajo el sol, acumula fuerza y revela su destino en la textura, el color y la elasticidad.</p>
+            <span class="maestria__note" data-i18n="maestria.chapter3.note">Campo · Madurez · Selección</span>
           </div>
         </article>
 
@@ -1125,11 +1150,11 @@
           </div>
           <div class="maestria__copy">
             <span class="maestria__number">04</span>
-            <span class="maestria__kicker">El Pilón</span>
-            <h3 class="maestria__title">La ciencia dominada por el tiempo.</h3>
+            <span class="maestria__kicker" data-i18n="maestria.chapter4.kicker">El Pilón</span>
+            <h3 class="maestria__title" data-i18n="maestria.chapter4.title">La ciencia dominada por el tiempo.</h3>
             <div class="maestria__line"></div>
-            <p class="maestria__text">Bajo presión y calor natural, el tabaco respira. La crudeza se afina, el aroma se ordena y la hoja encuentra equilibrio.</p>
-            <span class="maestria__note">Fermentación · Calor · Equilibrio</span>
+            <p class="maestria__text" data-i18n="maestria.chapter4.text">Bajo presión y calor natural, el tabaco respira. La crudeza se afina, el aroma se ordena y la hoja encuentra equilibrio.</p>
+            <span class="maestria__note" data-i18n="maestria.chapter4.note">Fermentación · Calor · Equilibrio</span>
           </div>
         </article>
 
@@ -1139,11 +1164,11 @@
           </div>
           <div class="maestria__copy">
             <span class="maestria__number">05</span>
-            <span class="maestria__kicker">El Maestro Torcedor</span>
-            <h3 class="maestria__title">La mano que convierte hoja en obra.</h3>
+            <span class="maestria__kicker" data-i18n="maestria.chapter5.kicker">El Maestro Torcedor</span>
+            <h3 class="maestria__title" data-i18n="maestria.chapter5.title">La mano que convierte hoja en obra.</h3>
             <div class="maestria__line"></div>
-            <p class="maestria__text">Cada cigarro es una pieza única. La tensión, el ritmo y el corte pertenecen a manos que conocen el punto exacto entre firmeza y respiración.</p>
-            <span class="maestria__note">Mesa · Técnica · Herencia</span>
+            <p class="maestria__text" data-i18n="maestria.chapter5.text">Cada cigarro es una pieza única. La tensión, el ritmo y el corte pertenecen a manos que conocen el punto exacto entre firmeza y respiración.</p>
+            <span class="maestria__note" data-i18n="maestria.chapter5.note">Mesa · Técnica · Herencia</span>
           </div>
         </article>
 
@@ -1153,11 +1178,11 @@
           </div>
           <div class="maestria__copy">
             <span class="maestria__number">06</span>
-            <span class="maestria__kicker">El Añejamiento</span>
-            <h3 class="maestria__title">El silencio como ingrediente.</h3>
+            <span class="maestria__kicker" data-i18n="maestria.chapter6.kicker">El Añejamiento</span>
+            <h3 class="maestria__title" data-i18n="maestria.chapter6.title">El silencio como ingrediente.</h3>
             <div class="maestria__line"></div>
-            <p class="maestria__text">El reposo pule lo que la mano construyó. En madera, sombra y tiempo, el aroma se vuelve memoria y el carácter alcanza profundidad.</p>
-            <span class="maestria__note">Cedro · Reposo · Cava</span>
+            <p class="maestria__text" data-i18n="maestria.chapter6.text">El reposo pule lo que la mano construyó. En madera, sombra y tiempo, el aroma se vuelve memoria y el carácter alcanza profundidad.</p>
+            <span class="maestria__note" data-i18n="maestria.chapter6.note">Cedro · Reposo · Cava</span>
           </div>
         </article>
 
@@ -1171,13 +1196,13 @@
           </div>
           <div class="maestria__copy maestria__copy--legado">
             <span class="maestria__number">07</span>
-            <span class="maestria__kicker">El Legado</span>
+            <span class="maestria__kicker" data-i18n="maestria.chapter7.kicker">El Legado</span>
             <div class="maestria__line"></div>
-            <p class="maestria__text">Todo comenzó en la región norte de la República Dominicana, donde un antepasado de nuestra familia dedicó su vida al cultivo y procesamiento del tabaco. Con el tiempo, logró dominar los secretos de la fermentación, un conocimiento valioso que transmitió a las siguientes generaciones como parte de un legado construido con esfuerzo, paciencia y pasión.</p>
-            <p class="maestria__text">A través de los años, cada generación aportó su experiencia, preservando las tradiciones y el amor por este noble oficio. Lo que comenzó como una enseñanza familiar se convirtió en una herencia que fortaleció nuestra identidad y nuestro compromiso con la calidad.</p>
-            <p class="maestria__text">Inspirados por ese legado y guiados por el sueño de compartir nuestra pasión con el mundo, nació Cazador de Sueños Cigars. Nuestro nombre representa la perseverancia de quienes nunca dejaron de creer en sus ideales y trabajaron para convertirlos en realidad.</p>
-            <p class="maestria__text">Hoy, cada cigarro que elaboramos es un homenaje a nuestros antepasados, a nuestra tierra y a los sueños que hicieron posible este camino. Más que una marca, somos la continuación de una historia familiar que sigue viva en cada hoja de tabaco y en cada experiencia que ofrecemos.</p>
-            <span class="maestria__note">Cazador de Sueños Sigar SRL</span>
+            <p class="maestria__text" data-i18n="maestria.chapter7.text1">Todo comenzó en la región norte de la República Dominicana, donde un antepasado de nuestra familia dedicó su vida al cultivo y procesamiento del tabaco. Con el tiempo, logró dominar los secretos de la fermentación, un conocimiento valioso que transmitió a las siguientes generaciones como parte de un legado construido con esfuerzo, paciencia y pasión.</p>
+            <p class="maestria__text" data-i18n="maestria.chapter7.text2">A través de los años, cada generación aportó su experiencia, preservando las tradiciones y el amor por este noble oficio. Lo que comenzó como una enseñanza familiar se convirtió en una herencia que fortaleció nuestra identidad y nuestro compromiso con la calidad.</p>
+            <p class="maestria__text" data-i18n="maestria.chapter7.text3">Inspirados por ese legado y guiados por el sueño de compartir nuestra pasión con el mundo, nació Cazador de Sueños Cigars. Nuestro nombre representa la perseverancia de quienes nunca dejaron de creer en sus ideales y trabajaron para convertirlos en realidad.</p>
+            <p class="maestria__text" data-i18n="maestria.chapter7.text4">Hoy, cada cigarro que elaboramos es un homenaje a nuestros antepasados, a nuestra tierra y a los sueños que hicieron posible este camino. Más que una marca, somos la continuación de una historia familiar que sigue viva en cada hoja de tabaco y en cada experiencia que ofrecemos.</p>
+            <span class="maestria__note" data-i18n="maestria.chapter7.note">Cazador de Sueños Sigar SRL</span>
           </div>
         </article>
 
@@ -1188,23 +1213,23 @@
     <section class="section contacto reveal" id="contacto">
       <div class="contacto__inner">
         <div class="contacto__intro">
-          <span class="section-label">Contacto</span>
-          <h2 class="section-title">Experiencia Privada</h2>
-          <p class="contacto__lead">Para consultas, pedidos especiales o experiencias de cata, escríbanos. Atendemos a conocedores y coleccionistas con la discreción que merece la casa.</p>
+          <span class="section-label" data-i18n="contact.label">Contacto</span>
+          <h2 class="section-title" data-i18n="contact.title">Experiencia Privada</h2>
+          <p class="contacto__lead" data-i18n="contact.lead">Para consultas, pedidos especiales o experiencias de cata, escríbanos. Atendemos a conocedores y coleccionistas con la discreción que merece la casa.</p>
           <ul class="contacto__details">
-            <li><span class="contacto__details-label">Origen</span>San José de las Matas · Cerro Angola, República Dominicana</li>
-            <li><span class="contacto__details-label">Respuesta</span>24–48 horas hábiles</li>
+            <li><span class="contacto__details-label" data-i18n="contact.details.origin_label">Origen</span><span data-i18n="contact.details.origin">Santiago de los Caballeros, República Dominicana</span></li>
+            <li><span class="contacto__details-label" data-i18n="contact.details.response_label">Respuesta</span><span data-i18n="contact.details.response">24–48 horas hábiles</span></li>
           </ul>
 
           <div class="contacto__channels" aria-label="Canales directos">
-            <p class="contacto__channels-title">Canales Directos</p>
+            <p class="contacto__channels-title" data-i18n="contact.channels.title">Canales Directos</p>
 
             <a class="channel channel--whatsapp" href="https://wa.me/18094645016" role="button">
               <span class="channel__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.027zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
               </span>
               <span class="channel__body">
-                <span class="channel__label">WhatsApp · Pedidos directos</span>
+                <span class="channel__label" data-i18n="contact.channels.whatsapp">WhatsApp · Pedidos directos</span>
                 <span class="channel__value">+1 809-464-5016</span>
               </span>
               <span class="channel__cta" aria-hidden="true">Escribir</span>
@@ -1215,7 +1240,7 @@
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
               </span>
               <span class="channel__body">
-                <span class="channel__label">Correo corporativo oficial</span>
+                <span class="channel__label" data-i18n="contact.channels.email">Correo corporativo oficial</span>
                 <span class="channel__value">cazadordesueno2024@gmail.com</span>
               </span>
             </div>
@@ -1225,19 +1250,19 @@
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>
               </span>
               <span class="channel__body">
-                <span class="channel__label">Teléfonos de gestión</span>
+                <span class="channel__label" data-i18n="contact.channels.phone">Teléfonos de gestión</span>
                 <span class="channel__value" data-placeholder>Líneas por confirmar</span>
               </span>
             </div>
           </div>
         </div>
         <form class="contacto__form" id="contactForm" novalidate>
-          <div class="field"><label for="cf-nombre">Nombre</label><input type="text" id="cf-nombre" name="nombre" autocomplete="name" required></div>
-          <div class="field"><label for="cf-email">Correo electrónico</label><input type="email" id="cf-email" name="email" autocomplete="email" required></div>
-          <div class="field"><label for="cf-asunto">Asunto</label><input type="text" id="cf-asunto" name="asunto"></div>
-          <div class="field"><label for="cf-mensaje">Mensaje</label><textarea id="cf-mensaje" name="mensaje" rows="5" required></textarea></div>
-          <button type="submit" class="btn contacto__submit">Enviar consulta</button>
-          <p class="contacto__form-note" id="formNote" hidden>Gracias. Su consulta ha sido registrada; le responderemos en breve.</p>
+          <div class="field"><label for="cf-nombre" data-i18n="contact.form.name">Nombre</label><input type="text" id="cf-nombre" name="nombre" autocomplete="name" required></div>
+          <div class="field"><label for="cf-email" data-i18n="contact.form.email">Correo electrónico</label><input type="email" id="cf-email" name="email" autocomplete="email" required></div>
+          <div class="field"><label for="cf-asunto" data-i18n="contact.form.subject">Asunto</label><input type="text" id="cf-asunto" name="asunto"></div>
+          <div class="field"><label for="cf-mensaje" data-i18n="contact.form.message">Mensaje</label><textarea id="cf-mensaje" name="mensaje" rows="5" required></textarea></div>
+          <button type="submit" class="btn contacto__submit" data-i18n="contact.form.submit">Enviar consulta</button>
+          <p class="contacto__form-note" id="formNote" hidden data-i18n="contact.form.success">Gracias. Su consulta ha sido registrada; le responderemos en breve.</p>
         </form>
       </div>
     </section>
@@ -1246,27 +1271,14 @@
 
   <!-- ===================== FOOTER ===================== -->
   <footer class="site-footer">
-    <span class="brand">Cazador de <span>Sueños</span></span>
-    <p class="footer__tagline">Cerro Angola · San José de las Matas · República Dominicana</p>
+    <span class="brand" data-i18n="header.brand">Cazador de <span>Sueños</span></span>
+    <p class="footer__tagline" data-i18n="footer.tagline">Fábrica ubicada en Santiago de los Caballeros, República Dominicana</p>
     
-    <div class="footer__social">
-      <a href="https://www.instagram.com/cazadordesuenocigars" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Cazador de Sueños Cigars" class="footer__social-link">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-        </svg>
-      </a>
-      <a href="https://www.tiktok.com/@yanirisvargas4" target="_blank" rel="noopener noreferrer" aria-label="TikTok de Cazador de Sueños Cigars" class="footer__social-link">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-          <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-        </svg>
-      </a>
-    </div>
-    
-    <p class="footer__copy">© 2026 Cazador de Sueños Cigars. Todos los derechos reservados.</p>
+    <p class="footer__copy" data-i18n="footer.copy">© 2026 Cazador de Sueños Cigars. Todos los derechos reservados.</p>
   </footer>
 
   <!-- ===================== WHATSAPP FLOTANTE (estructura, pendiente de datos) ===================== -->
-  <a class="wa-fab" href="https://wa.me/18094645016" aria-label="WhatsApp — Pedidos directos">
+  <a class="wa-fab" href="https://wa.me/18094645016" aria-label="WhatsApp — Pedidos directos" data-i18n="contact.whatsapp_fab_label">
     <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.027zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
     <span class="wa-fab__pulse" aria-hidden="true"></span>
   </a>

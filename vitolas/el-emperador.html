@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>El Emperador | El Primer Sueño — Cigarros Premium | Cazador de Sueños</title>
-  <meta name="description" content="El Emperador — el cigarro fundacional de Cazador de Sueños. Gran Toro 58×6 con fermentación especial familiar de San José de las Matas. Puro premium artesanal de edición limitada.">
-  <meta name="keywords" content="El Emperador, cigarros premium, Cazador de Sueños, San José de las Matas, Cerro Angola, puros artesanales de edición limitada, cigarros dominicanos">
+  <title>El Emperador | Cazador de Sueños Cigars SRL — Tabaco Dominicano Premium</title>
+  <meta name="description" content="El Emperador — cigarro fundacional de Cazador de Sueños Cigars SRL. Gran Toro 58×6 con fermentación especial familiar de Cerro Angola, San José de las Matas. Maestro Tabaquero, tabaco dominicano premium, INTABACO.">
+  <meta name="keywords" content="El Emperador, Cazador de Sueños Cigars SRL, tabaco dominicano, Cerro Angola, San José de las Matas, Tamboril, Maestro Tabaquero, INTABACO, cigarros premium, puros artesanales">
   <meta name="author" content="Cazador de Sueños Cigars">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://www.cazadordesuenocigars.com/vitolas/el-emperador.html">
@@ -20,6 +20,16 @@
   <meta name="twitter:title" content="El Emperador | Cazador de Sueños Cigars">
   <meta name="twitter:description" content="El primer sueño. Cigarro premium fundacional de la casa.">
   <meta name="twitter:image" content="https://www.cazadordesuenocigars.com/img/el-emperador-cigarro.jpg">
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BYRS7MGYXK');
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -93,9 +103,9 @@
 
   <main class="vitola-detail vitola-detail--emperador">
 
-    <a href="../index.html#catalogo" class="vitola-detail__back">← Volver al catálogo</a>
+    <a href="../index.html#catalogo" class="vitola-detail__back" data-i18n="vitolas.back_to_catalog">← Volver al catálogo</a>
 
-    <div class="vitola-detail__badge vitola-detail__badge--origin">El Primer Sueño</div>
+    <div class="vitola-detail__badge vitola-detail__badge--origin" data-i18n="vitolas.emperador.badge">El Primer Sueño</div>
 
     <section class="ligero-gallery" aria-label="Galería El Emperador">
       <figure class="ligero-gallery__frame ligero-gallery__frame--cigar">
@@ -109,7 +119,7 @@
           fetchpriority="high"
           decoding="sync"
         >
-        <figcaption class="ligero-gallery__label">Cigarro individual</figcaption>
+        <figcaption class="ligero-gallery__label" data-i18n="vitolas.gallery.single_cigar">Cigarro individual</figcaption>
       </figure>
       <figure class="ligero-gallery__frame ligero-gallery__frame--closed">
         <img
@@ -121,7 +131,7 @@
           loading="eager"
           decoding="async"
         >
-        <figcaption class="ligero-gallery__label">Caja cerrada</figcaption>
+        <figcaption class="ligero-gallery__label" data-i18n="vitolas.gallery.closed_box">Caja cerrada</figcaption>
       </figure>
       <figure class="ligero-gallery__frame ligero-gallery__frame--open">
         <img
@@ -133,23 +143,23 @@
           loading="eager"
           decoding="async"
         >
-        <figcaption class="ligero-gallery__label">Caja abierta</figcaption>
+        <figcaption class="ligero-gallery__label" data-i18n="vitolas.gallery.open_box">Caja abierta</figcaption>
       </figure>
     </section>
 
     <section class="ligero-identity emperador-identity">
       <div class="ligero-identity__header">
-        <span class="section-label">El Origen</span>
-        <h1 class="vitola-detail__title ligero-identity__title">El Emperador</h1>
-        <p class="ligero-identity__subtitle">
+        <span class="section-label" data-i18n="vitolas.emperador.section_label">El Origen</span>
+        <h1 class="vitola-detail__title ligero-identity__title" data-i18n="vitolas.emperador.title">El Emperador</h1>
+        <p class="ligero-identity__subtitle" data-i18n="vitolas.emperador.subtitle">
           El primer cigarro que nació en la fábrica Cazador de Sueños.
           Historia viva, herencia familiar y el sueño que lo inició todo.
         </p>
       </div>
 
       <div class="ligero-identity__concept emperador-identity__concept">
-        <h2 class="ligero-identity__concept-title">El Concepto Único</h2>
-        <p class="ligero-identity__concept-text">
+        <h2 class="ligero-identity__concept-title" data-i18n="vitolas.emperador.concept_title">El Concepto Único</h2>
+        <p class="ligero-identity__concept-text" data-i18n="vitolas.emperador.concept_text">
           El cigarro <strong>fundacional de la fábrica</strong>, creado bajo el secreto de una
           <strong>fermentación especial de tabacos</strong> que me enseñó mi abuelo. No es una
           vitola más: es el punto de partida de toda una casa, el primer humo que dio nombre
@@ -157,48 +167,48 @@
         </p>
         <div class="emperador-identity__seal" aria-hidden="true">
           <span class="emperador-identity__seal-ring"></span>
-          <span class="emperador-identity__seal-text">Fermentación<br>Especial</span>
+          <span class="emperador-identity__seal-text" data-i18n="vitolas.emperador.seal">Fermentación<br>Especial</span>
         </div>
       </div>
     </section>
 
     <section class="ligero-specs" aria-labelledby="specs-title">
-      <h2 class="vitola-detail__section-title" id="specs-title">Especificaciones</h2>
+      <h2 class="vitola-detail__section-title" id="specs-title" data-i18n="vitolas.specs.title">Especificaciones</h2>
       <div class="ligero-specs__grid">
         <article class="ligero-specs__item">
-          <h3>Formato / Vitola</h3>
-          <p class="ligero-specs__value">Gran Toro 58 × 6″</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.format_label">Formato / Vitola</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.emperador.specs.format_value">Gran Toro 58 × 6″</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.emperador.specs.format_detail">
             Un calibre imponente y majestuoso que denota dominio y carácter.
           </p>
         </article>
         <article class="ligero-specs__item">
-          <h3>Capa</h3>
-          <p class="ligero-specs__value">San Andrés Madura</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.wrapper_label">Capa</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.emperador.specs.wrapper_value">San Andrés Madura</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.emperador.specs.wrapper_detail">
             México — seleccionada por su maduración perfecta, color chocolate profundo
             y notas dulces y terrosas.
           </p>
         </article>
         <article class="ligero-specs__item">
-          <h3>Capote</h3>
-          <p class="ligero-specs__value">Olor Dominicano</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.binder_label">Capote</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.emperador.specs.binder_value">Olor Dominicano</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.emperador.specs.binder_detail">
             República Dominicana — aportando una suavidad aromática inigualable.
           </p>
         </article>
         <article class="ligero-specs__item">
-          <h3>Tripa</h3>
-          <p class="ligero-specs__value">Selección Premium</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.filler_label">Tripa</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.emperador.specs.filler_value">Selección Premium</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.emperador.specs.filler_detail">
             República Dominicana y otros países secretos, curados con el método
             de fermentación familiar.
           </p>
         </article>
         <article class="ligero-specs__item ligero-specs__item--highlight emperador-specs__fortaleza">
-          <h3>Fortaleza</h3>
-          <p class="ligero-specs__value">Medio-Fuerte</p>
-          <p class="ligero-specs__detail">
+          <h3 data-i18n="vitolas.specs.strength_label">Fortaleza</h3>
+          <p class="ligero-specs__value" data-i18n="vitolas.emperador.specs.strength_value">Medio-Fuerte</p>
+          <p class="ligero-specs__detail" data-i18n="vitolas.emperador.specs.strength_detail">
             Un equilibrio perfecto entre cuerpo y sabor.
           </p>
         </article>
@@ -206,15 +216,15 @@
     </section>
 
     <section class="ligero-tasting" aria-labelledby="tasting-title">
-      <h2 class="vitola-detail__section-title" id="tasting-title">Notas de Cata / Experiencia de Fumada</h2>
-      <p class="ligero-tasting__lead">
+      <h2 class="vitola-detail__section-title" id="tasting-title" data-i18n="vitolas.tasting.title">Notas de Cata / Experiencia de Fumada</h2>
+      <p class="ligero-tasting__lead" data-i18n="vitolas.emperador.tasting_lead">
         La fermentación especial revela su alma en tres actos — una narrativa
         de suavidad, riqueza y majestad digna del primer sueño de la casa.
       </p>
       <div class="ligero-tasting__thirds">
         <article class="ligero-tasting__third">
-          <span class="ligero-tasting__third-label">Primer Tercio</span>
-          <p class="ligero-tasting__third-text">
+          <span class="ligero-tasting__third-label" data-i18n="vitolas.tasting.first_third">Primer Tercio</span>
+          <p class="ligero-tasting__third-text" data-i18n="vitolas.emperador.tasting.first">
             La entrada es compleja y voluptuosamente cremosa. Un cacao suave,
             casi lácteo, se entrelaza con maderas finas de cedro y roble joven,
             mientras la capa San Andrés despliega su dulzor terroso con
@@ -224,8 +234,8 @@
           </p>
         </article>
         <article class="ligero-tasting__third">
-          <span class="ligero-tasting__third-label">Segundo Tercio</span>
-          <p class="ligero-tasting__third-text">
+          <span class="ligero-tasting__third-label" data-i18n="vitolas.tasting.second_third">Segundo Tercio</span>
+          <p class="ligero-tasting__third-text" data-i18n="vitolas.emperador.tasting.second">
             La evolución alcanza una riqueza aromática impresionante. El café
             tostado emerge con profundidad, acompañado de especias suaves — canela,
             nuez moscada — que danzan con la elegancia floral del Olor Dominicano.
@@ -235,8 +245,8 @@
           </p>
         </article>
         <article class="ligero-tasting__third">
-          <span class="ligero-tasting__third-label">Tercer Tercio</span>
-          <p class="ligero-tasting__third-text">
+          <span class="ligero-tasting__third-label" data-i18n="vitolas.tasting.third_third">Tercer Tercio</span>
+          <p class="ligero-tasting__third-text" data-i18n="vitolas.emperador.tasting.third">
             El desenlace es robusto pero impecablemente equilibrado. Cuero curtido
             y frutos secos — almendra, higo — construyen un final de carácter
             imperial, mientras una intensidad satisfactoria demuestra el temple de
@@ -250,13 +260,13 @@
 
     <section class="ligero-mystique emperador-mystique">
       <blockquote class="ligero-mystique__quote">
-        <p>
+        <p data-i18n="vitolas.emperador.mystique">
           Antes de ser marca, fuimos sueño. Antes de ser fábrica, fuimos receta
           susurrada entre abuelo y nieto. El Emperador es ese primer amanecer —
           el humo que encendió todo lo demás.
         </p>
       </blockquote>
-      <a href="../index.html#contacto" class="vitola-detail__inquire">Consultas privadas</a>
+      <a href="../index.html#contacto" class="vitola-detail__inquire" data-i18n="vitolas.inquire">Consultas privadas</a>
     </section>
 
   </main>

@@ -35,9 +35,39 @@
     }
   }
 
+  // Función para re-renderizar traducciones de vitolas
+  function translateVitolaPage(translations) {
+    if (!translations) return;
+
+    // Función recursiva para obtener traducción anidada
+    function getTranslation(obj, path) {
+      return path.split('.').reduce((o, key) => o && o[key], obj);
+    }
+
+    // Traducir elementos con data-i18n en la página de vitola
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      const translation = getTranslation(translations, key);
+      
+      if (translation) {
+        element.textContent = translation;
+      }
+    });
+  }
+
+  // Escuchar cambios de idioma para re-renderizar contenido dinámico
+  function initLanguageListener() {
+    window.addEventListener('cds:language-changed', (event) => {
+      const { translations } = event.detail;
+      translateVitolaPage(translations);
+      console.log('Vitola page re-rendered for language change');
+    });
+  }
+
   function onReady() {
     renderLogos();
     initReveal();
+    initLanguageListener();
   }
 
   if (localStorage.getItem('cds-age-verified') === '1') {

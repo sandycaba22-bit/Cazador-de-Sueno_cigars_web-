@@ -5,7 +5,7 @@
 
 const LanguageSwitcher = (function() {
   // Configuración de idiomas disponibles
-  const availableLanguages = ['es', 'en', 'fr', 'zh', 'de', 'ar'];
+  const availableLanguages = ['es', 'en', 'fr', 'zh', 'de', 'ar', 'ru'];
   
   const languageNames = {
     'es': 'Español',
@@ -13,7 +13,8 @@ const LanguageSwitcher = (function() {
     'fr': 'Français',
     'zh': '中文',
     'de': 'Deutsch',
-    'ar': 'العربية'
+    'ar': 'العربية',
+    'ru': 'Русский'
   };
 
   const languageFlags = {
@@ -22,7 +23,8 @@ const LanguageSwitcher = (function() {
     'fr': '🇫🇷',
     'zh': '🇨🇳',
     'de': '🇩🇪',
-    'ar': '🇸🇦'
+    'ar': '🇸🇦',
+    'ru': '🇷🇺'
   };
 
   // Detección automática del idioma del navegador
@@ -50,8 +52,64 @@ const LanguageSwitcher = (function() {
     return detectedLang;
   }
 
+  // Cargar archivo JSON de traducciones
+  async function loadTranslations(lang) {
+    try {
+      const response = await fetch(`/locales/${lang}.json`);
+      if (!response.ok) {
+        throw new Error(`No se pudo cargar ${lang}.json`);
+      }
+      const data = await response.json();
+      return data.translations;
+    } catch (error) {
+      console.error('Error cargando traducciones:', error);
+      return null;
+    }
+  }
+
+  // Traducir elementos con data-i18n
+  function translatePage(translations) {
+    if (!translations) return;
+
+    // Función recursiva para obtener traducción anidada
+    function getTranslation(obj, path) {
+      return path.split('.').reduce((o, key) => o && o[key], obj);
+    }
+
+    // Traducir elementos con data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      const translation = getTranslation(translations, key);
+      
+      if (translation) {
+        element.textContent = translation;
+      }
+    });
+
+    // Traducir placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+      const key = element.getAttribute('data-i18n-placeholder');
+      const translation = getTranslation(translations, key);
+      
+      if (translation) {
+        element.setAttribute('placeholder', translation);
+      }
+    });
+
+    // Cambiar dirección del documento para árabe
+    const html = document.documentElement;
+    const currentLang = localStorage.getItem('cds-language') || 'es';
+    if (translations.direction === 'rtl') {
+      html.setAttribute('dir', 'rtl');
+      html.setAttribute('lang', 'ar');
+    } else {
+      html.setAttribute('dir', 'ltr');
+      html.setAttribute('lang', currentLang);
+    }
+  }
+
   // Cambiar idioma
-  function setLanguage(lang) {
+  async function setLanguage(lang) {
     if (!availableLanguages.includes(lang)) {
       console.warn('Idioma no disponible:', lang);
       return;
@@ -60,9 +118,18 @@ const LanguageSwitcher = (function() {
     localStorage.setItem('cds-language', lang);
     updateLanguageDisplay(lang);
     
-    // Aquí se implementaría la lógica para cambiar el contenido
-    // Por ahora solo actualizamos el estado
-    console.log('Idioma cambiado a:', lang);
+    // Cargar y aplicar traducciones
+    const translations = await loadTranslations(lang);
+    if (translations) {
+      translatePage(translations);
+      console.log('Idioma cambiado a:', lang);
+      
+      // Emitir evento para que otros scripts puedan reaccionar
+      const event = new CustomEvent('cds:language-changed', {
+        detail: { language: lang, translations }
+      });
+      window.dispatchEvent(event);
+    }
   }
 
   // Actualizar display del selector
