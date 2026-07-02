@@ -27,7 +27,7 @@ const LanguageSwitcher = (function() {
     'ru': '🇷🇺'
   };
 
-  // Detección automática del idioma del navegador
+  // Detección automática del idioma del navegador (Accept-Language)
   function detectBrowserLanguage() {
     const browserLang = navigator.language || navigator.userLanguage;
     const langCode = browserLang.split('-')[0];
@@ -36,8 +36,8 @@ const LanguageSwitcher = (function() {
       return langCode;
     }
     
-    // Fallback a español si no está disponible
-    return 'es';
+    // Fallback a inglés si no está disponible
+    return 'en';
   }
 
   // Obtener idioma guardado o detectar automáticamente
@@ -180,7 +180,20 @@ const LanguageSwitcher = (function() {
   }
 
   // Inicialización
-  function init() {
+  async function init() {
+    // Remover estilo oculto del script temprano
+    if (window.__cdsEarlyStyle) {
+      window.__cdsEarlyStyle.remove();
+      delete window.__cdsEarlyStyle;
+    }
+    
+    // Cargar traducciones automáticamente
+    const currentLang = getCurrentLanguage();
+    const translations = await loadTranslations(currentLang);
+    if (translations) {
+      translatePage(translations);
+    }
+    
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initSelector);
     } else {
