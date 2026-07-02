@@ -147,36 +147,63 @@ const LanguageSwitcher = (function() {
     
     // Crear dropdown
     const selectorContainer = document.querySelector('.lang-selector');
-    if (!selectorContainer) return;
+    if (!selectorContainer) {
+      console.warn('[CDS] No se encontró el contenedor del selector de idiomas');
+      return;
+    }
 
-    const dropdown = document.createElement('div');
-    dropdown.className = 'lang-selector__dropdown';
-    
-    availableLanguages.forEach(lang => {
-      const option = document.createElement('button');
-      option.className = 'lang-selector__option';
-      option.textContent = `${languageFlags[lang]} ${languageNames[lang]}`;
-      option.setAttribute('data-lang', lang);
-      option.onclick = () => setLanguage(lang);
-      dropdown.appendChild(option);
-    });
+    // Verificar si ya existe el dropdown para evitar duplicados
+    let dropdown = selectorContainer.querySelector('.lang-selector__dropdown');
+    if (!dropdown) {
+      dropdown = document.createElement('div');
+      dropdown.className = 'lang-selector__dropdown';
+      
+      availableLanguages.forEach(lang => {
+        const option = document.createElement('button');
+        option.className = 'lang-selector__option';
+        option.textContent = `${languageFlags[lang]} ${languageNames[lang]}`;
+        option.setAttribute('data-lang', lang);
+        option.setAttribute('type', 'button');
+        
+        // Usar addEventListener en lugar de onclick para mejor manejo
+        option.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('[CDS] Cambiando idioma a:', lang);
+          setLanguage(lang);
+          dropdown.classList.remove('lang-selector__dropdown--open');
+        });
+        
+        dropdown.appendChild(option);
+      });
 
-    selectorContainer.appendChild(dropdown);
+      selectorContainer.appendChild(dropdown);
+    }
 
     // Toggle dropdown
     const button = selectorContainer.querySelector('.lang-selector__button');
     if (button) {
-      button.onclick = () => {
+      // Remover listeners existentes para evitar duplicados
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+      
+      newButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         dropdown.classList.toggle('lang-selector__dropdown--open');
-      };
+        console.log('[CDS] Dropdown toggled');
+      });
     }
 
     // Cerrar dropdown al hacer clic fuera
-    document.addEventListener('click', (e) => {
+    const closeHandler = (e) => {
       if (!selectorContainer.contains(e.target)) {
         dropdown.classList.remove('lang-selector__dropdown--open');
       }
-    });
+    };
+    document.addEventListener('click', closeHandler);
+    
+    console.log('[CDS] Selector de idiomas inicializado correctamente');
   }
 
   // Inicialización
