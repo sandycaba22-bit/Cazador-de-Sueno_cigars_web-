@@ -155,6 +155,42 @@
         </p>
       </div>
 
+      <!-- Luxury Purchase Panel -->
+      <div class="vitola-purchase-panel" id="purchasePanel">
+        <div class="purchase-panel__content">
+          <div class="purchase-panel__info">
+            <h3 class="purchase-panel__name" data-i18n="vitolas.puro_habano.title">Puro Habano</h3>
+            <p class="purchase-panel__description">Churchill 48×7 - Raíces Cubanas</p>
+            <div class="purchase-panel__price">
+              <span class="purchase-panel__price-label">Precio Mayoreo</span>
+              <span class="purchase-panel__price-value">$5.00 USD</span>
+            </div>
+            <div class="purchase-panel__box-price">
+              <span class="purchase-panel__box-label">Caja (25 unidades)</span>
+              <span class="purchase-panel__box-value">$125.00 USD</span>
+            </div>
+          </div>
+          <div class="purchase-panel__actions">
+            <button type="button" class="purchase-panel__button purchase-panel__button--unit" data-product-id="puro-habano" data-quantity="1">
+              <svg class="purchase-panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                <path d="M20 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              <span>Agregar Unidad</span>
+            </button>
+            <button type="button" class="purchase-panel__button purchase-panel__button--box" data-product-id="puro-habano" data-quantity="25">
+              <svg class="purchase-panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                <path d="M20 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              <span>Agregar Caja</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="ligero-identity__concept habano-identity__concept">
         <h2 class="ligero-identity__concept-title" data-i18n="vitolas.puro_habano.concept_title">El Concepto Único</h2>
         <p class="ligero-identity__concept-text" data-i18n="vitolas.puro_habano.concept_text">
@@ -269,9 +305,6 @@
         </p>
       </blockquote>
       <a href="../index.html#contacto" class="vitola-detail__inquire" data-i18n="vitolas.inquire">Consultas privadas</a>
-      <button type="button" class="vitola-detail__add-to-cart" data-product-id="puro-habano">
-        Agregar al Carrito - $16.00
-      </button>
     </section>
 
   </main>
@@ -289,5 +322,6 @@
   <script src="../js/language-switcher.js" defer></script>
   <script src="../js/shopping-cart.js" defer></script>
   <script src="../js/cart-modal.js" defer></script>
+  <script src="../js/purchase-panel.js" defer></script>
 </body>
 </html>
