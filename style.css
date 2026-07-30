@@ -235,6 +235,231 @@
   }
 }
 
+/* ============================================
+   CART LOCK SYSTEM - Estilos de Bloqueo Post-Pago
+   ============================================ */
+
+/* Banner Global de Bloqueo */
+.cart-lock-banner-global {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-bottom: 2px solid #FFD700;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.cart-lock-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.cart-lock-icon-global {
+  font-size: 1.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.cart-lock-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cart-lock-text strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cart-lock-text span {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  font-family: var(--font-body);
+}
+
+/* Notificación Flotante de Bloqueo */
+.cart-lock-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.cart-lock-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 2px solid #FFD700;
+  max-width: 400px;
+}
+
+.cart-lock-icon {
+  font-size: 1.75rem;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+.cart-lock-message {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Botones de Compra Bloqueados */
+.purchase-panel__button--locked {
+  background: linear-gradient(135deg, #666 0%, #444 100%) !important;
+  color: #999 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  border: 1px solid #555 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.purchase-panel__button--locked:hover {
+  background: linear-gradient(135deg, #666 0%, #444 100%) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.purchase-panel__button--locked .purchase-panel__icon {
+  opacity: 0.5;
+}
+
+/* Tooltip de Bloqueo en Botones */
+.purchase-lock-notification {
+  animation: none;
+  transform: none;
+  top: auto;
+  left: auto;
+}
+
+.purchase-lock-tooltip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #8B0000;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #FFD700;
+  white-space: nowrap;
+}
+
+.purchase-lock-tooltip .lock-icon {
+  font-size: 1rem;
+  animation: none;
+}
+
+/* Elementos del Carrito Bloqueados */
+[data-cart-action].cart-locked {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+}
+
+[data-cart-action].cart-locked:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design para Banner de Bloqueo */
+@media (max-width: 768px) {
+  .cart-lock-banner-global {
+    padding: 0.5rem 1rem;
+  }
+
+  .cart-lock-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .cart-lock-icon-global {
+    align-self: flex-start;
+  }
+
+  .cart-lock-text strong {
+    font-size: 0.9rem;
+  }
+
+  .cart-lock-text span {
+    font-size: 0.75rem;
+  }
+
+  .cart-lock-banner {
+    max-width: 90vw;
+    padding: 0.75rem 1rem;
+  }
+
+  .cart-lock-message {
+    font-size: 0.85rem;
+  }
+}
+
 /* High Contrast Mode Support */
 @media (prefers-contrast: high) {
   .vitola-purchase-panel {
