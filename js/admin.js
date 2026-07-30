@@ -4,8 +4,19 @@
  */
 
 const AdminPanel = (function() {
-  const ADMIN_PASSWORD = 'cazador2024'; // Cambiar en producción
+  // Hash SHA-256 de la contraseña (taBacoss2026!)
+  const ADMIN_PASSWORD_HASH = '80465e6ece44ba6f22a9508b3ca2bd9e55a430bc420b6e619e9bf5d5297a9573';
   const SESSION_KEY = 'cds-admin-session';
+  
+  // Función para calcular hash SHA-256
+  async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  }
   
   // Verificar sesión
   function checkSession() {
@@ -16,8 +27,9 @@ const AdminPanel = (function() {
   }
   
   // Login
-  function login(password) {
-    if (password === ADMIN_PASSWORD) {
+  async function login(password) {
+    const passwordHash = await hashPassword(password);
+    if (passwordHash === ADMIN_PASSWORD_HASH) {
       localStorage.setItem(SESSION_KEY, 'active');
       showAdminPanel();
       return true;
@@ -189,15 +201,17 @@ const AdminPanel = (function() {
   }
   
   // Inicializar
-  function init() {
+  async function init() {
     checkSession();
     
     // Event listener para login
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const password = document.getElementById('adminPassword').value;
       
-      if (!login(password)) {
+      const success = await login(password);
+      
+      if (!success) {
         document.getElementById('loginError').textContent = 'Contraseña incorrecta';
       } else {
         document.getElementById('loginError').textContent = '';

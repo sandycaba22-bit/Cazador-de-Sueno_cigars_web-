@@ -5,7 +5,10 @@
 
 const Checkout = (function() {
   const PAYMENT_CONFIG_PATH = '/config/payment-config.json';
+  const BANK_ACCOUNTS_PATH = '/config/bank-accounts-config.json';
   let paymentConfig = null;
+  let bankAccounts = null;
+  let selectedBankAccount = null;
   
   // Cargar configuración de pago
   async function loadPaymentConfig() {
@@ -20,16 +23,46 @@ const Checkout = (function() {
     }
   }
   
-  // Mostrar detalles bancarios
+  // Cargar cuentas bancarias
+  async function loadBankAccounts() {
+    try {
+      const response = await fetch(BANK_ACCOUNTS_PATH);
+      const data = await response.json();
+      bankAccounts = data.bank_accounts;
+      return data;
+    } catch (error) {
+      console.error('Error loading bank accounts:', error);
+      return null;
+    }
+  }
+  
+  // Manejar selección de cuenta bancaria
+  function setupBankAccountSelection() {
+    const accountCards = document.querySelectorAll('.bank-account-card');
+    
+    accountCards.forEach(card => {
+      card.addEventListener('click', function() {
+        // Remover selected de todas las tarjetas
+        accountCards.forEach(c => c.classList.remove('selected'));
+        
+        // Agregar selected a la tarjeta clickeada
+        this.classList.add('selected');
+        
+        // Seleccionar el radio button
+        const radio = this.querySelector('.bank-account-card-radio');
+        radio.checked = true;
+        
+        // Guardar cuenta seleccionada
+        selectedBankAccount = this.getAttribute('data-account-id');
+        
+        validateForm();
+      });
+    });
+  }
+  
+  // Mostrar detalles bancarios (obsoleto, ahora se usan tarjetas)
   function displayBankDetails() {
-    if (!paymentConfig || !paymentConfig.payment_methods.bank_transfer) return;
-    
-    const bankTransfer = paymentConfig.payment_methods.bank_transfer;
-    
-    document.getElementById('bankName').textContent = bankTransfer.bank_name;
-    document.getElementById('accountName').textContent = bankTransfer.account_name;
-    document.getElementById('accountNumber').textContent = bankTransfer.account_number;
-    document.getElementById('accountType').textContent = bankTransfer.account_type;
+    // Ya no se usa, las cuentas se muestran en tarjetas
   }
   
   // Renderizar items del pedido
@@ -107,7 +140,7 @@ const Checkout = (function() {
     const paymentProof = document.getElementById('paymentProof');
     const placeOrderBtn = document.getElementById('placeOrderBtn');
     
-    const isValid = form.checkValidity() && paymentProof.files.length > 0;
+    const isValid = form.checkValidity() && paymentProof.files.length > 0 && selectedBankAccount !== null;
     placeOrderBtn.disabled = !isValid;
   }
   
@@ -138,7 +171,8 @@ const Checkout = (function() {
         country: formData.get('country')
       },
       paymentMethod: 'bank_transfer',
-      paymentProof: paymentProof.name
+      paymentProof: paymentProof.name,
+      bankAccountId: selectedBankAccount
     };
     
     // Guardar pedido en localStorage (simulación de backend)
@@ -198,7 +232,8 @@ const Checkout = (function() {
     }
     
     await loadPaymentConfig();
-    displayBankDetails();
+    await loadBankAccounts();
+    setupBankAccountSelection();
     renderOrderItems();
     handleFileUpload();
     
@@ -215,7 +250,8 @@ const Checkout = (function() {
       e.preventDefault();
       
       if (document.getElementById('shippingForm').checkValidity() && 
-          document.getElementById('paymentProof').files.length > 0) {
+          document.getElementById('paymentProof').files.length > 0 &&
+          selectedBankAccount !== null) {
         
         document.getElementById('placeOrderBtn').disabled = true;
         document.getElementById('placeOrderBtn').textContent = 'Procesando...';

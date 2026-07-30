@@ -206,6 +206,50 @@
       font-family: 'Libre Baskerville', serif;
     }
     
+    .bank-account-selector {
+      margin-bottom: 1.5rem;
+    }
+    
+    .bank-account-card {
+      background: rgba(198, 162, 90, 0.05);
+      border: 2px solid rgba(198, 162, 90, 0.2);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .bank-account-card:hover {
+      border-color: rgba(198, 162, 90, 0.4);
+      background: rgba(198, 162, 90, 0.08);
+    }
+    
+    .bank-account-card.selected {
+      border-color: #c6a25a;
+      background: rgba(198, 162, 90, 0.1);
+    }
+    
+    .bank-account-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .bank-account-card-name {
+      color: #f4efe2;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    .bank-account-card-radio {
+      width: 20px;
+      height: 20px;
+      accent-color: #c6a25a;
+    }
+    
     .file-upload {
       border: 2px dashed rgba(198, 162, 90, 0.3);
       border-radius: 4px;
@@ -341,22 +385,37 @@
         <!-- Payment Information -->
         <div class="checkout-section">
           <h2>Método de Pago</h2>
-          <div class="bank-details" id="bankDetails">
-            <div class="bank-details-item">
-              <span class="bank-details-label">Banco</span>
-              <span class="bank-details-value" id="bankName">Cargando...</span>
+          <p style="color: #aeb9c6; margin-bottom: 1.5rem;">Seleccione una cuenta bancaria para realizar la transferencia:</p>
+          
+          <div class="bank-account-selector" id="bankAccountSelector">
+            <div class="bank-account-card" data-account-id="account1">
+              <div class="bank-account-card-header">
+                <span class="bank-account-card-name">Banco BHD - Cuenta de Ahorros</span>
+                <input type="radio" name="bankAccount" class="bank-account-card-radio" value="account1" required>
+              </div>
+              <div class="bank-details-item">
+                <span class="bank-details-label">Titular</span>
+                <span class="bank-details-value">Sandy de Jesús Rodríguez</span>
+              </div>
+              <div class="bank-details-item">
+                <span class="bank-details-label">Número de Cuenta</span>
+                <span class="bank-details-value">15705310035</span>
+              </div>
             </div>
-            <div class="bank-details-item">
-              <span class="bank-details-label">Titular de la Cuenta</span>
-              <span class="bank-details-value" id="accountName">Cargando...</span>
-            </div>
-            <div class="bank-details-item">
-              <span class="bank-details-label">Número de Cuenta</span>
-              <span class="bank-details-value" id="accountNumber">Cargando...</span>
-            </div>
-            <div class="bank-details-item">
-              <span class="bank-details-label">Tipo de Cuenta</span>
-              <span class="bank-details-value" id="accountType">Cargando...</span>
+            
+            <div class="bank-account-card" data-account-id="account2">
+              <div class="bank-account-card-header">
+                <span class="bank-account-card-name">Banco BHD - Cuenta de Ahorros</span>
+                <input type="radio" name="bankAccount" class="bank-account-card-radio" value="account2">
+              </div>
+              <div class="bank-details-item">
+                <span class="bank-details-label">Titular</span>
+                <span class="bank-details-value">PENDIENTE</span>
+              </div>
+              <div class="bank-details-item">
+                <span class="bank-details-label">Número de Cuenta</span>
+                <span class="bank-details-value">PENDIENTE</span>
+              </div>
             </div>
           </div>
           

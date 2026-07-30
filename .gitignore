@@ -17,6 +17,8 @@ Desktop.ini
 *.key
 credentials.json
 secrets.*
+config/bank-accounts.local.json
+config/bank-accounts-config.json
 
 # Logs y temporales
 *.log
