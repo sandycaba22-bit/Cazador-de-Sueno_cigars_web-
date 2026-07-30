@@ -274,7 +274,7 @@
           </div>
         </div>
         <div class="purchase-panel__actions">
-          <button type="button" class="purchase-panel__button purchase-panel__button--unit" data-product-id="rango" data-quantity="1">
+          <button type="button" class="purchase-panel__button purchase-panel__button--unit" data-product-id="rango" data-quantity="1" data-vitola="rango" data-tipo="individual">
             <svg class="purchase-panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M9 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
               <path d="M20 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
@@ -282,7 +282,7 @@
             </svg>
             <span>Agregar Unidad</span>
           </button>
-          <button type="button" class="purchase-panel__button purchase-panel__button--box" data-product-id="rango" data-quantity="10">
+          <button type="button" class="purchase-panel__button purchase-panel__button--box" data-product-id="rango" data-quantity="10" data-vitola="rango" data-tipo="caja">
             <svg class="purchase-panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M9 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
               <path d="M20 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
@@ -293,6 +293,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Contenedor para Calculadora de Pedido Integrada -->
+    <div id="cs-calculadora-contenedor"></div>
 
     <section class="ligero-mystique rango-mystique">
       <blockquote class="ligero-mystique__quote">
@@ -321,5 +324,6 @@
   <script src="../js/shopping-cart.js" defer></script>
   <script src="../js/cart-modal.js" defer></script>
   <script src="../js/purchase-panel.js" defer></script>
+  <script src="../js/calculator-cart-integration.js" defer></script>
 </body>
 </html>
