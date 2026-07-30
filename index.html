@@ -496,6 +496,67 @@
     .coleccion-card__media { min-height: clamp(340px, 72vw, 440px); }
   }
 
+  /* ============ CART BUTTON ============ */
+  .cart-button {
+    position: relative;
+    background: transparent;
+    border: 1px solid var(--border-gold-soft);
+    color: var(--cream);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+  }
+  .cart-button:hover {
+    border-color: var(--border-gold-medium);
+    background: var(--surface-panel);
+  }
+  .cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--gold);
+    color: var(--surface-base);
+    font-size: 0.7rem;
+    font-weight: 600;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @media (max-width: 768px) {
+    .cart-button {
+      padding: 0.4rem 0.8rem;
+      margin-left: 0.5rem;
+    }
+  }
+
+  /* ============ ADD TO CART BUTTON ============ */
+  .vitola-detail__add-to-cart {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #c6a25a 0%, #8b7355 100%);
+    border: none;
+    color: #050505;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .vitola-detail__add-to-cart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(198, 162, 90, 0.3);
+  }
+
   /* ============ HERO · FOTO LOW-KEY PREMIUM ============ */
   .hero {
     position: relative;
@@ -925,6 +986,14 @@
         <span class="lang-selector__current">🇪🇸 Español</span>
       </button>
     </div>
+    <button type="button" class="cart-button" id="cartButton" aria-label="Carrito de compras">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+      <span class="cart-badge" style="display: none;">0</span>
+    </button>
   </header>
 
   <main>
@@ -1327,6 +1396,27 @@
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
+    /* Cart button toggle */
+    var cartButton = document.getElementById('cartButton');
+    if (cartButton && window.CartModal) {
+      cartButton.addEventListener('click', function () {
+        window.CartModal.toggle();
+      });
+    }
+
+    /* Add to cart buttons */
+    document.querySelectorAll('.vitola-detail__add-to-cart').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var productId = this.getAttribute('data-product-id');
+        if (productId && window.ShoppingCart) {
+          window.ShoppingCart.addToCart(productId, 1);
+          if (window.CartModal) {
+            window.CartModal.open();
+          }
+        }
+      });
+    });
+
     /* Colecciones dropdown */
     var item = document.querySelector('.nav__item--has-menu');
     var trigger = item ? item.querySelector('.nav__menu-trigger') : null;
@@ -1419,6 +1509,8 @@
 
   <script src="hero-parallax.js" defer></script>
   <script src="js/language-switcher.js" defer></script>
+  <script src="js/shopping-cart.js" defer></script>
+  <script src="js/cart-modal.js" defer></script>
   <script src="js/ecommerce-skeleton.js" defer></script>
 
 </body>

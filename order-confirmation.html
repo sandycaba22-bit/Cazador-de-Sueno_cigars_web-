@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Early language detection script (must load first to prevent flicker) -->
+  <script src="/js/language-detect-early.js"></script>
+  
+  <title>Pedido Confirmado | Cazador de Sueños Cigars SRL</title>
+  <meta name="description" content="Su pedido ha sido recibido y está pendiente de verificación.">
+  <meta name="robots" content="noindex, follow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    .confirmation-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      min-height: 100vh;
+      text-align: center;
+    }
+    
+    .confirmation-icon {
+      font-size: 4rem;
+      margin-bottom: 2rem;
+    }
+    
+    .confirmation-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      color: #f4efe2;
+      margin-bottom: 1rem;
+      letter-spacing: 0.1em;
+    }
+    
+    .confirmation-subtitle {
+      color: #aeb9c6;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .order-details {
+      background: linear-gradient(180deg, rgba(10, 24, 38, 0.8) 0%, rgba(5, 5, 5, 0.9) 100%);
+      border: 1px solid rgba(198, 162, 90, 0.2);
+      border-radius: 8px;
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: left;
+    }
+    
+    .order-details h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: #f4efe2;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.2);
+      letter-spacing: 0.1em;
+    }
+    
+    .order-detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.1);
+    }
+    
+    .order-detail-row:last-child {
+      border-bottom: none;
+    }
+    
+    .order-detail-label {
+      color: #aeb9c6;
+      font-size: 0.9rem;
+    }
+    
+    .order-detail-value {
+      color: #f4efe2;
+      font-weight: 600;
+      font-family: 'Libre Baskerville', serif;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: rgba(198, 162, 90, 0.2);
+      border: 1px solid rgba(198, 162, 90, 0.4);
+      border-radius: 4px;
+      color: #c6a25a;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      margin: 1rem 0;
+    }
+    
+    .next-steps {
+      background: rgba(198, 162, 90, 0.05);
+      border: 1px solid rgba(198, 162, 90, 0.2);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    
+    .next-steps h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      color: #f4efe2;
+      margin-bottom: 1rem;
+      letter-spacing: 0.1em;
+    }
+    
+    .next-steps ul {
+      text-align: left;
+      color: #aeb9c6;
+      line-height: 1.8;
+    }
+    
+    .next-steps li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .back-button {
+      display: inline-block;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #c6a25a 0%, #8b7355 100%);
+      border: none;
+      color: #050505;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      text-decoration: none;
+      margin-top: 2rem;
+    }
+    
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(198, 162, 90, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="confirmation-container">
+    <div class="confirmation-icon">✓</div>
+    <h1 class="confirmation-title">¡Pedido Recibido!</h1>
+    <p class="confirmation-subtitle">Gracias por su compra. Su pedido está siendo procesado.</p>
+    
+    <div class="status-badge">
+      Estado: Pendiente de Verificación
+    </div>
+    
+    <div class="order-details" id="orderDetails">
+      <h2>Detalles del Pedido</h2>
+      <div id="orderDetailsContent">
+        Cargando detalles del pedido...
+      </div>
+    </div>
+    
+    <div class="next-steps">
+      <h3>Próximos Pasos</h3>
+      <ul>
+        <li>Verificaremos su comprobante de pago dentro de 24-48 horas</li>
+        <li>Recibirá un email de confirmación cuando el pago sea verificado</li>
+        <li>Su pedido será enviado una vez verificado</li>
+        <li>Para consultas, contáctenos en: cazadordesueno2024@gmail.com</li>
+      </ul>
+    </div>
+    
+    <a href="index.html" class="back-button">Volver al Sitio</a>
+  </div>
+  
+  <script>
+    // Obtener ID del pedido de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('orderId');
+    
+    // Cargar pedido desde localStorage
+    function loadOrderDetails() {
+      if (!orderId) {
+        document.getElementById('orderDetailsContent').innerHTML = '<p style="color: #65717f;">No se encontró el pedido.</p>';
+        return;
+      }
+      
+      const orders = JSON.parse(localStorage.getItem('cds-orders') || '[]');
+      const order = orders.find(o => o.id === orderId);
+      
+      if (!order) {
+        document.getElementById('orderDetailsContent').innerHTML = '<p style="color: #65717f;">No se encontró el pedido.</p>';
+        return;
+      }
+      
+      const orderDate = new Date(order.date).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      document.getElementById('orderDetailsContent').innerHTML = `
+        <div class="order-detail-row">
+          <span class="order-detail-label">Número de Pedido</span>
+          <span class="order-detail-value">${order.id}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Fecha</span>
+          <span class="order-detail-value">${orderDate}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Estado</span>
+          <span class="order-detail-value" style="color: #c6a25a;">Pendiente de Verificación</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Total</span>
+          <span class="order-detail-value">$${order.total.toFixed(2)} USD</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Método de Pago</span>
+          <span class="order-detail-value">Transferencia Bancaria</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Email</span>
+          <span class="order-detail-value">${order.shippingInfo.email}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">País de Envío</span>
+          <span class="order-detail-value">${order.shippingInfo.country}</span>
+        </div>
+      `;
+    }
+    
+    // Cargar detalles al iniciar
+    document.addEventListener('DOMContentLoaded', loadOrderDetails);
+  </script>
+</body>
+</html>

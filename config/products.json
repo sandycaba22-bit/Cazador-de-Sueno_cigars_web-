@@ -1,0 +1,90 @@
+{
+  "products": [
+    {
+      "id": "emperador",
+      "name": "El Emperador",
+      "name_en": "The Emperor",
+      "price_usd": 18.00,
+      "description": "Gran Toro 58×6 - El Primer Sueño",
+      "description_en": "Gran Toro 58×6 - The First Dream",
+      "image": "img/el-emperador-cigarro.jpg",
+      "category": "premium",
+      "stock": 100,
+      "weight_grams": 15,
+      "box_size": 25,
+      "active": true
+    },
+    {
+      "id": "puro-habano",
+      "name": "Puro Habano",
+      "name_en": "Puro Habano",
+      "price_usd": 16.00,
+      "description": "Churchill 48×7 - Raíces Cubanas",
+      "description_en": "Churchill 48×7 - Cuban Roots",
+      "image": "img/puro-habano-cigarro.jpg",
+      "category": "premium",
+      "stock": 100,
+      "weight_grams": 18,
+      "box_size": 25,
+      "active": true
+    },
+    {
+      "id": "exquisito",
+      "name": "El Exquisito",
+      "name_en": "The Exquisite",
+      "price_usd": 22.00,
+      "description": "Gran Toro 58×6 - Edición de Autor",
+      "description_en": "Gran Toro 58×6 - Author's Edition",
+      "image": "img/el-exquisito-cigarro.jpg",
+      "category": "limited",
+      "stock": 50,
+      "weight_grams": 15,
+      "box_size": 20,
+      "active": true
+    },
+    {
+      "id": "rango",
+      "name": "El Rango",
+      "name_en": "The Range",
+      "price_usd": 20.00,
+      "description": "Doble Perfecto 60×4½ - Formato Figurado",
+      "description_en": "Double Perfecto 60×4½ - Figurado Format",
+      "image": "img/el-rango-cigarro.jpg",
+      "category": "premium",
+      "stock": 100,
+      "weight_grams": 16,
+      "box_size": 25,
+      "active": true
+    },
+    {
+      "id": "ligero",
+      "name": "Ligero 007",
+      "name_en": "Ligero 007",
+      "price_usd": 25.00,
+      "description": "Robusto 5×50 - Obra Maestra",
+      "description_en": "Robusto 5×50 - Masterpiece",
+      "image": "img/ligero-007-cigarro.jpg",
+      "category": "limited",
+      "stock": 50,
+      "weight_grams": 12,
+      "box_size": 20,
+      "active": true
+    },
+    {
+      "id": "sultan",
+      "name": "El Sultán",
+      "name_en": "The Sultan",
+      "price_usd": 17.00,
+      "description": "Robusto 5×50 - Valle del Cibao",
+      "description_en": "Robusto 5×50 - Cibao Valley",
+      "image": "img/el-sultan-cigarro.jpg",
+      "category": "premium",
+      "stock": 100,
+      "weight_grams": 12,
+      "box_size": 25,
+      "active": true
+    }
+  ],
+  "currency": "USD",
+  "last_updated": "2026-07-30"
+}

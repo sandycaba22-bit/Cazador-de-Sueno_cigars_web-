@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Early language detection script (must load first to prevent flicker) -->
+  <script src="/js/language-detect-early.js"></script>
+  
+  <title>Checkout | Cazador de Sueños Cigars SRL</title>
+  <meta name="description" content="Complete su pedido de cigarros premium dominicanos. Pago por transferencia bancaria segura.">
+  <meta name="robots" content="noindex, follow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* Checkout specific styles */
+    .checkout-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    
+    .checkout-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.2);
+    }
+    
+    .checkout-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      color: #f4efe2;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.1em;
+    }
+    
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+    }
+    
+    @media (max-width: 900px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .checkout-section {
+      background: linear-gradient(180deg, rgba(10, 24, 38, 0.8) 0%, rgba(5, 5, 5, 0.9) 100%);
+      border: 1px solid rgba(198, 162, 90, 0.2);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .checkout-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: #f4efe2;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.2);
+      letter-spacing: 0.1em;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      color: #aeb9c6;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.1em;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.875rem;
+      background: rgba(7, 17, 29, 0.8);
+      border: 1px solid rgba(198, 162, 90, 0.3);
+      border-radius: 4px;
+      color: #f4efe2;
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #c6a25a;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .order-summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.1);
+    }
+    
+    .order-summary-item:last-child {
+      border-bottom: none;
+    }
+    
+    .order-summary-item-info {
+      flex: 1;
+    }
+    
+    .order-summary-item-name {
+      color: #f4efe2;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .order-summary-item-quantity {
+      color: #aeb9c6;
+      font-size: 0.85rem;
+    }
+    
+    .order-summary-item-price {
+      color: #c6a25a;
+      font-weight: 600;
+    }
+    
+    .order-summary-totals {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(198, 162, 90, 0.2);
+    }
+    
+    .order-summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      color: #aeb9c6;
+      font-size: 0.9rem;
+    }
+    
+    .order-summary-row.total {
+      color: #f4efe2;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(198, 162, 90, 0.2);
+    }
+    
+    .bank-details {
+      background: rgba(198, 162, 90, 0.05);
+      border: 1px solid rgba(198, 162, 90, 0.2);
+      border-radius: 4px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .bank-details-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.1);
+    }
+    
+    .bank-details-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .bank-details-label {
+      color: #aeb9c6;
+      font-size: 0.9rem;
+    }
+    
+    .bank-details-value {
+      color: #f4efe2;
+      font-weight: 600;
+      font-family: 'Libre Baskerville', serif;
+    }
+    
+    .file-upload {
+      border: 2px dashed rgba(198, 162, 90, 0.3);
+      border-radius: 4px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+    
+    .file-upload:hover {
+      border-color: #c6a25a;
+      background: rgba(198, 162, 90, 0.05);
+    }
+    
+    .file-upload input {
+      display: none;
+    }
+    
+    .file-upload-label {
+      color: #aeb9c6;
+      font-size: 0.9rem;
+    }
+    
+    .file-upload-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .checkout-button {
+      width: 100%;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, #c6a25a 0%, #8b7355 100%);
+      border: none;
+      color: #050505;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-top: 1.5rem;
+    }
+    
+    .checkout-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(198, 162, 90, 0.3);
+    }
+    
+    .checkout-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .empty-cart-message {
+      text-align: center;
+      padding: 3rem;
+      color: #aeb9c6;
+    }
+    
+    .empty-cart-message a {
+      color: #c6a25a;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="checkout-container">
+    <div class="checkout-header">
+      <a href="index.html" style="color: #c6a25a; text-decoration: none; font-family: 'Cormorant Garamond', serif; letter-spacing: 0.1em;">← Volver al sitio</a>
+      <h1>Checkout</h1>
+      <p style="color: #aeb9c6; margin-top: 0.5rem;">Complete su pedido de cigarros premium</p>
+    </div>
+    
+    <div id="checkoutContent" class="checkout-grid">
+      <!-- Left column: Forms -->
+      <div class="checkout-forms">
+        <!-- Shipping Information -->
+        <div class="checkout-section">
+          <h2>Información de Envío</h2>
+          <form id="shippingForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">Nombre *</label>
+                <input type="text" id="firstName" name="firstName" required>
+              </div>
+              <div class="form-group">
+                <label for="lastName">Apellido *</label>
+                <input type="text" id="lastName" name="lastName" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="phone">Teléfono *</label>
+              <input type="tel" id="phone" name="phone" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="address">Dirección *</label>
+              <input type="text" id="address" name="address" required>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="city">Ciudad *</label>
+                <input type="text" id="city" name="city" required>
+              </div>
+              <div class="form-group">
+                <label for="postalCode">Código Postal *</label>
+                <input type="text" id="postalCode" name="postalCode" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="country">País *</label>
+              <select id="country" name="country" required>
+                <option value="">Seleccione un país</option>
+                <option value="US">Estados Unidos</option>
+                <option value="CA">Canadá</option>
+                <option value="DO">República Dominicana</option>
+                <option value="OTHER">Otro</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Payment Information -->
+        <div class="checkout-section">
+          <h2>Método de Pago</h2>
+          <div class="bank-details" id="bankDetails">
+            <div class="bank-details-item">
+              <span class="bank-details-label">Banco</span>
+              <span class="bank-details-value" id="bankName">Cargando...</span>
+            </div>
+            <div class="bank-details-item">
+              <span class="bank-details-label">Titular de la Cuenta</span>
+              <span class="bank-details-value" id="accountName">Cargando...</span>
+            </div>
+            <div class="bank-details-item">
+              <span class="bank-details-label">Número de Cuenta</span>
+              <span class="bank-details-value" id="accountNumber">Cargando...</span>
+            </div>
+            <div class="bank-details-item">
+              <span class="bank-details-label">Tipo de Cuenta</span>
+              <span class="bank-details-value" id="accountType">Cargando...</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Comprobante de Pago *</label>
+            <div class="file-upload" id="paymentProofUpload">
+              <input type="file" id="paymentProof" name="paymentProof" accept="image/*,.pdf" required>
+              <div class="file-upload-icon">📄</div>
+              <div class="file-upload-label">Haga clic o arrastre el comprobante de pago aquí</div>
+              <div id="fileName" style="color: #c6a25a; margin-top: 0.5rem; font-size: 0.85rem;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right column: Order Summary -->
+      <div class="checkout-summary">
+        <div class="checkout-section">
+          <h2>Resumen del Pedido</h2>
+          <div id="orderItems">
+            <!-- Items will be loaded here -->
+          </div>
+          <div class="order-summary-totals">
+            <div class="order-summary-row">
+              <span>Subtotal</span>
+              <span id="subtotal">$0.00</span>
+            </div>
+            <div class="order-summary-row">
+              <span>Envío</span>
+              <span id="shipping">$0.00</span>
+            </div>
+            <div class="order-summary-row total">
+              <span>Total</span>
+              <span id="total">$0.00</span>
+            </div>
+          </div>
+          <button type="submit" class="checkout-button" id="placeOrderBtn" disabled>
+            Confirmar Pedido
+          </button>
+          <p style="text-align: center; color: #65717f; font-size: 0.8rem; margin-top: 1rem;">
+            Al confirmar, su pedido quedará "Pendiente de verificación"
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div id="emptyCart" class="empty-cart-message" style="display: none;">
+      <h2 style="font-family: 'Cormorant Garamond', serif; color: #f4efe2; margin-bottom: 1rem;">Tu carrito está vacío</a></h2>
+      <p style="margin-bottom: 1.5rem;">Explora nuestra colección premium de cigarros dominicanos</p>
+      <a href="index.html#catalogo" style="color: #c6a25a; text-decoration: none; font-family: 'Cormorant Garamond', serif; letter-spacing: 0.1em;">Ver Colección →</a>
+    </div>
+  </div>
+  
+  <script src="js/shopping-cart.js" defer></script>
+  <script src="js/checkout.js" defer></script>
+</body>
+</html>

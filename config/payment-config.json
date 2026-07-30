@@ -1,0 +1,35 @@
+{
+  "payment_methods": {
+    "bank_transfer": {
+      "active": true,
+      "name": "Transferencia Bancaria",
+      "name_en": "Bank Transfer",
+      "bank_name": "Banco Popular Dominicano",
+      "account_name": "Cazador de Sueños Cigars SRL",
+      "account_number": "1234567890",
+      "account_type": "Ahorros",
+      "routing_number": "BPD0",
+      "currency": "USD",
+      "instructions_es": "Realice la transferencia a la cuenta indicada y suba el comprobante de pago.",
+      "instructions_en": "Make the transfer to the indicated account and upload the payment proof."
+    }
+  },
+  "admin_notification": {
+    "email": "cazadordesueno2024@gmail.com",
+    "subject_prefix": "[NUEVO PEDIDO] Cazador de Sueños Cigars",
+    "enabled": true
+  },
+  "order_status": {
+    "pending": "Pendiente de verificación",
+    "pending_en": "Pending verification",
+    "verified": "Verificado",
+    "verified_en": "Verified",
+    "shipped": "Enviado",
+    "shipped_en": "Shipped",
+    "completed": "Completado",
+    "completed_en": "Completed",
+    "cancelled": "Cancelado",
+    "cancelled_en": "Cancelled"
+  },
+  "last_updated": "2026-07-30"
+}
