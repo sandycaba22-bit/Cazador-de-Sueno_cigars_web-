@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Panel Admin | Cazador de Sueños Cigars</title>
+  <meta name="description" content="Panel administrativo - Gestión de pedidos y calculadora de costos">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.2);
+    }
+    
+    .admin-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: #f4efe2;
+      margin: 0;
+      letter-spacing: 0.1em;
+    }
+    
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .admin-nav button {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 1px solid rgba(198, 162, 90, 0.3);
+      color: #f4efe2;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .admin-nav button:hover,
+    .admin-nav button.active {
+      background: rgba(198, 162, 90, 0.1);
+      border-color: #c6a25a;
+    }
+    
+    .admin-section {
+      display: none;
+    }
+    
+    .admin-section.active {
+      display: block;
+    }
+    
+    .admin-panel {
+      background: linear-gradient(180deg, rgba(10, 24, 38, 0.8) 0%, rgba(5, 5, 5, 0.9) 100%);
+      border: 1px solid rgba(198, 162, 90, 0.2);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .admin-panel h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: #f4efe2;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.2);
+      letter-spacing: 0.1em;
+    }
+    
+    /* Calculator Styles */
+    .calculator-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      color: #aeb9c6;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.1em;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      background: rgba(7, 17, 29, 0.8);
+      border: 1px solid rgba(198, 162, 90, 0.3);
+      border-radius: 4px;
+      color: #f4efe2;
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.95rem;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #c6a25a;
+    }
+    
+    .form-group input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    
+    .form-group input[type="number"]::-webkit-outer-spin-button,
+    .form-group input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .calculator-results {
+      background: rgba(198, 162, 90, 0.05);
+      border: 1px solid rgba(198, 162, 90, 0.2);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+    
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.1);
+    }
+    
+    .result-row:last-child {
+      border-bottom: none;
+    }
+    
+    .result-label {
+      color: #aeb9c6;
+      font-size: 0.9rem;
+    }
+    
+    .result-value {
+      color: #f4efe2;
+      font-weight: 600;
+      font-family: 'Libre Baskerville', serif;
+    }
+    
+    .result-value.highlight {
+      color: #c6a25a;
+      font-size: 1.1rem;
+    }
+    
+    .calculate-button {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #c6a25a 0%, #8b7355 100%);
+      border: none;
+      color: #050505;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-top: 1rem;
+    }
+    
+    .calculate-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(198, 162, 90, 0.3);
+    }
+    
+    /* Orders Table */
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .orders-table th,
+    .orders-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(198, 162, 90, 0.1);
+    }
+    
+    .orders-table th {
+      color: #c6a25a;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
+    
+    .orders-table td {
+      color: #f4efe2;
+      font-size: 0.9rem;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.05em;
+    }
+    
+    .status-pending {
+      background: rgba(198, 162, 90, 0.2);
+      color: #c6a25a;
+      border: 1px solid rgba(198, 162, 90, 0.4);
+    }
+    
+    .status-verified {
+      background: rgba(76, 175, 80, 0.2);
+      color: #81c784;
+      border: 1px solid rgba(76, 175, 80, 0.4);
+    }
+    
+    .status-shipped {
+      background: rgba(33, 150, 243, 0.2);
+      color: #64b5f6;
+      border: 1px solid rgba(33, 150, 243, 0.4);
+    }
+    
+    .status-completed {
+      background: rgba(156, 39, 176, 0.2);
+      color: #ba68c8;
+      border: 1px solid rgba(156, 39, 176, 0.4);
+    }
+    
+    /* Login Screen */
+    .login-screen {
+      max-width: 400px;
+      margin: 10vh auto;
+      padding: 2rem;
+      background: linear-gradient(180deg, rgba(10, 24, 38, 0.8) 0%, rgba(5, 5, 5, 0.9) 100%);
+      border: 1px solid rgba(198, 162, 90, 0.2);
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .login-screen h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: #f4efe2;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.1em;
+    }
+    
+    .login-screen input {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      background: rgba(7, 17, 29, 0.8);
+      border: 1px solid rgba(198, 162, 90, 0.3);
+      border-radius: 4px;
+      color: #f4efe2;
+      font-family: 'Libre Baskerville', serif;
+    }
+    
+    .login-screen button {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #c6a25a 0%, #8b7355 100%);
+      border: none;
+      color: #050505;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+    }
+    
+    .error-message {
+      color: #e57373;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+      <h2>Panel Administrativo</h2>
+      <form id="loginForm">
+        <input type="password" id="adminPassword" placeholder="Contraseña" required>
+        <button type="submit">Ingresar</button>
+      </form>
+      <div id="loginError" class="error-message"></div>
+    </div>
+    
+    <!-- Admin Panel -->
+    <div id="adminPanel" style="display: none;">
+      <div class="admin-header">
+        <h1>Panel Administrativo</h1>
+        <button onclick="logout()" style="padding: 0.5rem 1rem; background: transparent; border: 1px solid rgba(198, 162, 90, 0.3); color: #f4efe2; cursor: pointer;">Cerrar Sesión</button>
+      </div>
+      
+      <div class="admin-nav">
+        <button class="active" onclick="showSection('calculator')">Calculadora de Costos</button>
+        <button onclick="showSection('orders')">Pedidos</button>
+        <button onclick="showSection('notifications')">Notificaciones</button>
+      </div>
+      
+      <!-- Calculator Section -->
+      <div id="calculatorSection" class="admin-section active">
+        <div class="admin-panel">
+          <h2>Calculadora de Costo/Precio por Vitola</h2>
+          
+          <div class="calculator-grid">
+            <div class="form-group">
+              <label>Largo (pulgadas)</label>
+              <input type="number" id="length" step="0.25" placeholder="Ej: 6">
+            </div>
+            
+            <div class="form-group">
+              <label>Ring Gauge</label>
+              <input type="number" id="ringGauge" step="1" placeholder="Ej: 50">
+            </div>
+            
+            <div class="form-group">
+              <label>Costo Capa (USD)</label>
+              <input type="number" id="wrapperCost" step="0.01" placeholder="Ej: 0.50">
+            </div>
+            
+            <div class="form-group">
+              <label>Costo Capote (USD)</label>
+              <input type="number" id="binderCost" step="0.01" placeholder="Ej: 0.30">
+            </div>
+            
+            <div class="form-group">
+              <label>Costo Tripa (USD)</label>
+              <input type="number" id="fillerCost" step="0.01" placeholder="Ej: 0.40">
+            </div>
+            
+            <div class="form-group">
+              <label>% Merma</label>
+              <input type="number" id="wastePercent" step="0.1" placeholder="Ej: 15">
+            </div>
+            
+            <div class="form-group">
+              <label>Mano de Obra (USD)</label>
+              <input type="number" id="laborCost" step="0.01" placeholder="Ej: 0.50">
+            </div>
+            
+            <div class="form-group">
+              <label>Empaque (USD)</label>
+              <input type="number" id="packagingCost" step="0.01" placeholder="Ej: 0.20">
+            </div>
+            
+            <div class="form-group">
+              <label>% Margen</label>
+              <input type="number" id="marginPercent" step="0.1" placeholder="Ej: 40">
+            </div>
+          </div>
+          
+          <button class="calculate-button" onclick="calculatePrice()">Calcular Precio de Venta</button>
+          
+          <div class="calculator-results" id="results" style="display: none; margin-top: 2rem;">
+            <div class="result-row">
+              <span class="result-label">Costo Directo (Capa + Capote + Tripa)</span>
+              <span class="result-value" id="directCost">$0.00</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Costo Ajustado (con merma)</span>
+              <span class="result-value" id="adjustedCost">$0.00</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Costo Total (+ mano de obra + empaque)</span>
+              <span class="result-value" id="totalCost">$0.00</span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Precio de Venta Sugerido</span>
+              <span class="result-value highlight" id="salePrice">$0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Orders Section -->
+      <div id="ordersSection" class="admin-section">
+        <div class="admin-panel">
+          <h2>Pedidos Recientes</h2>
+          <div id="ordersContent">
+            <p style="color: #aeb9c6;">Cargando pedidos...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Notifications Section -->
+      <div id="notificationsSection" class="admin-section">
+        <div class="admin-panel">
+          <h2>Notificaciones Admin</h2>
+          <div id="notificationsContent">
+            <p style="color: #aeb9c6;">Cargando notificaciones...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="js/admin.js"></script>
+</body>
+</html>
