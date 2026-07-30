@@ -86,6 +86,7 @@
 
     if (!productId) {
       console.error('Product ID not found on button');
+      showToast('❌ Error: Product ID no encontrado en el botón', 'error');
       return;
     }
 
@@ -93,6 +94,7 @@
     if (ShoppingCart.isCartLocked()) {
       console.log('Cart is locked, showing notification');
       showLockNotification(button);
+      showToast('🔒 Carrito bloqueado tras pago', 'error');
       return;
     }
 
@@ -111,6 +113,9 @@
         button.querySelector('span').textContent = '¡Agregado!';
         button.style.background = 'linear-gradient(135deg, #2d5a3d 0%, #1a3d2a 100%)';
         
+        // Show visual success notification
+        showToast('✅ ¡Agregado al carrito con éxito!', 'success');
+        
         // Reset after delay
         setTimeout(() => {
           button.disabled = false;
@@ -125,6 +130,9 @@
         button.disabled = false;
         button.querySelector('span').textContent = 'Error - Reintentar';
         
+        // Show visual error notification
+        showToast('❌ Error: No se pudo agregar al carrito', 'error');
+        
         setTimeout(() => {
           button.querySelector('span').textContent = originalText;
         }, 2000);
@@ -135,10 +143,66 @@
       button.disabled = false;
       button.querySelector('span').textContent = 'Error - Reintentar';
       
+      // Show visual error notification with details
+      showToast('❌ Error: ' + error.message, 'error');
+      
       setTimeout(() => {
         button.querySelector('span').textContent = originalText;
       }, 2000);
     }
+  }
+
+  // Función para mostrar notificaciones visuales (toasts)
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = 'cart-toast cart-toast--' + type;
+    toast.innerHTML = message;
+    
+    // Estilos inline para garantizar que se muestre
+    toast.style.cssText = `
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background: ${type === 'success' ? '#2d5a3d' : '#8B0000'};
+      color: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 500;
+      border: 2px solid ${type === 'success' ? '#4caf50' : '#FFD700'};
+      animation: slideIn 0.3s ease-out;
+      max-width: 300px;
+    `;
+    
+    // Animación CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(toast);
+    
+    // Remover después de 3 segundos
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.3s ease-in forwards';
+      setTimeout(() => {
+        toast.remove();
+        style.remove();
+      }, 300);
+    }, 3000);
   }
 
   function showLockNotification(button) {
