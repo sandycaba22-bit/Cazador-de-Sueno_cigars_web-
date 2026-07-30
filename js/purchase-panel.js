@@ -6,21 +6,29 @@
 (function() {
   'use strict';
 
+  console.log('Purchase Panel Script Loading...');
+
   // Wait for DOM and ShoppingCart to be ready
   function init() {
+    console.log('Init called, ShoppingCart available:', !!window.ShoppingCart);
+    
     if (!window.ShoppingCart) {
+      console.log('ShoppingCart not ready, retrying in 100ms...');
       setTimeout(init, 100);
       return;
     }
 
+    console.log('ShoppingCart ready, setting up purchase panels...');
     setupPurchasePanels();
     setupCartLockListeners();
   }
 
   function setupPurchasePanels() {
     const purchaseButtons = document.querySelectorAll('.purchase-panel__button');
+    console.log('Found purchase buttons:', purchaseButtons.length);
     
-    purchaseButtons.forEach(button => {
+    purchaseButtons.forEach((button, index) => {
+      console.log(`Button ${index}: productId=${button.dataset.productId}, quantity=${button.dataset.quantity}`);
       button.addEventListener('click', handlePurchaseClick);
     });
   }
@@ -37,6 +45,7 @@
   function updateButtonsLockState() {
     const isLocked = ShoppingCart.isCartLocked();
     const purchaseButtons = document.querySelectorAll('.purchase-panel__button');
+    console.log('Updating buttons lock state, isLocked:', isLocked);
     
     purchaseButtons.forEach(button => {
       if (isLocked) {
@@ -73,6 +82,8 @@
     const productId = button.dataset.productId;
     const quantity = parseInt(button.dataset.quantity) || 1;
 
+    console.log('Purchase click - productId:', productId, 'quantity:', quantity);
+
     if (!productId) {
       console.error('Product ID not found on button');
       return;
@@ -80,6 +91,7 @@
 
     // Verificar bloqueo del carrito
     if (ShoppingCart.isCartLocked()) {
+      console.log('Cart is locked, showing notification');
       showLockNotification(button);
       return;
     }
@@ -92,6 +104,7 @@
     try {
       // Add to cart
       const success = ShoppingCart.addToCart(productId, quantity);
+      console.log('Add to cart result:', success);
       
       if (success) {
         // Success feedback
