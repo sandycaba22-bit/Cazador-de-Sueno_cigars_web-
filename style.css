@@ -3,7 +3,7 @@
    ============================================ */
 
 :root {
-  /* Paleta — Azul marino profundo · Oro · Blanco crema · Negro sofisticado */
+  /* Paleta — Tonos limpios y acentos sutiles de lujo */
   --navy: #0f2238;
   --navy-deep: #0a1826;
   --navy-light: #163050;
@@ -11,8 +11,10 @@
   --gold: #c6a25a;
   --gold-light: #e7d3a0;
   --gold-dark: #93763c;
-  --gold-glow: rgba(198, 162, 90, 0.14);
+  --gold-glow: rgba(198, 162, 90, 0.12);
   --cream: #f4efe2;
+  --gold-subtle: rgba(198, 162, 90, 0.08);
+  --navy-subtle: rgba(15, 34, 56, 0.06);
 
   /* Alias legados — remapeados a la nueva paleta para coherencia total */
   --black: #07111d;
@@ -24,9 +26,11 @@
   --gray-800: #16273b;
   --gray-900: #0d2036;
 
+  /* Tipografía elegante de lujo — serif refinada */
   --font-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
   --font-body: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
   --font-ui: 'Cormorant Garamond', Georgia, serif;
+  --font-price: 'Bodoni Moda', 'Didot', 'Bodoni MT', 'Times New Roman', serif;
   --space-section: clamp(5.5rem, 11vw, 10rem);
   --space-block: clamp(2rem, 4vw, 3.5rem);
   --content-max: 1320px;
@@ -44,11 +48,11 @@
   position: sticky;
   top: 2rem;
   background: linear-gradient(135deg, #ffffff 0%, #f8f6f2 100%);
-  border: 2px solid #c6a25a;
-  border-radius: 12px;
-  padding: 2rem;
+  border: 1px solid rgba(198, 162, 90, 0.3);
+  border-radius: 8px;
+  padding: 2.5rem;
   margin: 2rem 0;
-  box-shadow: 0 8px 32px rgba(198, 162, 90, 0.15);
+  box-shadow: 0 4px 24px rgba(198, 162, 90, 0.08);
   z-index: 100;
 }
 
@@ -65,12 +69,13 @@
 
 .purchase-panel__name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 1.85rem;
+  font-weight: 400;
   color: #0a1826;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: 0.05em;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-style: normal;
 }
 
 .purchase-panel__description {
@@ -79,6 +84,7 @@
   color: #65717f;
   margin: 0 0 1.5rem 0;
   font-style: italic;
+  font-weight: 400;
 }
 
 .purchase-panel__price,
@@ -93,19 +99,21 @@
 .purchase-panel__price-label,
 .purchase-panel__box-label {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #65717f;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-weight: 400;
 }
 
 .purchase-panel__price-value,
 .purchase-panel__box-value {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-family: 'Bodoni Moda', 'Didot', 'Bodoni MT', 'Times New Roman', serif;
+  font-size: 1.35rem;
+  font-weight: 400;
   color: #c6a25a;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  font-style: normal;
 }
 
 .purchase-panel__box-value {
@@ -126,22 +134,22 @@
   gap: 0.75rem;
   padding: 1rem 1.5rem;
   background: linear-gradient(135deg, #c6a25a 0%, #93763c 100%);
-  border: none;
-  border-radius: 8px;
+  border: 1px solid rgba(198, 162, 90, 0.2);
+  border-radius: 6px;
   color: #ffffff;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(198, 162, 90, 0.3);
+  box-shadow: 0 2px 8px rgba(198, 162, 90, 0.15);
 }
 
 .purchase-panel__button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(198, 162, 90, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(198, 162, 90, 0.25);
   background: linear-gradient(135deg, #d4b368 0%, #a3844a 100%);
 }
 
@@ -151,12 +159,13 @@
 
 .purchase-panel__button--unit {
   background: linear-gradient(135deg, #0a1826 0%, #163050 100%);
-  box-shadow: 0 4px 12px rgba(10, 24, 38, 0.3);
+  border: 1px solid rgba(15, 34, 56, 0.3);
+  box-shadow: 0 2px 8px rgba(10, 24, 38, 0.15);
 }
 
 .purchase-panel__button--unit:hover {
   background: linear-gradient(135deg, #163050 0%, #1a3a5c 100%);
-  box-shadow: 0 6px 20px rgba(10, 24, 38, 0.4);
+  box-shadow: 0 4px 12px rgba(10, 24, 38, 0.25);
 }
 
 .purchase-panel__icon {
@@ -3325,14 +3334,14 @@ body.is-age-locked .site-footer {
 .coleccion-card {
   position: relative;
   background: var(--navy-deep);
-  border: 1px solid rgba(198, 162, 90, 0.14);
+  border: 1px solid rgba(198, 162, 90, 0.12);
   transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 
 .coleccion-card:hover {
-  border-color: rgba(198, 162, 90, 0.45);
-  transform: translateY(-6px);
-  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.45);
+  border-color: rgba(198, 162, 90, 0.35);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
 }
 
 .coleccion-card__link {
@@ -3382,20 +3391,20 @@ body.is-age-locked .site-footer {
 
 .coleccion-card__line {
   font-family: var(--font-ui);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.28em;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.32em;
   text-transform: uppercase;
   color: var(--gold);
 }
 
 .coleccion-card__name {
   font-family: var(--font-display);
-  font-size: 1.9rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-size: 1.85rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
   color: var(--cream);
-  margin: 0.4rem 0 1rem;
+  margin: 0.5rem 0 1.1rem;
 }
 
 .coleccion-card__char {
@@ -3436,20 +3445,20 @@ body.is-age-locked .site-footer {
 .coleccion-card__cta {
   margin-top: auto;
   font-family: var(--font-ui);
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.24em;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gold);
-  border-bottom: 1px solid rgba(198, 162, 90, 0.35);
-  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(198, 162, 90, 0.3);
+  padding-bottom: 0.4rem;
   align-self: flex-start;
   transition: color var(--transition), border-color var(--transition);
 }
 
 .coleccion-card:hover .coleccion-card__cta {
   color: var(--gold-light);
-  border-color: var(--gold);
+  border-color: rgba(198, 162, 90, 0.5);
 }
 
 /* ============================================

@@ -41,7 +41,7 @@
 
     try {
       // Add to cart
-      await ShoppingCart.addItem(productId, quantity);
+      ShoppingCart.addToCart(productId, quantity);
       
       // Success feedback
       button.querySelector('span').textContent = '¡Agregado!';
