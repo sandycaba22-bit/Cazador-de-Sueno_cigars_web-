@@ -477,6 +477,124 @@
   }
 }
 
+/* ============================================
+   SEO CONTENT STYLES - Vitolas Pages
+   ============================================ */
+
+.vitola-seo-content {
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, rgba(10, 24, 38, 0.95) 0%, rgba(15, 34, 56, 0.98) 100%);
+  border-top: 1px solid rgba(198, 162, 90, 0.2);
+  border-bottom: 1px solid rgba(198, 162, 90, 0.2);
+  margin: 2rem 0;
+}
+
+.vitola-seo-content h2 {
+  font-family: var(--font-display);
+  color: var(--gold);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: 0.08em;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.seo-content__text {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.seo-content__paragraph {
+  font-family: var(--font-body);
+  color: var(--cream);
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+
+.seo-content__paragraph strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.seo-content__paragraph em {
+  color: var(--gold-light);
+  font-style: italic;
+}
+
+.seo-content__subtitle {
+  font-family: var(--font-display);
+  color: var(--gold-light);
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  letter-spacing: 0.06em;
+  margin: 2rem 0 1rem 0;
+  font-weight: 400;
+}
+
+.seo-content__markets {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.seo-content__markets li {
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  line-height: 1.6;
+  padding: 0.75rem 1rem;
+  background: rgba(198, 162, 90, 0.1);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+}
+
+.seo-content__markets li strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.seo-content__benefits {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+.seo-content__benefits li {
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  line-height: 1.8;
+  padding: 0.5rem 0;
+  padding-left: 2rem;
+  position: relative;
+}
+
+.seo-content__benefits li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: bold;
+}
+
+/* Responsive for SEO content */
+@media (max-width: 768px) {
+  .vitola-seo-content {
+    padding: 2rem 1rem;
+  }
+  
+  .seo-content__markets {
+    grid-template-columns: 1fr;
+  }
+  
+  .seo-content__paragraph {
+    font-size: 0.95rem;
+  }
+}
+
 /* Dark Mode Support (if needed in future) */
 @media (prefers-color-scheme: dark) {
   .vitola-purchase-panel {

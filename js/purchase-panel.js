@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CAZADOR DE SUEÑOS CIGARS - Luxury Purchase Panel
  * Handles purchase panel interactions with shopping cart and lock system
  */
@@ -8,10 +8,9 @@
 
   console.log('Purchase Panel Script Loading...');
 
-  // Wait for DOM and ShoppingCart to be ready
   function init() {
     console.log('Init called, ShoppingCart available:', !!window.ShoppingCart);
-    
+
     if (!window.ShoppingCart) {
       console.log('ShoppingCart not ready, retrying in 100ms...');
       setTimeout(init, 100);
@@ -23,22 +22,46 @@
     setupCartLockListeners();
   }
 
+  function isValidPurchaseButton(button) {
+    return button instanceof HTMLElement && document.body.contains(button);
+  }
+
+  function isClickBlocked(button) {
+    if (!isValidPurchaseButton(button)) {
+      return true;
+    }
+
+    const computedStyle = window.getComputedStyle(button);
+    return button.disabled || computedStyle.pointerEvents === 'none';
+  }
+
+  function getButtonLabel(button) {
+    if (!isValidPurchaseButton(button)) {
+      return null;
+    }
+
+    return button.querySelector('span');
+  }
+
   function setupPurchasePanels() {
     const purchaseButtons = document.querySelectorAll('.purchase-panel__button');
     console.log('Found purchase buttons:', purchaseButtons.length);
-    
+
     purchaseButtons.forEach((button, index) => {
+      if (!isValidPurchaseButton(button)) {
+        console.warn('Skipping invalid purchase button at index:', index);
+        return;
+      }
+
       console.log(`Button ${index}: productId=${button.dataset.productId}, quantity=${button.dataset.quantity}`);
+      button.removeEventListener('click', handlePurchaseClick);
       button.addEventListener('click', handlePurchaseClick);
     });
   }
 
   function setupCartLockListeners() {
-    // Escuchar eventos de bloqueo/desbloqueo del carrito
     window.addEventListener('cds:cart-locked', updateButtonsLockState);
     window.addEventListener('cds:cart-unlocked', updateButtonsLockState);
-    
-    // Estado inicial
     updateButtonsLockState();
   }
 
@@ -46,41 +69,72 @@
     const isLocked = ShoppingCart.isCartLocked();
     const purchaseButtons = document.querySelectorAll('.purchase-panel__button');
     console.log('Updating buttons lock state, isLocked:', isLocked);
-    
+
     purchaseButtons.forEach(button => {
+      if (!isValidPurchaseButton(button)) {
+        return;
+      }
+
+      const span = getButtonLabel(button);
+
       if (isLocked) {
         button.classList.add('purchase-panel__button--locked');
         button.disabled = true;
         button.setAttribute('data-locked', 'true');
-        
-        // Cambiar texto visualmente
-        const span = button.querySelector('span');
+
         if (span) {
           span.textContent = 'Carrito Bloqueado';
         }
-      } else {
-        button.classList.remove('purchase-panel__button--locked');
-        button.disabled = false;
-        button.removeAttribute('data-locked');
-        
-        // Restaurar texto original
-        const span = button.querySelector('span');
-        if (span) {
-          const originalText = button.dataset.originalText || 
-                            (button.classList.contains('purchase-panel__button--unit') ? 'Agregar Unidad' : 'Agregar Caja');
-          if (!button.dataset.originalText) {
-            button.dataset.originalText = originalText;
-          }
-          span.textContent = originalText;
+
+        return;
+      }
+
+      button.classList.remove('purchase-panel__button--locked');
+      button.disabled = false;
+      button.removeAttribute('data-locked');
+
+      if (span) {
+        const originalText = button.dataset.originalText ||
+          (button.classList.contains('purchase-panel__button--unit') ? 'Agregar Unidad' : 'Agregar Caja');
+
+        if (!button.dataset.originalText) {
+          button.dataset.originalText = originalText;
         }
+
+        span.textContent = originalText;
       }
     });
   }
 
   async function handlePurchaseClick(e) {
+    e.preventDefault();
+
     const button = e.currentTarget;
+    const isBlueButton = isValidPurchaseButton(button) &&
+      button.classList.contains('purchase-panel__button--unit');
+
+    if (isBlueButton) {
+      console.log('Botón azul presionado');
+    }
+
+    if (!isValidPurchaseButton(button)) {
+      console.error('Purchase button event fired without a valid DOM element');
+      return;
+    }
+
+    if (isClickBlocked(button)) {
+      console.warn('Click bloqueado: el botón está disabled o tiene pointer-events: none');
+      return;
+    }
+
+    const label = getButtonLabel(button);
     const productId = button.dataset.productId;
-    const quantity = parseInt(button.dataset.quantity) || 1;
+    const quantity = parseInt(button.dataset.quantity, 10) || 1;
+    const originalText = button.dataset.originalText || (label ? label.textContent : button.textContent);
+
+    if (!button.dataset.originalText) {
+      button.dataset.originalText = originalText;
+    }
 
     console.log('Purchase click - productId:', productId, 'quantity:', quantity);
 
@@ -90,7 +144,6 @@
       return;
     }
 
-    // Verificar bloqueo del carrito
     if (ShoppingCart.isCartLocked()) {
       console.log('Cart is locked, showing notification');
       showLockNotification(button);
@@ -98,67 +151,69 @@
       return;
     }
 
-    // Visual feedback
-    const originalText = button.querySelector('span').textContent;
     button.disabled = true;
-    button.querySelector('span').textContent = 'Agregando...';
+    if (label) {
+      label.textContent = 'Agregando...';
+    }
 
     try {
-      // Add to cart
-      const success = ShoppingCart.addToCart(productId, quantity);
+      const success = await Promise.resolve(ShoppingCart.addToCart(productId, quantity));
       console.log('Add to cart result:', success);
-      
+
       if (success) {
-        // Success feedback
-        button.querySelector('span').textContent = '¡Agregado!';
+        if (label) {
+          label.textContent = '¡Agregado!';
+        }
+
         button.style.background = 'linear-gradient(135deg, #2d5a3d 0%, #1a3d2a 100%)';
-        
-        // Show visual success notification
         showToast('✅ ¡Agregado al carrito con éxito!', 'success');
-        
-        // Reset after delay
+
         setTimeout(() => {
           button.disabled = false;
-          button.querySelector('span').textContent = originalText;
+          if (label) {
+            label.textContent = originalText;
+          }
           button.style.background = '';
         }, 1500);
 
-        // Update cart badge
         updateCartBadge();
-      } else {
-        // Error feedback
-        button.disabled = false;
-        button.querySelector('span').textContent = 'Error - Reintentar';
-        
-        // Show visual error notification
-        showToast('❌ Error: No se pudo agregar al carrito', 'error');
-        
-        setTimeout(() => {
-          button.querySelector('span').textContent = originalText;
-        }, 2000);
+        return;
       }
 
+      button.disabled = false;
+      if (label) {
+        label.textContent = 'Error - Reintentar';
+      }
+
+      showToast('❌ Error: No se pudo agregar al carrito', 'error');
+
+      setTimeout(() => {
+        if (label) {
+          label.textContent = originalText;
+        }
+      }, 2000);
     } catch (error) {
       console.error('Error adding to cart:', error);
       button.disabled = false;
-      button.querySelector('span').textContent = 'Error - Reintentar';
-      
-      // Show visual error notification with details
+
+      if (label) {
+        label.textContent = 'Error - Reintentar';
+      }
+
       showToast('❌ Error: ' + error.message, 'error');
-      
+
       setTimeout(() => {
-        button.querySelector('span').textContent = originalText;
+        if (label) {
+          label.textContent = originalText;
+        }
       }, 2000);
     }
   }
 
-  // Función para mostrar notificaciones visuales (toasts)
   function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = 'cart-toast cart-toast--' + type;
     toast.innerHTML = message;
-    
-    // Estilos inline para garantizar que se muestre
     toast.style.cssText = `
       position: fixed;
       top: 100px;
@@ -176,8 +231,7 @@
       animation: slideIn 0.3s ease-out;
       max-width: 300px;
     `;
-    
-    // Animación CSS
+
     const style = document.createElement('style');
     style.textContent = `
       @keyframes slideIn {
@@ -191,11 +245,10 @@
         }
       }
     `;
+
     document.head.appendChild(style);
-    
     document.body.appendChild(toast);
-    
-    // Remover después de 3 segundos
+
     setTimeout(() => {
       toast.style.animation = 'slideOut 0.3s ease-in forwards';
       setTimeout(() => {
@@ -206,7 +259,6 @@
   }
 
   function showLockNotification(button) {
-    // Crear notificación flotante cerca del botón
     const notification = document.createElement('div');
     notification.className = 'purchase-lock-notification';
     notification.innerHTML = `
@@ -215,15 +267,14 @@
         <span>Carrito bloqueado tras pago</span>
       </div>
     `;
-    
+
     const rect = button.getBoundingClientRect();
     notification.style.position = 'fixed';
     notification.style.top = `${rect.bottom + 10}px`;
     notification.style.left = `${rect.left}px`;
     notification.style.zIndex = '1000';
-    
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
       notification.remove();
     }, 2000);
@@ -231,8 +282,8 @@
 
   function updateCartBadge() {
     const cart = ShoppingCart.getCart();
-    const badge = document.querySelector('.cart-button__badge');
-    
+    const badge = document.querySelector('.cart-button__badge, .cart-badge');
+
     if (badge) {
       const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
       badge.textContent = totalItems > 0 ? totalItems : '';
@@ -240,14 +291,12 @@
     }
   }
 
-  // Initialize when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 
-  // Also listen for cart updates
   window.addEventListener('cds:cart-updated', updateCartBadge);
-
 })();
+
