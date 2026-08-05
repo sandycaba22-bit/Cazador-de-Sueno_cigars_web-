@@ -382,6 +382,9 @@ const ShoppingCart = (function() {
     updateCartLockState();
     
     console.log('Shopping Cart initialized:', cart);
+    
+    // Emitir evento global indicando que ShoppingCart está listo
+    window.dispatchEvent(new CustomEvent('cds:shopping-cart-ready', { detail: cart }));
   }
   
   return {
@@ -401,6 +404,12 @@ const ShoppingCart = (function() {
     getShippingZones: () => shippingZones
   };
 })();
+
+// Auto-inicialización
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded - Initializing ShoppingCart');
+  ShoppingCart.init();
+});
 
 // Auto-inicialización
 document.addEventListener('DOMContentLoaded', () => {
