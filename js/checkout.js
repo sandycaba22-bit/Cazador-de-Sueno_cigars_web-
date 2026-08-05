@@ -4,37 +4,20 @@
  */
 
 const Checkout = (function() {
-  const PAYMENT_CONFIG_PATH = '/config/payment-config.json';
-  const BANK_ACCOUNTS_PATH = '/config/bank-accounts-config.json';
-  let paymentConfig = null;
-  let bankAccounts = null;
   let selectedBankAccount = null;
   
-  // Cargar configuración de pago
-  async function loadPaymentConfig() {
-    try {
-      const response = await fetch(PAYMENT_CONFIG_PATH);
-      const data = await response.json();
-      paymentConfig = data;
-      return data;
-    } catch (error) {
-      console.error('Error loading payment config:', error);
-      return null;
+  // Configuración de pago embebida (sin dependencias externas)
+  const paymentConfig = {
+    whatsapp_notification: {
+      enabled: true,
+      phone_number: '18095551234' // Reemplazar con número real
+    },
+    admin_notification: {
+      enabled: true,
+      email: 'admin@cazadordesuenos.com',
+      subject_prefix: 'Nuevo Pedido'
     }
-  }
-  
-  // Cargar cuentas bancarias
-  async function loadBankAccounts() {
-    try {
-      const response = await fetch(BANK_ACCOUNTS_PATH);
-      const data = await response.json();
-      bankAccounts = data.bank_accounts;
-      return data;
-    } catch (error) {
-      console.error('Error loading bank accounts:', error);
-      return null;
-    }
-  }
+  };
   
   // Manejar selección de cuenta bancaria
   function setupBankAccountSelection() {
@@ -152,11 +135,8 @@ const Checkout = (function() {
         if (!firstInvalidField) firstInvalidField = field;
         if (field) field.style.borderColor = '#ff4444';
       } else {
-        isValid = false;
+        if (field) field.style.borderColor = '';
       }
-    } else {
-      if (field) field.style.borderColor = '';
-    }
     });
     
     // Validar email
@@ -356,18 +336,14 @@ ${itemsList}
   async function init() {
     console.log('Checkout initializing...');
     
-    // Esperar a que ShoppingCart esté listo
     if (!window.ShoppingCart) {
-      console.log('ShoppingCart not ready, waiting...');
-      setTimeout(init, 100);
+      console.error('ShoppingCart not available');
       return;
     }
     
     console.log('ShoppingCart ready, proceeding with checkout initialization');
     
     try {
-      await loadPaymentConfig();
-      await loadBankAccounts();
       setupBankAccountSelection();
       renderOrderItems();
       handleFileUpload();
