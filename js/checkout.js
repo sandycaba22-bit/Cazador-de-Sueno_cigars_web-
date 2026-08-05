@@ -354,47 +354,86 @@ ${itemsList}
   
   // Inicializar
   async function init() {
+    console.log('Checkout initializing...');
+    
     // Esperar a que ShoppingCart esté listo
     if (!window.ShoppingCart) {
+      console.log('ShoppingCart not ready, waiting...');
       setTimeout(init, 100);
       return;
     }
     
-    await loadPaymentConfig();
-    await loadBankAccounts();
-    setupBankAccountSelection();
-    renderOrderItems();
-    handleFileUpload();
+    console.log('ShoppingCart ready, proceeding with checkout initialization');
     
-    // Event listeners para validación
-    document.getElementById('shippingForm').addEventListener('input', validateForm);
-    document.getElementById('paymentProof').addEventListener('change', validateForm);
-    document.getElementById('country').addEventListener('change', (e) => {
-      ShoppingCart.setShippingCountry(e.target.value);
+    try {
+      await loadPaymentConfig();
+      await loadBankAccounts();
+      setupBankAccountSelection();
       renderOrderItems();
-    });
-    
-    // Event listener para submit
-    document.getElementById('placeOrderBtn').addEventListener('click', async (e) => {
-      e.preventDefault();
+      handleFileUpload();
       
-      if (validateForm()) {
-        document.getElementById('placeOrderBtn').disabled = true;
-        document.getElementById('placeOrderBtn').textContent = 'Procesando...';
-        
-        try {
-          await createOrder();
-        } catch (error) {
-          console.error('Error creating order:', error);
-          document.getElementById('placeOrderBtn').disabled = false;
-          document.getElementById('placeOrderBtn').textContent = 'Confirmar Pedido';
-          showToast('❌ Error al procesar el pedido. Por favor inténtelo nuevamente.', 'error');
-        }
+      // Verificar existencia de elementos DOM antes de agregar event listeners
+      const shippingForm = document.getElementById('shippingForm');
+      const paymentProof = document.getElementById('paymentProof');
+      const country = document.getElementById('country');
+      const placeOrderBtn = document.getElementById('placeOrderBtn');
+      
+      if (shippingForm) {
+        shippingForm.addEventListener('input', validateForm);
+        console.log('Shipping form event listener attached');
+      } else {
+        console.error('shippingForm element not found');
       }
-    });
-    
-    // Escuchar actualizaciones del carrito
-    window.addEventListener('cds:cart-updated', renderOrderItems);
+      
+      if (paymentProof) {
+        paymentProof.addEventListener('change', validateForm);
+        console.log('Payment proof event listener attached');
+      } else {
+        console.error('paymentProof element not found');
+      }
+      
+      if (country) {
+        country.addEventListener('change', (e) => {
+          ShoppingCart.setShippingCountry(e.target.value);
+          renderOrderItems();
+        });
+        console.log('Country select event listener attached');
+      } else {
+        console.error('country element not found');
+      }
+      
+      if (placeOrderBtn) {
+        placeOrderBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          
+          if (validateForm()) {
+            placeOrderBtn.disabled = true;
+            placeOrderBtn.textContent = 'Procesando...';
+            
+            try {
+              await createOrder();
+            } catch (error) {
+              console.error('Error creating order:', error);
+              placeOrderBtn.disabled = false;
+              placeOrderBtn.textContent = 'Confirmar Pedido';
+              showToast('❌ Error al procesar el pedido. Por favor inténtelo nuevamente.', 'error');
+            }
+          }
+        });
+        console.log('Place order button event listener attached');
+      } else {
+        console.error('placeOrderBtn element not found');
+      }
+      
+      // Escuchar actualizaciones del carrito
+      window.addEventListener('cds:cart-updated', renderOrderItems);
+      console.log('Cart update event listener attached');
+      
+      console.log('Checkout initialized successfully');
+    } catch (error) {
+      console.error('Error during checkout initialization:', error);
+      showToast('❌ Error al inicializar el checkout. Por favor recargue la página.', 'error');
+    }
   }
   
   // Sistema de notificaciones visuales (toasts)

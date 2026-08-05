@@ -183,6 +183,12 @@ const CartModal = (function() {
   
   // Renderizar items del carrito
   function renderCartItems() {
+    // Verificar si ShoppingCart está disponible
+    if (!window.ShoppingCart) {
+      console.warn('ShoppingCart not available in renderCartItems');
+      return;
+    }
+    
     const cart = ShoppingCart.getCart();
     const itemsContainer = modal.querySelector('.cart-modal__items');
     

@@ -488,5 +488,43 @@
   
   <script src="js/shopping-cart.js" defer></script>
   <script src="js/checkout.js" defer></script>
+  <script>
+    // Script de diagnóstico y verificación para checkout
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Checkout DOM loaded, verifying system status...');
+      
+      // Verificar ShoppingCart después de un tiempo
+      setTimeout(function() {
+        if (!window.ShoppingCart) {
+          console.error('CRITICAL: ShoppingCart not available in checkout after timeout');
+          // Mostrar mensaje de error al usuario
+          const checkoutContent = document.getElementById('checkoutContent');
+          if (checkoutContent) {
+            checkoutContent.innerHTML = `
+              <div style="text-align: center; padding: 3rem; color: #f4efe2;">
+                <h2 style="color: #c6a25a; margin-bottom: 1rem;">Error de Inicialización</h2>
+                <p>El sistema de carrito no está disponible. Por favor recargue la página.</p>
+                <button onclick="location.reload()" style="
+                  margin-top: 1rem;
+                  padding: 1rem 2rem;
+                  background: linear-gradient(135deg, #c6a25a 0%, #8b7355 100%);
+                  border: none;
+                  color: #050505;
+                  font-family: 'Cormorant Garamond', serif;
+                  font-size: 1rem;
+                  font-weight: 600;
+                  letter-spacing: 0.15em;
+                  text-transform: uppercase;
+                  cursor: pointer;
+                ">Recargar Página</button>
+              </div>
+            `;
+          }
+        } else {
+          console.log('ShoppingCart is available in checkout:', window.ShoppingCart);
+        }
+      }, 1000);
+    });
+  </script>
 </body>
 </html>

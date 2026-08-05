@@ -66,6 +66,12 @@
   }
 
   function updateButtonsLockState() {
+    // Verificar si ShoppingCart está disponible
+    if (!window.ShoppingCart) {
+      console.warn('ShoppingCart not available in updateButtonsLockState');
+      return;
+    }
+    
     const isLocked = ShoppingCart.isCartLocked();
     const purchaseButtons = document.querySelectorAll('.purchase-panel__button');
     console.log('Updating buttons lock state, isLocked:', isLocked);
@@ -141,6 +147,13 @@
     if (!productId) {
       console.error('Product ID not found on button');
       showToast('❌ Error: Product ID no encontrado en el botón', 'error');
+      return;
+    }
+
+    // Verificar si ShoppingCart está disponible
+    if (!window.ShoppingCart) {
+      console.error('ShoppingCart not available in handlePurchaseClick');
+      showToast('❌ Sistema de carrito no disponible', 'error');
       return;
     }
 
