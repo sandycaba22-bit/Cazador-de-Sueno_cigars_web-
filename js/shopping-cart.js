@@ -402,11 +402,15 @@ const ShoppingCart = (function() {
   };
 })();
 
-// Auto-inicialización inmediata (sin DOMContentLoaded)
-console.log('ShoppingCart script loaded, initializing immediately...');
-ShoppingCart.init();
+// Exponer ShoppingCart globalmente para otros scripts
+window.ShoppingCart = ShoppingCart;
 
-// Auto-inicialización
-document.addEventListener('DOMContentLoaded', () => {
+// Inicialización única en DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    ShoppingCart.init();
+  });
+} else {
+  // DOM ya cargado, inicializar inmediatamente
   ShoppingCart.init();
-});
+}
