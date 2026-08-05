@@ -35,13 +35,31 @@
   <meta name="twitter:description" content="Formato figurado de alta artesanía tabacalera.">
   <meta name="twitter:image" content="https://www.cazadordesuenocigars.com/img/el-rango-cigarro.jpg">
 
-  <!-- Google Analytics 4 -->
+  <!-- Google Analytics 4 - Global Tracking with International Support -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-BYRS7MGYXK');
+    gtag('config', 'G-BYRS7MGYXK', {
+      'anonymize_ip': true,
+      'cookie_flags': 'samesite=none;secure',
+      'send_page_view': true,
+      'custom_map': {
+        'dimension1': 'page_type',
+        'dimension2': 'user_language',
+        'dimension3': 'vitola_name'
+      },
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+    
+    gtag('set', 'user_properties', {
+      'page_type': 'vitola_detail',
+      'vitola_name': 'el_rango',
+      'market_region': 'global',
+      'content_language': 'spanish'
+    });
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">

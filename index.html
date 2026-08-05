@@ -31,13 +31,32 @@
   <meta property="og:locale" content="es_DO">
   <meta name="twitter:card" content="summary_large_image">
   
-  <!-- Google Analytics 4 -->
+  <!-- Google Analytics 4 - Global Tracking with International Support -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-BYRS7MGYXK');
+    gtag('config', 'G-BYRS7MGYXK', {
+      'anonymize_ip': true,
+      'cookie_flags': 'samesite=none;secure',
+      'send_page_view': true,
+      'custom_map': {
+        'dimension1': 'page_type',
+        'dimension2': 'user_language',
+        'dimension3': 'market_region'
+      },
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+    
+    // Set custom dimensions for international tracking
+    gtag('set', 'user_properties', {
+      'page_type': 'homepage',
+      'market_region': 'global',
+      'site_version': 'premium',
+      'content_language': 'spanish'
+    });
   </script>
   
   <!-- Meta Pixel (Facebook) -->

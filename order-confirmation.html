@@ -7,6 +7,23 @@
   <!-- Early language detection script (must load first to prevent flicker) -->
   <script src="/js/language-detect-early.js"></script>
   
+  <!-- Google Analytics 4 - Global Tracking -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BYRS7MGYXK', {
+      'anonymize_ip': true,
+      'cookie_flags': 'samesite=none;secure',
+      'custom_map': {
+        'dimension1': 'page_type',
+        'dimension2': 'user_language',
+        'dimension3': 'order_status'
+      }
+    });
+  </script>
+  
   <title>Pedido Confirmado | Cazador de Sueños Cigars SRL</title>
   <meta name="description" content="Su pedido ha sido recibido y está pendiente de verificación.">
   <meta name="robots" content="noindex, follow">
