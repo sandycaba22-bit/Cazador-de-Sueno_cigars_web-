@@ -1399,11 +1399,11 @@
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
-    /* Cart button toggle */
+    /* Cart button toggle - redirect to checkout */
     var cartButton = document.getElementById('cartButton');
-    if (cartButton && window.CartModal) {
+    if (cartButton) {
       cartButton.addEventListener('click', function () {
-        window.CartModal.toggle();
+        window.location.href = 'checkout.html';
       });
     }
 

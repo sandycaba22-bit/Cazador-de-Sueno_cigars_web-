@@ -19,6 +19,11 @@
     "subject_prefix": "[NUEVO PEDIDO] Cazador de Sueños Cigars",
     "enabled": true
   },
+  "whatsapp_notification": {
+    "enabled": true,
+    "phone_number": "18095551234",
+    "message_template": "Nuevo pedido recibido. Por favor verifique los detalles y confirme el pago."
+  },
   "order_status": {
     "pending": "Pendiente de verificación",
     "pending_en": "Pending verification",

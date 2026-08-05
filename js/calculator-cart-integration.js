@@ -457,7 +457,7 @@
       <div class="cs-cart-content">
         <span class="cs-cart-icon">🛒</span>
         <span class="cs-cart-text"><span id="cs-contador-carrito">0</span> ítems</span>
-        <a href="cart-test.html" class="cs-cart-link">Ver Carrito</a>
+        <a href="checkout.html" class="cs-cart-link">Ir al Checkout</a>
       </div>
     `;
     
