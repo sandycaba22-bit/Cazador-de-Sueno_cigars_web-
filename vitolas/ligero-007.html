@@ -374,24 +374,9 @@
   <script src="vitola-page.js"></script>
   <script src="../nav.js"></script>
   <script src="../js/language-switcher.js" defer></script>
-  <script src="../js/shopping-cart.js" defer></script>
+  <script src="../js/shopping-cart.js"></script>
   <script src="../js/cart-modal.js" defer></script>
   <script src="../js/purchase-panel.js" defer></script>
   <script src="../js/calculator-cart-integration.js" defer></script>
-  <script>
-    // Asegurar que ShoppingCart esté disponible antes de inicializar la calculadora
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM loaded, checking ShoppingCart availability...');
-      
-      // Forzar inicialización de ShoppingCart si aún no está disponible
-      setTimeout(function() {
-        if (!window.ShoppingCart) {
-          console.error('ShoppingCart not available after DOMContentLoaded');
-        } else {
-          console.log('ShoppingCart is available:', window.ShoppingCart);
-        }
-      }, 500);
-    });
-  </script>
 </body>
 </html>

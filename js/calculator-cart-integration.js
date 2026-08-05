@@ -164,28 +164,10 @@
   async function addToCart(product) {
     console.log('addToCart called, ShoppingCart available:', !!window.ShoppingCart);
     
-    // Verificar si ShoppingCart está disponible con sistema de reintentos
+    // Verificación síncrona limpia
     if (!window.ShoppingCart) {
-      console.error('ShoppingCart not available, waiting for initialization...');
-      showToast('⏳ Inicializando carrito...', 'info');
-      
-      // Sistema de reintentos para esperar a que ShoppingCart esté disponible
-      let retryCount = 0;
-      const maxRetries = 15;
-      const retryInterval = setInterval(() => {
-        retryCount++;
-        console.log(`Retry ${retryCount}/${maxRetries}: ShoppingCart available:`, !!window.ShoppingCart);
-        
-        if (window.ShoppingCart) {
-          clearInterval(retryInterval);
-          console.log('ShoppingCart now available, proceeding with add to cart');
-          addToCart(product);
-        } else if (retryCount >= maxRetries) {
-          clearInterval(retryInterval);
-          console.error('ShoppingCart failed to initialize after', maxRetries, 'retries');
-          showToast('❌ Sistema de carrito no disponible - Error de inicialización', 'error');
-        }
-      }, 150);
+      console.error('ShoppingCart not available');
+      showToast('❌ Sistema de carrito no disponible', 'error');
       return;
     }
 
@@ -626,16 +608,12 @@
     // Escuchar eventos del carrito
     setupCartListeners();
     
-    // Esperar a que ShoppingCart esté completamente inicializado
+    // Actualizar estado inicial - ShoppingCart debe estar disponible
     if (window.ShoppingCart) {
-      console.log('ShoppingCart already available');
+      console.log('ShoppingCart available, updating floating cart');
       updateFloatingCart();
     } else {
-      console.log('Waiting for ShoppingCart to be ready...');
-      window.addEventListener('cds:shopping-cart-ready', () => {
-        console.log('ShoppingCart ready event received');
-        updateFloatingCart();
-      });
+      console.warn('ShoppingCart not available at initialization time');
     }
     
     console.log('Calculator Cart Integration initialized successfully');
