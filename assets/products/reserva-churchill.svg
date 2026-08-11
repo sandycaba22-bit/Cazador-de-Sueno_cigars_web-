@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200" fill="none">
+  <rect width="280" height="200" fill="#342c24"/>
+  <rect x="55" y="40" width="170" height="120" rx="8" fill="#2b241d" stroke="#dbbc72" stroke-width="2"/>
+  <rect x="75" y="60" width="130" height="80" rx="4" fill="#1a1612" stroke="#c9a962" stroke-width="1"/>
+  <ellipse cx="140" cy="100" rx="14" ry="36" fill="#5c3d2e"/>
+  <text x="140" y="178" text-anchor="middle" fill="#dbbc72" font-family="Georgia,serif" font-size="14">Reserva</text>
+</svg>

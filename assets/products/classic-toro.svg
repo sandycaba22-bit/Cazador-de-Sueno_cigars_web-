@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200" fill="none">
+  <rect width="280" height="200" fill="#342c24"/>
+  <rect x="60" y="45" width="160" height="110" rx="6" fill="#2b241d" stroke="#c9a962" stroke-width="2"/>
+  <ellipse cx="110" cy="100" rx="16" ry="32" fill="#6b4423"/>
+  <ellipse cx="140" cy="100" rx="16" ry="32" fill="#6b4423"/>
+  <ellipse cx="170" cy="100" rx="16" ry="32" fill="#6b4423"/>
+  <text x="140" y="175" text-anchor="middle" fill="#c9a962" font-family="Georgia,serif" font-size="14">Toro</text>
+</svg>

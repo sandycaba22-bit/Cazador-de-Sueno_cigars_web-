@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Cazador Sueño — puros premium de exportación. Compra internacional con envío a todo el mundo."
+    />
+    <title>Cazador Sueño — Puros Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="home">
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a href="index.html" class="logo">
+          <span class="logo__mark">CS</span>
+          <span class="logo__text">Cazador Sueño</span>
+        </a>
+        <nav class="site-nav" aria-label="Principal">
+          <a href="#catalogo">Catálogo</a>
+          <a href="#envios">Envíos</a>
+          <a href="#pagos">Pagos</a>
+        </nav>
+        <button type="button" id="cart-toggle" class="cart-button" aria-label="Abrir carrito">
+          Carrito
+          <span id="cart-count" class="cart-button__count">0</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero__inner">
+          <p class="hero__eyebrow">Exportación premium · Envío internacional</p>
+          <h1>El sueño del conocedor, en cada caja</h1>
+          <p class="hero__lead">
+            Selección artesanal de puros con empaque certificado: 20 unidades por caja en líneas
+            Classic y Reserva, 10 unidades en la exclusiva línea Rango.
+          </p>
+          <a href="#catalogo" class="btn btn--primary btn--lg">Ver catálogo</a>
+        </div>
+      </section>
+
+      <section id="catalogo" class="section">
+        <div class="container">
+          <header class="section__header">
+            <h2>Catálogo</h2>
+            <p>Compra por caja o puro suelto. Tu carrito se mantiene al navegar.</p>
+          </header>
+          <div id="catalog-grid" class="catalog-grid"></div>
+        </div>
+      </section>
+
+      <section id="envios" class="section section--alt">
+        <div class="container info-grid">
+          <article>
+            <h3>Envío internacional</h3>
+            <p>
+              Calculamos tarifas automáticamente según tu país: EE. UU., Europa, Japón, China y más.
+              El costo se suma al total en el checkout.
+            </p>
+          </article>
+          <article>
+            <h3>Empaque certificado</h3>
+            <p>
+              Todas las cajas estándar incluyen 20 puros. La línea Rango se presenta en cajas de 10
+              unidades, reflejado en precio y unidades totales.
+            </p>
+          </article>
+          <article>
+            <h3>Venta final</h3>
+            <p>
+              Todos los pedidos son venta final. No se admiten devoluciones ni reembolsos una vez
+              confirmado el pago.
+            </p>
+          </article>
+          <article id="pagos">
+            <h3>Pagos globales</h3>
+            <p>
+              Tarjeta internacional vía Stripe o transferencia bancaria directa con datos de cuenta
+              y referencia única de pedido.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <p>© 2026 Cazador Sueño. Venta sujeta a regulaciones locales del importador.</p>
+        <p>
+          <a href="mailto:ventas@cazadorsueno.com">ventas@cazadorsueno.com</a>
+        </p>
+      </div>
+    </footer>
+
+    <div id="cart-overlay" class="overlay" aria-hidden="true"></div>
+    <aside id="cart-drawer" class="cart-drawer" aria-label="Carrito de compras">
+      <header class="cart-drawer__header">
+        <h2>Tu carrito</h2>
+        <button type="button" id="cart-close" class="btn-icon" aria-label="Cerrar">×</button>
+      </header>
+      <ul id="mini-cart-items" class="mini-cart"></ul>
+      <footer class="cart-drawer__footer">
+        <div class="cart-drawer__subtotal">
+          <span>Subtotal</span>
+          <strong id="mini-cart-subtotal">$0.00</strong>
+        </div>
+        <p class="cart-drawer__note">
+          <span id="cart-line-count">0</span> línea(s) · El envío se calcula en checkout.
+        </p>
+        <a id="go-checkout" href="checkout.html" class="btn btn--primary btn--block">Ir al checkout</a>
+      </footer>
+    </aside>
+
+    <script src="js/config.js"></script>
+    <script src="js/policies.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/shipping.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/cart-ui.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

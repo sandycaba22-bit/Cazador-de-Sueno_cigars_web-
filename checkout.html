@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Checkout seguro — Cazador Sueño" />
+    <title>Checkout — Cazador Sueño</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body data-page="checkout">
+    <header class="site-header site-header--compact">
+      <div class="container site-header__inner">
+        <a href="index.html" class="logo">
+          <span class="logo__mark">CS</span>
+          <span class="logo__text">Cazador Sueño</span>
+        </a>
+        <a href="index.html" class="link-back">← Seguir comprando</a>
+        <button type="button" id="cart-toggle" class="cart-button" aria-label="Abrir carrito">
+          Carrito
+          <span id="cart-count" class="cart-button__count">0</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="checkout-page">
+      <div class="container checkout-layout">
+        <section class="checkout-form-section">
+          <h1>Finalizar compra</h1>
+          <p class="checkout-intro">Envío internacional y pagos seguros desde cualquier país.</p>
+
+          <form id="checkout-form" novalidate>
+            <fieldset class="form-section">
+              <legend>Datos de contacto</legend>
+              <div class="form-grid">
+                <label>
+                  Nombre completo
+                  <input type="text" name="fullName" required autocomplete="name" />
+                </label>
+                <label>
+                  Correo electrónico
+                  <input type="email" name="email" required autocomplete="email" />
+                </label>
+                <label>
+                  Teléfono
+                  <input type="tel" name="phone" autocomplete="tel" />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Dirección de envío</legend>
+              <div class="form-grid">
+                <label class="span-2">
+                  Dirección
+                  <input type="text" name="address" required autocomplete="street-address" />
+                </label>
+                <label>
+                  Ciudad
+                  <input type="text" name="city" required autocomplete="address-level2" />
+                </label>
+                <label>
+                  Estado / Provincia
+                  <input type="text" name="state" autocomplete="address-level1" />
+                </label>
+                <label>
+                  Código postal
+                  <input type="text" name="postalCode" autocomplete="postal-code" />
+                </label>
+                <label>
+                  País de destino
+                  <select name="country" required></select>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Método de pago</legend>
+              <div class="payment-methods">
+                <label class="payment-option">
+                  <input type="radio" name="paymentMethod" value="card" checked />
+                  <span>
+                    <strong>Tarjeta de crédito / débito</strong>
+                    <small>Visa, Mastercard, Amex — procesado por Stripe</small>
+                  </span>
+                </label>
+                <label class="payment-option">
+                  <input type="radio" name="paymentMethod" value="bank_transfer" />
+                  <span>
+                    <strong>Transferencia bancaria</strong>
+                    <small>Pago manual con referencia única de pedido</small>
+                  </span>
+                </label>
+              </div>
+
+              <div id="card-payment-section" class="card-payment-section">
+                <label>Tarjeta</label>
+                <div id="card-element" class="card-element"></div>
+                <p id="card-errors" class="form-error" role="alert"></p>
+              </div>
+
+              <div id="bank-transfer-preview" hidden></div>
+            </fieldset>
+
+            <label class="span-2">
+              Notas del pedido (opcional)
+              <textarea name="notes" rows="3" placeholder="Instrucciones especiales de entrega"></textarea>
+            </label>
+
+            <fieldset class="form-section form-section--policy">
+              <legend>Política de venta final</legend>
+              <div class="policy-banner" role="note">
+                <strong>Sin devoluciones ni reembolsos.</strong>
+                <p id="policy-summary"></p>
+              </div>
+              <label class="policy-checkbox">
+                <input type="checkbox" name="acceptFinalSale" required />
+                <span id="policy-checkbox-label"></span>
+              </label>
+              <p class="policy-legal" id="policy-legal"></p>
+            </fieldset>
+
+            <fieldset class="form-section form-section--policy form-section--customs">
+              <legend>Responsabilidad aduanera</legend>
+              <div class="policy-banner policy-banner--customs" role="note">
+                <strong>Importación internacional.</strong>
+                <p>Los envíos DHL pueden estar sujetos a inspección, aranceles e impuestos en el país de destino.</p>
+              </div>
+              <label class="policy-checkbox">
+                <input type="checkbox" name="acceptCustomsDisclaimer" required />
+                <span id="customs-checkbox-label"></span>
+              </label>
+            </fieldset>
+
+            <button type="submit" id="submit-checkout" class="btn btn--primary btn--block btn--lg">
+              Confirmar pedido — venta final
+            </button>
+          </form>
+        </section>
+
+        <aside class="checkout-summary">
+          <h2>Resumen del pedido</h2>
+          <div id="checkout-items" class="checkout-items"></div>
+          <div class="checkout-summary__shipping-panel">
+            <h3 class="checkout-summary__shipping-title">Despacho internacional</h3>
+            <dl class="summary-lines summary-lines--shipping">
+              <div>
+                <dt>Transportista</dt>
+                <dd id="summary-carrier">DHL Express</dd>
+              </div>
+              <div>
+                <dt>Origen</dt>
+                <dd id="summary-origin">República Dominicana</dd>
+              </div>
+              <div>
+                <dt>Destino</dt>
+                <dd id="summary-destination">—</dd>
+              </div>
+              <div>
+                <dt>Cajas en envío</dt>
+                <dd><span id="summary-boxes">0</span> / <span id="summary-max-boxes">10</span></dd>
+              </div>
+            </dl>
+            <p id="dhl-box-warning" class="dhl-box-warning" hidden role="alert"></p>
+          </div>
+          <dl class="summary-lines">
+            <div>
+              <dt>Subtotal</dt>
+              <dd id="summary-subtotal">$0.00</dd>
+            </div>
+            <div>
+              <dt>Envío DHL (<span id="summary-zone">—</span>)</dt>
+              <dd id="summary-shipping">$0.00</dd>
+            </div>
+            <div class="summary-lines__total">
+              <dt>Total</dt>
+              <dd id="summary-total">$0.00</dd>
+            </div>
+          </dl>
+          <p class="checkout-summary__units">Total puros: <strong id="summary-units">0</strong></p>
+          <p class="checkout-summary__delivery">
+            Entrega estimada: <strong id="summary-delivery">—</strong>
+          </p>
+          <p class="checkout-summary__secure">🔒 Pagos cifrados · Cumplimiento PCI vía Stripe</p>
+        </aside>
+      </div>
+    </main>
+
+    <div id="cart-overlay" class="overlay" aria-hidden="true"></div>
+    <aside id="cart-drawer" class="cart-drawer" aria-label="Carrito de compras">
+      <header class="cart-drawer__header">
+        <h2>Tu carrito</h2>
+        <button type="button" id="cart-close" class="btn-icon" aria-label="Cerrar">×</button>
+      </header>
+      <ul id="mini-cart-items" class="mini-cart"></ul>
+      <footer class="cart-drawer__footer">
+        <div class="cart-drawer__subtotal">
+          <span>Subtotal</span>
+          <strong id="mini-cart-subtotal">$0.00</strong>
+        </div>
+        <p class="cart-drawer__note"><span id="cart-line-count">0</span> línea(s) en carrito</p>
+        <a id="go-checkout" href="checkout.html" class="btn btn--primary btn--block">En checkout</a>
+      </footer>
+    </aside>
+
+    <script src="js/config.js"></script>
+    <script src="js/policies.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/shipping.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/bank.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/cart-ui.js"></script>
+    <script src="js/checkout.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const summary = document.getElementById('policy-summary');
+        const label = document.getElementById('policy-checkbox-label');
+        const legal = document.getElementById('policy-legal');
+        const customsLabel = document.getElementById('customs-checkbox-label');
+        if (summary) summary.textContent = SALES_POLICY.summary;
+        if (label) label.textContent = SALES_POLICY.checkoutText;
+        if (legal) legal.textContent = SALES_POLICY.legalNotice;
+        if (customsLabel) customsLabel.textContent = CUSTOMS_DISCLAIMER.checkoutText;
+        initCheckoutPage();
+      });
+    </script>
+  </body>
+</html>

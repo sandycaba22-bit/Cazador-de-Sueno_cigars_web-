@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pedido confirmado — Cazador Sueño</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="confirmation">
+    <header class="site-header site-header--compact">
+      <div class="container site-header__inner">
+        <a href="index.html" class="logo">
+          <span class="logo__mark">CS</span>
+          <span class="logo__text">Cazador Sueño</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="confirmation-page">
+      <div class="container confirmation-card" id="confirmation-content">
+        <p>Cargando confirmación…</p>
+      </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/policies.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/bank.js"></script>
+    <script src="js/orders.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        const method = params.get('method');
+        const container = document.getElementById('confirmation-content');
+
+        let order = null;
+        try {
+          order = JSON.parse(sessionStorage.getItem('cazador_sueno_last_order'));
+        } catch {
+          order = null;
+        }
+
+        if ((!order || order.reference !== ref) && ref) {
+          order = await fetchOrderByReference(ref);
+        }
+
+        if (!order || order.reference !== ref) {
+          container.innerHTML = `
+            <h1>Pedido no encontrado</h1>
+            <p>No pudimos recuperar los detalles. Si completaste un pago, revisa tu correo o contáctanos.</p>
+            <a href="index.html" class="btn btn--primary">Volver al inicio</a>
+          `;
+          return;
+        }
+
+        const isBank = method === 'bank' || order.paymentMethod === 'bank_transfer';
+
+        const itemsHtml = order.items
+          .map(
+            (i) => `
+            <li>
+              <strong>${escapeHtml(i.name)}</strong> —
+              ${escapeHtml(i.displayLabel || `${i.quantity} uds.`)} · ${formatCurrency(i.lineTotal)}
+            </li>`
+          )
+          .join('');
+
+        container.innerHTML = `
+          <div class="confirmation-icon">${isBank ? '🏦' : '✓'}</div>
+          <h1>${isBank ? 'Pedido registrado — transferencia pendiente' : '¡Pago confirmado!'}</h1>
+          <p class="confirmation-ref">Referencia: <strong>${escapeHtml(order.reference)}</strong></p>
+          <p>Estado: <strong>${escapeHtml(order.status || order.paymentStatus)}</strong></p>
+          <p>Envío a ${escapeHtml(order.shipping.countryName || order.shipping.country)} · ${escapeHtml(order.shipping.city)}</p>
+          <p>Transportista: <strong>${escapeHtml(order.shipping.carrier || 'DHL Express')}</strong> · ${escapeHtml(order.shippingBoxes || order.shipping?.boxes || 0)} caja(s)</p>
+          <p>Entrega estimada: ${escapeHtml(order.estimatedDelivery)} días hábiles</p>
+
+          <ul class="confirmation-items">${itemsHtml}</ul>
+
+          <dl class="summary-lines">
+            <div><dt>Subtotal</dt><dd>${formatCurrency(order.subtotal)}</dd></div>
+            <div><dt>Envío</dt><dd>${formatCurrency(order.shippingCost)}</dd></div>
+            <div class="summary-lines__total"><dt>Total</dt><dd>${formatCurrency(order.total)}</dd></div>
+          </dl>
+
+          <div id="bank-block"></div>
+
+          <aside class="policy-banner policy-banner--confirmed" role="note">
+            <strong>Venta final — sin devoluciones ni reembolsos.</strong>
+            <p>${escapeHtml(SALES_POLICY.summary)}</p>
+            <p class="policy-legal">${escapeHtml(SALES_POLICY.legalNotice)}</p>
+            <p class="policy-legal">${escapeHtml(CUSTOMS_DISCLAIMER.checkoutText)}</p>
+          </aside>
+
+          <a href="index.html" class="btn btn--primary">Seguir comprando</a>
+        `;
+
+        if (isBank) {
+          const bankBlock = document.getElementById('bank-block');
+          renderBankTransferDetails(order, bankBlock, { showReference: true, showAmount: true });
+        }
+      });
+    </script>
+  </body>
+</html>
