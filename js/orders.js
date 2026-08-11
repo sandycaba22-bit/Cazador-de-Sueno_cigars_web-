@@ -1,5 +1,5 @@
 /**
- * Registro de pedidos en el backend con validación y datos bancarios integrados.
+ * Registro de pedidos en el backend con validación, sandbox y datos bancarios integrados.
  */
 
 function attachBankTransferDetails(order) {
@@ -75,13 +75,44 @@ function prepareOrderForRegistration(order) {
   return enriched;
 }
 
-async function registerOrder(order) {
-  const payload = prepareOrderForRegistration(order);
+function registerOrderLocally(order) {
+  const key = APP_CONFIG.sandbox?.ordersStorageKey || 'cazador_sueno_orders';
+  let orders = [];
 
+  try {
+    orders = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!Array.isArray(orders)) orders = [];
+  } catch {
+    orders = [];
+  }
+
+  const record = {
+    ...order,
+    refundEligible: false,
+    status:
+      order.paymentStatus === 'paid' || order.paymentStatus === 'paid_sandbox'
+        ? 'confirmed'
+        : 'awaiting_payment',
+    registeredAt: new Date().toISOString(),
+    sandbox: true,
+  };
+
+  orders.push(record);
+
+  try {
+    localStorage.setItem(key, JSON.stringify(orders));
+  } catch (err) {
+    throw new Error('No se pudo guardar el pedido de prueba en el navegador.');
+  }
+
+  return { success: true, order: record, message: 'Pedido de prueba registrado localmente.' };
+}
+
+async function registerOrderRemote(order) {
   const response = await fetch(`${APP_CONFIG.stripe.apiBaseUrl}/orders`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(order),
   });
 
   const data = await response.json().catch(() => ({}));
@@ -93,13 +124,54 @@ async function registerOrder(order) {
   return data;
 }
 
-async function fetchOrderByReference(reference) {
-  const response = await fetch(
-    `${APP_CONFIG.stripe.apiBaseUrl}/orders/${encodeURIComponent(reference)}`
-  );
+async function registerOrder(order) {
+  const payload = prepareOrderForRegistration(order);
 
-  if (!response.ok) return null;
-  return response.json();
+  if (order.paymentMethod === 'sandbox' || order.paymentStatus === 'paid_sandbox') {
+    return registerOrderLocally(payload);
+  }
+
+  if (isSandboxCheckoutEnabled() && order.paymentMethod === 'bank_transfer') {
+    try {
+      return await registerOrderRemote(payload);
+    } catch (remoteError) {
+      console.warn('[Orders] API no disponible, usando registro local sandbox:', remoteError.message);
+      return registerOrderLocally({ ...payload, paymentStatus: payload.paymentStatus || 'pending_transfer' });
+    }
+  }
+
+  try {
+    return await registerOrderRemote(payload);
+  } catch (remoteError) {
+    if (isSandboxCheckoutEnabled()) {
+      console.warn('[Orders] Fallback sandbox:', remoteError.message);
+      return registerOrderLocally(payload);
+    }
+    throw remoteError;
+  }
+}
+
+async function fetchOrderByReference(reference) {
+  try {
+    const response = await fetch(
+      `${APP_CONFIG.stripe.apiBaseUrl}/orders/${encodeURIComponent(reference)}`
+    );
+    if (response.ok) return response.json();
+  } catch {
+    /* API no disponible */
+  }
+
+  const key = APP_CONFIG.sandbox?.ordersStorageKey || 'cazador_sueno_orders';
+  try {
+    const orders = JSON.parse(localStorage.getItem(key) || '[]');
+    if (Array.isArray(orders)) {
+      return orders.find((entry) => entry.reference === reference) || null;
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return null;
 }
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -107,6 +179,7 @@ if (typeof module !== 'undefined' && module.exports) {
     attachBankTransferDetails,
     validateOrderForSubmission,
     prepareOrderForRegistration,
+    registerOrderLocally,
     registerOrder,
     fetchOrderByReference,
   };

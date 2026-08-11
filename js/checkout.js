@@ -1,11 +1,12 @@
 /**
- * Lógica de checkout: Stripe, transferencia bancaria y venta final.
+ * Lógica de checkout: Stripe, transferencia bancaria, sandbox y venta final.
  */
 
 let stripeInstance = null;
 let cardElement = null;
 
 function initStripe() {
+  if (!isStripeConfigured()) return null;
   if (typeof Stripe === 'undefined') {
     console.warn('Stripe.js no cargado.');
     return null;
@@ -17,35 +18,50 @@ function initStripe() {
 }
 
 function mountCardElement() {
-  const stripe = initStripe();
-  const container = $('#card-element');
-  if (!stripe || !container) return;
+  if (!isStripeConfigured()) return;
 
-  if (cardElement) return;
+  try {
+    const stripe = initStripe();
+    const container = $('#card-element');
+    if (!stripe || !container) return;
 
-  const elements = stripe.elements({ locale: APP_CONFIG.locale });
-  cardElement = elements.create('card', {
-    style: {
-      base: {
-        color: '#f5f0e8',
-        fontFamily: '"Cormorant Garamond", Georgia, serif',
-        fontSize: '16px',
-        '::placeholder': { color: '#8a8278' },
+    if (cardElement) return;
+
+    const elements = stripe.elements({ locale: APP_CONFIG.locale });
+    cardElement = elements.create('card', {
+      style: {
+        base: {
+          color: '#f5f0e8',
+          fontFamily: '"Cormorant Garamond", Georgia, serif',
+          fontSize: '16px',
+          '::placeholder': { color: '#8a8278' },
+        },
+        invalid: { color: '#e07a5f' },
       },
-      invalid: { color: '#e07a5f' },
-    },
-  });
+    });
 
-  cardElement.mount('#card-element');
-  cardElement.on('change', (event) => {
+    cardElement.mount('#card-element');
+    cardElement.on('change', (event) => {
+      const errorEl = $('#card-errors');
+      if (errorEl) errorEl.textContent = event.error ? event.error.message : '';
+    });
+  } catch (err) {
+    console.error('[Checkout] Stripe mount error:', err);
     const errorEl = $('#card-errors');
-    if (errorEl) errorEl.textContent = event.error ? event.error.message : '';
-  });
+    if (errorEl) {
+      errorEl.textContent =
+        'No se pudo cargar el formulario de tarjeta. Usa transferencia bancaria o modo sandbox.';
+    }
+  }
 }
 
 function destroyCardElement() {
   if (cardElement) {
-    cardElement.destroy();
+    try {
+      cardElement.destroy();
+    } catch {
+      /* ignore */
+    }
     cardElement = null;
   }
 }
@@ -80,6 +96,10 @@ function validateCheckoutForm(data) {
   if (!data.city) errors.push('Ciudad requerida.');
   if (!data.country) errors.push('País de destino requerido.');
   if (!data.paymentMethod) errors.push('Selecciona un método de pago.');
+
+  if (data.paymentMethod === 'card' && !isStripeConfigured()) {
+    errors.push('Pagos con tarjeta no configurados. Usa transferencia o modo sandbox.');
+  }
 
   const policyCheck = validateFinalSaleAcceptance(data.acceptFinalSale);
   if (!policyCheck.valid) errors.push(policyCheck.error);
@@ -126,6 +146,7 @@ function buildOrderPayload(formData, summary) {
       lineTotal: i.lineTotal,
       displayLabel: i.displayLabel,
       packagingLabel: i.product.packagingLabel,
+      isLegacy: Boolean(i.isLegacy),
     })),
     subtotal: summary.subtotal,
     shippingCost: summary.shippingCost,
@@ -246,6 +267,12 @@ async function submitCheckout(event) {
   }
 
   try {
+    if (formData.paymentMethod === 'sandbox') {
+      const saved = await finalizeOrder(order, 'paid_sandbox');
+      window.location.href = `order-confirmation.html?ref=${encodeURIComponent(saved.reference)}&method=sandbox`;
+      return;
+    }
+
     if (formData.paymentMethod === 'card') {
       const paymentIntent = await processStripePayment(order);
       order.stripePaymentIntentId = paymentIntent.id;
@@ -266,7 +293,7 @@ async function submitCheckout(event) {
   } finally {
     if (submitBtn) {
       const summaryAfter = getCartSummary(formData.country);
-      submitBtn.disabled = !summaryAfter.dhlValidation.valid;
+      submitBtn.disabled = !summaryAfter.isEmpty && !summaryAfter.dhlValidation.valid;
       submitBtn.textContent = 'Confirmar pedido — venta final';
     }
   }
@@ -300,97 +327,167 @@ function updateCheckoutSubmitState(summary) {
   }
 
   if (submitBtn) {
-    submitBtn.disabled = overLimit;
+    submitBtn.disabled = summary.isEmpty || overLimit;
     submitBtn.title = overLimit ? summary.dhlValidation.error : '';
   }
 }
 
+function setCheckoutEmptyState(isEmpty) {
+  const emptyEl = document.getElementById('checkout-empty');
+  const mainEl = document.getElementById('checkout-main');
+  const summaryEl = document.getElementById('checkout-summary-panel');
+
+  if (emptyEl) emptyEl.hidden = !isEmpty;
+  if (mainEl) mainEl.hidden = isEmpty;
+  if (summaryEl) summaryEl.hidden = isEmpty;
+}
+
+function showCheckoutFatalError(message) {
+  const banner = document.getElementById('checkout-error-banner');
+  if (banner) {
+    banner.hidden = false;
+    banner.textContent = message;
+  }
+}
+
+function setupPaymentMethods(form) {
+  const cardOption = document.getElementById('payment-option-card');
+  const cardInput = form.querySelector('input[name="paymentMethod"][value="card"]');
+  const sandboxOption = document.getElementById('payment-option-sandbox');
+  const sandboxInput = form.querySelector('input[name="paymentMethod"][value="sandbox"]');
+  const stripeNotice = document.getElementById('stripe-unavailable-notice');
+
+  if (!isStripeConfigured()) {
+    if (cardOption) cardOption.hidden = true;
+    if (cardInput) cardInput.disabled = true;
+    if (stripeNotice) stripeNotice.hidden = false;
+  }
+
+  if (isSandboxCheckoutEnabled()) {
+    if (sandboxOption) sandboxOption.hidden = false;
+    if (sandboxInput) sandboxInput.disabled = false;
+  } else {
+    if (sandboxOption) sandboxOption.hidden = true;
+    if (sandboxInput) sandboxInput.disabled = true;
+  }
+
+  const defaultMethod = isStripeConfigured()
+    ? 'card'
+    : isSandboxCheckoutEnabled()
+      ? 'sandbox'
+      : 'bank_transfer';
+
+  const defaultRadio = form.querySelector(`input[name="paymentMethod"][value="${defaultMethod}"]`);
+  if (defaultRadio) defaultRadio.checked = true;
+}
+
 function initCheckoutPage() {
-  const form = $('#checkout-form');
-  if (!form) return;
-
-  initGlobalCart();
-
-  const countrySelect = form.country;
-  getCountryList().forEach(({ code, name }) => {
-    const opt = document.createElement('option');
-    opt.value = code;
-    opt.textContent = name;
-    countrySelect.appendChild(opt);
-  });
-
-  function refreshSummary() {
-    const country = countrySelect.value || 'MX';
-    const summary = getCartSummary(country);
-
-    if (summary.isEmpty) {
-      window.location.href = 'index.html';
+  try {
+    const form = $('#checkout-form');
+    if (!form) {
+      showCheckoutFatalError('No se encontró el formulario de checkout.');
       return;
     }
 
-    const listEl = $('#checkout-items');
-    if (listEl) listEl.innerHTML = summary.items.map(renderCheckoutItem).join('');
+    initGlobalCart();
+    setupPaymentMethods(form);
 
-    const set = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = val;
-    };
+    const countrySelect = form.country;
+    const preferredCountry = getPreferredShippingCountry();
 
-    set('summary-subtotal', formatCurrency(summary.subtotal));
-    set('summary-shipping', formatCurrency(summary.shippingCost));
-    set('summary-total', formatCurrency(summary.total));
-    set('summary-delivery', `${summary.shipping.estimatedDays} días hábiles`);
-    set('summary-zone', summary.shipping.zone.name);
-    set('summary-units', String(summary.totalUnits));
-    set('summary-carrier', summary.shipping.carrier);
-    set('summary-origin', summary.shipping.originLabel);
-    set('summary-destination', getCountryName(country));
-    set('summary-boxes', String(summary.shippingBoxes));
-    set('summary-max-boxes', String(summary.shipping.maxBoxes));
+    getCountryList().forEach(({ code, name }) => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = name;
+      if (code === preferredCountry) opt.selected = true;
+      countrySelect.appendChild(opt);
+    });
 
-    updateCheckoutSubmitState(summary);
-  }
+    function refreshSummary() {
+      const country = countrySelect.value || preferredCountry || 'US';
+      const summary = getCartSummary(country);
 
-  countrySelect.addEventListener('change', refreshSummary);
-  refreshSummary();
+      setCheckoutEmptyState(summary.isEmpty);
 
-  const paymentRadios = $$('input[name="paymentMethod"]');
-  const cardSection = $('#card-payment-section');
-  const bankSection = $('#bank-transfer-preview');
+      if (summary.isEmpty) {
+        updateCheckoutSubmitState(summary);
+        return;
+      }
 
-  function togglePaymentUI() {
-    const method = form.paymentMethod.value;
-    if (cardSection) cardSection.hidden = method !== 'card';
-    if (bankSection) bankSection.hidden = method !== 'bank_transfer';
+      const listEl = $('#checkout-items');
+      if (listEl) listEl.innerHTML = summary.items.map(renderCheckoutItem).join('');
 
-    if (method === 'card') {
-      mountCardElement();
-    } else {
-      destroyCardElement();
-    }
-
-    if (method === 'bank_transfer' && bankSection) {
-      const summary = getCartSummary(countrySelect.value);
-      const previewOrder = {
-        reference: '(se generará al confirmar)',
-        total: summary.total,
-        customer: { fullName: form.fullName.value.trim(), email: form.email.value.trim() },
+      const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
       };
-      renderBankTransferDetails(previewOrder, bankSection, {
-        showReference: false,
-        showAmount: true,
-      });
+
+      set('summary-subtotal', formatCurrency(summary.subtotal));
+      set('summary-shipping', formatCurrency(summary.shippingCost));
+      set('summary-total', formatCurrency(summary.total));
+      set('summary-delivery', `${summary.shipping.estimatedDays} días hábiles`);
+      set('summary-zone', summary.shipping.zone.name);
+      set('summary-units', String(summary.totalUnits));
+      set('summary-carrier', summary.shipping.carrier);
+      set('summary-origin', summary.shipping.originLabel);
+      set('summary-destination', getCountryName(country));
+      set('summary-boxes', String(summary.shippingBoxes));
+      set('summary-max-boxes', String(summary.shipping.maxBoxes));
+
+      updateCheckoutSubmitState(summary);
     }
-  }
 
-  paymentRadios.forEach((radio) => radio.addEventListener('change', togglePaymentUI));
-  countrySelect.addEventListener('change', () => {
+    countrySelect.addEventListener('change', refreshSummary);
     refreshSummary();
-    if (form.paymentMethod.value === 'bank_transfer') togglePaymentUI();
-  });
 
-  togglePaymentUI();
-  form.addEventListener('submit', submitCheckout);
+    const paymentRadios = $$('input[name="paymentMethod"]');
+    const cardSection = $('#card-payment-section');
+    const bankSection = $('#bank-transfer-preview');
+    const sandboxNotice = $('#sandbox-payment-notice');
+
+    function togglePaymentUI() {
+      const method = form.paymentMethod.value;
+      if (cardSection) cardSection.hidden = method !== 'card';
+      if (bankSection) bankSection.hidden = method !== 'bank_transfer';
+      if (sandboxNotice) sandboxNotice.hidden = method !== 'sandbox';
+
+      if (method === 'card') {
+        mountCardElement();
+      } else {
+        destroyCardElement();
+      }
+
+      if (method === 'bank_transfer' && bankSection) {
+        const summary = getCartSummary(countrySelect.value || preferredCountry || 'US');
+        if (!summary.isEmpty) {
+          const previewOrder = {
+            reference: '(se generará al confirmar)',
+            total: summary.total,
+            customer: { fullName: form.fullName.value.trim(), email: form.email.value.trim() },
+          };
+          renderBankTransferDetails(previewOrder, bankSection, {
+            showReference: false,
+            showAmount: true,
+          });
+        }
+      }
+    }
+
+    paymentRadios.forEach((radio) => radio.addEventListener('change', togglePaymentUI));
+    countrySelect.addEventListener('change', () => {
+      refreshSummary();
+      if (form.paymentMethod.value === 'bank_transfer') togglePaymentUI();
+    });
+
+    togglePaymentUI();
+    form.addEventListener('submit', submitCheckout);
+    window.addEventListener('cart:updated', refreshSummary);
+  } catch (err) {
+    console.error('[Checkout] init error:', err);
+    showCheckoutFatalError(
+      err.message || 'Error al inicializar el checkout. Recarga la página e intenta de nuevo.'
+    );
+  }
 }
 
 if (typeof module !== 'undefined' && module.exports) {

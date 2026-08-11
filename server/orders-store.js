@@ -74,7 +74,10 @@ function createOrder(order) {
   const record = {
     ...order,
     refundEligible: false,
-    status: order.paymentStatus === 'paid' ? 'confirmed' : 'awaiting_payment',
+    status:
+      order.paymentStatus === 'paid' || order.paymentStatus === 'paid_sandbox'
+        ? 'confirmed'
+        : 'awaiting_payment',
     registeredAt: new Date().toISOString(),
   };
 

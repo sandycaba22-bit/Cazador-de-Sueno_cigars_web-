@@ -120,7 +120,9 @@ function resolveCartItem(entry) {
 
 function getCartItems() {
   reconcileCart();
-  return loadCart().map(resolveCartItem).filter(Boolean);
+  const modern = loadCart().map(resolveCartItem).filter(Boolean);
+  if (modern.length) return modern;
+  return typeof getLegacyCartItems === 'function' ? getLegacyCartItems() : [];
 }
 
 function addToCart(productId, quantity = 1, unitType = UNIT_TYPES.BOX) {
@@ -146,6 +148,11 @@ function addToCart(productId, quantity = 1, unitType = UNIT_TYPES.BOX) {
 }
 
 function updateCartQuantity(lineId, quantity) {
+  if (typeof isLegacyLineId === 'function' && isLegacyLineId(lineId)) {
+    const productId = legacyProductIdFromLineId(lineId);
+    return updateLegacyCartQuantity(productId, quantity);
+  }
+
   const { productId, unitType } = parseCartLineId(lineId);
   const cart = loadCart();
   const idx = cart.findIndex(
@@ -174,6 +181,11 @@ function updateCartQuantity(lineId, quantity) {
 }
 
 function removeFromCart(lineId) {
+  if (typeof isLegacyLineId === 'function' && isLegacyLineId(lineId)) {
+    removeLegacyCartItem(legacyProductIdFromLineId(lineId));
+    return getCartItems();
+  }
+
   const cart = loadCart().filter(
     (i) => getCartLineId(i.productId, i.unitType || UNIT_TYPES.BOX) !== lineId
   );
@@ -183,6 +195,14 @@ function removeFromCart(lineId) {
 
 function clearCart() {
   saveCart([]);
+  if (typeof clearLegacyCart === 'function') clearLegacyCart();
+}
+
+function getPreferredShippingCountry() {
+  const legacyCountry =
+    typeof getLegacyShippingCountry === 'function' ? getLegacyShippingCountry() : null;
+  if (legacyCountry) return legacyCountry;
+  return 'US';
 }
 
 function getCartSummary(countryCode = 'MX') {
@@ -241,5 +261,6 @@ if (typeof module !== 'undefined' && module.exports) {
     getCartCount,
     getCartLineCount,
     initCartPersistence,
+    getPreferredShippingCountry,
   };
 }

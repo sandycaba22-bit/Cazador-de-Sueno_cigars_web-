@@ -61,6 +61,7 @@
         }
 
         const isBank = method === 'bank' || order.paymentMethod === 'bank_transfer';
+        const isSandbox = method === 'sandbox' || order.paymentMethod === 'sandbox';
 
         const itemsHtml = order.items
           .map(
@@ -73,8 +74,14 @@
           .join('');
 
         container.innerHTML = `
-          <div class="confirmation-icon">${isBank ? '🏦' : '✓'}</div>
-          <h1>${isBank ? 'Pedido registrado — transferencia pendiente' : '¡Pago confirmado!'}</h1>
+          <div class="confirmation-icon">${isSandbox ? '🧪' : isBank ? '🏦' : '✓'}</div>
+          <h1>${
+            isSandbox
+              ? 'Pedido de prueba registrado (sandbox)'
+              : isBank
+                ? 'Pedido registrado — transferencia pendiente'
+                : '¡Pago confirmado!'
+          }</h1>
           <p class="confirmation-ref">Referencia: <strong>${escapeHtml(order.reference)}</strong></p>
           <p>Estado: <strong>${escapeHtml(order.status || order.paymentStatus)}</strong></p>
           <p>Envío a ${escapeHtml(order.shipping.countryName || order.shipping.country)} · ${escapeHtml(order.shipping.city)}</p>

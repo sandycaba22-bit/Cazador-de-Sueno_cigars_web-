@@ -30,7 +30,19 @@
     </header>
 
     <main class="checkout-page">
-      <div class="container checkout-layout">
+      <div class="container">
+        <div id="checkout-error-banner" class="checkout-error-banner" hidden role="alert"></div>
+
+        <div id="checkout-empty" class="checkout-empty" hidden>
+          <h1>Tu carrito está vacío</h1>
+          <p>Añade productos desde el catálogo o desde las páginas de vitolas antes de finalizar la compra.</p>
+          <div class="checkout-empty__actions">
+            <a href="index.html#catalogo" class="btn btn--primary">Ver catálogo</a>
+            <a href="vitolas/el-rango.html" class="btn btn--secondary">Ver vitolas</a>
+          </div>
+        </div>
+
+        <div id="checkout-main" class="checkout-layout">
         <section class="checkout-form-section">
           <h1>Finalizar compra</h1>
           <p class="checkout-intro">Envío internacional y pagos seguros desde cualquier país.</p>
@@ -83,7 +95,7 @@
             <fieldset class="form-section">
               <legend>Método de pago</legend>
               <div class="payment-methods">
-                <label class="payment-option">
+                <label class="payment-option" id="payment-option-card">
                   <input type="radio" name="paymentMethod" value="card" checked />
                   <span>
                     <strong>Tarjeta de crédito / débito</strong>
@@ -97,6 +109,22 @@
                     <small>Pago manual con referencia única de pedido</small>
                   </span>
                 </label>
+                <label class="payment-option" id="payment-option-sandbox" hidden>
+                  <input type="radio" name="paymentMethod" value="sandbox" />
+                  <span>
+                    <strong id="sandbox-payment-label">Pago de prueba (sandbox)</strong>
+                    <small>Simula una compra completa sin cargo real ni API de backend</small>
+                  </span>
+                </label>
+              </div>
+
+              <p id="stripe-unavailable-notice" class="checkout-notice" hidden>
+                Pagos con tarjeta no disponibles hasta configurar la clave pública de Stripe en
+                <code>js/config.js</code>.
+              </p>
+
+              <div id="sandbox-payment-notice" class="checkout-notice checkout-notice--sandbox" hidden>
+                Modo sandbox activo: se registrará un pedido de prueba en este navegador.
               </div>
 
               <div id="card-payment-section" class="card-payment-section">
@@ -144,7 +172,7 @@
           </form>
         </section>
 
-        <aside class="checkout-summary">
+        <aside id="checkout-summary-panel" class="checkout-summary">
           <h2>Resumen del pedido</h2>
           <div id="checkout-items" class="checkout-items"></div>
           <div class="checkout-summary__shipping-panel">
@@ -189,6 +217,7 @@
           </p>
           <p class="checkout-summary__secure">🔒 Pagos cifrados · Cumplimiento PCI vía Stripe</p>
         </aside>
+        </div>
       </div>
     </main>
 
@@ -214,6 +243,7 @@
     <script src="js/catalog.js"></script>
     <script src="js/shipping.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/cart-legacy-bridge.js"></script>
     <script src="js/bank.js"></script>
     <script src="js/orders.js"></script>
     <script src="js/cart.js"></script>
@@ -229,6 +259,40 @@
         if (label) label.textContent = SALES_POLICY.checkoutText;
         if (legal) legal.textContent = SALES_POLICY.legalNotice;
         if (customsLabel) customsLabel.textContent = CUSTOMS_DISCLAIMER.checkoutText;
+        const sandboxLabel = document.getElementById('sandbox-payment-label');
+        if (sandboxLabel && APP_CONFIG.sandbox?.label) {
+          sandboxLabel.textContent = APP_CONFIG.sandbox.label;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('selftest') === 'legacy') {
+          localStorage.setItem('cds-shopping-cart', JSON.stringify({
+            items: [{
+              productId: 'rango',
+              name: 'El Rango',
+              price: 16,
+              quantity: 10,
+              boxSize: 10,
+              weight: 16,
+              category: 'premium',
+            }],
+            subtotal: 160,
+            shipping: 0,
+            total: 160,
+            currency: 'USD',
+            shippingCountry: 'US',
+            isPaid: false,
+          }));
+          localStorage.removeItem('cazador_sueno_cart');
+        } else if (params.get('selftest') === 'modern') {
+          localStorage.setItem('cazador_sueno_cart', JSON.stringify({
+            version: 2,
+            items: [{ productId: 'cs-rango-petit', unitType: 'box', quantity: 1 }],
+            updatedAt: Date.now(),
+          }));
+          localStorage.removeItem('cds-shopping-cart');
+        }
+
         initCheckoutPage();
       });
     </script>
