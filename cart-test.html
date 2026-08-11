@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Google Analytics 4 - Global Tracking -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BYRS7MGYXK', {
+      'anonymize_ip': true,
+      'cookie_flags': 'samesite=none;secure',
+      'custom_map': {
+        'dimension1': 'page_type',
+        'dimension2': 'user_language'
+      }
+    });
+  </script>
+  
+  <title>Carrito de Compras - Cazador de Sueños Cigars</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .cart-test-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: var(--navy-deep);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+    }
+    
+    .cart-test-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--gold-subtle);
+    }
+    
+    .cart-test-header h1 {
+      font-family: var(--font-display);
+      color: var(--gold);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .cart-test-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .cart-test-btn {
+      padding: 0.75rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy-deep);
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-ui);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .cart-test-btn:hover {
+      background: var(--gold-light);
+    }
+    
+    .cart-test-btn--danger {
+      background: #8B0000;
+      color: #fff;
+    }
+    
+    .cart-test-btn--danger:hover {
+      background: #A52A2A;
+    }
+    
+    .cart-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--navy-panel);
+      border: 1px solid var(--gold-subtle);
+      border-radius: 6px;
+    }
+    
+    .cart-item-image {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+    
+    .cart-item-details {
+      flex: 1;
+    }
+    
+    .cart-item-name {
+      font-family: var(--font-display);
+      color: var(--cream);
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .cart-item-price {
+      color: var(--gold);
+      font-family: var(--font-price);
+      font-size: 1.1rem;
+    }
+    
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .cart-qty-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--gold);
+      color: var(--navy-deep);
+      border: none;
+      border-radius: 4px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .cart-qty-btn:hover {
+      background: var(--gold-light);
+    }
+    
+    .cart-qty-btn:disabled {
+      background: #666;
+      color: #999;
+      cursor: not-allowed;
+    }
+    
+    .cart-qty-display {
+      font-family: var(--font-display);
+      color: var(--cream);
+      font-size: 1.25rem;
+      min-width: 40px;
+      text-align: center;
+    }
+    
+    .cart-item-remove {
+      padding: 0.5rem 1rem;
+      background: #8B0000;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+    }
+    
+    .cart-item-remove:hover {
+      background: #A52A2A;
+    }
+    
+    .cart-item-remove:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    
+    .cart-summary {
+      background: var(--navy-panel);
+      padding: 1.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--gold-subtle);
+    }
+    
+    .cart-summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--gold-subtle);
+    }
+    
+    .cart-summary-row:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      font-size: 1.25rem;
+      color: var(--gold);
+    }
+    
+    .cart-status {
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      text-align: center;
+      font-family: var(--font-body);
+    }
+    
+    .cart-status--unlocked {
+      background: rgba(46, 125, 50, 0.2);
+      color: #81c784;
+      border: 1px solid #4caf50;
+    }
+    
+    .cart-status--locked {
+      background: rgba(139, 0, 0, 0.2);
+      color: #ef9a9a;
+      border: 1px solid #8B0000;
+    }
+    
+    .empty-cart-message {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gray-400);
+      font-family: var(--font-body);
+    }
+  </style>
+</head>
+<body>
+  <div class="cart-test-container">
+    <div class="cart-test-header">
+      <h1>🛒 Carrito de Compras Premium</h1>
+      <p style="color: var(--gray-400);">Sistema estilo PedidosYa con bloqueo post-pago</p>
+    </div>
+    
+    <div class="cart-test-controls">
+      <button class="cart-test-btn" onclick="testAddEmperador()">+ El Emperador</button>
+      <button class="cart-test-btn" onclick="testAddPuroHabano()">+ Puro Habano</button>
+      <button class="cart-test-btn" onclick="testAddExquisito()">+ El Exquisito</button>
+      <button class="cart-test-btn" onclick="testAddRango()">+ El Rango</button>
+      <button class="cart-test-btn" onclick="testAddLigero()">+ Ligero 007</button>
+      <button class="cart-test-btn" onclick="testAddSultan()">+ El Sultán</button>
+      <button class="cart-test-btn cart-test-btn--danger" onclick="testLockCart()">🔒 Simular Pago y Bloquear</button>
+      <button class="cart-test-btn" onclick="testUnlockCart()">🔓 Desbloquear (Admin)</button>
+      <button class="cart-test-btn cart-test-btn--danger" onclick="testClearCart()">🗑️ Limpiar Carrito</button>
+    </div>
+    
+    <div id="cartStatus" class="cart-status cart-status--unlocked">
+      Estado: <strong>Desbloqueado</strong> - Puedes agregar y modificar productos
+    </div>
+    
+    <div id="cartItems" class="cart-items-list">
+      <div class="empty-cart-message">
+        El carrito está vacío. Agrega productos para probar.
+      </div>
+    </div>
+    
+    <div class="cart-summary">
+      <div class="cart-summary-row">
+        <span>Subtotal:</span>
+        <span id="cartSubtotal">$0.00</span>
+      </div>
+      <div class="cart-summary-row">
+        <span>Envío:</span>
+        <span id="cartShipping">$0.00</span>
+      </div>
+      <div class="cart-summary-row">
+        <span>Total:</span>
+        <span id="cartTotal">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/shopping-cart.js"></script>
+  <script>
+    // Esperar a que el carrito esté inicializado
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        if (window.ShoppingCart) {
+          renderCart();
+          setupCartListeners();
+        }
+      }, 500);
+    });
+
+    function setupCartListeners() {
+      window.addEventListener('cds:cart-updated', renderCart);
+      window.addEventListener('cds:cart-locked', renderCart);
+      window.addEventListener('cds:cart-unlocked', renderCart);
+    }
+
+    function renderCart() {
+      const cart = ShoppingCart.getCart();
+      const cartItems = document.getElementById('cartItems');
+      const cartStatus = document.getElementById('cartStatus');
+      
+      // Actualizar estado
+      if (cart.isPaid) {
+        cartStatus.className = 'cart-status cart-status--locked';
+        cartStatus.innerHTML = `Estado: <strong>Bloqueado</strong> - Orden #${cart.orderId || 'N/A'} procesada`;
+      } else {
+        cartStatus.className = 'cart-status cart-status--unlocked';
+        cartStatus.innerHTML = 'Estado: <strong>Desbloqueado</strong> - Puedes agregar y modificar productos';
+      }
+      
+      // Renderizar items
+      if (cart.items.length === 0) {
+        cartItems.innerHTML = '<div class="empty-cart-message">El carrito está vacío. Agrega productos para probar.</div>';
+      } else {
+        cartItems.innerHTML = cart.items.map(item => `
+          <div class="cart-item">
+            <img src="${item.image}" alt="${item.name}" class="cart-item-image" onerror="this.src='https://via.placeholder.com/80x80?text=Cigarro'">
+            <div class="cart-item-details">
+              <div class="cart-item-name">${item.name}</div>
+              <div class="cart-item-price">$${item.price.toFixed(2)} USD</div>
+            </div>
+            <div class="cart-item-controls">
+              <button class="cart-qty-btn" onclick="testDecreaseQuantity('${item.productId}')" ${cart.isPaid ? 'disabled' : ''}>-</button>
+              <span class="cart-qty-display">${item.quantity}</span>
+              <button class="cart-qty-btn" onclick="testIncreaseQuantity('${item.productId}')" ${cart.isPaid ? 'disabled' : ''}>+</button>
+            </div>
+            <button class="cart-item-remove" onclick="testRemoveItem('${item.productId}')" ${cart.isPaid ? 'disabled' : ''}>Eliminar</button>
+          </div>
+        `).join('');
+      }
+      
+      // Actualizar totales
+      document.getElementById('cartSubtotal').textContent = `$${cart.subtotal.toFixed(2)}`;
+      document.getElementById('cartShipping').textContent = `$${cart.shipping.toFixed(2)}`;
+      document.getElementById('cartTotal').textContent = `$${cart.total.toFixed(2)}`;
+    }
+
+    // Funciones de prueba
+    function testAddEmperador() {
+      ShoppingCart.addToCart('emperador', 1);
+    }
+
+    function testAddPuroHabano() {
+      ShoppingCart.addToCart('puro-habano', 1);
+    }
+
+    function testAddExquisito() {
+      ShoppingCart.addToCart('exquisito', 1);
+    }
+
+    function testAddRango() {
+      ShoppingCart.addToCart('rango', 1);
+    }
+
+    function testAddLigero() {
+      ShoppingCart.addToCart('ligero', 1);
+    }
+
+    function testAddSultan() {
+      ShoppingCart.addToCart('sultan', 1);
+    }
+
+    function testDecreaseQuantity(productId) {
+      ShoppingCart.decreaseQuantity(productId);
+    }
+
+    function testIncreaseQuantity(productId) {
+      ShoppingCart.addToCart(productId, 1);
+    }
+
+    function testRemoveItem(productId) {
+      ShoppingCart.removeFromCart(productId);
+    }
+
+    function testLockCart() {
+      const orderId = 'ORD-' + Date.now();
+      ShoppingCart.lockCartAfterPayment(orderId);
+      alert('Carrito bloqueado simulando pago exitoso. Orden ID: ' + orderId);
+    }
+
+    function testUnlockCart() {
+      ShoppingCart.unlockCartForNewOrder();
+      alert('Carrito desbloqueado para nueva orden (función administrativa)');
+    }
+
+    function testClearCart() {
+      ShoppingCart.clearCart();
+    }
+  </script>
+</body>
+</html>

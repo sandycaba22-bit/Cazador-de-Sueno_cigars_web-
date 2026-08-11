@@ -1,0 +1,4854 @@
+/* ============================================
+   Cazador de Sueños Cigars — Ultra Luxury
+   ============================================ */
+
+:root {
+  /* Paleta — Tonos limpios y acentos sutiles de lujo */
+  --navy: #0f2238;
+  --navy-deep: #0a1826;
+  --navy-light: #163050;
+  --navy-panel: #112844;
+  --gold: #c6a25a;
+  --gold-light: #e7d3a0;
+  --gold-dark: #93763c;
+  --gold-glow: rgba(198, 162, 90, 0.12);
+  --cream: #f4efe2;
+  --gold-subtle: rgba(198, 162, 90, 0.08);
+  --navy-subtle: rgba(15, 34, 56, 0.06);
+
+  /* Alias legados — remapeados a la nueva paleta para coherencia total */
+  --black: #07111d;
+  --white: #f4efe2;
+  --gray-100: #e6ddca;
+  --gray-300: #aeb9c6;
+  --gray-400: #8794a3;
+  --gray-500: #65717f;
+  --gray-800: #16273b;
+  --gray-900: #0d2036;
+
+  /* Tipografía elegante de lujo — serif refinada */
+  --font-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+  --font-body: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Cormorant Garamond', Georgia, serif;
+  --font-price: 'Bodoni Moda', 'Didot', 'Bodoni MT', 'Times New Roman', serif;
+  --space-section: clamp(5.5rem, 11vw, 10rem);
+  --space-block: clamp(2rem, 4vw, 3.5rem);
+  --content-max: 1320px;
+  --transition: 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow: 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --intro-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --intro-exit: cubic-bezier(0.45, 0, 0.15, 1);
+}
+
+/* ============================================
+   Luxury Purchase Panel (Vitola Pages)
+   ============================================ */
+
+.vitola-purchase-panel {
+  position: sticky;
+  top: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f6f2 100%);
+  border: 1px solid rgba(198, 162, 90, 0.3);
+  border-radius: 8px;
+  padding: 2.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 24px rgba(198, 162, 90, 0.08);
+  z-index: 100;
+}
+
+.purchase-panel__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.purchase-panel__info {
+  flex: 1;
+}
+
+.purchase-panel__name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.85rem;
+  font-weight: 400;
+  color: #0a1826;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+.purchase-panel__description {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1rem;
+  color: #65717f;
+  margin: 0 0 1.5rem 0;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.purchase-panel__price,
+.purchase-panel__box-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(198, 162, 90, 0.2);
+}
+
+.purchase-panel__price-label,
+.purchase-panel__box-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.85rem;
+  color: #65717f;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.purchase-panel__price-value,
+.purchase-panel__box-value {
+  font-family: 'Bodoni Moda', 'Didot', 'Bodoni MT', 'Times New Roman', serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: #c6a25a;
+  letter-spacing: 0.06em;
+  font-style: normal;
+}
+
+.purchase-panel__box-value {
+  font-size: 1.5rem;
+}
+
+.purchase-panel__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 200px;
+}
+
+.purchase-panel__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #c6a25a 0%, #93763c 100%);
+  border: 1px solid rgba(198, 162, 90, 0.2);
+  border-radius: 6px;
+  color: #ffffff;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(198, 162, 90, 0.15);
+}
+
+.purchase-panel__button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(198, 162, 90, 0.25);
+  background: linear-gradient(135deg, #d4b368 0%, #a3844a 100%);
+}
+
+.purchase-panel__button:active {
+  transform: translateY(0);
+}
+
+.purchase-panel__button--unit {
+  background: linear-gradient(135deg, #0a1826 0%, #163050 100%);
+  border: 1px solid rgba(15, 34, 56, 0.3);
+  box-shadow: 0 2px 8px rgba(10, 24, 38, 0.15);
+}
+
+.purchase-panel__button--unit:hover {
+  background: linear-gradient(135deg, #163050 0%, #1a3a5c 100%);
+  box-shadow: 0 4px 12px rgba(10, 24, 38, 0.25);
+}
+
+.purchase-panel__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .vitola-purchase-panel {
+    position: relative;
+    top: 0;
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+  }
+
+  .purchase-panel__content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .purchase-panel__name {
+    font-size: 1.5rem;
+  }
+
+  .purchase-panel__description {
+    font-size: 0.9rem;
+  }
+
+  .purchase-panel__price-value,
+  .purchase-panel__box-value {
+    font-size: 1.1rem;
+  }
+
+  .purchase-panel__box-value {
+    font-size: 1.3rem;
+  }
+
+  .purchase-panel__actions {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .purchase-panel__button {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vitola-purchase-panel {
+    padding: 1.25rem;
+  }
+
+  .purchase-panel__name {
+    font-size: 1.25rem;
+  }
+
+  .purchase-panel__price-value,
+  .purchase-panel__box-value {
+    font-size: 1rem;
+  }
+
+  .purchase-panel__box-value {
+    font-size: 1.15rem;
+  }
+}
+
+/* ============================================
+   CART LOCK SYSTEM - Estilos de Bloqueo Post-Pago
+   ============================================ */
+
+/* Banner Global de Bloqueo */
+.cart-lock-banner-global {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-bottom: 2px solid #FFD700;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.cart-lock-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.cart-lock-icon-global {
+  font-size: 1.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.cart-lock-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cart-lock-text strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cart-lock-text span {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  font-family: var(--font-body);
+}
+
+/* Notificación Flotante de Bloqueo */
+.cart-lock-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.cart-lock-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 2px solid #FFD700;
+  max-width: 400px;
+}
+
+.cart-lock-icon {
+  font-size: 1.75rem;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+.cart-lock-message {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Botones de Compra Bloqueados */
+.purchase-panel__button--locked {
+  background: linear-gradient(135deg, #666 0%, #444 100%) !important;
+  color: #999 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  border: 1px solid #555 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.purchase-panel__button--locked:hover {
+  background: linear-gradient(135deg, #666 0%, #444 100%) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.purchase-panel__button--locked .purchase-panel__icon {
+  opacity: 0.5;
+}
+
+/* Tooltip de Bloqueo en Botones */
+.purchase-lock-notification {
+  animation: none;
+  transform: none;
+  top: auto;
+  left: auto;
+}
+
+.purchase-lock-tooltip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #8B0000;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #FFD700;
+  white-space: nowrap;
+}
+
+.purchase-lock-tooltip .lock-icon {
+  font-size: 1rem;
+  animation: none;
+}
+
+/* Elementos del Carrito Bloqueados */
+[data-cart-action].cart-locked {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+}
+
+[data-cart-action].cart-locked:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design para Banner de Bloqueo */
+@media (max-width: 768px) {
+  .cart-lock-banner-global {
+    padding: 0.5rem 1rem;
+  }
+
+  .cart-lock-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .cart-lock-icon-global {
+    align-self: flex-start;
+  }
+
+  .cart-lock-text strong {
+    font-size: 0.9rem;
+  }
+
+  .cart-lock-text span {
+    font-size: 0.75rem;
+  }
+
+  .cart-lock-banner {
+    max-width: 90vw;
+    padding: 0.75rem 1rem;
+  }
+
+  .cart-lock-message {
+    font-size: 0.85rem;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .vitola-purchase-panel {
+    border-width: 3px;
+  }
+
+  .purchase-panel__price-value,
+  .purchase-panel__box-value {
+    color: #0a1826;
+    font-weight: 800;
+  }
+
+  .purchase-panel__button {
+    border: 2px solid #0a1826;
+  }
+}
+
+/* ============================================
+   SEO CONTENT STYLES - Vitolas Pages
+   ============================================ */
+
+.vitola-seo-content {
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, rgba(10, 24, 38, 0.95) 0%, rgba(15, 34, 56, 0.98) 100%);
+  border-top: 1px solid rgba(198, 162, 90, 0.2);
+  border-bottom: 1px solid rgba(198, 162, 90, 0.2);
+  margin: 2rem 0;
+}
+
+.vitola-seo-content h2 {
+  font-family: var(--font-display);
+  color: var(--gold);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: 0.08em;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.seo-content__text {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.seo-content__paragraph {
+  font-family: var(--font-body);
+  color: var(--cream);
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+
+.seo-content__paragraph strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.seo-content__paragraph em {
+  color: var(--gold-light);
+  font-style: italic;
+}
+
+.seo-content__subtitle {
+  font-family: var(--font-display);
+  color: var(--gold-light);
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  letter-spacing: 0.06em;
+  margin: 2rem 0 1rem 0;
+  font-weight: 400;
+}
+
+.seo-content__markets {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.seo-content__markets li {
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  line-height: 1.6;
+  padding: 0.75rem 1rem;
+  background: rgba(198, 162, 90, 0.1);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+}
+
+.seo-content__markets li strong {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.seo-content__benefits {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+.seo-content__benefits li {
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  line-height: 1.8;
+  padding: 0.5rem 0;
+  padding-left: 2rem;
+  position: relative;
+}
+
+.seo-content__benefits li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: bold;
+}
+
+/* Responsive for SEO content */
+@media (max-width: 768px) {
+  .vitola-seo-content {
+    padding: 2rem 1rem;
+  }
+  
+  .seo-content__markets {
+    grid-template-columns: 1fr;
+  }
+  
+  .seo-content__paragraph {
+    font-size: 0.95rem;
+  }
+}
+
+/* Dark Mode Support (if needed in future) */
+@media (prefers-color-scheme: dark) {
+  .vitola-purchase-panel {
+    background: linear-gradient(135deg, #1a2a3a 0%, #0f2238 100%);
+    border-color: #c6a25a;
+  }
+
+  .purchase-panel__name {
+    color: #f4efe2;
+  }
+
+  .purchase-panel__description {
+    color: #aeb9c6;
+  }
+
+  .purchase-panel__price-label,
+  .purchase-panel__box-label {
+    color: #aeb9c6;
+  }
+}
+
+/* ============================================
+   Age Gate
+   ============================================ */
+
+.age-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.6s ease, visibility 0.6s;
+}
+
+.age-gate--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.age-gate__panel {
+  text-align: center;
+  max-width: 420px;
+  padding: 3rem 2.5rem;
+  border: 1px solid rgba(201, 169, 98, 0.25);
+  background: var(--gray-900);
+}
+
+.age-gate__label {
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.age-gate__title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.2rem;
+}
+
+.age-gate__text {
+  font-size: 0.85rem;
+  color: var(--gray-300);
+  margin-bottom: 2rem;
+  line-height: 1.7;
+}
+
+.age-gate__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.age-gate__exit {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.age-gate__exit:hover {
+  color: var(--gray-300);
+}
+
+/* ============================================
+   Scroll Reveal
+   ============================================ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 1s var(--intro-ease), transform 1s var(--intro-ease);
+}
+
+.reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================
+   INTRO — 8s Ultra Luxury Welcome
+   ============================================ */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  overflow: hidden;
+  pointer-events: all;
+}
+
+.intro--done {
+  pointer-events: none;
+}
+
+.intro__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transform: scale(1.12);
+  filter: brightness(0.18) saturate(0.55) contrast(1.35);
+  transition: opacity 2s var(--intro-ease), transform 12s linear;
+}
+
+.intro--reveal .intro__video {
+  opacity: 0.38;
+  transform: scale(1.02);
+}
+
+.intro__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 50% at 50% 48%, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.75) 50%, rgba(0, 0, 0, 0.98) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.3) 20%, rgba(0, 0, 0, 0.3) 80%, rgba(0, 0, 0, 0.95) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.intro__depth {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 40% 35% at 50% 48%, rgba(201, 169, 98, 0.04) 0%, transparent 70%);
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.intro__abyss {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 2;
+  opacity: 1;
+  transition: opacity 2s var(--intro-ease) 0.15s;
+  pointer-events: none;
+}
+
+.intro--reveal .intro__abyss {
+  opacity: 0;
+}
+
+.intro__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.intro__canvas--smoke {
+  filter: blur(2px);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 1.5s ease 0.4s;
+}
+
+.intro--reveal .intro__canvas--smoke {
+  opacity: 0.85;
+}
+
+.intro__canvas--embers {
+  z-index: 4;
+  mix-blend-mode: screen;
+}
+
+.intro__logo-wrap {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  background: transparent;
+  transform: translate(-50%, -50%) scale(0.55);
+  opacity: 0;
+  filter: brightness(0) blur(8px);
+  transition:
+    transform 2s var(--intro-ease),
+    opacity 1.8s var(--intro-ease),
+    filter 2.2s var(--intro-ease);
+  will-change: transform, opacity, filter;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.intro--reveal .intro__logo-wrap {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  filter: brightness(1) blur(0);
+}
+
+.intro--exiting .intro__logo-wrap {
+  transition:
+    transform 1.4s var(--intro-exit),
+    opacity 1s ease 0.3s,
+    filter 1s ease;
+  z-index: 10001;
+}
+
+.intro--exiting .intro__logo-wrap {
+  opacity: 1;
+  filter: brightness(1) blur(0);
+}
+
+.intro--done .intro__logo-wrap {
+  opacity: 0;
+}
+
+.intro__logo-canvas {
+  display: block;
+  position: relative;
+  z-index: 3;
+  background: transparent;
+  mix-blend-mode: screen;
+  filter:
+    drop-shadow(0 0 50px rgba(201, 169, 98, 0.45))
+    drop-shadow(0 0 20px rgba(255, 140, 50, 0.2));
+}
+
+.intro__logo-aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140%;
+  height: 160%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center,
+    rgba(201, 169, 98, 0.18) 0%,
+    rgba(255, 120, 40, 0.06) 35%,
+    transparent 70%);
+  animation: auraPulse 4s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.intro__fire-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 108%;
+  height: 108%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255, 140, 50, 0.5) 40deg,
+    rgba(232, 213, 163, 0.7) 80deg,
+    transparent 120deg,
+    rgba(201, 169, 98, 0.4) 200deg,
+    rgba(255, 90, 30, 0.45) 260deg,
+    transparent 320deg
+  );
+  filter: blur(6px);
+  opacity: 0;
+  animation: fireRingSpin 6s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 2s ease 1s;
+}
+
+.intro--reveal .intro__fire-ring {
+  opacity: 0.65;
+}
+
+.intro__fire-shimmer {
+  position: absolute;
+  inset: -12%;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 200, 100, 0.12) 45%,
+    rgba(255, 230, 180, 0.22) 50%,
+    rgba(255, 200, 100, 0.12) 55%,
+    transparent 65%
+  );
+  background-size: 250% 100%;
+  animation: shimmerSweep 5s ease-in-out infinite;
+  z-index: 3;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity 1.5s ease 1.2s;
+}
+
+.intro--reveal .intro__fire-shimmer {
+  opacity: 1;
+}
+
+@keyframes auraPulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%, -50%) scale(1.08); }
+}
+
+@keyframes fireRingSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes shimmerSweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Intro exit — fade overlay */
+.intro--exiting .intro__video,
+.intro--exiting .intro__canvas,
+.intro--exiting .intro__vignette {
+  opacity: 0 !important;
+  transition: opacity 1.2s ease;
+}
+
+.intro--exiting .intro__abyss {
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.intro--done {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+/* Site hidden during intro */
+.is-intro .site {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.site {
+  transition: opacity 1.4s var(--intro-ease) 0.2s, visibility 1.4s;
+}
+
+.site-revealed .site {
+  opacity: 1;
+  visibility: visible;
+}
+
+.is-intro .site-header {
+  opacity: 0;
+}
+
+.site-revealed .site-header {
+  opacity: 1;
+  transition: opacity 1s ease 0.4s, background var(--transition), backdrop-filter var(--transition);
+}
+
+.is-intro .nav__logo-img {
+  opacity: 0 !important;
+  visibility: hidden;
+}
+
+.site-revealed .nav__logo-img.logo-canvas--ready {
+  opacity: 1 !important;
+  visibility: visible;
+  transition: opacity 0.8s ease 0.2s;
+}
+
+/* Reset & Base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 18px;
+}
+
+body {
+  background-color: var(--navy-deep);
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(22, 48, 80, 0.55) 0%, transparent 60%),
+    linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+  background-attachment: fixed;
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.85;
+  letter-spacing: 0.015em;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Macro photography — integridad visual, sin recortes ni deformación */
+.macro-stage,
+.vitola-card__media,
+.ligero-gallery__frame,
+.legado__frame,
+.vitola-detail__visual {
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, #111 0%, #050505 100%);
+}
+
+.vitola-card__media,
+.ligero-gallery__frame,
+.legado__frame,
+.vitola-detail__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ligero-gallery__frame {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.vitola-card__image,
+.ligero-gallery__img,
+.legado__image,
+.vitola-detail__visual img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(78vh, 860px);
+  object-fit: contain;
+  object-position: center;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+ul {
+  list-style: none;
+}
+
+strong {
+  font-weight: 500;
+  color: var(--white);
+}
+
+/* Typography */
+
+.section-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.25rem;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5.5vw, 3.75rem);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.12;
+  color: var(--white);
+}
+
+/* Button */
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 1.15rem 3rem;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: color var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+  transform: translateY(100%);
+  transition: transform var(--transition);
+  z-index: -1;
+}
+
+.btn:hover {
+  color: var(--black);
+  border-color: var(--gold-light);
+  box-shadow: 0 0 30px var(--gold-glow);
+}
+
+.btn:hover::before {
+  transform: translateY(0);
+}
+
+/* ============================================
+   Navigation
+   ============================================ */
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 0 clamp(1.5rem, 4vw, 4rem);
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+  transition: background var(--transition), backdrop-filter var(--transition);
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: clamp(1.5rem, 4vw, 4rem);
+  right: clamp(1.5rem, 4vw, 4rem);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 169, 98, 0.35), transparent);
+  opacity: 0.6;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  height: 5.5rem;
+}
+
+.nav__logo {
+  display: flex;
+  align-items: center;
+  transition: opacity var(--transition);
+}
+
+.nav__logo:hover {
+  opacity: 0.85;
+}
+
+.nav__logo-img,
+.footer__logo-img {
+  display: block;
+  width: auto;
+}
+
+.logo-canvas {
+  opacity: 0;
+  background: transparent;
+  mix-blend-mode: screen;
+  transition: opacity var(--transition);
+  filter: drop-shadow(0 0 12px rgba(201, 169, 98, 0.25));
+}
+
+.logo-canvas--ready {
+  opacity: 1;
+}
+
+.logo-canvas--ready + .nav__logo-fallback,
+.logo-canvas--ready + .footer__logo-fallback {
+  display: none;
+}
+
+.nav__logo-fallback {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--white);
+}
+
+.footer__logo-fallback {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.8rem;
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav__item--has-menu {
+  position: relative;
+}
+
+.nav__menu-trigger {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gray-300);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.nav__menu-trigger::after {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 0.45rem;
+  vertical-align: middle;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--gray-500);
+  transition: transform var(--transition);
+}
+
+.nav__item--open .nav__menu-trigger::after {
+  transform: rotate(180deg);
+}
+
+.nav__menu {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  min-width: 18rem;
+  padding: 0.5rem 0;
+  background: rgba(6, 6, 6, 0.98);
+  border: 1px solid rgba(201, 169, 98, 0.22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+  z-index: 200;
+}
+
+.nav__item--open .nav__menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav__menu-entry {
+  display: block;
+  padding: 0.85rem 1.75rem;
+  transition: background var(--transition);
+}
+
+.nav__menu-entry::after {
+  display: none !important;
+}
+
+.nav__menu-entry:hover {
+  background: rgba(201, 169, 98, 0.06);
+}
+
+.nav__menu-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  line-height: 1.3;
+}
+
+.nav__menu-desc {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  margin-top: 0.2rem;
+}
+
+.nav__menu a {
+  display: block;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  color: var(--gray-300);
+  white-space: nowrap;
+}
+
+.nav__menu a::after {
+  display: none;
+}
+
+.nav__menu a:hover {
+  color: var(--gold);
+  background: rgba(201, 169, 98, 0.06);
+}
+
+.nav__menu-divider {
+  display: block;
+  height: 1px;
+  margin: 0.5rem 1rem;
+  background: rgba(201, 169, 98, 0.15);
+}
+
+.nav__menu-all {
+  color: var(--gold) !important;
+  font-weight: 500;
+}
+
+.nav__links a {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gray-300);
+  position: relative;
+}
+
+.nav__links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transition: width var(--transition);
+}
+
+.nav__links a:hover {
+  color: var(--white);
+}
+
+.nav__links a:hover::after {
+  width: 100%;
+}
+
+.nav__cta {
+  border: 1px solid var(--gold-dark) !important;
+  padding: 0.6rem 1.4rem !important;
+  color: var(--gold) !important;
+  transition: background var(--transition), color var(--transition), border-color var(--transition) !important;
+}
+
+.nav__cta::after {
+  display: none !important;
+}
+
+.nav__cta:hover {
+  background: var(--gold);
+  color: var(--black) !important;
+  border-color: var(--gold) !important;
+}
+
+.nav__toggle {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.nav__toggle span {
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--gold);
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+/* ============================================
+   Hero
+   ============================================ */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero__media {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.4) saturate(0.75);
+  transform: scale(1.05);
+  animation: heroZoom 20s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+.hero__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.05);
+  animation: heroZoom 20s ease-in-out infinite alternate;
+  z-index: 0;
+  opacity: 0;
+}
+
+.hero__image:not([hidden]) {
+  opacity: 1;
+  z-index: 1;
+}
+
+@keyframes heroZoom {
+  from { transform: scale(1.05); }
+  to   { transform: scale(1.12); }
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(201, 169, 98, 0.06) 0%, transparent 60%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, transparent 30%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem;
+  max-width: 800px;
+  animation: fadeUp 1.2s ease-out both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero__eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.75rem;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 8.5vw, 5.75rem);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 1.05;
+  margin-bottom: 1.75rem;
+  background: linear-gradient(180deg, var(--white) 20%, var(--gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero__subtitle {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--gray-300);
+  letter-spacing: 0.02em;
+  line-height: 1.65;
+  margin-bottom: 3.25rem;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero__discover {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(201, 169, 98, 0.35);
+  padding-bottom: 0.35rem;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.hero__discover:hover {
+  color: var(--gold-light);
+  border-color: var(--gold);
+}
+
+.hero__scroll span {
+  display: block;
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
+  50%       { opacity: 1;   transform: scaleY(1); }
+}
+
+/* ============================================
+   El Legado — Asymmetric Layout
+   ============================================ */
+
+#legado,
+#maestria,
+#catalogo,
+#contacto {
+  scroll-margin-top: 6rem;
+}
+
+.legado {
+  padding: var(--space-section) clamp(1.5rem, 4vw, 4rem);
+  position: relative;
+}
+
+.legado::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 10%, var(--gold-dark) 50%, transparent 90%);
+  opacity: 0.3;
+}
+
+.legado__container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(3rem, 6vw, 6rem);
+  align-items: start;
+}
+
+.legado__visual {
+  position: relative;
+}
+
+.legado__frame {
+  position: relative;
+  overflow: visible;
+  height: auto;
+  min-height: unset;
+  padding: clamp(2rem, 4vw, 3.5rem);
+  margin-left: 0;
+  border: 1px solid rgba(201, 169, 98, 0.15);
+}
+
+.legado__frame--placeholder {
+  min-height: 420px;
+  background:
+    linear-gradient(165deg, rgba(201, 169, 98, 0.08) 0%, transparent 50%),
+    linear-gradient(to bottom, #0a0806, var(--gray-900));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.legado__frame--placeholder::after {
+  content: 'Cerro Angola · San José de las Matas';
+  position: relative;
+  z-index: 2;
+  inset: auto;
+  background: none;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.85;
+  text-align: center;
+}
+
+.legado__image {
+  transition: opacity var(--transition-slow);
+}
+
+.legado__frame::after {
+  display: none;
+}
+
+.legado__frame:hover .legado__image {
+  opacity: 0.95;
+}
+
+.legado__frame::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: 20%;
+  bottom: 20%;
+  border: 1px solid var(--gold-dark);
+  opacity: 0.5;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+.legado__frame:hover::before {
+  opacity: 0.9;
+}
+
+.legado__accent {
+  position: absolute;
+  bottom: -2rem;
+  right: -1rem;
+  width: 40%;
+  height: 40%;
+  border: 1px solid var(--gold);
+  opacity: 0.2;
+  z-index: -1;
+}
+
+.legado__text {
+  padding-right: 1rem;
+}
+
+.legado__divider {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  margin: 1.5rem 0 2rem;
+}
+
+.legado__lead {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--gray-100);
+  margin-bottom: 1.75rem;
+}
+
+.legado__text p {
+  color: var(--gray-300);
+  margin-bottom: 1.35rem;
+  font-size: 1.0625rem;
+  line-height: 1.82;
+}
+
+.legado__quote {
+  margin-top: 2.5rem;
+  padding: 2rem 0 0 2rem;
+  border-left: 1px solid var(--gold-dark);
+}
+
+.legado__quote p {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--gold-light);
+  margin-bottom: 0.8rem;
+}
+
+.legado__quote cite {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-style: normal;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+/* ============================================
+   Maestría Técnica
+   ============================================ */
+
+.maestria {
+  padding: var(--space-section) clamp(1.5rem, 4vw, 4rem);
+  background: var(--gray-900);
+  position: relative;
+}
+
+.maestria::before,
+.maestria::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dark), transparent);
+  opacity: 0.25;
+}
+
+.maestria::before { top: 0; }
+.maestria::after  { bottom: 0; }
+
+.maestria__header {
+  max-width: 700px;
+  margin: 0 auto 5rem;
+  text-align: center;
+}
+
+.maestria__intro {
+  color: var(--gray-300);
+  font-size: 1.1rem;
+  margin-top: 1.75rem;
+  line-height: 1.85;
+}
+
+.maestria__grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.maestria__card {
+  background: var(--black);
+  padding: 3.25rem 2.75rem;
+  position: relative;
+  transition: background var(--transition);
+}
+
+.maestria__card:hover {
+  background: var(--gray-800);
+}
+
+.maestria__number {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--gold-dark);
+  opacity: 0.4;
+  display: block;
+  margin-bottom: 1.5rem;
+  transition: opacity var(--transition), color var(--transition);
+}
+
+.maestria__card:hover .maestria__number {
+  opacity: 0.8;
+  color: var(--gold);
+}
+
+.maestria__card h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  color: var(--white);
+}
+
+.maestria__card p {
+  font-size: 1rem;
+  color: var(--gray-300);
+  line-height: 1.85;
+}
+
+.maestria__card--featured {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  align-items: start;
+  border-top: 1px solid var(--gold-dark);
+  margin-top: 2px;
+  padding-top: 3rem;
+}
+
+.maestria__card--featured h3 {
+  font-size: 1.8rem;
+}
+
+.maestria__badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+  padding: 0.4rem 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ============================================
+   Catálogo — Vitolas de Ensueño
+   ============================================ */
+
+.catalogo {
+  padding: var(--space-section) clamp(1.5rem, 4vw, 4rem);
+}
+
+.catalogo__header {
+  max-width: 760px;
+  margin: 0 auto clamp(4rem, 7vw, 6rem);
+  text-align: center;
+}
+
+.catalogo__intro {
+  color: var(--gray-300);
+  font-size: 1.1rem;
+  margin-top: 1.75rem;
+  line-height: 1.85;
+}
+
+.catalogo__quick {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 2rem;
+}
+
+.catalogo__quick a {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(201, 169, 98, 0.2);
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.catalogo__quick a:hover {
+  color: var(--gold);
+  border-color: rgba(201, 169, 98, 0.45);
+  background: rgba(201, 169, 98, 0.06);
+}
+
+.vitola-card__media-link {
+  display: block;
+  color: inherit;
+}
+
+.vitola-card__name a {
+  color: inherit;
+  transition: color var(--transition);
+}
+
+.vitola-card__name a:hover {
+  color: var(--gold);
+}
+
+.catalogo__grid {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.vitola-card {
+  background: var(--gray-900);
+  border: 1px solid rgba(201, 169, 98, 0.18);
+  position: relative;
+  overflow: visible;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.vitola-card:hover {
+  border-color: rgba(201, 169, 98, 0.4);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.vitola-card__media {
+  position: relative;
+  height: auto;
+  min-height: unset;
+  padding: clamp(2.5rem, 5vw, 4rem);
+}
+
+.vitola-card__media::after {
+  display: none;
+}
+
+.vitola-card__image {
+  margin: 0 auto;
+  transition: opacity var(--transition-slow);
+}
+
+.vitola-card:hover .vitola-card__image {
+  opacity: 0.92;
+}
+
+.vitola-card__body {
+  padding: clamp(2.5rem, 4vw, 3.5rem) clamp(2rem, 4vw, 3.5rem);
+}
+
+.vitola-card__line {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.vitola-card__name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.5vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  margin: 0.65rem 0 1.25rem;
+  color: var(--white);
+}
+
+.vitola-card__desc {
+  font-size: 1.05rem;
+  color: var(--gray-300);
+  line-height: 1.85;
+  margin-bottom: 1.75rem;
+}
+
+.vitola-card__specs {
+  border-top: 1px solid rgba(201, 169, 98, 0.15);
+  padding-top: 1.2rem;
+}
+
+.vitola-card__specs li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: var(--gray-300);
+  padding: 0.45rem 0;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(201, 169, 98, 0.06);
+}
+
+.vitola-card__specs li span {
+  font-family: var(--font-ui);
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+}
+
+.vitola-card--limited {
+  border-color: rgba(201, 169, 98, 0.35);
+}
+
+/* —— Flagship: Ligero 007 —— */
+.vitola-card--flagship {
+  max-width: var(--content-max);
+  margin: 0 auto clamp(3rem, 5vw, 5rem);
+  border-color: rgba(201, 169, 98, 0.28);
+  background: linear-gradient(160deg, #0a0908 0%, var(--gray-900) 100%);
+}
+
+.vitola-card--flagship:hover {
+  box-shadow: 0 32px 70px rgba(0, 0, 0, 0.5);
+}
+
+.vitola-card__flagship-inner {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: stretch;
+}
+
+.vitola-card--flagship:nth-of-type(even) .vitola-card__flagship-inner {
+  direction: rtl;
+}
+
+.vitola-card--flagship:nth-of-type(even) .vitola-card__body,
+.vitola-card--flagship:nth-of-type(even) .vitola-card__media-link {
+  direction: ltr;
+}
+
+.vitola-card__media--flagship {
+  padding: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.vitola-card__cta {
+  margin-top: 1.75rem;
+}
+
+.vitola-card__ribbon--flagship {
+  z-index: 2;
+}
+
+.catalogo__subheading {
+  max-width: 1300px;
+  margin: 0 auto 2rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  text-align: center;
+}
+
+.vitola-card__ribbon {
+  position: absolute;
+  top: 1.5rem;
+  right: -2rem;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: var(--black);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.4rem 3rem;
+  transform: rotate(45deg);
+  z-index: 3;
+}
+
+.vitola-card__link {
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid var(--gold-dark);
+  padding-bottom: 0.25rem;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.vitola-card__link:hover {
+  color: var(--gold-light);
+  border-color: var(--gold);
+}
+
+/* ============================================
+   Página Individual — Vitola Detail
+   ============================================ */
+
+.vitola-page {
+  background: var(--black);
+}
+
+.vitola-page .site-header {
+  opacity: 1;
+}
+
+.vitola-page .nav__logo-img.logo-canvas--ready {
+  opacity: 1 !important;
+  visibility: visible;
+}
+
+.vitola-detail {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 8rem clamp(1.5rem, 4vw, 4rem) 6rem;
+}
+
+.vitola-detail__back {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  margin-bottom: 3rem;
+  transition: color var(--transition);
+}
+
+.vitola-detail__back:hover {
+  color: var(--gold);
+}
+
+.vitola-detail__badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  padding: 0.45rem 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.vitola-detail__hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 4rem;
+  align-items: center;
+  margin-bottom: 5rem;
+}
+
+.vitola-detail__visual {
+  position: relative;
+  height: auto;
+  min-height: unset;
+  padding: clamp(2rem, 4vw, 3.5rem);
+  overflow: visible;
+  border: 1px solid rgba(201, 169, 98, 0.2);
+}
+
+.vitola-detail__visual::after {
+  display: none;
+}
+
+.vitola-detail__inquire {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(201, 169, 98, 0.35);
+  padding-bottom: 0.3rem;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.vitola-detail__inquire:hover {
+  color: var(--gold-light);
+  border-color: var(--gold);
+}
+
+.hero__scroll {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.vitola-detail__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 3.8rem);
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+
+.vitola-detail__lead {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--gray-100);
+  margin-bottom: 2rem;
+}
+
+.vitola-detail__quick {
+  margin-bottom: 2.5rem;
+  border-top: 1px solid rgba(201, 169, 98, 0.2);
+  padding-top: 1.2rem;
+}
+
+.vitola-detail__quick li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--gray-300);
+  padding: 0.4rem 0;
+}
+
+.vitola-detail__quick li span {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+.vitola-detail__section-title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(201, 169, 98, 0.15);
+}
+
+.vitola-detail__blend,
+.vitola-detail__notes,
+.vitola-detail__story {
+  margin-bottom: 4rem;
+}
+
+.vitola-detail__blend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.vitola-detail__blend-item {
+  background: var(--gray-900);
+  padding: 2rem;
+  border: 1px solid rgba(201, 169, 98, 0.1);
+  transition: border-color var(--transition);
+}
+
+.vitola-detail__blend-item:hover {
+  border-color: rgba(201, 169, 98, 0.3);
+}
+
+.vitola-detail__blend-item h3 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+}
+
+.vitola-detail__blend-item p {
+  font-size: 0.85rem;
+  color: var(--gray-300);
+  line-height: 1.75;
+}
+
+.vitola-detail__notes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.vitola-detail__note-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+}
+
+.vitola-detail__note p {
+  font-size: 0.9rem;
+  color: var(--gray-300);
+  line-height: 1.75;
+}
+
+.vitola-detail__story p {
+  font-size: 1.0625rem;
+  color: var(--gray-300);
+  line-height: 1.88;
+  margin-bottom: 1.35rem;
+  max-width: 760px;
+}
+
+.vitola-detail__quote {
+  margin-top: 2.5rem;
+  max-width: 560px;
+}
+
+.vitola-page--limited .vitola-detail__visual {
+  border-color: rgba(201, 169, 98, 0.4);
+}
+
+/* —— Ligero 007 — Obra Maestra —— */
+.vitola-detail--ligero {
+  max-width: 1100px;
+}
+
+.vitola-detail__badge--master {
+  letter-spacing: 0.35em;
+}
+
+.vitola-detail__badge--origin {
+  letter-spacing: 0.3em;
+  background: linear-gradient(135deg, #8b6914, var(--gold), #d4b86a);
+}
+
+/* —— El Emperador — El Origen —— */
+.vitola-detail--emperador {
+  max-width: 1100px;
+}
+
+.emperador-identity__concept {
+  background: linear-gradient(160deg, rgba(139, 105, 20, 0.08) 0%, transparent 60%);
+}
+
+.emperador-identity__seal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7rem;
+  height: 7rem;
+  margin-top: 2rem;
+}
+
+.emperador-identity__seal-ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(201, 169, 98, 0.45);
+  border-radius: 50%;
+}
+
+.emperador-identity__seal-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0.5rem;
+  border: 1px solid rgba(201, 169, 98, 0.2);
+  border-radius: 50%;
+}
+
+.emperador-identity__seal-text {
+  position: relative;
+  z-index: 1;
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.6;
+  color: var(--gold);
+}
+
+.emperador-specs__fortaleza {
+  background: linear-gradient(160deg, rgba(139, 105, 20, 0.1) 0%, var(--gray-900) 100%);
+}
+
+.emperador-mystique {
+  background: linear-gradient(to bottom, transparent, rgba(139, 105, 20, 0.04));
+}
+
+.vitola-card--origin {
+  margin-bottom: 3rem;
+  border-color: rgba(201, 169, 98, 0.35);
+  background: linear-gradient(145deg, #0d0b08 0%, var(--gray-900) 100%);
+}
+
+.vitola-card__ribbon--origin {
+  background: linear-gradient(135deg, #8b6914, var(--gold));
+}
+
+.legado__cta {
+  margin-top: 2.5rem;
+}
+
+/* —— Puro Habano — Raíces Cubanas —— */
+.vitola-detail__badge--habano {
+  letter-spacing: 0.28em;
+  background: linear-gradient(135deg, #5c3d1e, #a67c52, #c9a962);
+}
+
+.vitola-detail--habano {
+  max-width: 1100px;
+}
+
+.habano-identity__concept {
+  background: linear-gradient(160deg, rgba(166, 124, 82, 0.1) 0%, transparent 60%);
+}
+
+.habano-identity__crest {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.habano-identity__crest-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201, 169, 98, 0.4), transparent);
+}
+
+.habano-identity__crest-text {
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.habano-specs__yamaza {
+  border-color: rgba(166, 124, 82, 0.25);
+  background: linear-gradient(160deg, rgba(166, 124, 82, 0.06) 0%, var(--gray-900) 100%);
+}
+
+.habano-specs__fortaleza {
+  background: linear-gradient(160deg, rgba(92, 61, 30, 0.15) 0%, var(--gray-900) 100%);
+}
+
+.habano-mystique {
+  background: linear-gradient(to bottom, transparent, rgba(92, 61, 30, 0.05));
+}
+
+.vitola-card--habano {
+  margin-bottom: 3rem;
+  border-color: rgba(166, 124, 82, 0.35);
+  background: linear-gradient(145deg, #0a0806 0%, var(--gray-900) 100%);
+}
+
+.vitola-card__ribbon--habano {
+  background: linear-gradient(135deg, #5c3d1e, #a67c52, var(--gold));
+}
+
+/* —— El Exquisito — Edición Limitada —— */
+.vitola-detail__badge--exquisito {
+  letter-spacing: 0.22em;
+  background: linear-gradient(135deg, #3d2a14, #6b4a2a, var(--gold-light));
+}
+
+.vitola-detail--exquisito {
+  max-width: 1100px;
+}
+
+.exquisito-detail__rarity {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: -1.5rem 0 3rem;
+  opacity: 0.85;
+}
+
+.exquisito-identity__concept {
+  background: linear-gradient(160deg, rgba(61, 42, 20, 0.12) 0%, rgba(201, 169, 98, 0.04) 50%, transparent 100%);
+  border-color: rgba(201, 169, 98, 0.28);
+}
+
+.exquisito-identity__origin {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.exquisito-identity__origin-peak,
+.exquisito-identity__origin-place {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--gold-light);
+  letter-spacing: 0.04em;
+}
+
+.exquisito-identity__origin-divider {
+  flex: 1;
+  min-width: 3rem;
+  height: 1px;
+  background: linear-gradient(to right, rgba(201, 169, 98, 0.5), rgba(201, 169, 98, 0.1));
+}
+
+.exquisito-specs__capote {
+  border-color: rgba(201, 169, 98, 0.22);
+  background: linear-gradient(160deg, rgba(61, 42, 20, 0.08) 0%, var(--gray-900) 100%);
+}
+
+.exquisito-specs__fortaleza {
+  background: linear-gradient(160deg, rgba(107, 74, 42, 0.18) 0%, var(--gray-900) 100%);
+}
+
+.exquisito-mystique {
+  background: linear-gradient(to bottom, transparent, rgba(61, 42, 20, 0.06));
+  border-top-color: rgba(201, 169, 98, 0.2);
+}
+
+.vitola-card--exquisito {
+  margin-bottom: 3rem;
+  border-color: rgba(201, 169, 98, 0.4);
+  background: linear-gradient(145deg, #0c0a07 0%, #12100c 50%, var(--gray-900) 100%);
+  box-shadow: 0 0 50px rgba(201, 169, 98, 0.06);
+}
+
+.vitola-card--exquisito:hover {
+  box-shadow: 0 0 70px rgba(201, 169, 98, 0.12);
+}
+
+.vitola-card__ribbon--exquisito {
+  background: linear-gradient(135deg, #3d2a14, #8b6914, var(--gold));
+  letter-spacing: 0.18em;
+}
+
+/* —— El Rango — Alta Artesanía —— */
+.vitola-detail__badge--rango {
+  letter-spacing: 0.28em;
+  background: linear-gradient(135deg, #2a2a2a, #5c5c5c, var(--gold));
+}
+
+.vitola-detail--rango {
+  max-width: 1100px;
+}
+
+.rango-detail__craft {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  margin: -1.5rem 0 3rem;
+}
+
+.rango-identity__concept {
+  background: linear-gradient(160deg, rgba(92, 92, 92, 0.08) 0%, rgba(201, 169, 98, 0.04) 50%, transparent 100%);
+  border-color: rgba(201, 169, 98, 0.22);
+}
+
+.rango-identity__figurado {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.rango-identity__figurado-label {
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.rango-identity__figurado-shape {
+  flex: 1;
+  height: 2.5rem;
+  max-width: 12rem;
+  border: 1px solid rgba(201, 169, 98, 0.35);
+  border-radius: 50% 50% 45% 45% / 30% 30% 70% 70%;
+  background: linear-gradient(180deg, rgba(201, 169, 98, 0.08) 0%, transparent 100%);
+  position: relative;
+}
+
+.rango-identity__figurado-shape::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -0.35rem;
+  transform: translateX(-50%);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.6;
+}
+
+.rango-specs__formato {
+  border-color: rgba(201, 169, 98, 0.2);
+}
+
+.rango-specs__fortaleza {
+  background: linear-gradient(160deg, rgba(92, 92, 92, 0.12) 0%, var(--gray-900) 100%);
+}
+
+.rango-mystique {
+  background: linear-gradient(to bottom, transparent, rgba(92, 92, 92, 0.04));
+}
+
+.vitola-card--rango {
+  margin-bottom: 3rem;
+  border-color: rgba(201, 169, 98, 0.3);
+  background: linear-gradient(145deg, #0a0a0a 0%, var(--gray-900) 100%);
+}
+
+.vitola-card__ribbon--rango {
+  background: linear-gradient(135deg, #3a3a3a, #6b6b6b, var(--gold));
+  letter-spacing: 0.15em;
+}
+
+/* —— El Sultán — Corona del Catálogo —— */
+.vitola-detail__badge--sultan {
+  letter-spacing: 0.2em;
+  background: linear-gradient(135deg, #4a1520, #7a2840, var(--gold));
+}
+
+.vitola-detail--sultan {
+  max-width: 1100px;
+}
+
+.sultan-detail__finale {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: -1.5rem 0 3rem;
+  opacity: 0.9;
+}
+
+.sultan-identity__concept {
+  background: linear-gradient(160deg, rgba(122, 40, 64, 0.1) 0%, rgba(201, 169, 98, 0.05) 50%, transparent 100%);
+  border-color: rgba(201, 169, 98, 0.28);
+}
+
+.sultan-identity__cibao {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.sultan-identity__cibao-line {
+  flex: 1;
+  min-width: 2rem;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201, 169, 98, 0.45), transparent);
+}
+
+.sultan-identity__cibao-text {
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.sultan-specs__tripa {
+  border-color: rgba(122, 40, 64, 0.25);
+  background: linear-gradient(160deg, rgba(122, 40, 64, 0.08) 0%, var(--gray-900) 100%);
+}
+
+.sultan-specs__fortaleza {
+  background: linear-gradient(160deg, rgba(74, 21, 32, 0.2) 0%, var(--gray-900) 100%);
+}
+
+.sultan-mystique {
+  background: linear-gradient(to bottom, transparent, rgba(74, 21, 32, 0.06));
+}
+
+.vitola-card--sultan {
+  margin-bottom: 2rem;
+  border-color: rgba(201, 169, 98, 0.42);
+  background: linear-gradient(145deg, #0d0809 0%, #120c0e 50%, var(--gray-900) 100%);
+  box-shadow: 0 0 60px rgba(122, 40, 64, 0.08);
+}
+
+.vitola-card--sultan:hover {
+  box-shadow: 0 0 80px rgba(122, 40, 64, 0.14);
+}
+
+.vitola-card__ribbon--sultan {
+  background: linear-gradient(135deg, #4a1520, #7a2840, var(--gold));
+  letter-spacing: 0.12em;
+}
+
+.catalogo__finale {
+  max-width: 1300px;
+  margin: 3rem auto 0;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(201, 169, 98, 0.15);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: var(--gray-400);
+}
+
+.ligero-gallery {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: auto auto;
+  gap: 1.25rem;
+  margin-bottom: 6rem;
+}
+
+.ligero-gallery__frame {
+  position: relative;
+  overflow: visible;
+  margin: 0;
+  background: radial-gradient(ellipse at center, #111 0%, #050505 100%);
+  border: 1px solid rgba(201, 169, 98, 0.2);
+  height: auto;
+  min-height: unset;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  padding-bottom: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.ligero-gallery__frame--closed,
+.ligero-gallery__frame--open {
+  padding-bottom: clamp(1.5rem, 3vw, 2.75rem);
+}
+
+.ligero-gallery__frame::after {
+  display: none;
+}
+
+.ligero-gallery__frame--cigar {
+  grid-row: 1 / 3;
+  grid-column: 1;
+  padding: clamp(2rem, 4vw, 3.5rem);
+}
+
+.ligero-gallery__frame--closed {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.ligero-gallery__frame--open {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+.ligero-gallery__img {
+  display: block;
+  margin: 0 auto;
+  max-height: 100%;
+  flex-shrink: 0;
+}
+
+.ligero-gallery__label {
+  position: static;
+  width: 100%;
+  margin: clamp(1rem, 2vw, 1.5rem) 0 0;
+  padding: 0.65rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--gold);
+  background: none;
+  flex-shrink: 0;
+}
+
+.ligero-gallery__frame--closed .ligero-gallery__label,
+.ligero-gallery__frame--open .ligero-gallery__label {
+  margin-top: clamp(1.35rem, 2.8vw, 2.25rem);
+  padding-top: 0.85rem;
+}
+
+.ligero-identity {
+  margin-bottom: 5rem;
+}
+
+.ligero-identity__title {
+  margin-bottom: 0.75rem;
+}
+
+.ligero-identity__subtitle {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--gray-300);
+  line-height: 1.6;
+  max-width: 640px;
+}
+
+.ligero-identity__concept {
+  margin-top: 3rem;
+  padding: 2.5rem;
+  border: 1px solid rgba(201, 169, 98, 0.2);
+  background: linear-gradient(160deg, rgba(201, 169, 98, 0.06) 0%, transparent 60%);
+}
+
+.ligero-identity__concept-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--gold);
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.06em;
+}
+
+.ligero-identity__concept-text {
+  font-size: 1rem;
+  color: var(--gray-100);
+  line-height: 1.85;
+  max-width: 680px;
+}
+
+.ligero-identity__concept-text strong {
+  color: var(--gold-light);
+  font-weight: 500;
+}
+
+.ligero-identity__seven {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.ligero-identity__seven span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--gold);
+  border: 1px solid rgba(201, 169, 98, 0.35);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.ligero-specs {
+  margin-bottom: 4rem;
+}
+
+.ligero-specs__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+}
+
+.ligero-specs__item {
+  background: var(--gray-900);
+  padding: 2rem 1.75rem;
+  border: 1px solid rgba(201, 169, 98, 0.12);
+  transition: border-color var(--transition);
+}
+
+.ligero-specs__item:hover {
+  border-color: rgba(201, 169, 98, 0.35);
+}
+
+.ligero-specs__item h3 {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  margin-bottom: 0.9rem;
+}
+
+.ligero-specs__value {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.4;
+}
+
+.ligero-specs__value--pending {
+  font-size: 1rem;
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+.ligero-specs__item--highlight {
+  border-color: rgba(201, 169, 98, 0.3);
+  background: linear-gradient(160deg, rgba(201, 169, 98, 0.08) 0%, var(--gray-900) 100%);
+}
+
+.ligero-specs__tag {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.ligero-specs__detail {
+  margin-top: 0.65rem;
+  font-size: 0.78rem;
+  color: var(--gray-400);
+  line-height: 1.7;
+}
+
+.ligero-tasting {
+  margin-bottom: 4rem;
+}
+
+.ligero-tasting__lead {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 300;
+  color: var(--gray-100);
+  line-height: 1.65;
+  margin-bottom: 2.5rem;
+  max-width: 560px;
+}
+
+.ligero-tasting__thirds {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.ligero-tasting__third-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+}
+
+.ligero-tasting__third-pending {
+  font-size: 0.85rem;
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+.ligero-tasting__third-text {
+  font-size: 0.9rem;
+  color: var(--gray-300);
+  line-height: 1.85;
+}
+
+.ligero-mystique {
+  text-align: center;
+  padding: 4rem 2rem;
+  border-top: 1px solid rgba(201, 169, 98, 0.15);
+}
+
+.ligero-mystique__quote {
+  max-width: 620px;
+  margin: 0 auto 2.5rem;
+  padding: 0;
+  border: none;
+}
+
+.ligero-mystique__quote p {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--gray-100);
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+
+/* ============================================
+   Contacto
+   ============================================ */
+
+.contacto {
+  padding: var(--space-section) clamp(1.5rem, 4vw, 4rem);
+  background: linear-gradient(180deg, var(--black) 0%, #060606 100%);
+  border-top: 1px solid rgba(201, 169, 98, 0.12);
+}
+
+.contacto__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.contacto__lead {
+  max-width: 600px;
+  margin: 1.75rem auto 4rem;
+  font-size: 1.1rem;
+  color: var(--gray-300);
+  line-height: 1.88;
+}
+
+.contacto__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  text-align: left;
+}
+
+.contacto__card {
+  background: var(--gray-900);
+  padding: 2.25rem 2rem;
+  border: 1px solid rgba(201, 169, 98, 0.12);
+  transition: border-color var(--transition);
+}
+
+.contacto__card:hover {
+  border-color: rgba(201, 169, 98, 0.3);
+}
+
+.contacto__card h3 {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.contacto__card p {
+  font-size: 0.88rem;
+  color: var(--gray-100);
+  line-height: 1.75;
+}
+
+.contacto__card a {
+  color: var(--white);
+  border-bottom: 1px solid var(--gold-dark);
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.contacto__card a:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.contacto__note {
+  margin-top: 0.75rem !important;
+  font-size: 0.75rem !important;
+  color: var(--gray-500) !important;
+}
+
+.contacto__link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold) !important;
+  border-bottom: none !important;
+}
+
+.site-footer {
+  padding: 4rem 3rem;
+  border-top: 1px solid rgba(201, 169, 98, 0.15);
+  background: var(--black);
+}
+
+.footer__inner {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer__logo-img {
+  margin: 0 auto 0.8rem;
+}
+
+.footer__tagline {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+.footer__divider {
+  width: 40px;
+  height: 1px;
+  background: var(--gold-dark);
+  margin: 2rem auto;
+}
+
+.footer__newsletter {
+  max-width: 480px;
+  margin: 0 auto 2rem;
+}
+
+.footer__newsletter-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.footer__newsletter-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer__newsletter input {
+  flex: 1;
+  min-width: 200px;
+  max-width: 280px;
+  padding: 0.9rem 1.2rem;
+  background: var(--black);
+  border: 1px solid rgba(201, 169, 98, 0.25);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+.footer__newsletter input::placeholder {
+  color: var(--gray-500);
+}
+
+.footer__newsletter input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.footer__newsletter .btn {
+  padding: 0.9rem 1.6rem;
+}
+
+.footer__newsletter-note {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+}
+
+.footer__copy {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================
+   Scroll Header Effect
+   ============================================ */
+
+.site-header--scrolled {
+  background: rgba(0, 0, 0, 0.96);
+  backdrop-filter: blur(16px);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .legado__container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .legado__frame {
+    margin-left: 0;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .legado__text {
+    padding-right: 0;
+    text-align: center;
+  }
+
+  .legado__divider {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .legado__quote {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid var(--gold-dark);
+    padding-top: 2rem;
+  }
+
+  .maestria__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .maestria__card--featured {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogo__grid {
+    grid-template-columns: 1fr;
+    max-width: 550px;
+  }
+
+  .vitola-card__flagship-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .vitola-card__media--flagship,
+  .vitola-card__media {
+    padding: 2rem 1.5rem;
+  }
+
+  .ligero-gallery {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    min-height: 0;
+  }
+
+  .ligero-gallery__frame--cigar,
+  .ligero-gallery__frame--closed,
+  .ligero-gallery__frame--open {
+    grid-row: auto;
+    grid-column: 1;
+  }
+
+  .ligero-gallery__frame--cigar {
+    min-height: 320px;
+  }
+
+  .ligero-specs__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ligero-specs__item--highlight {
+    grid-column: 1 / -1;
+  }
+
+  .ligero-tasting__thirds {
+    grid-template-columns: 1fr;
+  }
+
+  .vitola-detail__hero {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .vitola-detail__blend-grid,
+  .vitola-detail__notes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .intro__logo-canvas {
+    max-width: 90vw;
+    height: auto !important;
+  }
+
+  .site-header {
+    padding: 0 1.5rem;
+  }
+
+  .site-header::after {
+    left: 1.5rem;
+    right: 1.5rem;
+  }
+
+  .nav__links {
+    position: fixed;
+    top: 5rem;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.97);
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1.5rem;
+    transform: translateY(-120%);
+    opacity: 0;
+    transition: transform var(--transition), opacity var(--transition);
+    border-bottom: 1px solid var(--gold-dark);
+  }
+
+  .nav__links--open {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .nav__item--has-menu {
+    width: 100%;
+  }
+
+  .nav__menu {
+    position: static;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
+    border: none;
+    border-left: 1px solid rgba(201, 169, 98, 0.15);
+    box-shadow: none;
+    background: transparent;
+    padding: 0 0 0 1rem;
+    display: none;
+    min-width: 0;
+  }
+
+  .nav__item--open .nav__menu {
+    display: block;
+  }
+
+  .nav__menu-entry {
+    padding: 0.65rem 0;
+  }
+
+  .nav__toggle {
+    display: flex;
+  }
+
+  .legado,
+  .maestria,
+  .catalogo,
+  .contacto {
+    padding: 5rem 1.5rem;
+  }
+
+  .contacto__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogo__quick {
+    gap: 0.4rem;
+  }
+
+  .hero__title {
+    letter-spacing: 0.04em;
+  }
+
+  .vitola-detail {
+    padding: 6rem 1.5rem 4rem;
+  }
+}
+
+/* ============================================
+   LUXURY SYSTEM — Davidoff / Arturo Fuente tier
+   ============================================ */
+
+body.is-age-locked #site,
+body.is-age-locked #intro,
+body.is-age-locked .site-header,
+body.is-age-locked main,
+body.is-age-locked .site-footer {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.age-gate {
+  background: #000;
+  backdrop-filter: none;
+}
+
+.age-gate__splash,
+.age-gate__panel {
+  text-align: center;
+  max-width: 540px;
+  padding: clamp(3rem, 6vw, 4.5rem) clamp(2rem, 5vw, 3.5rem);
+  border: 1px solid rgba(201, 169, 98, 0.2);
+  background: #050505;
+}
+
+.age-gate__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+}
+
+.age-gate__text {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--gray-300);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+}
+
+.age-gate__legal {
+  margin-top: 2rem;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--gray-500);
+  line-height: 1.6;
+}
+
+/* Navegación — limpia, intuitiva */
+.nav__links {
+  gap: 2.75rem;
+}
+
+.nav__cta {
+  border: none !important;
+  padding: 0 !important;
+  color: var(--gray-300) !important;
+}
+
+.nav__cta:hover {
+  background: transparent !important;
+  color: var(--white) !important;
+}
+
+/* Catálogo editorial — sin ornamentos */
+.vitola-card__ribbon {
+  display: none !important;
+}
+
+.catalogo {
+  background: var(--black);
+}
+
+.vitola-card--flagship {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+  border: none;
+  border-bottom: 1px solid rgba(201, 169, 98, 0.1);
+  background: transparent;
+  box-shadow: none;
+}
+
+.vitola-card--flagship:last-of-type {
+  border-bottom: none;
+}
+
+.vitola-card--flagship:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.vitola-card--flagship:nth-of-type(even) .vitola-card__flagship-inner {
+  direction: ltr;
+}
+
+.vitola-card__flagship-inner {
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+  align-items: center;
+}
+
+.vitola-card__media,
+.vitola-card__media--flagship {
+  background: #030303;
+  border: 1px solid rgba(201, 169, 98, 0.08);
+  padding: clamp(2rem, 4vw, 3.5rem);
+}
+
+/* Marcos de producto (galería + detalle) sobre textura natural navy */
+.ligero-gallery__frame,
+.vitola-detail__visual {
+  background-color: #0a1726 !important;
+  background-image:
+    radial-gradient(ellipse 70% 65% at 50% 42%, rgba(20, 44, 72, 0.4) 0%, transparent 72%),
+    url('img/texture-navy.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border-color: rgba(198, 162, 90, 0.16);
+}
+
+.ligero-gallery__img,
+.vitola-detail__visual img {
+  filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.5));
+}
+
+.vitola-card__image,
+.ligero-gallery__img,
+.legado__image {
+  max-height: min(82vh, 920px);
+}
+
+.vitola-card__name a:hover {
+  color: var(--gold-light);
+}
+
+/* Páginas vitola — presentación impecable */
+.vitola-page main {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.vitola-detail__badge {
+  font-family: var(--font-ui);
+  letter-spacing: 0.28em;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid rgba(201, 169, 98, 0.35);
+  padding: 0.5rem 1.25rem;
+}
+
+.ligero-gallery {
+  margin-top: 1rem;
+}
+
+.ligero-mystique {
+  padding: 3rem 0 0;
+  border-top: 1px solid rgba(201, 169, 98, 0.1);
+  text-align: left;
+}
+
+/* Legado — narrativa pura */
+.legado__text p,
+.maestria__card p,
+.maestria__intro {
+  font-size: 1.05rem;
+  line-height: 1.9;
+}
+
+.legado__quote p {
+  font-size: 1.65rem;
+}
+
+/* Hero minimal */
+.hero__content {
+  max-width: 720px;
+}
+
+.hero__title {
+  font-weight: 500;
+  -webkit-text-fill-color: var(--cream);
+  background: none;
+  color: var(--cream);
+}
+
+/* ============================================
+   RECONSTRUCCIÓN — Azul marino · Oro · Crema
+   ============================================ */
+
+/* — Header sticky sobre azul marino — */
+.site-header {
+  background: rgba(7, 17, 29, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.site-header--scrolled {
+  background: rgba(7, 17, 29, 0.96);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 1px 0 rgba(198, 162, 90, 0.12);
+}
+
+.site-header::after {
+  background: linear-gradient(90deg, transparent, rgba(198, 162, 90, 0.4), transparent);
+}
+
+.nav__links a,
+.nav__menu-trigger {
+  color: var(--gray-300);
+}
+
+.nav__links a:hover,
+.nav__menu-trigger:hover {
+  color: var(--cream);
+}
+
+/* — Hero — */
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 60%, rgba(15, 34, 56, 0.25) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(7, 17, 29, 0.55) 0%, rgba(7, 17, 29, 0.35) 40%, rgba(10, 24, 38, 0.92) 100%);
+}
+
+.hero__video,
+.hero__image {
+  filter: brightness(0.42) saturate(0.7) hue-rotate(185deg);
+}
+
+.hero__eyebrow {
+  color: var(--gold);
+}
+
+.hero__subtitle {
+  color: var(--gray-100);
+}
+
+/* — Títulos / etiquetas — */
+.section-label {
+  color: var(--gold);
+}
+
+.section-title {
+  color: var(--cream);
+}
+
+/* — El Legado / Maestría sobre paneles navy — */
+.legado {
+  background: transparent;
+}
+
+.maestria {
+  background: var(--navy-deep);
+}
+
+.maestria__card {
+  background: var(--navy);
+  border: 1px solid rgba(198, 162, 90, 0.08);
+}
+
+.maestria__card:hover {
+  background: var(--navy-light);
+}
+
+.legado__frame {
+  border-color: rgba(198, 162, 90, 0.18);
+  background: linear-gradient(160deg, var(--navy-light) 0%, var(--navy-deep) 100%);
+}
+
+.legado__quote {
+  border-left-color: var(--gold-dark);
+}
+
+.legado__quote p {
+  color: var(--gold-light);
+}
+
+/* ============================================
+   Nuestras Colecciones — Grid editorial
+   ============================================ */
+
+.coleccion {
+  padding: var(--space-section) clamp(1.5rem, 4vw, 4rem);
+  background: var(--navy);
+}
+
+.coleccion__header {
+  max-width: 760px;
+  margin: 0 auto clamp(3.5rem, 6vw, 5.5rem);
+  text-align: center;
+}
+
+.coleccion__intro {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  color: var(--gray-300);
+  line-height: 1.8;
+}
+
+.coleccion__grid {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+}
+
+.coleccion-card {
+  position: relative;
+  background: var(--navy-deep);
+  border: 1px solid rgba(198, 162, 90, 0.12);
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.coleccion-card:hover {
+  border-color: rgba(198, 162, 90, 0.35);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+}
+
+.coleccion-card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+}
+
+.coleccion-card__media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 3.5vw, 3rem);
+  aspect-ratio: 4 / 3;
+  background-color: #0a1726;
+  background-image:
+    radial-gradient(ellipse 70% 65% at 50% 42%, rgba(20, 44, 72, 0.45) 0%, transparent 72%),
+    url('img/texture-navy.jpg');
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid rgba(198, 162, 90, 0.12);
+  overflow: hidden;
+}
+
+.coleccion-card__img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.55));
+  transition: transform var(--transition-slow);
+}
+
+.coleccion-card:hover .coleccion-card__img {
+  transform: scale(1.04);
+}
+
+.coleccion-card__body {
+  padding: clamp(1.75rem, 3vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.coleccion-card__line {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.coleccion-card__name {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--cream);
+  margin: 0.5rem 0 1.1rem;
+}
+
+.coleccion-card__char {
+  font-size: 0.98rem;
+  color: var(--gray-300);
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+}
+
+.coleccion-card__blend {
+  margin: 0 0 1.5rem;
+  border-top: 1px solid rgba(198, 162, 90, 0.12);
+}
+
+.coleccion-card__blend > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(198, 162, 90, 0.06);
+}
+
+.coleccion-card__blend dt {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+}
+
+.coleccion-card__blend dd {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--gray-100);
+  text-align: right;
+}
+
+.coleccion-card__cta {
+  margin-top: auto;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(198, 162, 90, 0.3);
+  padding-bottom: 0.4rem;
+  align-self: flex-start;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.coleccion-card:hover .coleccion-card__cta {
+  color: var(--gold-light);
+  border-color: rgba(198, 162, 90, 0.5);
+}
+
+/* ============================================
+   Contacto — intro + formulario limpio
+   ============================================ */
+
+.contacto {
+  background: var(--navy-deep);
+}
+
+.contacto__inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  align-items: start;
+  text-align: left;
+}
+
+.contacto__lead {
+  margin: 1.5rem 0 2.5rem;
+  font-size: 1.08rem;
+  color: var(--gray-300);
+  line-height: 1.85;
+  max-width: none;
+}
+
+.contacto__details {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.contacto__details li {
+  font-size: 1rem;
+  color: var(--gray-100);
+  line-height: 1.6;
+}
+
+.contacto__details-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.35rem;
+}
+
+.contacto__details a {
+  color: var(--cream);
+  border-bottom: 1px solid var(--gold-dark);
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.contacto__details a:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.contacto__form {
+  background: var(--navy);
+  border: 1px solid rgba(198, 162, 90, 0.14);
+  padding: clamp(2rem, 4vw, 3rem);
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.field label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gray-300);
+  margin-bottom: 0.6rem;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  background: var(--navy-deep);
+  border: 1px solid rgba(198, 162, 90, 0.22);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
+  transition: border-color var(--transition);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--gray-500);
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.contacto__submit {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.contacto__form-note {
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+/* — Botón sólido oro para CTA principal del formulario — */
+.btn--primary {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* — Footer sobre navy — */
+.site-footer {
+  background: var(--navy-deep);
+  border-top-color: rgba(198, 162, 90, 0.15);
+}
+
+.footer__newsletter input {
+  background: var(--navy);
+  border-color: rgba(198, 162, 90, 0.25);
+  color: var(--cream);
+}
+
+/* ============================================
+   Responsive — Colecciones / Contacto
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .coleccion__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .contacto__inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .coleccion__grid {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+}
+
+/* ============================================
+   REDISEÑO LUJO — Hero cine · Manifiesto · Firma
+   ============================================ */
+
+/* — Hero foto low-key (sincronizado con index.html) — */
+.hero__atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #000000;
+}
+
+.hero__photo-wrap {
+  position: absolute;
+  inset: -5%;
+}
+
+.hero__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 62%;
+  filter: brightness(0.9) contrast(1.06) saturate(0.94);
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse 52% 44% at 50% 40%, rgba(0, 0, 0, 0.52) 0%, rgba(0, 0, 0, 0.18) 48%, transparent 74%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.42) 0%, transparent 30%, transparent 68%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  max-width: 860px;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.hero__eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2rem;
+}
+
+.hero__title {
+  font-size: clamp(3.4rem, 11vw, 8rem);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  color: var(--cream);
+  -webkit-text-fill-color: var(--cream);
+  background: none;
+}
+
+.hero__subtitle {
+  margin: 2rem auto 0;
+  max-width: 30ch;
+  font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+  font-style: italic;
+  color: var(--gray-100);
+  line-height: 1.7;
+}
+
+.hero__cta {
+  display: inline-block;
+  margin-top: 3rem;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cream);
+  padding: 1.1rem 2.75rem;
+  border: 1px solid rgba(231, 211, 160, 0.5);
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.hero__cta:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--navy-deep);
+}
+
+.hero__scroll {
+  position: absolute;
+  left: 50%;
+  bottom: 2.5rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: block;
+  width: 1px;
+  height: 64px;
+  overflow: hidden;
+}
+
+.hero__scroll-line {
+  display: block;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, var(--gold));
+  animation: scrollPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0% { transform: translateY(-100%); }
+  60%, 100% { transform: translateY(100%); }
+}
+
+/* — Franja Manifiesto — */
+.manifiesto {
+  padding: clamp(4.5rem, 9vw, 8rem) clamp(1.5rem, 4vw, 4rem);
+  background: var(--navy-deep);
+  border-top: 1px solid rgba(198, 162, 90, 0.1);
+  border-bottom: 1px solid rgba(198, 162, 90, 0.1);
+}
+
+.manifiesto__inner {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.manifiesto__text {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4.5vw, 3rem);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--cream);
+}
+
+.manifiesto__text em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+/* — La Firma de la Casa (spotlight) — */
+.firma {
+  padding: var(--space-section) clamp(1.5rem, 4vw, 4rem);
+  background: var(--navy);
+}
+
+.firma__inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  align-items: center;
+}
+
+.firma__media {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 4vw, 3.5rem);
+  background-color: #0a1726;
+  background-image:
+    radial-gradient(ellipse 70% 65% at 50% 42%, rgba(20, 44, 72, 0.45) 0%, transparent 72%),
+    url('img/texture-navy.jpg');
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(198, 162, 90, 0.16);
+  overflow: hidden;
+}
+
+.firma__media img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 36px rgba(0, 0, 0, 0.55));
+  transition: transform var(--transition-slow);
+}
+
+.firma:hover .firma__media img {
+  transform: scale(1.05) rotate(-1deg);
+}
+
+.firma__divider {
+  width: 64px;
+  height: 1px;
+  background: var(--gold-dark);
+  margin: 1.5rem 0 2rem;
+}
+
+.firma__lead {
+  font-size: 1.15rem;
+  line-height: 1.85;
+  color: var(--gray-100);
+  margin-bottom: 1.25rem;
+}
+
+.firma__note {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--gold-light);
+  margin-bottom: 2.5rem;
+}
+
+.firma__cta {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(198, 162, 90, 0.4);
+  transition: color var(--transition), border-color var(--transition), letter-spacing var(--transition);
+}
+
+.firma__cta:hover {
+  color: var(--gold-light);
+  border-color: var(--gold);
+  letter-spacing: 0.3em;
+}
+
+/* — Pulido de transiciones de enlaces de nav — */
+.nav__links a {
+  position: relative;
+}
+
+.nav__links > li > a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transition: width var(--transition);
+}
+
+.nav__links > li > a:hover::after {
+  width: 100%;
+}
+
+@media (max-width: 860px) {
+  .firma__inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .firma__media {
+    max-width: 460px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* ============================================
+   ORDEN FINAL — Nueva arquitectura de secciones
+   ============================================ */
+
+/* ── Nav active highlight por scroll ── */
+.nav__links a[data-nav-target] {
+  transition: color var(--transition);
+}
+.nav__links a.nav--active {
+  color: var(--gold) !important;
+}
+.nav__links a.nav--active::after {
+  width: 100% !important;
+}
+
+/* ── VITOLAS — Grid 2 columnas ── */
+.vitolas {
+  padding: var(--space-section) 0;
+  background: var(--navy-deep);
+}
+
+.vitolas__header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto clamp(3rem, 6vw, 5rem);
+  padding: 0 1.5rem;
+}
+
+.vitolas__intro {
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  color: var(--gray-300);
+  line-height: 1.8;
+  margin-top: 1rem;
+}
+
+.vitolas__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 5vw, 4rem);
+}
+
+.vitola-card {
+  background: var(--navy-panel);
+  border: 1px solid rgba(198, 162, 90, 0.12);
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  overflow: hidden;
+}
+
+.vitola-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(198, 162, 90, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(198, 162, 90, 0.06);
+}
+
+.vitola-card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.vitola-card__photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vitola-card__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  padding: 0.75rem;
+}
+
+.vitola-card:hover .vitola-card__photo img {
+  transform: scale(1.04);
+}
+
+.vitola-card__info {
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.6rem;
+}
+
+.vitola-card__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.vitola-card__desc {
+  font-size: clamp(0.82rem, 1.4vw, 0.95rem);
+  color: var(--gray-300);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.vitola-card__cta {
+  margin-top: auto;
+  padding-top: 1rem;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-top: 1px solid rgba(198, 162, 90, 0.2);
+  transition: color var(--transition), letter-spacing var(--transition);
+  display: block;
+}
+
+.vitola-card:hover .vitola-card__cta {
+  color: var(--gold-light);
+  letter-spacing: 0.26em;
+}
+
+/* ── SECCIÓN TABACO — Origen del Sueño ── */
+.tabaco {
+  padding: var(--space-section) 0;
+  background: var(--navy);
+  position: relative;
+}
+
+.tabaco::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.tabaco__header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto clamp(2.5rem, 5vw, 4rem);
+  padding: 0 1.5rem;
+}
+
+.tabaco__gallery {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-rows: auto;
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  max-width: var(--content-max);
+  margin: 0 auto clamp(3rem, 6vw, 5rem);
+  padding: 0 clamp(1.25rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.tabaco__figure {
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.tabaco__figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tabaco__figure:hover img {
+  transform: scale(1.04);
+}
+
+.tabaco__figure--tall {
+  grid-row: span 1;
+  aspect-ratio: 3 / 4;
+}
+
+.tabaco__figure:not(.tabaco__figure--tall) {
+  aspect-ratio: 4 / 3;
+}
+
+.tabaco__text {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 5vw, 4rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tabaco__para {
+  font-size: clamp(0.95rem, 1.7vw, 1.1rem);
+  line-height: 1.9;
+  color: var(--gray-100);
+}
+
+.tabaco__para--lead {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  font-style: italic;
+  color: var(--cream);
+}
+
+.tabaco__para strong {
+  color: var(--gold-light);
+  font-weight: 600;
+  font-style: normal;
+}
+
+.tabaco__quote {
+  border-left: 2px solid var(--gold);
+  padding: 1.2rem 0 1.2rem 2rem;
+  margin: 0.5rem 0 0;
+}
+
+.tabaco__quote p {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-style: italic;
+  color: var(--gold-light);
+  margin: 0 0 0.5rem;
+}
+
+.tabaco__quote cite {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+}
+
+/* ── MAESTRÍA NUEVA — Layout editorial foto+historia ── */
+.maestria-nueva {
+  padding: var(--space-section) 0;
+  background: var(--navy-deep);
+  position: relative;
+}
+
+.maestria-nueva::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* Historia principal — foto B&W + texto */
+.maestria-nueva__story {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: clamp(3rem, 6vw, 7rem);
+  align-items: center;
+  max-width: var(--content-max);
+  margin: 0 auto clamp(4rem, 8vw, 7rem);
+  padding: 0 clamp(1.5rem, 6vw, 5rem);
+}
+
+.maestria-nueva__foto-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.maestria-nueva__foto {
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(198, 162, 90, 0.15);
+}
+
+.maestria-nueva__foto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(198, 162, 90, 0.08);
+  pointer-events: none;
+}
+
+.maestria-nueva__foto-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: grayscale(1) contrast(1.05) brightness(0.95);
+  transition: filter 0.6s ease;
+}
+
+.maestria-nueva__foto:hover .maestria-nueva__foto-img {
+  filter: grayscale(0.6) contrast(1.08) brightness(1.0);
+}
+
+.maestria-nueva__foto-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-left: 0.25rem;
+  border-left: 2px solid var(--gold);
+  padding-left: 0.75rem;
+}
+
+.maestria-nueva__foto-caption span {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  line-height: 1.5;
+}
+
+.maestria-nueva__foto-caption span:first-child {
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+/* Historia text block */
+.maestria-nueva__historia {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.maestria-nueva__divider {
+  width: 3rem;
+  height: 1px;
+  background: var(--gold);
+}
+
+.maestria-nueva__quote {
+  border-left: 2px solid var(--gold);
+  padding: 0.5rem 0 0.5rem 1.75rem;
+  margin: 0;
+}
+
+.maestria-nueva__quote p {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  font-style: italic;
+  line-height: 1.8;
+  color: var(--cream);
+  margin: 0 0 0.75rem;
+}
+
+.maestria-nueva__quote p:last-child {
+  margin: 0;
+  color: var(--gold-light);
+  font-size: clamp(1.1rem, 2.1vw, 1.4rem);
+}
+
+.maestria-nueva__text {
+  font-size: clamp(0.9rem, 1.6vw, 1rem);
+  line-height: 1.9;
+  color: rgba(230, 221, 202, 0.8);
+}
+
+.maestria-nueva__text strong {
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+.maestria-nueva__text--signature {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+  color: var(--gold);
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(198, 162, 90, 0.2);
+}
+
+/* Proceso — tira de 4 fotos */
+.maestria-nueva__proceso {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.5rem, 1.2vw, 1rem);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 6vw, 5rem);
+}
+
+.maestria-nueva__proc-fig {
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.maestria-nueva__proc-fig img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.5s ease;
+  filter: brightness(0.85) saturate(0.9);
+}
+
+.maestria-nueva__proc-fig:hover img {
+  transform: scale(1.06);
+  filter: brightness(1.0) saturate(1.1);
+}
+
+.maestria-nueva__proc-fig figcaption {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 0.6rem 0.75rem;
+  background: linear-gradient(to top, rgba(7,17,29,0.85) 0%, transparent 100%);
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.maestria-nueva__proc-fig:hover figcaption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Responsive Maestría ── */
+@media (max-width: 900px) {
+  .maestria-nueva__story {
+    grid-template-columns: 1fr;
+    max-width: 620px;
+    margin: 0 auto clamp(3rem, 6vw, 5rem);
+  }
+
+  .maestria-nueva__foto-wrap {
+    max-width: 420px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .maestria-nueva__proceso {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .maestria-nueva__proceso {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+}
+
+/* ============================================
+   HISTORIA — Sección familiar B&N
+   ============================================ */
+
+.historia {
+  padding: var(--space-section) 0;
+  background: var(--navy);
+  position: relative;
+}
+
+.historia::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.historia__inner {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: clamp(3rem, 7vw, 8rem);
+  align-items: center;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 6vw, 5rem);
+}
+
+/* Columna foto */
+.historia__foto-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.historia__foto {
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(198, 162, 90, 0.18);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 0 0 1px rgba(198,162,90,0.06);
+}
+
+.historia__foto-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: grayscale(1) contrast(1.08) brightness(0.92);
+  transition: filter 0.8s ease;
+}
+
+.historia__foto:hover .historia__foto-img {
+  filter: grayscale(0.55) contrast(1.06) brightness(1.0);
+}
+
+.historia__foto-credit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--gold);
+}
+
+.historia__foto-name {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--gold-light);
+  letter-spacing: 0.04em;
+}
+
+.historia__foto-lugar {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+}
+
+/* Columna texto */
+.historia__texto-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.historia__divider {
+  width: 3rem;
+  height: 1px;
+  background: var(--gold);
+}
+
+.historia__quote {
+  border-left: 2px solid rgba(198, 162, 90, 0.5);
+  padding: 0.75rem 0 0.75rem 2rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.historia__quote p {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.9vw, 1.3rem);
+  font-style: italic;
+  line-height: 1.85;
+  color: var(--cream);
+  margin: 0;
+}
+
+.historia__quote p:last-child {
+  color: var(--gold-light);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+}
+
+.historia__firma {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(198, 162, 90, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .historia__inner {
+    grid-template-columns: 1fr;
+    max-width: 580px;
+    margin: 0 auto;
+    gap: 2.5rem;
+  }
+
+  .historia__foto-col {
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* ── Responsive — Vitolas y Tabaco ── */
+@media (max-width: 900px) {
+  .vitolas__grid {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .tabaco__gallery {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .tabaco__figure--tall {
+    grid-column: span 2;
+    aspect-ratio: 16 / 9;
+  }
+
+  .tabaco__figure:not(.tabaco__figure--tall) {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .tabaco__gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .tabaco__figure--tall {
+    grid-column: span 1;
+    aspect-ratio: 4 / 3;
+  }
+}

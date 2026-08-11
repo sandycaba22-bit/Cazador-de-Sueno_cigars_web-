@@ -1,0 +1,380 @@
+{
+  "language": "es",
+  "direction": "ltr",
+  "translations": {
+    "age_gate": {
+      "title": "Cazador de Sueños Cigars",
+      "eyebrow": "Verificación de Edad",
+      "text": "Este sitio contiene información sobre productos de tabaco reservados para mayores de edad. Confirme que tiene 21 años o más para continuar.",
+      "enter": "Sí, tengo 21 años o más",
+      "exit": "No, salir del sitio",
+      "legal": "Al ingresar, usted confirma cumplir con la edad legal en su jurisdicción."
+    },
+    "header": {
+      "brand": "Cazador de Sueños",
+      "nav": {
+        "legacy": "El Legado",
+        "mastery": "Maestría",
+        "collections": "Colecciones",
+        "contact": "Contacto"
+      }
+    },
+    "nav": {
+      "menu": {
+        "emperador": "El Emperador",
+        "emperador_desc": "El Primer Sueño",
+        "puro_habano": "Puro Habano",
+        "puro_habano_desc": "Raíces Cubanas",
+        "exquisito": "El Exquisito",
+        "exquisito_desc": "Edición de Autor",
+        "rango": "El Rango",
+        "rango_desc": "Formato Figurado",
+        "ligero": "Ligero 007",
+        "ligero_desc": "Obra Maestra",
+        "sultan": "El Sultán",
+        "sultan_desc": "Valle del Cibao"
+      }
+    },
+    "hero": {
+      "eyebrow": "Cerro Angola · República Dominicana",
+      "title": "Cazador de Sueños",
+      "subtitle": "Donde la tradición familiar se encuentra con la precisión científica.",
+      "cta": "Descubrir la colección"
+    },
+    "collections": {
+      "label": "Nuestras Colecciones",
+      "title": "Seis Vitolas de Autor",
+      "intro": "Cada formato, una expresión distinta de la casa. Fotografía macro de estudio, tabaquería declarada.",
+      "cta": "Consultar",
+      "emperador": {
+        "line": "El Primer Sueño",
+        "name": "El Emperador",
+        "description": "Dominio y carácter. El cigarro fundacional de la casa, de fermentación especial familiar."
+      },
+      "puro_habano": {
+        "line": "Raíces Cubanas",
+        "name": "Puro Habano",
+        "description": "Liga de autor con capa Habana y balance extraordinario. Homenaje al Viejo Mundo."
+      },
+      "exquisito": {
+        "line": "Edición de Autor",
+        "name": "El Exquisito",
+        "description": "Producción ultra limitada de República Dominicana, con doble capote Nicaragua–Camerún."
+      },
+      "rango": {
+        "line": "Formato Figurado",
+        "name": "El Rango",
+        "description": "Doble Perfecto de alta artesanía. Sabor concentrado y combustión impecable."
+      },
+      "ligero": {
+        "line": "Obra Maestra",
+        "name": "Ligero 007",
+        "description": "Blend místico de siete tabacos de siete países. La maravilla de la casa."
+      },
+      "sultan": {
+        "line": "Valle del Cibao",
+        "name": "El Sultán",
+        "description": "Robusto de cuerpo pleno e impacto magistral, con tripa premium del Cibao."
+      }
+    },
+    "mission_vision": {
+      "label": "Nuestra Identidad",
+      "title": "Misión, Visión y Valores",
+      "intro": "Cazador de Sueños Sigar SRL — Tradición, excelencia y compromiso",
+      "mission": {
+        "title": "Misión",
+        "text": "Producir cigarros de alta calidad utilizando las mejores hojas de tabaco y procesos especializados, satisfaciendo las expectativas de nuestros clientes mediante la excelencia, la responsabilidad, el respeto por nuestros colaboradores y el desarrollo sostenible de la industria tabacalera."
+      },
+      "vision": {
+        "title": "Visión",
+        "text": "Ser una fábrica de cigarros reconocida a nivel nacional e internacional por la excelencia de nuestros productos, la tradición artesanal, la innovación constante y el compromiso con la calidad, llevando el sabor y la cultura del tabaco a los mercados más exigentes."
+      },
+      "values": {
+        "title": "Valores",
+        "items": [
+          {"key": "quality", "label": "Calidad", "text": "Mantener los más altos estándares en cada etapa de producción."},
+          {"key": "commitment", "label": "Compromiso", "text": "Cumplir responsablemente con clientes, colaboradores y socios."},
+          {"key": "tradition", "label": "Tradición", "text": "Preservar el legado y la cultura del arte de elaborar cigarros."},
+          {"key": "integrity", "label": "Integridad", "text": "Actuar con honestidad, ética y transparencia."},
+          {"key": "innovation", "label": "Innovación", "text": "Mejorar continuamente nuestros procesos y productos."},
+          {"key": "teamwork", "label": "Trabajo en equipo", "text": "Fomentar la colaboración y el respeto mutuo."},
+          {"key": "responsibility", "label": "Responsabilidad social y ambiental", "text": "Contribuir al bienestar de la comunidad y al cuidado del medio ambiente."}
+        ]
+      }
+    },
+    "contact": {
+      "label": "Contacto",
+      "title": "Experiencia Privada",
+      "lead": "Para consultas, pedidos especiales o experiencias de cata, escríbanos. Atendemos a conocedores y coleccionistas con la discreción que merece la casa.",
+      "details": {
+        "origin_label": "Origen",
+        "origin": "Santiago de los Caballeros, República Dominicana",
+        "response_label": "Respuesta",
+        "response": "24–48 horas hábiles"
+      },
+      "channels": {
+        "title": "Canales Directos",
+        "whatsapp": "WhatsApp · Pedidos directos",
+        "email": "Correo corporativo oficial",
+        "phone": "Teléfonos de gestión"
+      },
+      "form": {
+        "name": "Nombre",
+        "email": "Correo electrónico",
+        "subject": "Asunto",
+        "message": "Mensaje",
+        "submit": "Enviar consulta",
+        "success": "Gracias. Su consulta ha sido registrada; le responderemos en breve."
+      },
+      "whatsapp_fab_label": "WhatsApp — Pedidos directos"
+    },
+    "footer": {
+      "tagline": "Fábrica ubicada en Santiago de los Caballeros, República Dominicana",
+      "copy": "© 2026 Cazador de Sueños Cigars. Todos los derechos reservados."
+    },
+    "maestria": {
+      "label": "Maestría",
+      "title": "El Arte de la Paciencia",
+      "subtitle": "\"No fabricamos cigarros. Cultivamos legados.\"",
+      "intro": "Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen, cultivo, fermentación, mano experta, reposo y legado.",
+      "chapter1": {
+        "kicker": "El Origen · San José de las Matas",
+        "title": "Aquí nace nuestra historia.",
+        "text": "En las tierras de República Dominicana, entre pinos, neblina y tierra fresca, comienza la memoria de Cazador de Sueños. No venimos de un despacho. Venimos de la montaña.",
+        "note": "Cordillera Central · República Dominicana"
+      },
+      "chapter2": {
+        "kicker": "La Semilla",
+        "title": "Todo comienza aquí.",
+        "text": "La promesa de una gran hoja empieza en silencio: plantas jóvenes, orden, cuidado y espera. Cada brote exige disciplina antes de convertirse en carácter.",
+        "note": "Vivero · Selección · Paciencia"
+      },
+      "chapter3": {
+        "kicker": "La Hoja",
+        "title": "Origen que se puede tocar.",
+        "text": "El campo define la identidad. La hoja madura bajo el sol, acumula fuerza y revela su destino en la textura, el color y la elasticidad.",
+        "note": "Campo · Madurez · Selección"
+      },
+      "chapter4": {
+        "kicker": "El Pilón",
+        "title": "La ciencia dominada por el tiempo.",
+        "text": "Bajo presión y calor natural, el tabaco respira. La crudeza se afina, el aroma se ordena y la hoja encuentra equilibrio.",
+        "note": "Fermentación · Calor · Equilibrio"
+      },
+      "chapter5": {
+        "kicker": "El Maestro Torcedor",
+        "title": "La mano que convierte hoja en obra.",
+        "text": "Cada cigarro es una pieza única. La tensión, el ritmo y el corte pertenecen a manos que conocen el punto exacto entre firmeza y respiración.",
+        "note": "Mesa · Técnica · Herencia"
+      },
+      "chapter6": {
+        "kicker": "El Añejamiento",
+        "title": "El silencio como ingrediente.",
+        "text": "El reposo pule lo que la mano construyó. En madera, sombra y tiempo, el aroma se vuelve memoria y el carácter alcanza profundidad.",
+        "note": "Cedro · Reposo · Cava"
+      },
+      "chapter7": {
+        "kicker": "El Legado",
+        "text1": "Todo comenzó en la región norte de la República Dominicana, donde un antepasado de nuestra familia dedicó su vida al cultivo y procesamiento del tabaco. Con el tiempo, logró dominar los secretos de la fermentación, un conocimiento valioso que transmitió a las siguientes generaciones como parte de un legado construido con esfuerzo, paciencia y pasión.",
+        "text2": "A través de los años, cada generación aportó su experiencia, preservando las tradiciones y el amor por este noble oficio. Lo que comenzó como una enseñanza familiar se convirtió en una herencia que fortaleció nuestra identidad y nuestro compromiso con la calidad.",
+        "text3": "Inspirados por ese legado y guiados por el sueño de compartir nuestra pasión con el mundo, nació Cazador de Sueños Cigars. Nuestro nombre representa la perseverancia de quienes nunca dejaron de creer en sus ideales y trabajaron para convertirlos en realidad.",
+        "text4": "Hoy, cada cigarro que elaboramos es un homenaje a nuestros antepasados, a nuestra tierra y a los sueños que hicieron posible este camino. Más que una marca, somos la continuación de una historia familiar que sigue viva en cada hoja de tabaco y en cada experiencia que ofrecemos.",
+        "note": "Cazador de Sueños Sigar SRL"
+      }
+    },
+    "vitolas": {
+      "back_to_catalog": "← Volver al catálogo",
+      "gallery": {
+        "single_cigar": "Cigarro individual",
+        "closed_box": "Caja cerrada",
+        "open_box": "Caja abierta"
+      },
+      "specs": {
+        "title": "Especificaciones",
+        "format_label": "Formato / Vitola",
+        "wrapper_label": "Capa",
+        "binder_label": "Capote",
+        "filler_label": "Tripa",
+        "strength_label": "Fortaleza"
+      },
+      "tasting": {
+        "title": "Notas de Cata / Experiencia de Fumada",
+        "first_third": "Primer Tercio",
+        "second_third": "Segundo Tercio",
+        "third_third": "Tercer Tercio"
+      },
+      "inquire": "Consultas privadas",
+      "emperador": {
+        "badge": "El Primer Sueño",
+        "section_label": "El Origen",
+        "title": "El Emperador",
+        "subtitle": "El primer cigarro que nació en la fábrica Cazador de Sueños. Historia viva, herencia familiar y el sueño que lo inició todo.",
+        "concept_title": "El Concepto Único",
+        "concept_text": "El cigarro fundacional de la fábrica, creado bajo el secreto de una fermentación especial de tabacos que me enseñó mi abuelo. No es una vitola más: es el punto de partida de toda una casa, el primer humo que dio nombre a un legado.",
+        "seal": "Fermentación Especial",
+        "specs": {
+          "format_value": "Gran Toro 58 × 6″",
+          "format_detail": "Un calibre imponente y majestuoso que denota dominio y carácter.",
+          "wrapper_value": "San Andrés Madura",
+          "wrapper_detail": "México — seleccionada por su maduración perfecta, color chocolate profundo y notas dulces y terrosas.",
+          "binder_value": "Olor Dominicano",
+          "binder_detail": "República Dominicana — aportando una suavidad aromática inigualable.",
+          "filler_value": "Selección Premium",
+          "filler_detail": "República Dominicana y otros países secretos, curados con el método de fermentación familiar.",
+          "strength_value": "Medio-Fuerte",
+          "strength_detail": "Un equilibrio perfecto entre cuerpo y sabor."
+        },
+        "tasting_lead": "La fermentación especial revela su alma en tres actos — una narrativa de suavidad, riqueza y majestad digna del primer sueño de la casa.",
+        "tasting": {
+          "first": "La entrada es compleja y voluptuosamente cremosa. Un cacao suave, casi lácteo, se entrelaza con maderas finas de cedro y roble joven, mientras la capa San Andrés despliega su dulzor terroso con refinamiento. La fermentación especial se manifiesta en esa suavidad inicial — un abrazo sedoso que invita a permanecer, como el primer suspiro de un gran añejo recién descorchado.",
+          "second": "La evolución alcanza una riqueza aromática impresionante. El café tostado emerge con profundidad, acompañado de especias suaves — canela, nuez moscada — que danzan con la elegancia floral del Olor Dominicano. Aquí la fermentación secreta despliega toda su complejidad: capas que se superponen con la precisión de un bouquet maduro, revelando matices que solo el tiempo y el saber ancestral pueden otorgar.",
+          "third": "El desenlace es robusto pero impecablemente equilibrado. Cuero curtido y frutos secos — almendra, higo — construyen un final de carácter imperial, mientras una intensidad satisfactoria demuestra el temple de un verdadero Emperador. El postgusto es memorable y limpio: la firma silenciosa de la fermentación especial, un eco noble que permanece mucho después de que el humo se disperse."
+        },
+        "mystique": "Antes de ser marca, fuimos sueño. Antes de ser fábrica, fuimos receta susurrada entre abuelo y nieto. El Emperador es ese primer amanecer — el humo que encendió todo lo demás."
+      },
+      "puro_habano": {
+        "badge": "Raíces Cubanas",
+        "section_label": "Raíces Cubanas",
+        "title": "Puro Habano",
+        "subtitle": "Una liga de autor de ultra lujo para los amantes de la tradición. Fuerza habanera, dulzor exótico de nuestra tierra y un balance sin precedentes.",
+        "concept_title": "El Concepto Único",
+        "concept_text": "Un tributo a la tradición tabacalera clásica, enriquecido con una liga exclusiva de autor que equilibra la fuerza del viejo mundo con un dulzor exótico y único de nuestra tierra. No es nostalgia: es herencia elevada, poder domado por la mano que conoce el suelo.",
+        "crest": "Liga de Autor · Tripa Yamazá",
+        "specs": {
+          "format_value": "Churchill 48 × 7″",
+          "format_detail": "El formato de los grandes conocedores; elegante, estilizado y de larga fumada.",
+          "wrapper_value": "Habana",
+          "wrapper_detail": "Seleccionada por su textura rica, aceitosa y ese carácter especiado y tradicional tan distintivo.",
+          "binder_value": "Olor Dominicano",
+          "binder_detail": "Aportando una suavidad aromática impecable para domar la fuerza de la liga.",
+          "filler_value": "Tripa Yamazá",
+          "filler_detail": "Criollo 98 — una selección especial que aporta una dulzura profunda, melosa y totalmente diferente al criollo original debido a su suelo arcilloso.",
+          "strength_value": "Fuerte",
+          "strength_detail": "Cuerpo pleno, pero con un balance extraordinario."
+        },
+        "tasting_lead": "Cuero, madera y el dulzor meloso de Yamazá — una liga de autor desplegada en tres actos de fuerza, equilibrio y distinción.",
+        "tasting": {
+          "first": "La apertura es imponente y ceremonial. La madera tostada y las especias firmes de la capa Habana saludan el paladar con autoridad — roble ahumado, cedro seco y un registro especiado profundamente tradicional. Pero desde el primer instante, bajo esa armadura de carácter, comienza a asomarse el fondo dulce y distintivo del tabaco de Yamazá: una promesa melosa, casi confitada, que anticipa la complejidad de la liga de autor.",
+          "second": "La transición alcanza una complejidad absoluta. En el corazón de la fumada, el cuero viejo y el cacao emergen con nobleza — curtido, profundo, con la textura de una bodega centenaria — mientras el Olor Dominicano aporta su aroma impecable y la tripa Yamazá despliega su dulzor melosa con precisión de sommelier. Tres capas dialogan en equilibrio perfecto: fuerza, suavidad y un registro exótico que solo el suelo arcilloso puede otorgar.",
+          "third": "El desenlace es robusto, intenso y cargado de carácter terrenal. Matices de cuero y especias exóticas construyen un final memorable, donde la fortaleza fuerte se mantiene cremosa y limpia gracias al reajuste de la fermentación y el dulzor único de Yamazá. El retrogusto persiste con dignidad — poder sin aspereza, intensidad con refinamiento: la firma de un gran Churchill que honra el viejo mundo desde la tierra dominicana."
+        },
+        "mystique": "El Puro Habano no evoca Cuba: la honra. Es la liga de autor que une la tradición habanera con el dulzor secreto de Yamazá — el homenaje de quien conoce el viejo mundo y lo eleva desde nuestra tierra."
+      },
+      "exquisito": {
+        "badge": "Edición Limitada de Autor",
+        "rarity": "Producción ultra limitada · Añejamiento prolongado",
+        "section_label": "Cerro Angola · San José de las Matas",
+        "title": "El Exquisito",
+        "subtitle": "Joya de la corona de producción ultra limitada. Alta regalía, fortaleza fuerte y un añejamiento tan riguroso que solo unas pocas unidades ven la luz cada año.",
+        "concept_title": "El Concepto Único",
+        "concept_text": "Una obra de arte de producción ultra limitada. El tabaco utilizado pasa por un proceso de curación y una fermentación especial e histórica heredada de mi abuelo, realizada exclusivamente en las faldas de las lomas de Cerro Angola, Rincón de Piedras, San José de las Matas. Este microclima y método otorgan matices únicos e irrepetibles, imposibles de encontrar en marcas comerciales tradicionales.",
+        "origin_peak": "Cerro Angola",
+        "origin_place": "Rincón de Piedras",
+        "specs": {
+          "format_value": "Gran Toro 58 × 6″",
+          "format_detail": "Cuerpo pleno, imponente y de gran presencia.",
+          "wrapper_value": "San Andrés Madura",
+          "wrapper_detail": "México — color chocolate profundo, aceitosa y con un dulzor terroso madurado a la perfección.",
+          "binder_value": "Doble Capote",
+          "binder_detail": "Nicaragua y Camerún — una combinación magistral que aporta la fuerza estructural nicaragüense y el toque especiado y aromático del Camerún.",
+          "filler_value": "Selección Premium",
+          "filler_detail": "Añejada con el secreto de la casa y el rigor del microclima de la sierra.",
+          "strength_value": "Fuerte",
+          "strength_detail": "Intenso, complejo y sumamente sofisticado."
+        },
+        "tasting_lead": "Los matices únicos de la fermentación de San José de las Matas — una sinfonía de sierra, tierra y tiempo desplegada en tres actos de culto.",
+        "tasting": {
+          "first": "La entrada es potente e imponente, pero la fortaleza fuerte se presenta con elegancia sorprendente. Notas de tierra húmeda y madera ahumada evocan el aire puro de Cerro Angola, mientras destellos dulces y terrosos de la capa San Andrés Madura asoman con sutileza — como la bruma matinal sobre las lomas de Rincón de Piedras. Es el primer suspiro de un tabaco que ha esperado su momento con paciencia ancestral.",
+          "second": "La evolución alcanza una complejidad indomable pero impecablemente equilibrada. El doble capote despliega su magia: cuero noble y café cargado entrelazados con la especia persistente del Camerún. La fermentación secreta revela entonces su riqueza mineral y matices únicos — registros que solo el microclima de la sierra y el método del abuelo pueden otorgar. Cada calada es un capítulo nuevo, como un segundo aroma en una copa de gran reserva reservada a pocos iniciados.",
+          "third": "El desenlace es majestuoso: robusto, denso y cargado de carácter. Cacao amargo y frutos secos tostados construyen un clímax de refinamiento imperial, mientras un retrogusto prolongado deja una sensación limpia y aceitosa, inolvidable. Es una fumada de culto para verdaderos conocedores — el tributo final de un tabaco que nació en la montaña y maduró en el silencio de la tradición."
+        },
+        "mystique": "Pocas unidades al año. No por escasez fabricada, sino por tiempo exigido. El Exquisito no se produce: se espera — en las faldas de Cerro Angola, como enseñó el abuelo."
+      },
+      "rango": {
+        "badge": "Alta Artesanía",
+        "craft": "Formato figurado · Maestría en el rolado",
+        "section_label": "Maestría en el Rolado",
+        "title": "El Rango",
+        "subtitle": "Un cigarro espectacular en formato figurado. Complejidad concentrada, combustión impecable y la destreza máxima de nuestros maestros roleros.",
+        "concept_title": "El Concepto Único",
+        "concept_text": "Un cigarro de alta artesanía tabacalera. Al ser un formato figurado, representa la destreza máxima de nuestros maestros roleros, logrando una evolución de sabor concentrada y una dinámica de fumada excepcional. Cada vitola es una escultura de humo — corta en longitud, imponente en cepo, infinita en personalidad.",
+        "figurado_label": "Doble Perfecto",
+        "specs": {
+          "format_value": "Doble Perfecto 60 × 4½″",
+          "format_detail": "Un cigarro figurado, imponente en su cepo pero de longitud corta, ideal para una fumada rica y de gran evolución.",
+          "wrapper_value": "San Andrés",
+          "wrapper_detail": "Seleccionada por su excelente textura y el balance perfecto que aporta al perfil.",
+          "binder_value": "Selección Premium",
+          "binder_detail": "Nicaragua — aportando estructura y el carácter característico de sus tierras volcánicas.",
+          "filler_value": "100% Nicaragua",
+          "filler_detail": "Una mezcla equilibrada que resalta la riqueza del tabaco centroamericano.",
+          "strength_value": "Medium-Fuerte",
+          "strength_detail": "Un equilibrio perfecto entre cuerpo, aroma y amabilidad al paladar."
+        },
+        "tasting_lead": "La pimienta rica y suave como firma — una sinfonía concentrada que evoluciona con la geometría del Doble Perfecto.",
+        "tasting": {
+          "first": "La entrada es sumamente interesante, dictada por la punta estrecha del Doble Perfecto. De inmediato impacta una pimienta suave, rica y muy aromática — precisa, casi floral en su registro — acompañada de notas de madera ligera que preparan el escenario. La combustión se abre con impecable regularidad, testimonio del arte del rolado figurado: cada calada es concentrada, intensa y deliberadamente elegante.",
+          "second": "La fumada se ensancha y se vuelve notablemente más cremosa en el centro del cigarro, donde el cepo alcanza su máxima expresión. Despiertan matices terrosos sutiles y frutos secos — almendra, nuez — mientras se asienta esa pimienta elegante que estimula el paladar sin saturarlo. El capote y la tripa nicaragüenses despliegan su balance con precisión de sommelier: estructura volcánica domada por amabilidad y refinamiento.",
+          "third": "El cierre es denso, sabroso y sumamente satisfactorio. La fortaleza Medium-Fuerte se mantiene redonda y limpia hasta la última ceniza, dejando un retrogusto persistente a especias dulces, maderas tostadas y esa pimienta característica que define la personalidad de El Rango. Es el desenlace de un formato que condensa en pocos centímetros lo que otros vitolas tardan en revelar — pura maestría concentrada."
+        },
+        "mystique": "El Rango no se mide en pulgadas: se mide en destreza. Cada figurado es la firma de un maestro rolero que convierte la forma en sabor y la combustión en arte."
+      },
+      "ligero": {
+        "badge": "Obra Maestra",
+        "section_label": "La Maravilla de la Casa",
+        "title": "Ligero 007",
+        "subtitle": "Una creación sin precedentes. Misticismo, presencia imponente y precisión de sommelier en cada calada.",
+        "concept_title": "El Concepto Único",
+        "concept_text": "Un blend místico y exclusivo compuesto por siete tabacos seleccionados de siete países diferentes. Siete orígenes convergen en una sola vitola que desafía lo convencional, exige contemplación y redefine la experiencia del conocedor.",
+        "specs": {
+          "format_value": "Toro 58 × 5″",
+          "format_detail": "Un calibre imponente que denota presencia y alta regalía.",
+          "wrapper_value": "San Andrés Madura",
+          "wrapper_detail": "México — seleccionada por su maduración perfecta, color chocolate profundo y notas sutilmente dulces.",
+          "binder_value": "Camerún",
+          "binder_detail": "África — aportando un equilibrio especiado único.",
+          "filler_value": "Selección Premium",
+          "filler_detail": "Nicaragua y otros cuatro países secretos que completan los siete tabacos del blend.",
+          "strength_value": "Alta y sofisticada",
+          "strength_detail": "Ligero premium con cuerpo pleno y refinamiento de alta gama."
+        },
+        "tasting_lead": "Complejidad absoluta y evolución en cada tercio — una sinfonía olfativa que se despliega con la precisión de un gran añejo.",
+        "tasting": {
+          "first": "La apertura es imponente y ceremonial. Una pimienta fina y precisa saluda el paladar, seguida de maderas nobles — roble y cedro — que establecen un marco estructural de gran elegancia. La capa San Andrés Madura revela entonces su firma: un dulzor sutil, casi confitado, que envuelve la entrada con seducción y anticipa la profundidad por venir.",
+          "second": "La transición despierta una complejidad absoluta. El cacao amargo emerge con autoridad, entrelazándose con café tostado de tueste medio-alto y notas de avellana. El capote de Camerún aporta una riqueza cremosa y especiada que redondea el perfil, mientras los siete tabacos comienzan a dialogar en capas — cada calada revela un matiz nuevo, como un segundo aroma en una copa de gran reserva.",
+          "third": "El final es memorable y sin concesiones. Robustez y refinamiento coexisten en un clímax de cuero curtido, especias exóticas y un registro terroso que habla del poder del ligero. La evolución es intensa hasta la última ceniza, demostrando la fuerza de los siete tabacos sin sacrificar la elegancia — un desenlace digno de la Maravilla de la Casa."
+        },
+        "mystique": "El Ligero 007 no se fuma: se descifra. Cada país aporta un capítulo; cada tercio revela un secreto. Es la vitola que convierte el humo en ritual."
+      },
+      "sultan": {
+        "badge": "Sexta Vitola Oficial",
+        "finale": "La corona del catálogo · Carácter del Cibao",
+        "section_label": "Valle del Cibao",
+        "title": "El Sultán",
+        "subtitle": "Corto en formato, imponente en fortaleza. La riqueza tabacalera de nuestra tierra concentrada en un Robusto de impacto magistral.",
+        "concept_title": "El Concepto Único",
+        "concept_text": "La máxima expresión del carácter dominicano concentrada en un formato clásico. Un cigarro diseñado para quienes buscan una fumada intensa, compacta y repleta de matices tradicionales, complejos y sumamente profundos. Poco espacio, todo el poder del Cibao.",
+        "cibao_text": "Valle del Cibao · República Dominicana",
+        "specs": {
+          "format_value": "Robusto 50 × 5″",
+          "format_detail": "Un formato clásico, cómodo en mano pero con una concentración de cuerpo y potencia extraordinaria.",
+          "wrapper_value": "San Andrés",
+          "wrapper_detail": "Aportando su característico color profundo, textura aceitosa y un sutil balance terroso.",
+          "binder_value": "Olor Dominicano",
+          "binder_detail": "Aportando una base aromática rica y tradicional que amarra perfectamente la fuerza de la liga.",
+          "filler_value": "Selección Premium",
+          "filler_detail": "Valle del Cibao — hojas de gran fortaleza que otorgan un carácter criollo único, profundo y con mucha evolución.",
+          "strength_value": "Fuerte",
+          "strength_detail": "Intenso, con mucho cuerpo y un golpe de sabor imponente."
+        },
+        "tasting_lead": "El Cibao y el Olor en su máxima expresión — tres actos de potencia concentrada, elegancia criolla y postgusto inolvidable.",
+        "tasting": {
+          "first": "El inicio es sumamente intenso y especiado. La pimienta negra impacta con franqueza, seguida de madera noble — roble y cedro — que establece un marco estructural de autoridad. La densidad del humo es notable desde la primera bocanada: espesa, cremosa, deliberada. Es el carácter fuerte de El Sultán en estado puro, con la rica procedencia de la tripa del Cibao manifestándose sin concesiones.",
+          "second": "La fumada se estabiliza hacia una complejidad imponente. Emergen matices de café expreso y frutos secos tostados — almendra, avellana — sobre un fondo de cuero noble que da profundidad al perfil. La aromaticidad única del capote Olor Dominicano equilibra la potencia con maestría, manteniendo el registro robusto pero sumamente elegante. Es el corazón de la liga dominicana: fuerza domesticada por tradición aromática.",
+          "third": "El final es denso, untuoso y de carácter criollo inolvidable. La fortaleza fuerte se despide en todo su esplendor con cacao oscuro y tierra seca, construyendo un clímax compacto y magistral. El postgusto es largo, persistente y muy limpio — la firma de un Robusto que no necesita longitud para dejar huella. Una fumada corta, pero de un impacto que corona el catálogo con dignidad imperial."
+        },
+        "mystique": "El Sultán no pide tiempo: exige atención. Es la sexta vitola, la última palabra y la más dominicana de la casa — el Cibao convertido en humo, en poder, en tradición."
+      }
+    }
+  }
+}

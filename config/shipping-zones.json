@@ -1,0 +1,64 @@
+{
+  "zones": [
+    {
+      "id": "national",
+      "name": "Nacional (República Dominicana)",
+      "name_en": "National (Dominican Republic)",
+      "countries": ["DO"],
+      "base_rate_usd": 5.00,
+      "rate_per_item_usd": 0.50,
+      "rate_per_gram_usd": 0.02,
+      "free_shipping_threshold_usd": 100.00,
+      "delivery_days_min": 2,
+      "delivery_days_max": 4,
+      "active": true
+    },
+    {
+      "id": "zone1",
+      "name": "Zona 1 (Estados Unidos)",
+      "name_en": "Zone 1 (United States)",
+      "countries": ["US"],
+      "base_rate_usd": 15.00,
+      "rate_per_item_usd": 1.00,
+      "rate_per_gram_usd": 0.05,
+      "free_shipping_threshold_usd": 200.00,
+      "delivery_days_min": 5,
+      "delivery_days_max": 10,
+      "active": true
+    },
+    {
+      "id": "zone2",
+      "name": "Zona 2 (Canadá)",
+      "name_en": "Zone 2 (Canada)",
+      "countries": ["CA"],
+      "base_rate_usd": 18.00,
+      "rate_per_item_usd": 1.20,
+      "rate_per_gram_usd": 0.06,
+      "free_shipping_threshold_usd": 200.00,
+      "delivery_days_min": 7,
+      "delivery_days_max": 14,
+      "active": true
+    },
+    {
+      "id": "zone3",
+      "name": "Zona 3 (Resto del Mundo)",
+      "name_en": "Zone 3 (Rest of World)",
+      "countries": [],
+      "base_rate_usd": 25.00,
+      "rate_per_item_usd": 1.50,
+      "rate_per_gram_usd": 0.08,
+      "free_shipping_threshold_usd": 300.00,
+      "delivery_days_min": 10,
+      "delivery_days_max": 21,
+      "active": true
+    }
+  ],
+  "country_to_zone": {
+    "DO": "national",
+    "US": "zone1",
+    "CA": "zone2"
+  },
+  "default_zone": "zone3",
+  "currency": "USD",
+  "last_updated": "2026-07-30"
+}
