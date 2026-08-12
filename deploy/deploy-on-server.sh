@@ -15,7 +15,7 @@ set -euo pipefail
 # El script vive dentro del repositorio, asi que deduce su raiz a partir de su propia
 # ubicacion. Da igual como se llame la carpeta donde se haya clonado.
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-SITE_ROOT="${SITE_ROOT:-/var/www/cazador-de-suenos-cigars}"
+SITE_ROOT="${SITE_ROOT:-/var/www/html}"
 BRANCH="${BRANCH:-main}"
 DOMAIN="${DOMAIN:-cazadordesuenocigar.com}"
 
