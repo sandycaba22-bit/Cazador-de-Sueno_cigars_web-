@@ -1,0 +1,3 @@
+# Los scripts que se ejecutan en el servidor deben conservar saltos de linea LF.
+# Con CRLF, bash falla con "bad interpreter: /bin/bash^M".
+*.sh text eol=lf
