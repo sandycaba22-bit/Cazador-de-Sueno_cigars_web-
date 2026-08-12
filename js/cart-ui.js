@@ -8,9 +8,13 @@ function renderMiniCartItem(item) {
   const packagingBadge = isRangoLine(item.product.line)
     ? `<span class="badge badge--rango badge--inline">Rango · ${PACKAGING.RANGO_UNITS} uds</span>`
     : `<span class="badge badge--standard badge--inline">${PACKAGING.STANDARD_UNITS} uds/caja</span>`;
+  const thumb = item.product.image
+    ? `<img class="mini-cart__thumb" src="${escapeHtml(item.product.image)}" alt="" loading="lazy" />`
+    : '';
 
   return `
     <li class="mini-cart__item ${lineClass}" data-line-id="${escapeHtml(item.lineId)}">
+      ${thumb}
       <div class="mini-cart__item-info">
         <strong>${escapeHtml(item.product.name)}</strong>
         ${packagingBadge}

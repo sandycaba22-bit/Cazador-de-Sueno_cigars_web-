@@ -3,220 +3,237 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Checkout seguro — Cazador Sueño" />
-    <title>Checkout — Cazador Sueño</title>
+    <meta name="description" content="Checkout seguro — Cazador de Sueños Cigars" />
+    <title>Checkout — Cazador de Sueños</title>
+    <!-- Restaurar visibilidad inmediata (evita pantalla negra por language-detect-early) -->
+    <script>
+      (function () {
+        if (window.__cdsEarlyStyle) {
+          window.__cdsEarlyStyle.remove();
+          delete window.__cdsEarlyStyle;
+        }
+        document.documentElement.style.visibility = 'visible';
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Libre+Baskerville:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/checkout-commerce.css" />
     <script src="https://js.stripe.com/v3/"></script>
   </head>
   <body data-page="checkout">
-    <header class="site-header site-header--compact">
-      <div class="container site-header__inner">
-        <a href="index.html" class="logo">
-          <span class="logo__mark">CS</span>
-          <span class="logo__text">Cazador Sueño</span>
-        </a>
-        <a href="index.html" class="link-back">← Seguir comprando</a>
-        <button type="button" id="cart-toggle" class="cart-button" aria-label="Abrir carrito">
-          Carrito
-          <span id="cart-count" class="cart-button__count">0</span>
-        </button>
-      </div>
-    </header>
+    <main class="checkout-page-lux">
+      <div class="checkout-container">
+        <div class="checkout-topbar">
+          <a href="index.html" class="checkout-topbar__back">← Seguir comprando</a>
+          <span class="checkout-topbar__brand">Cazador de Sueños</span>
+          <button type="button" id="cart-toggle" class="btn-lux btn-lux--outline" aria-label="Abrir carrito">
+            Carrito <span id="cart-count">0</span>
+          </button>
+        </div>
 
-    <main class="checkout-page">
-      <div class="container">
         <div id="checkout-error-banner" class="checkout-error-banner" hidden role="alert"></div>
 
-        <div id="checkout-empty" class="checkout-empty" hidden>
+        <div id="checkout-empty" class="checkout-empty-lux" hidden>
           <h1>Tu carrito está vacío</h1>
           <p>Añade productos desde el catálogo o desde las páginas de vitolas antes de finalizar la compra.</p>
-          <div class="checkout-empty__actions">
-            <a href="index.html#catalogo" class="btn btn--primary">Ver catálogo</a>
-            <a href="vitolas/el-rango.html" class="btn btn--secondary">Ver vitolas</a>
+          <div class="checkout-actions-row">
+            <a href="index.html#catalogo" class="btn-lux btn-lux--gold">Ver catálogo</a>
+            <a href="vitolas/el-rango.html" class="btn-lux btn-lux--outline">Explorar vitolas</a>
           </div>
         </div>
 
-        <div id="checkout-main" class="checkout-layout">
-        <section class="checkout-form-section">
-          <h1>Finalizar compra</h1>
-          <p class="checkout-intro">Envío internacional y pagos seguros desde cualquier país.</p>
+        <div id="checkout-main" class="checkout-layout-lux">
+          <section class="checkout-panel checkout-form-section">
+            <h1>Finalizar compra</h1>
+            <p class="checkout-panel__intro">Envío internacional DHL y pagos seguros desde cualquier país.</p>
 
-          <form id="checkout-form" novalidate>
-            <fieldset class="form-section">
-              <legend>Datos de contacto</legend>
-              <div class="form-grid">
-                <label>
-                  Nombre completo
-                  <input type="text" name="fullName" required autocomplete="name" />
-                </label>
-                <label>
-                  Correo electrónico
-                  <input type="email" name="email" required autocomplete="email" />
-                </label>
-                <label>
-                  Teléfono
-                  <input type="tel" name="phone" autocomplete="tel" />
-                </label>
-              </div>
-            </fieldset>
+            <form id="checkout-form" novalidate>
+              <fieldset class="form-section">
+                <legend>Datos de contacto</legend>
+                <div class="form-grid">
+                  <label>
+                    Nombre completo
+                    <input type="text" name="fullName" required autocomplete="name" />
+                  </label>
+                  <label>
+                    Correo electrónico
+                    <input type="email" name="email" required autocomplete="email" />
+                  </label>
+                  <label class="span-2">
+                    Teléfono
+                    <input type="tel" name="phone" autocomplete="tel" />
+                  </label>
+                </div>
+              </fieldset>
 
-            <fieldset class="form-section">
-              <legend>Dirección de envío</legend>
-              <div class="form-grid">
-                <label class="span-2">
-                  Dirección
-                  <input type="text" name="address" required autocomplete="street-address" />
-                </label>
-                <label>
-                  Ciudad
-                  <input type="text" name="city" required autocomplete="address-level2" />
-                </label>
-                <label>
-                  Estado / Provincia
-                  <input type="text" name="state" autocomplete="address-level1" />
-                </label>
-                <label>
-                  Código postal
-                  <input type="text" name="postalCode" autocomplete="postal-code" />
-                </label>
-                <label>
-                  País de destino
-                  <select name="country" required></select>
-                </label>
-              </div>
-            </fieldset>
+              <fieldset class="form-section">
+                <legend>Dirección de envío</legend>
+                <div class="form-grid">
+                  <label class="span-2">
+                    Dirección
+                    <input type="text" name="address" required autocomplete="street-address" />
+                  </label>
+                  <label>
+                    Ciudad
+                    <input type="text" name="city" required autocomplete="address-level2" />
+                  </label>
+                  <label>
+                    Estado / Provincia
+                    <input type="text" name="state" autocomplete="address-level1" />
+                  </label>
+                  <label>
+                    Código postal
+                    <input type="text" name="postalCode" autocomplete="postal-code" />
+                  </label>
+                  <label>
+                    País de destino
+                    <select name="country" required></select>
+                  </label>
+                </div>
+              </fieldset>
 
-            <fieldset class="form-section">
-              <legend>Método de pago</legend>
-              <div class="payment-methods">
-                <label class="payment-option" id="payment-option-card">
-                  <input type="radio" name="paymentMethod" value="card" checked />
-                  <span>
-                    <strong>Tarjeta de crédito / débito</strong>
-                    <small>Visa, Mastercard, Amex — procesado por Stripe</small>
-                  </span>
+              <fieldset class="form-section">
+                <legend>Método de pago</legend>
+                <div class="payment-methods">
+                  <label class="payment-option" id="payment-option-card">
+                    <input type="radio" name="paymentMethod" value="card" checked />
+                    <span>
+                      <strong>Tarjeta de crédito / débito</strong>
+                      <small>Visa, Mastercard, Amex — procesado por Stripe</small>
+                    </span>
+                  </label>
+                  <label class="payment-option">
+                    <input type="radio" name="paymentMethod" value="bank_transfer" />
+                    <span>
+                      <strong>Transferencia bancaria</strong>
+                      <small>BHD o Banreservas — referencia única de pedido</small>
+                    </span>
+                  </label>
+                  <label class="payment-option" id="payment-option-sandbox" hidden>
+                    <input type="radio" name="paymentMethod" value="sandbox" />
+                    <span>
+                      <strong id="sandbox-payment-label">Pago de prueba (sandbox)</strong>
+                      <small>Simula una compra completa sin cargo real</small>
+                    </span>
+                  </label>
+                </div>
+
+                <p id="stripe-unavailable-notice" class="checkout-notice" hidden>
+                  Pagos con tarjeta no disponibles hasta configurar Stripe en js/config.js.
+                </p>
+                <div id="sandbox-payment-notice" class="checkout-notice" hidden>
+                  Modo sandbox: el pedido se guardará localmente para pruebas.
+                </div>
+
+                <div id="card-payment-section" class="card-payment-section">
+                  <label>Tarjeta</label>
+                  <div id="card-element" class="card-element"></div>
+                  <p id="card-errors" class="form-error" role="alert"></p>
+                </div>
+
+                <div id="bank-transfer-preview" hidden></div>
+
+                <label id="proof-upload-area" class="proof-upload" hidden>
+                  <input type="file" id="payment-proof" name="paymentProof" accept="image/*,.pdf" />
+                  <span>📄 Adjuntar comprobante de transferencia (opcional ahora, obligatorio para activar envío)</span>
+                  <small id="proof-file-name"></small>
                 </label>
-                <label class="payment-option">
-                  <input type="radio" name="paymentMethod" value="bank_transfer" />
-                  <span>
-                    <strong>Transferencia bancaria</strong>
-                    <small>Pago manual con referencia única de pedido</small>
-                  </span>
-                </label>
-                <label class="payment-option" id="payment-option-sandbox" hidden>
-                  <input type="radio" name="paymentMethod" value="sandbox" />
-                  <span>
-                    <strong id="sandbox-payment-label">Pago de prueba (sandbox)</strong>
-                    <small>Simula una compra completa sin cargo real ni API de backend</small>
-                  </span>
-                </label>
-              </div>
+              </fieldset>
 
-              <p id="stripe-unavailable-notice" class="checkout-notice" hidden>
-                Pagos con tarjeta no disponibles hasta configurar la clave pública de Stripe en
-                <code>js/config.js</code>.
-              </p>
-
-              <div id="sandbox-payment-notice" class="checkout-notice checkout-notice--sandbox" hidden>
-                Modo sandbox activo: se registrará un pedido de prueba en este navegador.
-              </div>
-
-              <div id="card-payment-section" class="card-payment-section">
-                <label>Tarjeta</label>
-                <div id="card-element" class="card-element"></div>
-                <p id="card-errors" class="form-error" role="alert"></p>
-              </div>
-
-              <div id="bank-transfer-preview" hidden></div>
-            </fieldset>
-
-            <label class="span-2">
-              Notas del pedido (opcional)
-              <textarea name="notes" rows="3" placeholder="Instrucciones especiales de entrega"></textarea>
-            </label>
-
-            <fieldset class="form-section form-section--policy">
-              <legend>Política de venta final</legend>
-              <div class="policy-banner" role="note">
-                <strong>Sin devoluciones ni reembolsos.</strong>
-                <p id="policy-summary"></p>
-              </div>
-              <label class="policy-checkbox">
-                <input type="checkbox" name="acceptFinalSale" required />
-                <span id="policy-checkbox-label"></span>
+              <label class="span-2">
+                Notas del pedido (opcional)
+                <textarea name="notes" rows="3" placeholder="Instrucciones especiales de entrega"></textarea>
               </label>
-              <p class="policy-legal" id="policy-legal"></p>
-            </fieldset>
 
-            <fieldset class="form-section form-section--policy form-section--customs">
-              <legend>Responsabilidad aduanera</legend>
-              <div class="policy-banner policy-banner--customs" role="note">
-                <strong>Importación internacional.</strong>
-                <p>Los envíos DHL pueden estar sujetos a inspección, aranceles e impuestos en el país de destino.</p>
-              </div>
-              <label class="policy-checkbox">
-                <input type="checkbox" name="acceptCustomsDisclaimer" required />
-                <span id="customs-checkbox-label"></span>
-              </label>
-            </fieldset>
+              <fieldset class="form-section form-section--policy">
+                <legend>Política de venta final</legend>
+                <div class="policy-banner" role="note">
+                  <strong>Sin devoluciones ni reembolsos.</strong>
+                  <p id="policy-summary"></p>
+                </div>
+                <label class="policy-checkbox">
+                  <input type="checkbox" name="acceptFinalSale" required />
+                  <span id="policy-checkbox-label"></span>
+                </label>
+              </fieldset>
 
-            <button type="submit" id="submit-checkout" class="btn btn--primary btn--block btn--lg">
-              Confirmar pedido — venta final
-            </button>
-          </form>
-        </section>
+              <fieldset class="form-section form-section--policy">
+                <legend>Responsabilidad aduanera</legend>
+                <label class="policy-checkbox">
+                  <input type="checkbox" name="acceptCustomsDisclaimer" required />
+                  <span id="customs-checkbox-label"></span>
+                </label>
+              </fieldset>
 
-        <aside id="checkout-summary-panel" class="checkout-summary">
-          <h2>Resumen del pedido</h2>
-          <div id="checkout-items" class="checkout-items"></div>
-          <div class="checkout-summary__shipping-panel">
-            <h3 class="checkout-summary__shipping-title">Despacho internacional</h3>
-            <dl class="summary-lines summary-lines--shipping">
+              <div class="checkout-trust">
+                <ul>
+                  <li id="trust-authenticity"></li>
+                  <li id="trust-delivery"></li>
+                  <li id="trust-policy"></li>
+                </ul>
+              </div>
+
+              <div class="checkout-actions-row">
+                <button type="submit" id="submit-checkout" class="btn-lux btn-lux--gold btn--block">
+                  Confirmar pedido — venta final
+                </button>
+                <button type="button" id="whatsapp-checkout-btn" class="btn-lux btn-lux--outline">
+                  Finalizar pedido por WhatsApp
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <aside id="checkout-summary-panel" class="checkout-panel checkout-summary-lux">
+            <h2>Resumen del pedido</h2>
+            <div id="checkout-items" class="checkout-items"></div>
+
+            <div class="checkout-summary__shipping-panel">
+              <h3>Despacho internacional</h3>
+              <dl class="summary-lines-lux">
+                <div>
+                  <dt>Transportista</dt>
+                  <dd id="summary-carrier">DHL Express</dd>
+                </div>
+                <div>
+                  <dt>Origen</dt>
+                  <dd id="summary-origin">República Dominicana</dd>
+                </div>
+                <div>
+                  <dt>Destino</dt>
+                  <dd id="summary-destination">—</dd>
+                </div>
+                <div>
+                  <dt>Cajas en envío</dt>
+                  <dd><span id="summary-boxes">0</span> / <span id="summary-max-boxes">10</span></dd>
+                </div>
+              </dl>
+              <p id="dhl-box-warning" class="dhl-box-warning" hidden role="alert"></p>
+            </div>
+
+            <dl class="summary-lines-lux">
               <div>
-                <dt>Transportista</dt>
-                <dd id="summary-carrier">DHL Express</dd>
+                <dt>Subtotal</dt>
+                <dd id="summary-subtotal">$0.00</dd>
               </div>
               <div>
-                <dt>Origen</dt>
-                <dd id="summary-origin">República Dominicana</dd>
+                <dt>Envío DHL (<span id="summary-zone">—</span>)</dt>
+                <dd id="summary-shipping">$0.00</dd>
               </div>
-              <div>
-                <dt>Destino</dt>
-                <dd id="summary-destination">—</dd>
-              </div>
-              <div>
-                <dt>Cajas en envío</dt>
-                <dd><span id="summary-boxes">0</span> / <span id="summary-max-boxes">10</span></dd>
+              <div class="summary-lines-lux__total">
+                <dt>Total</dt>
+                <dd id="summary-total">$0.00</dd>
               </div>
             </dl>
-            <p id="dhl-box-warning" class="dhl-box-warning" hidden role="alert"></p>
-          </div>
-          <dl class="summary-lines">
-            <div>
-              <dt>Subtotal</dt>
-              <dd id="summary-subtotal">$0.00</dd>
-            </div>
-            <div>
-              <dt>Envío DHL (<span id="summary-zone">—</span>)</dt>
-              <dd id="summary-shipping">$0.00</dd>
-            </div>
-            <div class="summary-lines__total">
-              <dt>Total</dt>
-              <dd id="summary-total">$0.00</dd>
-            </div>
-          </dl>
-          <p class="checkout-summary__units">Total puros: <strong id="summary-units">0</strong></p>
-          <p class="checkout-summary__delivery">
-            Entrega estimada: <strong id="summary-delivery">—</strong>
-          </p>
-          <p class="checkout-summary__secure">🔒 Pagos cifrados · Cumplimiento PCI vía Stripe</p>
-        </aside>
+            <p class="checkout-panel__intro">Total puros: <strong id="summary-units">0</strong></p>
+            <p class="checkout-panel__intro">Entrega estimada: <strong id="summary-delivery">—</strong></p>
+          </aside>
         </div>
       </div>
     </main>
@@ -234,10 +251,11 @@
           <strong id="mini-cart-subtotal">$0.00</strong>
         </div>
         <p class="cart-drawer__note"><span id="cart-line-count">0</span> línea(s) en carrito</p>
-        <a id="go-checkout" href="checkout.html" class="btn btn--primary btn--block">En checkout</a>
+        <a id="go-checkout" href="checkout.html" class="btn btn--primary btn--block">Ir al checkout</a>
       </footer>
     </aside>
 
+    <script src="js/page-visibility.js"></script>
     <script src="js/config.js"></script>
     <script src="js/policies.js"></script>
     <script src="js/catalog.js"></script>
@@ -248,52 +266,94 @@
     <script src="js/orders.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/cart-ui.js"></script>
+    <script src="js/whatsapp-commerce.js"></script>
     <script src="js/checkout.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const summary = document.getElementById('policy-summary');
-        const label = document.getElementById('policy-checkbox-label');
-        const legal = document.getElementById('policy-legal');
-        const customsLabel = document.getElementById('customs-checkbox-label');
-        if (summary) summary.textContent = SALES_POLICY.summary;
-        if (label) label.textContent = SALES_POLICY.checkoutText;
-        if (legal) legal.textContent = SALES_POLICY.legalNotice;
-        if (customsLabel) customsLabel.textContent = CUSTOMS_DISCLAIMER.checkoutText;
-        const sandboxLabel = document.getElementById('sandbox-payment-label');
-        if (sandboxLabel && APP_CONFIG.sandbox?.label) {
-          sandboxLabel.textContent = APP_CONFIG.sandbox.label;
+      window.addEventListener('error', function (event) {
+        var banner = document.getElementById('checkout-error-banner');
+        if (banner) {
+          banner.hidden = false;
+          banner.textContent =
+            'Error al cargar el checkout: ' + (event.message || 'revise la consola del navegador.');
         }
+        if (typeof revealCdsPage === 'function') revealCdsPage();
+      });
 
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('selftest') === 'legacy') {
-          localStorage.setItem('cds-shopping-cart', JSON.stringify({
-            items: [{
-              productId: 'rango',
-              name: 'El Rango',
-              price: 16,
-              quantity: 10,
-              boxSize: 10,
-              weight: 16,
-              category: 'premium',
-            }],
-            subtotal: 160,
-            shipping: 0,
-            total: 160,
-            currency: 'USD',
-            shippingCountry: 'US',
-            isPaid: false,
-          }));
-          localStorage.removeItem('cazador_sueno_cart');
-        } else if (params.get('selftest') === 'modern') {
-          localStorage.setItem('cazador_sueno_cart', JSON.stringify({
-            version: 2,
-            items: [{ productId: 'cs-rango-petit', unitType: 'box', quantity: 1 }],
-            updatedAt: Date.now(),
-          }));
-          localStorage.removeItem('cds-shopping-cart');
+      document.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (typeof revealCdsPage === 'function') revealCdsPage();
+
+          var summary = document.getElementById('policy-summary');
+          var label = document.getElementById('policy-checkbox-label');
+          var customsLabel = document.getElementById('customs-checkbox-label');
+          if (summary) summary.textContent = SALES_POLICY.summary;
+          if (label) label.textContent = SALES_POLICY.checkoutText;
+          if (customsLabel) customsLabel.textContent = CUSTOMS_DISCLAIMER.checkoutText;
+
+          var trustAuth = document.getElementById('trust-authenticity');
+          var trustDel = document.getElementById('trust-delivery');
+          var trustPol = document.getElementById('trust-policy');
+          if (trustAuth) trustAuth.textContent = APP_CONFIG.trust.authenticity;
+          if (trustDel) trustDel.textContent = APP_CONFIG.trust.delivery;
+          if (trustPol) trustPol.textContent = APP_CONFIG.trust.policy;
+
+          var sandboxLabel = document.getElementById('sandbox-payment-label');
+          if (sandboxLabel && APP_CONFIG.sandbox && APP_CONFIG.sandbox.label) {
+            sandboxLabel.textContent = APP_CONFIG.sandbox.label;
+          }
+
+          var waBtn = document.getElementById('whatsapp-checkout-btn');
+          if (waBtn && APP_CONFIG.whatsapp) {
+            waBtn.textContent = APP_CONFIG.whatsapp.label || 'Finalizar por WhatsApp';
+          }
+
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('selftest') === 'legacy') {
+            localStorage.setItem(
+              'cds-shopping-cart',
+              JSON.stringify({
+                items: [
+                  {
+                    productId: 'rango',
+                    name: 'El Rango',
+                    price: 16,
+                    quantity: 10,
+                    boxSize: 10,
+                    image: 'img/el-rango-cigarro.jpg',
+                  },
+                ],
+                subtotal: 160,
+                shipping: 0,
+                total: 160,
+                currency: 'USD',
+                shippingCountry: 'US',
+                isPaid: false,
+              })
+            );
+            localStorage.removeItem('cazador_sueno_cart');
+          } else if (params.get('selftest') === 'modern') {
+            localStorage.setItem(
+              'cazador_sueno_cart',
+              JSON.stringify({
+                version: 2,
+                items: [{ productId: 'cs-rango-petit', unitType: 'box', quantity: 1 }],
+                updatedAt: Date.now(),
+              })
+            );
+            localStorage.removeItem('cds-shopping-cart');
+          }
+
+          initCheckoutPage();
+          if (typeof initFloatingCommerceWidgets === 'function') initFloatingCommerceWidgets();
+        } catch (err) {
+          console.error('[Checkout bootstrap]', err);
+          var banner = document.getElementById('checkout-error-banner');
+          if (banner) {
+            banner.hidden = false;
+            banner.textContent =
+              err.message || 'No se pudo iniciar el checkout. Recarga la página e intenta de nuevo.';
+          }
         }
-
-        initCheckoutPage();
       });
     </script>
   </body>

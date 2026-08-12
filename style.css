@@ -4852,3 +4852,47 @@ body.is-age-locked .site-footer {
     aspect-ratio: 4 / 3;
   }
 }
+
+/* Flotantes de comercio — carrito + WhatsApp */
+.cds-float-whatsapp,
+.cds-float-cart {
+  position: fixed;
+  z-index: 9990;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  text-decoration: none;
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+}
+
+.cds-float-whatsapp {
+  right: 1.25rem;
+  bottom: 1.25rem;
+  background: #25d366;
+  color: #fff;
+}
+
+.cds-float-cart {
+  right: 1.25rem;
+  bottom: 5.5rem;
+  background: rgba(17, 40, 68, 0.95);
+  border: 1px solid rgba(198, 162, 90, 0.35);
+  color: var(--cream);
+}
+
+.cds-float-cart__count {
+  min-width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #07111d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}

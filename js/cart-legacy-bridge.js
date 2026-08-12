@@ -5,6 +5,20 @@
 
 const LEGACY_CART_KEY = 'cds-shopping-cart';
 
+const LEGACY_PRODUCT_IMAGES = {
+  emperador: 'img/el-emperador-cigarro.jpg',
+  'puro-habano': 'img/puro-habano-cigarro.jpg',
+  exquisito: 'img/el-exquisito-cigarro.jpg',
+  rango: 'img/el-rango-cigarro.jpg',
+  ligero: 'img/ligero-007/cigarro.jpg',
+  sultan: 'img/el-sultan-cigarro.jpg',
+};
+
+function getLegacyProductImage(productId, itemImage) {
+  if (itemImage) return itemImage;
+  return LEGACY_PRODUCT_IMAGES[productId] || 'img/hero-atmosphere.jpg';
+}
+
 function loadLegacyCartRaw() {
   try {
     const raw = localStorage.getItem(LEGACY_CART_KEY);
@@ -38,6 +52,7 @@ function legacyItemToCartEntry(item) {
         boxSize === PACKAGING.RANGO_UNITS
           ? `Caja Rango (${PACKAGING.RANGO_UNITS} uds.)`
           : `Caja estándar (${PACKAGING.STANDARD_UNITS} uds.)`,
+      image: getLegacyProductImage(item.productId, item.image),
     },
     lineTotal: Math.round(unitPrice * totalUnits * 100) / 100,
     totalUnits,

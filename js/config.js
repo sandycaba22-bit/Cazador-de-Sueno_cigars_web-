@@ -55,9 +55,22 @@ const APP_CONFIG = {
     email: 'ventas@cazadorsueno.com',
     phone: '+1 (809) 555-0198',
   },
+
+  whatsapp: {
+    enabled: true,
+    phone: '18095550198',
+    label: 'Finalizar pedido por WhatsApp',
+    floatLabel: 'WhatsApp',
+  },
+
+  trust: {
+    authenticity: 'Productos 100% auténticos — tabaco premium de origen certificado.',
+    delivery: 'Despacho internacional DHL con seguimiento y tiempos estimados por zona.',
+    policy: 'Venta final con transparencia total antes de confirmar el pago.',
+  },
 };
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { APP_CONFIG };
 }
-
+
