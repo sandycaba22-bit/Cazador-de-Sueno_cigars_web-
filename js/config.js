@@ -58,7 +58,7 @@ const APP_CONFIG = {
 
   whatsapp: {
     enabled: true,
-    phone: '18095550198',
+    phone: '18094645016',
     label: 'Finalizar pedido por WhatsApp',
     floatLabel: 'WhatsApp',
   },

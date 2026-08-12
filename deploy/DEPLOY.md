@@ -87,21 +87,30 @@ sudo systemctl enable nginx
 ### Opción A — Desde tu PC (Windows PowerShell)
 
 ```powershell
-# En tu máquina local, desde la carpeta del proyecto
-cd C:\Users\sandy\cazador-de-suenos-cigars
+cd C:\Users\sandy\Documents\cazador-sueno-web
 
-# Subir todo el sitio (excluye deploy si no lo necesitas en servidor)
-scp -r index.html style.css intro.js logo-render.js nav.js robots.txt sitemap.xml img images vitolas USUARIO@IP_EXTERNA:/var/www/cazador-de-suenos-cigars/
+# Ensayo: muestra qué subiría sin tocar el servidor
+.\deploy\deploy-from-windows.ps1 -SshUser TU_USUARIO -DryRun
+
+# Despliegue real
+.\deploy\deploy-from-windows.ps1 -SshUser TU_USUARIO
 ```
+
+El script respalda el sitio antes de sobrescribir, sube la capa de comercio
+(`checkout.html`, `order-confirmation.html`, `style.css`, `css/`, `js/`, `config/`,
+`locales/`, `assets/`, `vitolas/`), restaura permisos y verifica el resultado por HTTPS.
 
 ### Opción B — Con rsync (Git Bash o WSL)
 
 ```bash
-rsync -avz --delete \
-  --exclude 'deploy/' \
-  --exclude '.git/' \
+rsync -avz \
+  --exclude 'deploy/' --exclude '.git/' --exclude 'server/' \
+  --exclude 'index.html' --exclude 'index_temp.html' --exclude 'index_server.html' \
+  --exclude 'admin.html' --exclude 'cart-test.html' \
   ./ USUARIO@IP_EXTERNA:/var/www/cazador-de-suenos-cigars/
 ```
+
+> No uses `--delete` ni subas `index.html`. Ver la advertencia de abajo.
 
 ### Permisos en el servidor
 
@@ -203,11 +212,31 @@ En el navegador:
 
 ## Mantenimiento
 
-```bash
+```powershell
 # Actualizar sitio tras cambios locales
-rsync -avz --delete --exclude 'deploy/' ./ USUARIO@IP:/var/www/cazador-de-suenos-cigars/
-sudo systemctl reload nginx
+.\deploy\deploy-from-windows.ps1 -SshUser TU_USUARIO
 ```
+
+### Advertencia: index.html está desincronizado
+
+La portada que sirve el servidor pesa unos 81 KB y **no existe en el repositorio**: fue
+editada directamente en producción. El `index.html` de este repositorio es una maqueta de
+comercio de 5 KB. Subirlo borraría la portada real del sitio.
+
+Por eso el script de despliegue **excluye `index.html` por defecto**. Para arreglarlo de
+raíz, baja la portada real del servidor al repositorio y confírmala en git:
+
+```powershell
+scp USUARIO@IP:/var/www/cazador-de-suenos-cigars/index.html .\index.html
+```
+
+Solo después tiene sentido usar `-IncludeIndex`.
+
+### Advertencia: no ejecutes setup-server.sh en un sitio en producción
+
+`setup-server.sh` reinstala Nginx con una configuración *bootstrap* HTTP para el dominio
+`cazadordesuenocigars.com`. El sitio en vivo es `cazadordesuenocigar.com` con HTTPS, así que
+ejecutarlo tumbaría el certificado y el dominio. Úsalo únicamente en una instalación desde cero.
 
 ---
 
