@@ -41,7 +41,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 | Tipo | Nombre | Valor correcto |
 |---|---|---|
-| A | @ | 35.237.216.105 |
+| A | @ | 34.24.248.250 |
 | CNAME | www | cazadordesuenocigars.com. |
 
 **Problema actual:** `www` apunta a `cazadordesuenocigars.com` (dominio distinto con IPs de GoDaddy).
@@ -54,4 +54,4 @@ Añade en **Compute Engine → Metadata → SSH Keys**:
 sandy:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMXO6X+3xr7SJ5fxcEJHmt1czKVTj8Ids1ud20BTFawk sandy@DESKTOP-K4JIII1
 ```
 
-Luego Cursor podrá conectar con `ssh sandy@35.237.216.105`.
+Luego Cursor podrá conectar con `ssh sandy@34.24.248.250`.

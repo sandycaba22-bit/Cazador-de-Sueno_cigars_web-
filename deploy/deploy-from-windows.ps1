@@ -16,7 +16,9 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$SshUser,
 
-    [string]$ServerIp = "35.237.216.105",
+    # IP del servidor. Debe coincidir con el registro A del dominio: si no coincide,
+    # el script avisa antes de subir nada (una IP vieja da "Connection timed out").
+    [string]$ServerIp = "34.24.248.250",
 
     [string]$RemotePath = "/var/www/cazador-de-suenos-cigars",
 
@@ -104,6 +106,25 @@ if ($DryRun) {
     Write-Host ""
     Write-Host "Modo ensayo: no se sube nada. Destino habria sido ${Remote}:${RemotePath}/" -ForegroundColor Yellow
     return
+}
+
+Write-Host "==> Comprobando que la IP coincide con el DNS del dominio..." -ForegroundColor Cyan
+$dnsIps = $null
+try {
+    $dnsIps = (Resolve-DnsName $Domain -Type A -ErrorAction Stop | Where-Object { $_.IPAddress }).IPAddress
+} catch {
+    Write-Warning "No se pudo resolver $Domain ($($_.Exception.Message)). Se continua sin comprobar."
+}
+
+if ($dnsIps) {
+    if ($dnsIps -contains $ServerIp) {
+        Write-Host "    $Domain -> $ServerIp" -ForegroundColor Green
+    } else {
+        Write-Warning "$Domain apunta a $($dnsIps -join ', ') pero vas a desplegar en $ServerIp."
+        Write-Warning "Desplegar en la IP equivocada no publica nada, y una IP muerta da 'Connection timed out'."
+        $answer = Read-Host "Escribe SI para continuar de todos modos"
+        if ($answer -ne "SI") { throw "Cancelado: revisa el parametro -ServerIp." }
+    }
 }
 
 Write-Host "==> Verificando conexión SSH a $Remote ..." -ForegroundColor Cyan

@@ -1,4 +1,4 @@
-# Acceso SSH a la VM GCP — 35.237.216.105
+# Acceso SSH a la VM GCP — 34.24.248.250
 
 ## Estado detectado
 
@@ -30,7 +30,7 @@ sudo chown -R $USER:$USER /var/www/cazador-de-suenos-cigars
 
 ```powershell
 cd C:\Users\sandy\cazador-de-suenos-cigars
-scp -r index.html style.css intro.js logo-render.js nav.js robots.txt sitemap.xml img images vitolas deploy USUARIO@35.237.216.105:/var/www/cazador-de-suenos-cigars/
+scp -r index.html style.css intro.js logo-render.js nav.js robots.txt sitemap.xml img images vitolas deploy USUARIO@34.24.248.250:/var/www/cazador-de-suenos-cigars/
 ```
 
 6. De vuelta en la VM SSH:
@@ -57,14 +57,14 @@ Luego despliega:
 
 ```powershell
 cd C:\Users\sandy\cazador-de-suenos-cigars
-.\deploy\deploy-from-windows.ps1 -SshUser TU_USUARIO -ServerIp 35.237.216.105
+.\deploy\deploy-from-windows.ps1 -SshUser TU_USUARIO -ServerIp 34.24.248.250
 ```
 
 Si usas clave custom:
 
 ```powershell
 $env:SSH_KEY = "$env:USERPROFILE\.ssh\id_ed25519_gcp"
-ssh -i $env:SSH_KEY USUARIO@35.237.216.105
+ssh -i $env:SSH_KEY USUARIO@34.24.248.250
 ```
 
 ---
@@ -73,7 +73,7 @@ ssh -i $env:SSH_KEY USUARIO@35.237.216.105
 
 | Tipo | Nombre | Valor |
 |---|---|---|
-| A | @ | 35.237.216.105 |
+| A | @ | 34.24.248.250 |
 | CNAME | www | cazadordesuenocigars.com. |
 
 Luego en la VM:
@@ -89,11 +89,11 @@ sudo nginx -t && sudo systemctl reload nginx
 ## Verificación post-despliegue
 
 ```bash
-curl -I http://35.237.216.105/
-curl -I http://35.237.216.105/vitolas/el-emperador.html
-curl -I http://35.237.216.105/vitolas/el-sultan.html
+curl -I http://34.24.248.250/
+curl -I http://34.24.248.250/vitolas/el-emperador.html
+curl -I http://34.24.248.250/vitolas/el-sultan.html
 ```
 
 En navegador:
-- http://35.237.216.105/ (inmediato)
+- http://34.24.248.250/ (inmediato)
 - https://www.cazadordesuenocigars.com/ (tras DNS + certbot)

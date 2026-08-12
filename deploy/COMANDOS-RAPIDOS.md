@@ -1,10 +1,10 @@
-# Comandos rápidos — IP: 35.237.216.105
+# Comandos rápidos — IP: 34.24.248.250
 
 ## GoDaddy DNS (pegar ahora)
 
 | Tipo  | Nombre | Valor                | TTL |
 |-------|--------|----------------------|-----|
-| **A** | `@`    | `35.237.216.105`     | 600 |
+| **A** | `@`    | `34.24.248.250`     | 600 |
 | **CNAME** | `www` | `cazadordesuenocigars.com.` | 600 |
 
 ---
@@ -13,7 +13,7 @@
 
 ```powershell
 cd C:\Users\sandy\cazador-de-suenos-cigars
-scp -r index.html style.css intro.js logo-render.js nav.js robots.txt sitemap.xml img images vitolas USUARIO@35.237.216.105:/var/www/cazador-de-suenos-cigars/
+scp -r index.html style.css intro.js logo-render.js nav.js robots.txt sitemap.xml img images vitolas USUARIO@34.24.248.250:/var/www/cazador-de-suenos-cigars/
 ```
 
 Reemplaza `USUARIO` por tu usuario SSH en la VM (ej. tu nombre de Google o `ubuntu`).
@@ -23,7 +23,7 @@ Reemplaza `USUARIO` por tu usuario SSH en la VM (ej. tu nombre de Google o `ubun
 ## SSH al servidor
 
 ```bash
-ssh USUARIO@35.237.216.105
+ssh USUARIO@34.24.248.250
 ```
 
 ---
@@ -45,15 +45,15 @@ sudo certbot --nginx -d www.cazadordesuenocigars.com -d cazadordesuenocigars.com
 
 ```bash
 dig www.cazadordesuenocigars.com +short
-# Debe mostrar: 35.237.216.105
+# Debe mostrar: 34.24.248.250
 
 dig cazadordesuenocigars.com +short
-# Debe mostrar: 35.237.216.105
+# Debe mostrar: 34.24.248.250
 ```
 
 ---
 
 ## Verificar sitio
 
-- http://35.237.216.105 (antes de SSL/DNS)
+- http://34.24.248.250 (antes de SSL/DNS)
 - https://www.cazadordesuenocigars.com (después de DNS + certbot)
