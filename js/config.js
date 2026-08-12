@@ -53,7 +53,7 @@ const APP_CONFIG = {
 
   contact: {
     email: 'ventas@cazadorsueno.com',
-    phone: '+1 (809) 555-0198',
+    phone: '+1 (809) 464-5016',
   },
 
   whatsapp: {
