@@ -1049,6 +1049,26 @@ textarea:focus {
   margin-bottom: 0.35rem;
 }
 
+.confirmation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn--whatsapp {
+  background: #25d366;
+  border: 1px solid #1da851;
+  color: #07130a;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn--whatsapp:hover {
+  background: #1da851;
+  color: #ffffff;
+}
+
 /* Footer */
 .site-footer {
   border-top: 1px solid var(--border);

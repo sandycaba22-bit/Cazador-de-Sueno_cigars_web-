@@ -14,9 +14,18 @@ const LEGACY_PRODUCT_IMAGES = {
   sultan: 'img/el-sultan-cigarro.jpg',
 };
 
+function normalizeCommerceAssetUrl(path) {
+  if (!path) return path;
+  if (/^https?:\/\//i.test(path) || path.startsWith('/')) return path;
+  if (typeof resolveCommerceAssetUrl === 'function') return resolveCommerceAssetUrl(path);
+  return `/${String(path).replace(/^\.\//, '')}`;
+}
+
 function getLegacyProductImage(productId, itemImage) {
-  if (itemImage) return itemImage;
-  return LEGACY_PRODUCT_IMAGES[productId] || 'img/hero-atmosphere.jpg';
+  if (itemImage) return normalizeCommerceAssetUrl(itemImage);
+  return normalizeCommerceAssetUrl(
+    LEGACY_PRODUCT_IMAGES[productId] || 'img/hero-atmosphere.jpg'
+  );
 }
 
 function loadLegacyCartRaw() {

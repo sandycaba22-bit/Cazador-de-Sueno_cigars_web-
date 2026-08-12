@@ -446,12 +446,26 @@ function setupPaymentMethods(form) {
 
   const defaultMethod = isStripeConfigured()
     ? 'card'
-    : isSandboxCheckoutEnabled()
-      ? 'sandbox'
-      : 'bank_transfer';
+    : 'bank_transfer';
 
-  const defaultRadio = form.querySelector(`input[name="paymentMethod"][value="${defaultMethod}"]`);
-  if (defaultRadio) defaultRadio.checked = true;
+  form.querySelectorAll('input[name="paymentMethod"]').forEach((input) => {
+    input.checked = input.value === defaultMethod;
+  });
+}
+
+function renderAlwaysVisibleBankDetails(container, summary) {
+  if (!container || typeof renderBankTransferDetails !== 'function') return;
+
+  const previewOrder = {
+    reference: '(se generará al confirmar)',
+    total: summary?.total || 0,
+    customer: { fullName: '', email: '' },
+  };
+
+  renderBankTransferDetails(previewOrder, container, {
+    showReference: false,
+    showAmount: Boolean(summary && !summary.isEmpty),
+  });
 }
 
 function initCheckoutPage() {
@@ -476,6 +490,8 @@ function initCheckoutPage() {
       countrySelect.appendChild(opt);
     });
 
+    const bankAlways = document.getElementById('bank-transfer-always');
+
     function refreshSummary() {
       const country = countrySelect.value || preferredCountry || 'US';
       const summary = safeGetCartSummary(country);
@@ -484,6 +500,7 @@ function initCheckoutPage() {
 
       if (summary.isEmpty) {
         updateCheckoutSubmitState(summary);
+        if (bankAlways) renderAlwaysVisibleBankDetails(bankAlways, summary);
         return;
       }
 
@@ -511,10 +528,18 @@ function initCheckoutPage() {
       set('summary-max-boxes', String(summary.shipping.maxBoxes));
 
       updateCheckoutSubmitState(summary);
+      if (bankAlways) renderAlwaysVisibleBankDetails(bankAlways, summary);
+    }
+
+    function refreshBankPanels() {
+      const country = countrySelect.value || preferredCountry || 'US';
+      const summary = safeGetCartSummary(country);
+      if (bankAlways) renderAlwaysVisibleBankDetails(bankAlways, summary);
     }
 
     countrySelect.addEventListener('change', refreshSummary);
     refreshSummary();
+    refreshBankPanels();
 
     const paymentRadios = $$('input[name="paymentMethod"]');
     const cardSection = $('#card-payment-section');
@@ -538,9 +563,9 @@ function initCheckoutPage() {
     function togglePaymentUI() {
       const method = form.paymentMethod.value;
       if (cardSection) cardSection.hidden = method !== 'card';
-      if (bankSection) bankSection.hidden = method !== 'bank_transfer';
+      if (bankSection) bankSection.hidden = true;
       if (sandboxNotice) sandboxNotice.hidden = method !== 'sandbox';
-      if (proofArea) proofArea.hidden = method !== 'bank_transfer';
+      if (proofArea) proofArea.hidden = method === 'card';
 
       if (method === 'card') {
         mountCardElement();
@@ -548,31 +573,23 @@ function initCheckoutPage() {
         destroyCardElement();
       }
 
-      if (method === 'bank_transfer' && bankSection) {
-        const summary = safeGetCartSummary(countrySelect.value || preferredCountry || 'US');
-        if (!summary.isEmpty) {
-          const previewOrder = {
-            reference: '(se generará al confirmar)',
-            total: summary.total,
-            customer: { fullName: form.fullName.value.trim(), email: form.email.value.trim() },
-          };
-          renderBankTransferDetails(previewOrder, bankSection, {
-            showReference: false,
-            showAmount: true,
-          });
-        }
-      }
+      refreshBankPanels();
     }
 
     paymentRadios.forEach((radio) => radio.addEventListener('change', togglePaymentUI));
     countrySelect.addEventListener('change', () => {
       refreshSummary();
-      if (form.paymentMethod.value === 'bank_transfer') togglePaymentUI();
+      refreshBankPanels();
     });
 
     togglePaymentUI();
     form.addEventListener('submit', submitCheckout);
     window.addEventListener('cart:updated', refreshSummary);
+    window.addEventListener('cart:updated', refreshBankPanels);
+    window.addEventListener('cds:cart-updated', () => {
+      refreshSummary();
+      refreshBankPanels();
+    });
 
     const whatsappBtn = document.getElementById('whatsapp-checkout-btn');
     if (whatsappBtn) {

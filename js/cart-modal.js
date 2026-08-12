@@ -171,7 +171,8 @@ const CartModal = (function() {
     overlay.addEventListener('click', close);
     modal.querySelector('.cart-modal__close').addEventListener('click', close);
     modal.querySelector('.cart-modal__checkout').addEventListener('click', () => {
-      window.location.href = 'checkout.html';
+      window.location.href =
+        typeof getCheckoutUrl === 'function' ? getCheckoutUrl() : '/checkout.html';
     });
     modal.querySelector('.cart-country').addEventListener('change', (e) => {
       ShoppingCart.setShippingCountry(e.target.value);

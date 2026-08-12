@@ -13,6 +13,7 @@
           delete window.__cdsEarlyStyle;
         }
         document.documentElement.style.visibility = 'visible';
+        document.body.style.visibility = 'visible';
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -101,18 +102,18 @@
               <fieldset class="form-section">
                 <legend>Método de pago</legend>
                 <div class="payment-methods">
-                  <label class="payment-option" id="payment-option-card">
-                    <input type="radio" name="paymentMethod" value="card" checked />
-                    <span>
-                      <strong>Tarjeta de crédito / débito</strong>
-                      <small>Visa, Mastercard, Amex — procesado por Stripe</small>
-                    </span>
-                  </label>
                   <label class="payment-option">
-                    <input type="radio" name="paymentMethod" value="bank_transfer" />
+                    <input type="radio" name="paymentMethod" value="bank_transfer" checked />
                     <span>
                       <strong>Transferencia bancaria</strong>
                       <small>BHD o Banreservas — referencia única de pedido</small>
+                    </span>
+                  </label>
+                  <label class="payment-option" id="payment-option-card">
+                    <input type="radio" name="paymentMethod" value="card" />
+                    <span>
+                      <strong>Tarjeta de crédito / débito</strong>
+                      <small>Visa, Mastercard, Amex — procesado por Stripe</small>
                     </span>
                   </label>
                   <label class="payment-option" id="payment-option-sandbox" hidden>
@@ -136,6 +137,8 @@
                   <div id="card-element" class="card-element"></div>
                   <p id="card-errors" class="form-error" role="alert"></p>
                 </div>
+
+                <div id="bank-transfer-always" class="bank-transfer-panel bank-transfer-panel--always"></div>
 
                 <div id="bank-transfer-preview" hidden></div>
 
@@ -256,6 +259,7 @@
     </aside>
 
     <script src="js/page-visibility.js"></script>
+    <script src="js/commerce-urls.js"></script>
     <script src="js/config.js"></script>
     <script src="js/policies.js"></script>
     <script src="js/catalog.js"></script>
@@ -345,6 +349,14 @@
 
           initCheckoutPage();
           if (typeof initFloatingCommerceWidgets === 'function') initFloatingCommerceWidgets();
+
+          if (typeof getCartItems === 'function') {
+            console.info('[Checkout] Carrito real detectado:', {
+              items: getCartItems().length,
+              legacyRaw: localStorage.getItem('cds-shopping-cart'),
+              modernRaw: localStorage.getItem('cazador_sueno_cart'),
+            });
+          }
         } catch (err) {
           console.error('[Checkout bootstrap]', err);
           var banner = document.getElementById('checkout-error-banner');

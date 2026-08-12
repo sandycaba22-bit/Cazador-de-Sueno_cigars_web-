@@ -121,8 +121,12 @@ function resolveCartItem(entry) {
 function getCartItems() {
   reconcileCart();
   const modern = loadCart().map(resolveCartItem).filter(Boolean);
+  const legacy =
+    typeof getLegacyCartItems === 'function' ? getLegacyCartItems() : [];
+
+  if (modern.length && legacy.length) return [...modern, ...legacy];
   if (modern.length) return modern;
-  return typeof getLegacyCartItems === 'function' ? getLegacyCartItems() : [];
+  return legacy;
 }
 
 function addToCart(productId, quantity = 1, unitType = UNIT_TYPES.BOX) {
@@ -238,9 +242,16 @@ function initCartPersistence() {
   reconcileCart();
 
   window.addEventListener('storage', (event) => {
-    if (event.key === CART_STORAGE_KEY) {
+    if (
+      event.key === CART_STORAGE_KEY ||
+      event.key === (typeof LEGACY_CART_KEY !== 'undefined' ? LEGACY_CART_KEY : 'cds-shopping-cart')
+    ) {
       window.dispatchEvent(new CustomEvent('cart:updated'));
     }
+  });
+
+  window.addEventListener('cds:cart-updated', () => {
+    window.dispatchEvent(new CustomEvent('cart:updated'));
   });
 }
 

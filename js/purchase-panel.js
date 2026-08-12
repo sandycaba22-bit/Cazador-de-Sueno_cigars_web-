@@ -43,6 +43,8 @@
         button.querySelector('span').textContent = '¡Agregado!';
         button.style.background = 'linear-gradient(135deg, #2d5a3d 0%, #1a3d2a 100%)';
         
+        showCheckoutShortcut(button);
+
         // Reset after delay
         setTimeout(() => {
           button.disabled = false;
@@ -83,6 +85,31 @@
       badge.style.display = totalItems > 0 ? 'flex' : 'none';
     }
   }
+
+  // Único CTA de checkout de la página: vive en el panel sticky para seguir
+  // accesible aunque el cliente agregue desde la calculadora, más abajo.
+  function showCheckoutShortcut(button) {
+    const container =
+      (button && button.closest('.purchase-panel__actions')) ||
+      document.querySelector('.purchase-panel__actions') ||
+      document.querySelector('.vitola-purchase-panel');
+    if (!container) return;
+
+    let cta = document.querySelector('.purchase-panel__checkout-cta');
+    if (!cta) {
+      cta = document.createElement('a');
+      cta.className = 'purchase-panel__button purchase-panel__button--checkout purchase-panel__checkout-cta';
+      container.appendChild(cta);
+    }
+
+    cta.href = typeof getCheckoutUrl === 'function' ? getCheckoutUrl() : '/checkout.html';
+    cta.textContent = 'Finalizar compra →';
+    cta.hidden = false;
+  }
+
+  window.revealCheckoutShortcut = function revealCheckoutShortcut() {
+    showCheckoutShortcut(null);
+  };
 
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {

@@ -33,6 +33,7 @@
     <script src="js/utils.js"></script>
     <script src="js/bank.js"></script>
     <script src="js/orders.js"></script>
+    <script src="js/whatsapp-commerce.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);
@@ -105,12 +106,33 @@
             <p class="policy-legal">${escapeHtml(CUSTOMS_DISCLAIMER.checkoutText)}</p>
           </aside>
 
-          <a href="index.html" class="btn btn--primary">Seguir comprando</a>
+          <div class="confirmation-actions">
+            <button type="button" class="btn btn--whatsapp" id="confirmation-whatsapp">
+              ${isBank ? 'Enviar comprobante por WhatsApp' : 'Enviar pedido por WhatsApp'}
+            </button>
+            <a href="index.html" class="btn btn--primary">Seguir comprando</a>
+          </div>
         `;
 
         if (isBank) {
           const bankBlock = document.getElementById('bank-block');
           renderBankTransferDetails(order, bankBlock, { showReference: true, showAmount: true });
+        }
+
+        const waBtn = document.getElementById('confirmation-whatsapp');
+        if (waBtn) {
+          waBtn.addEventListener('click', () => {
+            const message = [
+              buildWhatsAppOrderMessage(order, null),
+              '',
+              isBank
+                ? '📎 Adjunto el comprobante de la transferencia con esta referencia.'
+                : '',
+            ]
+              .filter(Boolean)
+              .join('\n');
+            openWhatsAppWithMessage(message);
+          });
         }
       });
     </script>

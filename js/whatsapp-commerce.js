@@ -104,7 +104,7 @@ function initFloatingCommerceWidgets() {
     const cart = document.createElement('a');
     cart.id = 'cds-float-cart';
     cart.className = 'cds-float-cart';
-    cart.href = 'checkout.html';
+    cart.href = typeof getCheckoutUrl === 'function' ? getCheckoutUrl() : '/checkout.html';
     cart.setAttribute('aria-label', 'Ir al checkout');
     cart.innerHTML = `<span class="cds-float-cart__icon">🛒</span><span id="cds-float-cart-count" class="cds-float-cart__count">0</span>`;
     document.body.appendChild(cart);
