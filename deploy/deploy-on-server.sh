@@ -2,7 +2,7 @@
 #
 # Despliegue desde el propio servidor (terminal SSH del navegador).
 #
-#   bash ~/cazador-sueno-web/deploy/deploy-on-server.sh
+#   bash ~/Cazador-de-Suenos-Siga-Web/deploy/deploy-on-server.sh
 #
 # Trae la ultima version de main desde GitHub y la publica en el directorio que
 # sirve Nginx. Respalda antes de sobrescribir y verifica el resultado al final.
@@ -12,7 +12,9 @@
 
 set -euo pipefail
 
-REPO_DIR="${REPO_DIR:-$HOME/cazador-sueno-web}"
+# El script vive dentro del repositorio, asi que deduce su raiz a partir de su propia
+# ubicacion. Da igual como se llame la carpeta donde se haya clonado.
+REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 SITE_ROOT="${SITE_ROOT:-/var/www/cazador-de-suenos-cigars}"
 BRANCH="${BRANCH:-main}"
 DOMAIN="${DOMAIN:-cazadordesuenocigar.com}"
@@ -27,11 +29,13 @@ rojo()  { printf '\033[1;31m%s\033[0m\n' "$1"; }
 
 # --- Comprobaciones previas ---------------------------------------------------
 if [[ ! -d "$REPO_DIR/.git" ]]; then
-  rojo "No hay un repositorio en $REPO_DIR."
-  echo "Clonalo primero:"
-  echo "  git clone git@github.com:sandycaba22-bit/Cazador-de-Suenos-Siga-Web.git $REPO_DIR"
+  rojo "No hay un repositorio git en $REPO_DIR."
+  echo "Ejecuta el script desde dentro del repositorio clonado, por ejemplo:"
+  echo "  bash ~/Cazador-de-Suenos-Siga-Web/deploy/deploy-on-server.sh"
   exit 1
 fi
+
+echo "Repositorio: $REPO_DIR"
 
 if [[ ! -d "$SITE_ROOT" ]]; then
   rojo "No existe el directorio del sitio: $SITE_ROOT"
