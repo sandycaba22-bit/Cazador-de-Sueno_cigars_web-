@@ -128,6 +128,21 @@
       },
       "whatsapp_fab_label": "WhatsApp — Pedidos directos"
     },
+    "sommelier": {
+      "fab_label": "Sommelier de Cava — Asesor de la casa",
+      "kicker": "Cazador de Sueños",
+      "title": "Sommelier de Cava",
+      "welcome": "Bienvenido a la cava. Soy el maestro tabaquero de la casa. ¿Busca una recomendación de vitola, notas de cata, o representa a un distribuidor?",
+      "placeholder": "Escriba su consulta…",
+      "send": "Enviar",
+      "close": "Cerrar",
+      "error": "La cava está en silencio por un momento. Intente de nuevo.",
+      "recommend": "Recomiéndeme una vitola",
+      "b2b": "Soy importador / distribuidor",
+      "tasting": "Notas de El Emperador",
+      "whatsapp_cta": "Continuar por WhatsApp con la casa",
+      "disclaimer": "Solo para mayores de 21 años · Tabaco premium"
+    },
     "footer": {
       "tagline": "Fábrica ubicada en Santiago de los Caballeros, República Dominicana",
       "copy": "© 2026 Cazador de Sueños Cigars. Todos los derechos reservados."

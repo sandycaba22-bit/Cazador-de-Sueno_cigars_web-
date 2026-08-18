@@ -57,3 +57,4 @@ dig cazadordesuenocigars.com +short
 
 - http://35.237.216.105 (antes de SSL/DNS)
 - https://www.cazadordesuenocigars.com (después de DNS + certbot)
+- https://www.cazadordesuenocigars.com/api/ai-sommelier/health (debe devolver `{"ok":true,...}` si el sommelier está en marcha)

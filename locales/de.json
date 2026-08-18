@@ -128,6 +128,21 @@
       },
       "whatsapp_fab_label": "WhatsApp — Direkte Bestellungen"
     },
+    "sommelier": {
+      "fab_label": "Keller-Sommelier — Berater des Hauses",
+      "kicker": "Cazador de Sueños",
+      "title": "Keller-Sommelier",
+      "welcome": "Willkommen im Keller. Ich bin der Meisterblender des Hauses. Suchen Sie eine Vitola-Empfehlung, Verkostungsnotizen, oder vertreten Sie einen Distributor?",
+      "placeholder": "Schreiben Sie Ihre Anfrage…",
+      "send": "Senden",
+      "close": "Schließen",
+      "error": "Der Keller ist einen Moment still. Bitte versuchen Sie es erneut.",
+      "recommend": "Empfehlen Sie eine Vitola",
+      "b2b": "Ich bin Importeur / Distributor",
+      "tasting": "Noten von El Emperador",
+      "whatsapp_cta": "Auf WhatsApp mit dem Haus fortfahren",
+      "disclaimer": "Nur für Personen ab 21 Jahren · Premium-Tabak"
+    },
     "footer": {
       "tagline": "Fabrik in Santiago de los Caballeros, Dominikanische Republik",
       "copy": "© 2026 Cazador de Sueños Cigars. Alle Rechte vorbehalten."

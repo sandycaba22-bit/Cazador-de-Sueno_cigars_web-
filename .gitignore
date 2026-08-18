@@ -13,6 +13,7 @@ Desktop.ini
 # Secretos
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 credentials.json
@@ -28,6 +29,10 @@ cache/
 
 # Dependencias
 node_modules/
+
+# Leads B2B del sommelier (privados)
+server/ai-sommelier/data/*.jsonl
+server/ai-sommelier/data/*.json
 
 # Build local
 dist/

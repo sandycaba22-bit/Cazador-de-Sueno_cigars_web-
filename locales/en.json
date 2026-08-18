@@ -128,6 +128,21 @@
       },
       "whatsapp_fab_label": "WhatsApp — Direct Orders"
     },
+    "sommelier": {
+      "fab_label": "Cellar Sommelier — House advisor",
+      "kicker": "Cazador de Sueños",
+      "title": "Cellar Sommelier",
+      "welcome": "Welcome to the cellar. I am the house master blender. Are you looking for a vitola recommendation, tasting notes, or do you represent a distributor?",
+      "placeholder": "Write your inquiry…",
+      "send": "Send",
+      "close": "Close",
+      "error": "The cellar is quiet for a moment. Please try again.",
+      "recommend": "Recommend a vitola",
+      "b2b": "I am an importer / distributor",
+      "tasting": "Notes on El Emperador",
+      "whatsapp_cta": "Continue on WhatsApp with the house",
+      "disclaimer": "Adults 21+ only · Premium tobacco"
+    },
     "footer": {
       "tagline": "Factory located in Santiago de los Caballeros, Dominican Republic",
       "copy": "© 2026 Cazador de Sueños Cigars. All rights reserved."

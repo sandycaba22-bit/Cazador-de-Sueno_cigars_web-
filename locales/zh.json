@@ -128,6 +128,21 @@
       },
       "whatsapp_fab_label": "WhatsApp — 直接订单"
     },
+    "sommelier": {
+      "fab_label": "酒窖侍酒师 — 品牌顾问",
+      "kicker": "Cazador de Sueños",
+      "title": "酒窖侍酒师",
+      "welcome": "欢迎来到酒窖。我是本宅的调配大师。您是在寻找维托拉推荐、品鉴笔记，还是代表经销商？",
+      "placeholder": "请写下您的咨询…",
+      "send": "发送",
+      "close": "关闭",
+      "error": "酒窖暂时安静。请稍后再试。",
+      "recommend": "请为我推荐一支维托拉",
+      "b2b": "我是进口商 / 经销商",
+      "tasting": "皇帝的品鉴笔记",
+      "whatsapp_cta": "通过 WhatsApp 与本宅继续",
+      "disclaimer": "仅限 21 岁以上 · 精品烟草"
+    },
     "footer": {
       "tagline": "工厂位于圣地亚哥·德洛斯卡瓦列罗斯，多米尼加共和国",
       "copy": "© 2026 Cazador de Sueños Cigars. 版权所有。"

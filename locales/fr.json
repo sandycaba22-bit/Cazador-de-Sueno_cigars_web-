@@ -128,6 +128,21 @@
       },
       "whatsapp_fab_label": "WhatsApp — Commandes directes"
     },
+    "sommelier": {
+      "fab_label": "Sommelier de cave — Conseiller de la maison",
+      "kicker": "Cazador de Sueños",
+      "title": "Sommelier de cave",
+      "welcome": "Bienvenue dans la cave. Je suis le maître torcedor de la maison. Cherchez-vous une recommandation de vitola, des notes de dégustation, ou représentez-vous un distributeur ?",
+      "placeholder": "Écrivez votre demande…",
+      "send": "Envoyer",
+      "close": "Fermer",
+      "error": "La cave est silencieuse un instant. Veuillez réessayer.",
+      "recommend": "Recommandez-moi une vitola",
+      "b2b": "Je suis importateur / distributeur",
+      "tasting": "Notes de El Emperador",
+      "whatsapp_cta": "Continuer sur WhatsApp avec la maison",
+      "disclaimer": "Réservé aux 21 ans et plus · Tabac premium"
+    },
     "footer": {
       "tagline": "Usine située à Santiago de los Caballeros, République Dominicaine",
       "copy": "© 2026 Cazador de Sueños Cigars. Tous droits réservés."

@@ -1,0 +1,347 @@
+/* Cazador de Sueños — Sommelier de Cava (widget flotante) */
+.cds-sommelier-fab {
+  position: fixed;
+  left: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(1rem, 3vw, 2rem);
+  z-index: 920;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #e7d3a0;
+  background: linear-gradient(160deg, #121212, #050505);
+  border: 1px solid rgba(198, 162, 90, 0.38);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 0 18px rgba(198, 162, 90, 0.08);
+  cursor: pointer;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    color 0.45s ease, border-color 0.45s ease, opacity 0.3s ease;
+}
+
+.cds-sommelier-fab:hover,
+.cds-sommelier-fab:focus-visible {
+  transform: translateY(-3px) scale(1.04);
+  color: #c6a25a;
+  border-color: #c6a25a;
+  outline: none;
+}
+
+.cds-sommelier-fab[hidden],
+.cds-sommelier[hidden] {
+  display: none !important;
+}
+
+.cds-sommelier-fab__pulse {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid rgba(198, 162, 90, 0.28);
+  animation: cdsSommelierPulse 2.8s ease-out infinite;
+  pointer-events: none;
+}
+
+.cds-sommelier-fab.is-open .cds-sommelier-fab__pulse {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes cdsSommelierPulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+
+.cds-sommelier {
+  position: fixed;
+  left: clamp(1rem, 3vw, 2rem);
+  bottom: calc(clamp(1rem, 3vw, 2rem) + 72px);
+  z-index: 930;
+  width: min(400px, calc(100vw - 2rem));
+  max-height: min(640px, calc(100dvh - 7.5rem));
+  display: flex;
+  flex-direction: column;
+  color: #f4efe2;
+  background:
+    linear-gradient(180deg, rgba(18, 18, 18, 0.97) 0%, rgba(5, 5, 5, 0.98) 100%);
+  border: 1px solid rgba(198, 162, 90, 0.28);
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  transform-origin: bottom left;
+  animation: cdsSommelierIn 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes cdsSommelierIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cds-sommelier__header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1rem 0.9rem 1.1rem;
+  border-bottom: 1px solid rgba(198, 162, 90, 0.16);
+  background: linear-gradient(180deg, rgba(198, 162, 90, 0.08), transparent);
+}
+
+.cds-sommelier__mark {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(198, 162, 90, 0.45);
+  color: #c6a25a;
+  font-family: 'Bodoni Moda', 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+}
+
+.cds-sommelier__titles {
+  min-width: 0;
+  flex: 1;
+}
+
+.cds-sommelier__kicker {
+  margin: 0;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(231, 211, 160, 0.55);
+}
+
+.cds-sommelier__title {
+  margin: 0.15rem 0 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 500;
+  font-size: 1.28rem;
+  letter-spacing: 0.02em;
+  color: #e7d3a0;
+  line-height: 1.15;
+}
+
+.cds-sommelier__close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: rgba(231, 211, 160, 0.68);
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+.cds-sommelier__close:hover,
+.cds-sommelier__close:focus-visible {
+  color: #c6a25a;
+  outline: none;
+}
+
+.cds-sommelier__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 220px;
+}
+
+.cds-sommelier__msg {
+  max-width: 92%;
+  padding: 0.75rem 0.9rem;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cds-sommelier__msg--bot {
+  align-self: flex-start;
+  background: rgba(198, 162, 90, 0.07);
+  border: 1px solid rgba(198, 162, 90, 0.14);
+  color: #f4efe2;
+}
+
+.cds-sommelier__msg--user {
+  align-self: flex-end;
+  background: rgba(15, 34, 56, 0.45);
+  border: 1px solid rgba(198, 162, 90, 0.22);
+  color: #e7d3a0;
+}
+
+.cds-sommelier__msg--error {
+  align-self: stretch;
+  max-width: 100%;
+  border-color: rgba(198, 162, 90, 0.35);
+  color: #e7d3a0;
+  font-style: italic;
+}
+
+.cds-sommelier__msg b {
+  color: #e7d3a0;
+  font-weight: 700;
+}
+
+.cds-sommelier__caret {
+  display: inline-block;
+  width: 0.45em;
+  height: 1em;
+  margin-left: 0.12em;
+  background: #c6a25a;
+  vertical-align: text-bottom;
+  animation: cdsSommelierCaret 1s steps(1) infinite;
+}
+
+@keyframes cdsSommelierCaret {
+  50% { opacity: 0; }
+}
+
+.cds-sommelier__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0 1.05rem 0.75rem;
+}
+
+.cds-sommelier__chip {
+  appearance: none;
+  cursor: pointer;
+  background: transparent;
+  color: rgba(231, 211, 160, 0.78);
+  border: 1px solid rgba(198, 162, 90, 0.28);
+  padding: 0.4rem 0.7rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+
+.cds-sommelier__chip:hover,
+.cds-sommelier__chip:focus-visible {
+  color: #e7d3a0;
+  border-color: #c6a25a;
+  background: rgba(198, 162, 90, 0.08);
+  outline: none;
+}
+
+.cds-sommelier__form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem 0.55rem;
+  border-top: 1px solid rgba(198, 162, 90, 0.14);
+}
+
+.cds-sommelier__input {
+  flex: 1;
+  resize: none;
+  min-height: 44px;
+  max-height: 110px;
+  background: rgba(5, 5, 5, 0.55);
+  border: 1px solid rgba(198, 162, 90, 0.18);
+  color: #f4efe2;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  padding: 0.65rem 0.75rem;
+  outline: none;
+}
+
+.cds-sommelier__input:focus {
+  border-color: rgba(198, 162, 90, 0.45);
+}
+
+.cds-sommelier__input::placeholder {
+  color: rgba(231, 211, 160, 0.38);
+}
+
+.cds-sommelier__send {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 1px solid rgba(198, 162, 90, 0.45);
+  background: linear-gradient(160deg, #93763c, #c6a25a);
+  color: #050505;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.cds-sommelier__send:hover,
+.cds-sommelier__send:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  outline: none;
+}
+
+.cds-sommelier__send:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+  filter: none;
+}
+
+.cds-sommelier__cta {
+  display: none;
+  margin: 0 1.05rem 0.2rem;
+  text-align: center;
+  text-decoration: none;
+  color: #050505;
+  background: linear-gradient(135deg, #c6a25a, #e7d3a0);
+  border: 1px solid #c6a25a;
+  padding: 0.7rem 0.9rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
+.cds-sommelier__cta.is-visible {
+  display: block;
+}
+
+.cds-sommelier__disclaimer {
+  margin: 0;
+  padding: 0.35rem 1.05rem 0.7rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(231, 211, 160, 0.38);
+  text-align: center;
+  font-family: 'Libre Baskerville', Georgia, serif;
+}
+
+body.is-age-locked .cds-sommelier-fab,
+body.is-age-locked .cds-sommelier {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .cds-sommelier {
+    left: 0.65rem;
+    right: 0.65rem;
+    width: auto;
+    bottom: calc(0.65rem + 66px);
+    max-height: min(78dvh, calc(100dvh - 6.5rem));
+  }
+
+  .cds-sommelier-fab {
+    width: 54px;
+    height: 54px;
+    left: 0.65rem;
+    bottom: 0.65rem;
+  }
+
+  .wa-fab {
+    bottom: 0.65rem;
+  }
+}

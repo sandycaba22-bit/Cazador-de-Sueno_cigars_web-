@@ -205,9 +205,51 @@ En el navegador:
 
 ```bash
 # Actualizar sitio tras cambios locales
-rsync -avz --delete --exclude 'deploy/' ./ USUARIO@IP:/var/www/cazador-de-suenos-cigars/
+rsync -avz --delete --exclude 'deploy/' --exclude '.env' ./ USUARIO@IP:/var/www/cazador-de-suenos-cigars/
 sudo systemctl reload nginx
+sudo systemctl restart cds-ai-sommelier
 ```
+
+---
+
+## Sommelier IA (Gemini)
+
+El chat flotante llama a `/api/ai-sommelier`. Nginx reenvía al proceso Node en `127.0.0.1:8787`. La clave de Gemini **nunca** va al navegador.
+
+1. Instalar Node.js 18+ en la VM (`node -v`).
+2. Crear la clave en [Google AI Studio](https://aistudio.google.com/apikey).
+3. En el servidor:
+
+```bash
+sudo mkdir -p /etc/cazador-de-suenos
+sudo nano /etc/cazador-de-suenos/ai-sommelier.env
+# Contenido:
+# GEMINI_API_KEY=tu_clave
+# GEMINI_MODEL=gemini-2.5-flash
+# HOUSE_WHATSAPP=+1 809-464-5016
+# HOUSE_WHATSAPP_E164=18094645016
+# HOUSE_EMAIL=cazadordesueno2024@gmail.com
+# LOG_REPLIES=true
+# PORT=8787
+# HOST=127.0.0.1
+
+sudo chown www-data:www-data /var/www/cazador-de-suenos-cigars/server/ai-sommelier/data
+sudo chmod 750 /var/www/cazador-de-suenos-cigars/server/ai-sommelier/data
+
+sudo cp /var/www/cazador-de-suenos-cigars/server/ai-sommelier/cds-ai-sommelier.service /etc/systemd/system/cds-ai-sommelier.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now cds-ai-sommelier
+sudo nginx -t && sudo systemctl reload nginx
+curl -s http://127.0.0.1:8787/api/ai-sommelier/health
+
+# Ver en vivo lo que responde el Maestro Tabaquero:
+sudo journalctl -u cds-ai-sommelier -f
+
+# Ver en vivo lo que responde el Maestro Tabaquero:
+sudo journalctl -u cds-ai-sommelier -f
+```
+
+Los leads B2B quedan en `server/ai-sommelier/data/leads.jsonl`. El widget también abre WhatsApp `+1 809-464-5016` con el resumen del lead.
 
 ---
 
@@ -218,3 +260,5 @@ sudo systemctl reload nginx
 | `/var/www/cazador-de-suenos-cigars/` | Raíz del sitio |
 | `/etc/nginx/sites-available/cazador-de-suenos` | Config Nginx |
 | `/etc/letsencrypt/live/www.cazadordesuenocigars.com/` | Certificados SSL |
+| `/etc/cazador-de-suenos/ai-sommelier.env` | Clave Gemini (no versionar) |
+| `127.0.0.1:8787` | Proceso Node del sommelier |

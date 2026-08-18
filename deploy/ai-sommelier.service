@@ -1,0 +1,20 @@
+[Unit]
+Description=Cazador de Sueños — AI Sommelier (Gemini)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/cazador-de-suenos-cigars/server/ai-sommelier
+EnvironmentFile=-/etc/cazador-de-suenos/ai-sommelier.env
+EnvironmentFile=-/var/www/cazador-de-suenos-cigars/server/ai-sommelier/.env
+ExecStart=/usr/bin/node /var/www/cazador-de-suenos-cigars/server/ai-sommelier/server.js
+Restart=always
+RestartSec=4
+User=www-data
+Group=www-data
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
