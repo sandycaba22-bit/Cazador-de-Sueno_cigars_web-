@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200" fill="none">
+  <rect width="280" height="200" fill="#342c24"/>
+  <rect x="65" y="55" width="150" height="90" rx="6" fill="#2b241d" stroke="#dbbc72" stroke-width="2"/>
+  <ellipse cx="140" cy="100" rx="10" ry="38" fill="#5c3d2e"/>
+  <text x="140" y="175" text-anchor="middle" fill="#dbbc72" font-family="Georgia,serif" font-size="13">Lancero</text>
+</svg>

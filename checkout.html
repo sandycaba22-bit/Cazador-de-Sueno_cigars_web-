@@ -1,492 +1,372 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- Early language detection script (must load first to prevent flicker) -->
-  <script src="/js/language-detect-early.js"></script>
-  
-  <!-- Google Analytics 4 - Global Tracking -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-BYRS7MGYXK', {
-      'anonymize_ip': true,
-      'cookie_flags': 'samesite=none;secure',
-      'custom_map': {
-        'dimension1': 'page_type',
-        'dimension2': 'user_language',
-        'dimension3': 'shipping_country'
-      }
-    });
-  </script>
-  
-  <title>Checkout | Cazador de Sueños Cigars SRL</title>
-  <meta name="description" content="Complete su pedido de cigarros premium dominicanos. Pago por transferencia bancaria segura.">
-  <meta name="robots" content="noindex, follow">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  
-  <style>
-    /* Checkout specific styles */
-    .checkout-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-      min-height: 100vh;
-    }
-    
-    .checkout-header {
-      text-align: center;
-      margin-bottom: 3rem;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid rgba(198, 162, 90, 0.2);
-    }
-    
-    .checkout-header h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.5rem;
-      color: #f4efe2;
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.1em;
-    }
-    
-    .checkout-grid {
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: 2rem;
-    }
-    
-    @media (max-width: 900px) {
-      .checkout-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .checkout-section {
-      background: linear-gradient(180deg, rgba(10, 24, 38, 0.8) 0%, rgba(5, 5, 5, 0.9) 100%);
-      border: 1px solid rgba(198, 162, 90, 0.2);
-      border-radius: 8px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-    }
-    
-    .checkout-section h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.5rem;
-      color: #f4efe2;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(198, 162, 90, 0.2);
-      letter-spacing: 0.1em;
-    }
-    
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    
-    .form-group label {
-      display: block;
-      color: #aeb9c6;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-      font-family: 'Cormorant Garamond', serif;
-      letter-spacing: 0.1em;
-    }
-    
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 0.875rem;
-      background: rgba(7, 17, 29, 0.8);
-      border: 1px solid rgba(198, 162, 90, 0.3);
-      border-radius: 4px;
-      color: #f4efe2;
-      font-family: 'Libre Baskerville', serif;
-      font-size: 1rem;
-      transition: border-color 0.3s ease;
-    }
-    
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #c6a25a;
-    }
-    
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    
-    @media (max-width: 600px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .order-summary-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 0;
-      border-bottom: 1px solid rgba(198, 162, 90, 0.1);
-    }
-    
-    .order-summary-item:last-child {
-      border-bottom: none;
-    }
-    
-    .order-summary-item-info {
-      flex: 1;
-    }
-    
-    .order-summary-item-name {
-      color: #f4efe2;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1rem;
-      margin-bottom: 0.25rem;
-    }
-    
-    .order-summary-item-quantity {
-      color: #aeb9c6;
-      font-size: 0.85rem;
-    }
-    
-    .order-summary-item-price {
-      color: #c6a25a;
-      font-weight: 600;
-    }
-    
-    .order-summary-totals {
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(198, 162, 90, 0.2);
-    }
-    
-    .order-summary-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-      color: #aeb9c6;
-      font-size: 0.9rem;
-    }
-    
-    .order-summary-row.total {
-      color: #f4efe2;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(198, 162, 90, 0.2);
-    }
-    
-    .bank-details {
-      background: rgba(198, 162, 90, 0.05);
-      border: 1px solid rgba(198, 162, 90, 0.2);
-      border-radius: 4px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .bank-details-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid rgba(198, 162, 90, 0.1);
-    }
-    
-    .bank-details-item:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-    
-    .bank-details-label {
-      color: #aeb9c6;
-      font-size: 0.9rem;
-    }
-    
-    .bank-details-value {
-      color: #f4efe2;
-      font-weight: 600;
-      font-family: 'Libre Baskerville', serif;
-    }
-    
-    .bank-account-selector {
-      margin-bottom: 1.5rem;
-    }
-    
-    .bank-account-card {
-      background: rgba(198, 162, 90, 0.05);
-      border: 2px solid rgba(198, 162, 90, 0.2);
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .bank-account-card:hover {
-      border-color: rgba(198, 162, 90, 0.4);
-      background: rgba(198, 162, 90, 0.08);
-    }
-    
-    .bank-account-card.selected {
-      border-color: #c6a25a;
-      background: rgba(198, 162, 90, 0.1);
-    }
-    
-    .bank-account-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    
-    .bank-account-card-name {
-      color: #f4efe2;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
-    
-    .bank-account-card-radio {
-      width: 20px;
-      height: 20px;
-      accent-color: #c6a25a;
-    }
-    
-    .file-upload {
-      border: 2px dashed rgba(198, 162, 90, 0.3);
-      border-radius: 4px;
-      padding: 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.3s ease, background 0.3s ease;
-    }
-    
-    .file-upload:hover {
-      border-color: #c6a25a;
-      background: rgba(198, 162, 90, 0.05);
-    }
-    
-    .file-upload input {
-      display: none;
-    }
-    
-    .file-upload-label {
-      color: #aeb9c6;
-      font-size: 0.9rem;
-    }
-    
-    .file-upload-icon {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .checkout-button {
-      width: 100%;
-      padding: 1.25rem;
-      background: linear-gradient(135deg, #c6a25a 0%, #8b7355 100%);
-      border: none;
-      color: #050505;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      margin-top: 1.5rem;
-    }
-    
-    .checkout-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(198, 162, 90, 0.3);
-    }
-    
-    .checkout-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .empty-cart-message {
-      text-align: center;
-      padding: 3rem;
-      color: #aeb9c6;
-    }
-    
-    .empty-cart-message a {
-      color: #c6a25a;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="checkout-container">
-    <div class="checkout-header">
-      <a href="index.html" style="color: #c6a25a; text-decoration: none; font-family: 'Cormorant Garamond', serif; letter-spacing: 0.1em;">← Volver al sitio</a>
-      <h1>Checkout</h1>
-      <p style="color: #aeb9c6; margin-top: 0.5rem;">Complete su pedido de cigarros premium</p>
-    </div>
-    
-    <div id="checkoutContent" class="checkout-grid">
-      <!-- Left column: Forms -->
-      <div class="checkout-forms">
-        <!-- Shipping Information -->
-        <div class="checkout-section">
-          <h2>Información de Envío</h2>
-          <form id="shippingForm">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="firstName">Nombre *</label>
-                <input type="text" id="firstName" name="firstName" required>
-              </div>
-              <div class="form-group">
-                <label for="lastName">Apellido *</label>
-                <input type="text" id="lastName" name="lastName" required>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="email">Email *</label>
-              <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="phone">Teléfono *</label>
-              <input type="tel" id="phone" name="phone" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="address">Dirección *</label>
-              <input type="text" id="address" name="address" required>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="city">Ciudad *</label>
-                <input type="text" id="city" name="city" required>
-              </div>
-              <div class="form-group">
-                <label for="postalCode">Código Postal *</label>
-                <input type="text" id="postalCode" name="postalCode" required>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="country">País *</label>
-              <select id="country" name="country" required>
-                <option value="">Seleccione un país</option>
-                <option value="US">Estados Unidos</option>
-                <option value="CA">Canadá</option>
-                <option value="DO">República Dominicana</option>
-                <option value="OTHER">Otro</option>
-              </select>
-            </div>
-          </form>
-        </div>
-        
-        <!-- Payment Information -->
-        <div class="checkout-section">
-          <h2>Método de Pago</h2>
-          <p style="color: #aeb9c6; margin-bottom: 1.5rem;">Seleccione una cuenta bancaria para realizar la transferencia:</p>
-          
-          <div class="bank-account-selector" id="bankAccountSelector">
-            <div class="bank-account-card" data-account-id="account1">
-              <div class="bank-account-card-header">
-                <span class="bank-account-card-name">Banco BHD - Cuenta de Ahorros</span>
-                <input type="radio" name="bankAccount" class="bank-account-card-radio" value="account1" required>
-              </div>
-              <div class="bank-details-item">
-                <span class="bank-details-label">Titular</span>
-                <span class="bank-details-value">Sandy de Jesús Rodríguez</span>
-              </div>
-              <div class="bank-details-item">
-                <span class="bank-details-label">Número de Cuenta</span>
-                <span class="bank-details-value">15705310035</span>
-              </div>
-            </div>
-            
-            <div class="bank-account-card" data-account-id="account2">
-              <div class="bank-account-card-header">
-                <span class="bank-account-card-name">Banco de Reservas - Cuenta de Ahorros</span>
-                <input type="radio" name="bankAccount" class="bank-account-card-radio" value="account2">
-              </div>
-              <div class="bank-details-item">
-                <span class="bank-details-label">Titular</span>
-                <span class="bank-details-value">Sandy Rodríguez</span>
-              </div>
-              <div class="bank-details-item">
-                <span class="bank-details-label">Número de Cuenta</span>
-                <span class="bank-details-value">9605921123</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Comprobante de Pago *</label>
-            <div class="file-upload" id="paymentProofUpload">
-              <input type="file" id="paymentProof" name="paymentProof" accept="image/*,.pdf" required>
-              <div class="file-upload-icon">📄</div>
-              <div class="file-upload-label">Haga clic o arrastre el comprobante de pago aquí</div>
-              <div id="fileName" style="color: #c6a25a; margin-top: 0.5rem; font-size: 0.85rem;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Right column: Order Summary -->
-      <div class="checkout-summary">
-        <div class="checkout-section">
-          <h2>Resumen del Pedido</h2>
-          <div id="orderItems">
-            <!-- Items will be loaded here -->
-          </div>
-          <div class="order-summary-totals">
-            <div class="order-summary-row">
-              <span>Subtotal</span>
-              <span id="subtotal">$0.00</span>
-            </div>
-            <div class="order-summary-row">
-              <span>Envío</span>
-              <span id="shipping">$0.00</span>
-            </div>
-            <div class="order-summary-row total">
-              <span>Total</span>
-              <span id="total">$0.00</span>
-            </div>
-          </div>
-          <button type="submit" class="checkout-button" id="placeOrderBtn" disabled>
-            Confirmar Pedido
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Checkout seguro — Cazador de Sueños Cigars" />
+    <title>Checkout — Cazador de Sueños</title>
+    <!-- Restaurar visibilidad inmediata (evita pantalla negra por language-detect-early) -->
+    <script>
+      (function () {
+        if (window.__cdsEarlyStyle) {
+          window.__cdsEarlyStyle.remove();
+          delete window.__cdsEarlyStyle;
+        }
+        document.documentElement.style.visibility = 'visible';
+        document.body.style.visibility = 'visible';
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Libre+Baskerville:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/checkout-commerce.css" />
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body data-page="checkout">
+    <main class="checkout-page-lux">
+      <div class="checkout-container">
+        <div class="checkout-topbar">
+          <a href="index.html" class="checkout-topbar__back">← Seguir comprando</a>
+          <span class="checkout-topbar__brand">Cazador de Sueños</span>
+          <button type="button" id="cart-toggle" class="btn-lux btn-lux--outline" aria-label="Abrir carrito">
+            Carrito <span id="cart-count">0</span>
           </button>
-          <p style="text-align: center; color: #65717f; font-size: 0.8rem; margin-top: 1rem;">
-            Al confirmar, su pedido quedará "Pendiente de verificación"
-          </p>
+        </div>
+
+        <div id="checkout-error-banner" class="checkout-error-banner" hidden role="alert"></div>
+
+        <div id="checkout-empty" class="checkout-empty-lux" hidden>
+          <h1>Tu carrito está vacío</h1>
+          <p>Añade productos desde el catálogo o desde las páginas de vitolas antes de finalizar la compra.</p>
+          <div class="checkout-actions-row">
+            <a href="index.html#catalogo" class="btn-lux btn-lux--gold">Ver catálogo</a>
+            <a href="vitolas/el-rango.html" class="btn-lux btn-lux--outline">Explorar vitolas</a>
+          </div>
+        </div>
+
+        <div id="checkout-main" class="checkout-layout-lux">
+          <section class="checkout-panel checkout-form-section">
+            <h1>Finalizar compra</h1>
+            <p class="checkout-panel__intro">Envío internacional DHL y pagos seguros desde cualquier país.</p>
+
+            <form id="checkout-form" novalidate>
+              <fieldset class="form-section">
+                <legend>Datos de contacto</legend>
+                <div class="form-grid">
+                  <label>
+                    Nombre completo
+                    <input type="text" name="fullName" required autocomplete="name" />
+                  </label>
+                  <label>
+                    Correo electrónico
+                    <input type="email" name="email" required autocomplete="email" />
+                  </label>
+                  <label class="span-2">
+                    Teléfono
+                    <input type="tel" name="phone" autocomplete="tel" />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-section">
+                <legend>Dirección de envío</legend>
+                <div class="form-grid">
+                  <label class="span-2">
+                    Dirección
+                    <input type="text" name="address" required autocomplete="street-address" />
+                  </label>
+                  <label>
+                    Ciudad
+                    <input type="text" name="city" required autocomplete="address-level2" />
+                  </label>
+                  <label>
+                    Estado / Provincia
+                    <input type="text" name="state" autocomplete="address-level1" />
+                  </label>
+                  <label>
+                    Código postal
+                    <input type="text" name="postalCode" autocomplete="postal-code" />
+                  </label>
+                  <label>
+                    País de destino
+                    <select name="country" required></select>
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-section">
+                <legend>Método de pago</legend>
+                <div class="payment-methods">
+                  <label class="payment-option">
+                    <input type="radio" name="paymentMethod" value="bank_transfer" checked />
+                    <span>
+                      <strong>Transferencia bancaria</strong>
+                      <small>BHD o Banreservas — referencia única de pedido</small>
+                    </span>
+                  </label>
+                  <label class="payment-option" id="payment-option-card">
+                    <input type="radio" name="paymentMethod" value="card" />
+                    <span>
+                      <strong>Tarjeta de crédito / débito</strong>
+                      <small>Visa, Mastercard, Amex — procesado por Stripe</small>
+                    </span>
+                  </label>
+                  <label class="payment-option" id="payment-option-sandbox" hidden>
+                    <input type="radio" name="paymentMethod" value="sandbox" />
+                    <span>
+                      <strong id="sandbox-payment-label">Pago de prueba (sandbox)</strong>
+                      <small>Simula una compra completa sin cargo real</small>
+                    </span>
+                  </label>
+                </div>
+
+                <p id="stripe-unavailable-notice" class="checkout-notice" hidden>
+                  Pagos con tarjeta no disponibles hasta configurar Stripe en js/config.js.
+                </p>
+                <div id="sandbox-payment-notice" class="checkout-notice" hidden>
+                  Modo sandbox: el pedido se guardará localmente para pruebas.
+                </div>
+
+                <div id="card-payment-section" class="card-payment-section">
+                  <label>Tarjeta</label>
+                  <div id="card-element" class="card-element"></div>
+                  <p id="card-errors" class="form-error" role="alert"></p>
+                </div>
+
+                <div id="bank-transfer-always" class="bank-transfer-panel bank-transfer-panel--always"></div>
+
+                <div id="bank-transfer-preview" hidden></div>
+
+                <label id="proof-upload-area" class="proof-upload" hidden>
+                  <input type="file" id="payment-proof" name="paymentProof" accept="image/*,.pdf" />
+                  <span>📄 Adjuntar comprobante de transferencia (opcional ahora, obligatorio para activar envío)</span>
+                  <small id="proof-file-name"></small>
+                </label>
+              </fieldset>
+
+              <label class="span-2">
+                Notas del pedido (opcional)
+                <textarea name="notes" rows="3" placeholder="Instrucciones especiales de entrega"></textarea>
+              </label>
+
+              <fieldset class="form-section form-section--policy">
+                <legend>Política de venta final</legend>
+                <div class="policy-banner" role="note">
+                  <strong>Sin devoluciones ni reembolsos.</strong>
+                  <p id="policy-summary"></p>
+                </div>
+                <label class="policy-checkbox">
+                  <input type="checkbox" name="acceptFinalSale" required />
+                  <span id="policy-checkbox-label"></span>
+                </label>
+              </fieldset>
+
+              <fieldset class="form-section form-section--policy">
+                <legend>Responsabilidad aduanera</legend>
+                <label class="policy-checkbox">
+                  <input type="checkbox" name="acceptCustomsDisclaimer" required />
+                  <span id="customs-checkbox-label"></span>
+                </label>
+              </fieldset>
+
+              <div class="checkout-trust">
+                <ul>
+                  <li id="trust-authenticity"></li>
+                  <li id="trust-delivery"></li>
+                  <li id="trust-policy"></li>
+                </ul>
+              </div>
+
+              <div class="checkout-actions-row">
+                <button type="submit" id="submit-checkout" class="btn-lux btn-lux--gold btn--block">
+                  Confirmar pedido — venta final
+                </button>
+                <button type="button" id="whatsapp-checkout-btn" class="btn-lux btn-lux--outline">
+                  Finalizar pedido por WhatsApp
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <aside id="checkout-summary-panel" class="checkout-panel checkout-summary-lux">
+            <h2>Resumen del pedido</h2>
+            <div id="checkout-items" class="checkout-items"></div>
+
+            <div class="checkout-summary__shipping-panel">
+              <h3>Despacho internacional</h3>
+              <dl class="summary-lines-lux">
+                <div>
+                  <dt>Transportista</dt>
+                  <dd id="summary-carrier">DHL Express</dd>
+                </div>
+                <div>
+                  <dt>Origen</dt>
+                  <dd id="summary-origin">República Dominicana</dd>
+                </div>
+                <div>
+                  <dt>Destino</dt>
+                  <dd id="summary-destination">—</dd>
+                </div>
+                <div>
+                  <dt>Cajas en envío</dt>
+                  <dd><span id="summary-boxes">0</span> / <span id="summary-max-boxes">10</span></dd>
+                </div>
+              </dl>
+              <p id="dhl-box-warning" class="dhl-box-warning" hidden role="alert"></p>
+            </div>
+
+            <dl class="summary-lines-lux">
+              <div>
+                <dt>Subtotal</dt>
+                <dd id="summary-subtotal">$0.00</dd>
+              </div>
+              <div>
+                <dt>Envío DHL (<span id="summary-zone">—</span>)</dt>
+                <dd id="summary-shipping">$0.00</dd>
+              </div>
+              <div class="summary-lines-lux__total">
+                <dt>Total</dt>
+                <dd id="summary-total">$0.00</dd>
+              </div>
+            </dl>
+            <p class="checkout-panel__intro">Total puros: <strong id="summary-units">0</strong></p>
+            <p class="checkout-panel__intro">Entrega estimada: <strong id="summary-delivery">—</strong></p>
+          </aside>
         </div>
       </div>
-    </div>
-    
-    <div id="emptyCart" class="empty-cart-message" style="display: none;">
-      <h2 style="font-family: 'Cormorant Garamond', serif; color: #f4efe2; margin-bottom: 1rem;">Tu carrito está vacío</a></h2>
-      <p style="margin-bottom: 1.5rem;">Explora nuestra colección premium de cigarros dominicanos</p>
-      <a href="index.html#catalogo" style="color: #c6a25a; text-decoration: none; font-family: 'Cormorant Garamond', serif; letter-spacing: 0.1em;">Ver Colección →</a>
-    </div>
-  </div>
-  
-  <script src="/js/shopping-cart.js"></script>
-  <script src="/js/checkout.js" defer></script>
-</body>
+    </main>
+
+    <div id="cart-overlay" class="overlay" aria-hidden="true"></div>
+    <aside id="cart-drawer" class="cart-drawer" aria-label="Carrito de compras">
+      <header class="cart-drawer__header">
+        <h2>Tu carrito</h2>
+        <button type="button" id="cart-close" class="btn-icon" aria-label="Cerrar">×</button>
+      </header>
+      <ul id="mini-cart-items" class="mini-cart"></ul>
+      <footer class="cart-drawer__footer">
+        <div class="cart-drawer__subtotal">
+          <span>Subtotal</span>
+          <strong id="mini-cart-subtotal">$0.00</strong>
+        </div>
+        <p class="cart-drawer__note"><span id="cart-line-count">0</span> línea(s) en carrito</p>
+        <a id="go-checkout" href="checkout.html" class="btn btn--primary btn--block">Ir al checkout</a>
+      </footer>
+    </aside>
+
+    <script src="js/page-visibility.js"></script>
+    <script src="js/commerce-urls.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/policies.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/shipping.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/cart-legacy-bridge.js"></script>
+    <script src="js/bank.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/cart-ui.js"></script>
+    <script src="js/whatsapp-commerce.js"></script>
+    <script src="js/checkout.js"></script>
+    <script>
+      window.addEventListener('error', function (event) {
+        var banner = document.getElementById('checkout-error-banner');
+        if (banner) {
+          banner.hidden = false;
+          banner.textContent =
+            'Error al cargar el checkout: ' + (event.message || 'revise la consola del navegador.');
+        }
+        if (typeof revealCdsPage === 'function') revealCdsPage();
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (typeof revealCdsPage === 'function') revealCdsPage();
+
+          var summary = document.getElementById('policy-summary');
+          var label = document.getElementById('policy-checkbox-label');
+          var customsLabel = document.getElementById('customs-checkbox-label');
+          if (summary) summary.textContent = SALES_POLICY.summary;
+          if (label) label.textContent = SALES_POLICY.checkoutText;
+          if (customsLabel) customsLabel.textContent = CUSTOMS_DISCLAIMER.checkoutText;
+
+          var trustAuth = document.getElementById('trust-authenticity');
+          var trustDel = document.getElementById('trust-delivery');
+          var trustPol = document.getElementById('trust-policy');
+          if (trustAuth) trustAuth.textContent = APP_CONFIG.trust.authenticity;
+          if (trustDel) trustDel.textContent = APP_CONFIG.trust.delivery;
+          if (trustPol) trustPol.textContent = APP_CONFIG.trust.policy;
+
+          var sandboxLabel = document.getElementById('sandbox-payment-label');
+          if (sandboxLabel && APP_CONFIG.sandbox && APP_CONFIG.sandbox.label) {
+            sandboxLabel.textContent = APP_CONFIG.sandbox.label;
+          }
+
+          var waBtn = document.getElementById('whatsapp-checkout-btn');
+          if (waBtn && APP_CONFIG.whatsapp) {
+            waBtn.textContent = APP_CONFIG.whatsapp.label || 'Finalizar por WhatsApp';
+          }
+
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('selftest') === 'legacy') {
+            localStorage.setItem(
+              'cds-shopping-cart',
+              JSON.stringify({
+                items: [
+                  {
+                    productId: 'rango',
+                    name: 'El Rango',
+                    price: 16,
+                    quantity: 10,
+                    boxSize: 10,
+                    image: 'img/el-rango-cigarro.jpg',
+                  },
+                ],
+                subtotal: 160,
+                shipping: 0,
+                total: 160,
+                currency: 'USD',
+                shippingCountry: 'US',
+                isPaid: false,
+              })
+            );
+            localStorage.removeItem('cazador_sueno_cart');
+          } else if (params.get('selftest') === 'modern') {
+            localStorage.setItem(
+              'cazador_sueno_cart',
+              JSON.stringify({
+                version: 2,
+                items: [{ productId: 'cs-rango-petit', unitType: 'box', quantity: 1 }],
+                updatedAt: Date.now(),
+              })
+            );
+            localStorage.removeItem('cds-shopping-cart');
+          }
+
+          initCheckoutPage();
+          if (typeof initFloatingCommerceWidgets === 'function') initFloatingCommerceWidgets();
+
+          if (typeof getCartItems === 'function') {
+            console.info('[Checkout] Carrito real detectado:', {
+              items: getCartItems().length,
+              legacyRaw: localStorage.getItem('cds-shopping-cart'),
+              modernRaw: localStorage.getItem('cazador_sueno_cart'),
+            });
+          }
+        } catch (err) {
+          console.error('[Checkout bootstrap]', err);
+          var banner = document.getElementById('checkout-error-banner');
+          if (banner) {
+            banner.hidden = false;
+            banner.textContent =
+              err.message || 'No se pudo iniciar el checkout. Recarga la página e intenta de nuevo.';
+          }
+        }
+      });
+    </script>
+  </body>
 </html>

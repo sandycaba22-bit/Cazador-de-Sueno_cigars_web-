@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200" fill="none">
+  <rect width="280" height="200" fill="#342c24"/>
+  <rect x="70" y="50" width="140" height="100" rx="6" fill="#2b241d" stroke="#c9a962" stroke-width="2"/>
+  <rect x="85" y="65" width="110" height="70" rx="4" fill="#1a1612"/>
+  <ellipse cx="140" cy="100" rx="18" ry="28" fill="#8b5a3c"/>
+  <text x="140" y="175" text-anchor="middle" fill="#c9a962" font-family="Georgia,serif" font-size="14">Classic</text>
+</svg>

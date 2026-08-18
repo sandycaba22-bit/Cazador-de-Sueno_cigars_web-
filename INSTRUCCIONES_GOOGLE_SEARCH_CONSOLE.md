@@ -123,7 +123,7 @@ Repite el proceso de verificación para:
 ---
 
 **Contacto de Soporte:**
-- Para problemas técnicos del servidor: sandy@35.237.216.105
+- Para problemas técnicos del servidor: sandy@34.24.248.250
 - Para consultas de SEO: Documentación de Google Search Console
 
 **Fecha de implementación:** 23 de junio de 2026

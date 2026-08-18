@@ -14,7 +14,7 @@ PASO 2 — Crear estos registros (reemplaza IP con tu IP externa de GCP):
 ┌─────────┬────────┬──────────────────────────────────┬─────┐
 │ Tipo    │ Nombre │ Valor                            │ TTL │
 ├─────────┼────────┼──────────────────────────────────┼─────┤
-│ A       │ @      │ 35.237.216.105                   │ 600 │
+│ A       │ @      │ 34.24.248.250                   │ 600 │
 │ CNAME   │ www    │ cazadordesuenocigars.com.             │ 600 │
 └─────────┴────────┴──────────────────────────────────┴─────┘
 
@@ -23,8 +23,8 @@ NOTA: El punto al final de "cazadordesuenocigars.com." en CNAME es correcto.
 ALTERNATIVA si CNAME en www da error en GoDaddy:
 
 ┌─────────┬────────┬──────────────────────────────────┬─────┐
-│ A       │ @      │ 35.237.216.105                   │ 600 │
-│ A       │ www    │ 35.237.216.105                   │ 600 │
+│ A       │ @      │ 34.24.248.250                   │ 600 │
+│ A       │ www    │ 34.24.248.250                   │ 600 │
 └─────────┴────────┴──────────────────────────────────┴─────┘
 
 REDIRECCIÓN sin www → www:

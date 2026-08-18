@@ -7,7 +7,7 @@ param(
     [string]$ProjectId = "",
     [string]$Zone = "us-east1-b",
     [string]$Instance = "jaragoexpresselite",
-    [string]$ServerIp = "35.237.216.105"
+    [string]$ServerIp = "34.24.248.250"
 )
 
 $ErrorActionPreference = "Stop"

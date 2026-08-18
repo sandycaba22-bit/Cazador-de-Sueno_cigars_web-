@@ -26,6 +26,7 @@ config/bank-accounts-config.json
 .tmp/
 temp/
 cache/
+data/
 
 # Dependencias
 node_modules/

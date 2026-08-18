@@ -64,10 +64,52 @@
     });
   }
 
+  function initCommerceFloats() {
+    if (document.body.dataset.page === 'checkout') return;
+    if (document.getElementById('cds-float-whatsapp')) return;
+
+    var phone = '18095550198';
+    var wa = document.createElement('a');
+    wa.id = 'cds-float-whatsapp';
+    wa.className = 'cds-float-whatsapp';
+    wa.href = 'https://wa.me/' + phone;
+    wa.target = '_blank';
+    wa.rel = 'noopener';
+    wa.setAttribute('aria-label', 'WhatsApp');
+    wa.innerHTML = '<span class="cds-float-whatsapp__icon">💬</span><span class="cds-float-whatsapp__text">WhatsApp</span>';
+    document.body.appendChild(wa);
+
+    // Un solo carrito flotante por página: la calculadora ya monta el suyo.
+    if (!document.getElementById('cs-carrito-flotante') && !document.getElementById('cds-float-cart')) {
+      var cart = document.createElement('a');
+      cart.id = 'cds-float-cart';
+      cart.className = 'cds-float-cart';
+      cart.href = typeof getCheckoutUrl === 'function' ? getCheckoutUrl() : '/checkout.html';
+      cart.setAttribute('aria-label', 'Ir al checkout');
+      cart.innerHTML = '<span class="cds-float-cart__icon">🛒</span><span id="cds-float-cart-count" class="cds-float-cart__count">0</span>';
+      document.body.appendChild(cart);
+    }
+
+    function refreshCount() {
+      var count = 0;
+      try {
+        if (window.ShoppingCart && window.ShoppingCart.getCart) {
+          count = window.ShoppingCart.getCart().items.reduce(function (s, i) { return s + i.quantity; }, 0);
+        }
+      } catch (e) { /* ignore */ }
+      var el = document.getElementById('cds-float-cart-count');
+      if (el) el.textContent = String(count);
+    }
+
+    refreshCount();
+    window.addEventListener('cds:cart-updated', refreshCount);
+  }
+
   function onReady() {
     renderLogos();
     initReveal();
     initLanguageListener();
+    initCommerceFloats();
   }
 
   if (localStorage.getItem('cds-age-verified') === '1') {

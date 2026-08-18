@@ -50,12 +50,13 @@
   
   // Prevenir parpadeo ocultando el body temporalmente
   // El script principal lo mostrará después de cargar traducciones
-  const style = document.createElement('style');
-  style.textContent = 'body { visibility: hidden; }';
-  document.head.appendChild(style);
-  
-  // Guardar referencia para que el script principal pueda removerlo
-  window.__cdsEarlyStyle = style;
+  const skipHidePages = /checkout\.html|order-confirmation\.html|cart-test\.html/i;
+  if (!skipHidePages.test(location.pathname)) {
+    const style = document.createElement('style');
+    style.textContent = 'body { visibility: hidden; }';
+    document.head.appendChild(style);
+    window.__cdsEarlyStyle = style;
+  }
   
   console.log('[CDS] Idioma detectado:', currentLang);
 })();

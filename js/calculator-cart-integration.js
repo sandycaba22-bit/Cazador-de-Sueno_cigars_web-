@@ -185,14 +185,10 @@
       
       if (success) {
         showToast(`✅ ¡${quantity} x ${product.name} agregado al carrito!`, 'success');
-        
-        // Ocultar calculadora después de agregar
-        setTimeout(() => {
-          const contenedor = document.getElementById('cs-calculadora-contenedor');
-          if (contenedor) {
-            contenedor.innerHTML = '';
-          }
-        }, 2000);
+
+        if (typeof window.revealCheckoutShortcut === 'function') {
+          window.revealCheckoutShortcut();
+        }
       } else {
         showToast('❌ Error al agregar al carrito', 'error');
       }
@@ -422,7 +418,7 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(198, 162, 90, 0.3);
       }
-      
+
       .cs-btn-icon {
         width: 20px;
         height: 20px;
@@ -453,6 +449,8 @@
   // Carrito flotante indicador premium
   function createFloatingCart() {
     if (document.getElementById('cs-carrito-flotante')) return;
+    // Un solo carrito flotante por página: si ya existe el de comercio, no duplicar.
+    if (document.getElementById('cds-float-cart')) return;
     
     const floatingCart = document.createElement('div');
     floatingCart.id = 'cs-carrito-flotante';
@@ -460,7 +458,7 @@
       <div class="cs-cart-content">
         <span class="cs-cart-icon">🛒</span>
         <span class="cs-cart-text"><span id="cs-contador-carrito">0</span> ítems</span>
-        <a href="checkout.html" class="cs-cart-link">Ir al Checkout</a>
+        <a href="/checkout.html" class="cs-cart-link cs-cart-link--checkout">Ver carrito</a>
       </div>
     `;
     
@@ -532,6 +530,17 @@
     document.head.appendChild(style);
     
     document.body.appendChild(floatingCart);
+
+    const checkoutLink = floatingCart.querySelector('.cs-cart-link--checkout');
+    if (checkoutLink) {
+      if (typeof getCheckoutUrl === 'function') checkoutLink.href = getCheckoutUrl();
+      checkoutLink.addEventListener('click', (e) => {
+        if (window.CartModal && typeof window.CartModal.open === 'function') {
+          e.preventDefault();
+          window.CartModal.open();
+        }
+      });
+    }
   }
 
   // Actualizar contador del carrito flotante
