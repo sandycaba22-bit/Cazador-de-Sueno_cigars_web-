@@ -1,4 +1,4 @@
-﻿# Despliegue Cazador de Sueños Cigars - Windows PowerShell
+# Despliegue Cazador de Sueños Cigars - Windows PowerShell
 #
 # Uso normal (publica el checkout y todo el comercio):
 #   .\deploy\deploy-from-windows.ps1 -SshUser TU_USUARIO
