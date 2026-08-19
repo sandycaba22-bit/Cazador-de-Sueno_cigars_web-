@@ -1,0 +1,367 @@
+/**
+ * Cazador de Sueños — sistema visual de lujo.
+ * Carbón, oro mate y tipografía ligera. Se carga antes de las hojas de página.
+ */
+
+:root {
+  --cds-black: #070707;
+  --cds-charcoal: #111111;
+  --cds-charcoal-mid: #181818;
+  --cds-charcoal-elevated: #1f1c18;
+  --cds-gold: #c4a574;
+  --cds-gold-matte: #b08d57;
+  --cds-bronze: #8a6a3c;
+  --cds-gold-light: #e4d2ae;
+  --cds-cream: #f3eee4;
+  --cds-muted: #a89f91;
+  --cds-border: rgba(196, 165, 116, 0.2);
+  --cds-shadow: 0 22px 56px rgba(0, 0, 0, 0.55);
+  --cds-shadow-btn: 0 10px 24px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 247, 230, 0.22);
+  --cds-shadow-btn-pressed: 0 1px 2px rgba(0, 0, 0, 0.55), inset 0 3px 8px rgba(0, 0, 0, 0.4);
+  --cds-radius: 3px;
+  --press-duration: 0.16s;
+  --press-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --bg: var(--cds-charcoal);
+  --bg-alt: var(--cds-charcoal-mid);
+  --surface: var(--cds-charcoal-elevated);
+  --surface-elevated: #2a261e;
+  --text: var(--cds-cream);
+  --text-muted: var(--cds-muted);
+  --accent: var(--cds-gold);
+  --accent-hover: var(--cds-gold-light);
+  --rango: #8b5a3c;
+  --success: #6b9e78;
+  --error: #e07a5f;
+  --border: var(--cds-border);
+  --radius: var(--cds-radius);
+  --shadow: var(--cds-shadow);
+
+  --navy: var(--cds-charcoal);
+  --navy-deep: var(--cds-black);
+  --navy-light: var(--cds-charcoal-mid);
+  --navy-panel: var(--cds-charcoal-elevated);
+  --gold: var(--cds-gold);
+  --gold-light: var(--cds-gold-light);
+  --gold-dark: var(--cds-bronze);
+  --gold-glow: rgba(196, 165, 116, 0.14);
+  --cream: var(--cds-cream);
+  --gold-subtle: rgba(196, 165, 116, 0.08);
+  --navy-subtle: rgba(7, 7, 7, 0.06);
+  --black: var(--cds-black);
+  --white: var(--cds-cream);
+  --gray-100: #e6ddca;
+  --gray-300: #c4bbb0;
+  --gray-400: #9a9186;
+  --gray-500: #7a7268;
+  --gray-800: #1c1c1c;
+  --gray-900: #101010;
+
+  --font-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+  --font-body: 'Outfit', 'Source Sans 3', system-ui, sans-serif;
+  --font-ui: 'Outfit', 'Source Sans 3', system-ui, sans-serif;
+  --font-price: 'Cormorant Garamond', Georgia, serif;
+  --container: 1120px;
+}
+
+/* —— Botón engomado: se hunde al pulsar —— */
+.cds-press,
+.btn,
+.co-btn,
+.purchase-panel__button,
+.nav__cta,
+.cart-button,
+.lang-selector__button,
+.lang-selector__option,
+.cds-sommelier-fab,
+.cds-sommelier__send,
+.cds-sommelier__cta,
+.cds-sommelier__chip,
+.ca__fab,
+.ca__chip,
+.ca__form button,
+.cds-float-whatsapp,
+.cds-float-cart,
+.co-paypal-btn,
+.co-method {
+  transition:
+    transform var(--press-duration) var(--press-ease),
+    box-shadow var(--press-duration) var(--press-ease),
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.cds-press:focus-visible,
+.btn:focus-visible,
+.co-btn:focus-visible,
+.purchase-panel__button:focus-visible,
+.nav__cta:focus-visible,
+.cart-button:focus-visible,
+.lang-selector__button:focus-visible,
+.cds-sommelier-fab:focus-visible,
+.cds-sommelier__send:focus-visible,
+.ca__fab:focus-visible,
+.cds-float-whatsapp:focus-visible,
+.cds-float-cart:focus-visible {
+  outline: 1px solid var(--cds-gold);
+  outline-offset: 3px;
+}
+
+.cds-press:active:not(:disabled),
+.btn:active:not(:disabled),
+.co-btn:active:not(:disabled),
+.purchase-panel__button:active:not(:disabled),
+.nav__cta:active,
+.cart-button:active,
+.lang-selector__button:active,
+.lang-selector__option:active,
+.cds-sommelier-fab:active,
+.cds-sommelier__send:active:not(:disabled),
+.cds-sommelier__cta:active,
+.cds-sommelier__chip:active,
+.ca__fab:active,
+.ca__chip:active,
+.ca__form button:active,
+.cds-float-whatsapp:active,
+.cds-float-cart:active,
+.co-paypal-btn:active:not(:disabled),
+.co-method:active {
+  transform: translateY(3px);
+  box-shadow: var(--cds-shadow-btn-pressed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cds-press,
+  .btn,
+  .co-btn,
+  .purchase-panel__button,
+  .nav__cta,
+  .cart-button,
+  .lang-selector__button,
+  .lang-selector__option,
+  .cds-sommelier-fab,
+  .cds-sommelier__send,
+  .cds-sommelier__cta,
+  .cds-sommelier__chip,
+  .ca__fab,
+  .ca__chip,
+  .ca__form button,
+  .cds-float-whatsapp,
+  .cds-float-cart,
+  .co-paypal-btn,
+  .co-method,
+  .cds-sommelier,
+  .cds-sommelier-fab__pulse {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .cds-press:active:not(:disabled),
+  .btn:active:not(:disabled),
+  .co-btn:active:not(:disabled),
+  .purchase-panel__button:active:not(:disabled),
+  .nav__cta:active,
+  .cart-button:active,
+  .lang-selector__button:active,
+  .cds-sommelier-fab:active,
+  .ca__fab:active,
+  .cds-float-whatsapp:active,
+  .cds-float-cart:active,
+  .co-paypal-btn:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* —— Selector de idioma (discreto, en cabecera) —— */
+.lang-selector {
+  position: relative;
+  flex: 0 0 auto;
+  z-index: 40;
+}
+
+.lang-selector__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.38rem 0.7rem;
+  border: 1px solid var(--cds-border);
+  border-radius: var(--cds-radius);
+  background: rgba(7, 7, 7, 0.45);
+  color: var(--cds-muted);
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+}
+
+.lang-selector__button:hover {
+  color: var(--cds-gold);
+  border-color: rgba(196, 165, 116, 0.45);
+}
+
+.lang-selector__icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+}
+
+.lang-selector__current {
+  line-height: 1;
+}
+
+.lang-selector__dropdown {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  min-width: 11.5rem;
+  padding: 0.35rem 0;
+  background: rgba(12, 12, 12, 0.98);
+  border: 1px solid var(--cds-border);
+  box-shadow: var(--cds-shadow);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+.lang-selector__dropdown--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.lang-selector__option {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.95rem;
+  border: 0;
+  background: transparent;
+  color: var(--cds-cream);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lang-selector__option:hover,
+.lang-selector__option:focus-visible {
+  background: rgba(196, 165, 116, 0.08);
+  color: var(--cds-gold);
+  outline: none;
+}
+
+html[dir='rtl'] .lang-selector__dropdown {
+  right: auto;
+  left: 0;
+}
+
+/* —— Marca en cabeceras de comercio —— */
+.cds-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--cds-cream);
+  text-decoration: none;
+}
+
+.cds-brand:hover {
+  color: var(--cds-gold-light);
+}
+
+.cds-brand__mark {
+  display: block;
+}
+
+.logo-canvas {
+  opacity: 0;
+  background: transparent;
+  mix-blend-mode: screen;
+}
+
+.logo-canvas--ready {
+  opacity: 1;
+}
+
+.logo-canvas--ready + .nav__logo-fallback,
+.logo-canvas--ready + .footer__logo-fallback {
+  display: none;
+}
+
+.nav__logo-fallback {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--cds-cream);
+}
+
+.nav__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-left: 1rem;
+}
+
+/* —— Flotantes de comercio —— */
+.cds-float-whatsapp,
+.cds-float-cart {
+  position: fixed;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.05rem;
+  border-radius: var(--cds-radius);
+  text-decoration: none;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: var(--cds-shadow-btn);
+}
+
+.cds-float-whatsapp {
+  right: 1.25rem;
+  bottom: 1.25rem;
+  background: #111;
+  color: var(--cds-gold);
+  border: 1px solid rgba(196, 165, 116, 0.45);
+}
+
+.cds-float-whatsapp:hover {
+  color: var(--cds-black);
+  background: var(--cds-gold);
+}
+
+.cds-float-cart {
+  right: 1.25rem;
+  bottom: 4.85rem;
+  background: rgba(17, 17, 17, 0.94);
+  border: 1px solid rgba(196, 165, 116, 0.28);
+  color: var(--cds-cream);
+}
+
+.cds-float-cart__count {
+  min-width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--cds-gold);
+  color: var(--cds-black);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 500;
+}

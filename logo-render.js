@@ -44,6 +44,22 @@ window.LogoRender = {
     ctx.putImageData(imageData, 0, 0);
   },
 
+  async mountAll() {
+    if (!window.pdfjsLib) return;
+    const canvases = document.querySelectorAll('.logo-canvas[data-logo]');
+    await Promise.all(
+      Array.from(canvases).map(async (canvas) => {
+        try {
+          const h = Number(canvas.dataset.height) || 44;
+          await this.renderPdfToCanvas(canvas, canvas.dataset.logo, h);
+          canvas.classList.add('logo-canvas--ready');
+        } catch (e) {
+          console.warn('Logo render failed:', e);
+        }
+      })
+    );
+  },
+
   async renderPdfToCanvas(canvas, url, targetHeight) {
     if (!window.pdfjsLib) return false;
 
@@ -71,3 +87,9 @@ window.LogoRender = {
     return true;
   }
 };
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.LogoRender && typeof window.LogoRender.mountAll === 'function') {
+    window.LogoRender.mountAll();
+  }
+});

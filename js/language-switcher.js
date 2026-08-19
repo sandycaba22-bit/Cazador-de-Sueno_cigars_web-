@@ -136,7 +136,7 @@ const LanguageSwitcher = (function() {
   function updateLanguageDisplay(lang) {
     const selector = document.querySelector('.lang-selector__current');
     if (selector) {
-      selector.textContent = `${languageFlags[lang]} ${languageNames[lang]}`;
+      selector.textContent = lang.toUpperCase();
     }
   }
 
@@ -161,7 +161,7 @@ const LanguageSwitcher = (function() {
       availableLanguages.forEach(lang => {
         const option = document.createElement('button');
         option.className = 'lang-selector__option';
-        option.textContent = `${languageFlags[lang]} ${languageNames[lang]}`;
+        option.textContent = `${lang.toUpperCase()}  ${languageNames[lang]}`;
         option.setAttribute('data-lang', lang);
         option.setAttribute('type', 'button');
         

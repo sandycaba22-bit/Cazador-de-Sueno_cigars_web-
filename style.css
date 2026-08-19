@@ -3,34 +3,32 @@
    ============================================ */
 
 :root {
-  /* Paleta — Tonos limpios y acentos sutiles de lujo */
-  --navy: #0f2238;
-  --navy-deep: #0a1826;
-  --navy-light: #163050;
-  --navy-panel: #112844;
-  --gold: #c6a25a;
-  --gold-light: #e7d3a0;
-  --gold-dark: #93763c;
-  --gold-glow: rgba(198, 162, 90, 0.12);
-  --cream: #f4efe2;
-  --gold-subtle: rgba(198, 162, 90, 0.08);
-  --navy-subtle: rgba(15, 34, 56, 0.06);
+  /* Paleta — carbón profundo y oro mate (tokens en css/luxury-tokens.css) */
+  --navy: #111111;
+  --navy-deep: #070707;
+  --navy-light: #181818;
+  --navy-panel: #1f1c18;
+  --gold: #c4a574;
+  --gold-light: #e4d2ae;
+  --gold-dark: #8a6a3c;
+  --gold-glow: rgba(196, 165, 116, 0.14);
+  --cream: #f3eee4;
+  --gold-subtle: rgba(196, 165, 116, 0.08);
+  --navy-subtle: rgba(7, 7, 7, 0.06);
 
-  /* Alias legados — remapeados a la nueva paleta para coherencia total */
-  --black: #07111d;
-  --white: #f4efe2;
+  --black: #070707;
+  --white: #f3eee4;
   --gray-100: #e6ddca;
-  --gray-300: #aeb9c6;
-  --gray-400: #8794a3;
-  --gray-500: #65717f;
-  --gray-800: #16273b;
-  --gray-900: #0d2036;
+  --gray-300: #c4bbb0;
+  --gray-400: #9a9186;
+  --gray-500: #7a7268;
+  --gray-800: #1c1c1c;
+  --gray-900: #101010;
 
-  /* Tipografía elegante de lujo — serif refinada */
   --font-display: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
-  --font-body: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
-  --font-ui: 'Cormorant Garamond', Georgia, serif;
-  --font-price: 'Bodoni Moda', 'Didot', 'Bodoni MT', 'Times New Roman', serif;
+  --font-body: 'Outfit', 'Source Sans 3', system-ui, sans-serif;
+  --font-ui: 'Outfit', 'Source Sans 3', system-ui, sans-serif;
+  --font-price: 'Cormorant Garamond', Georgia, serif;
   --space-section: clamp(5.5rem, 11vw, 10rem);
   --space-block: clamp(2rem, 4vw, 3.5rem);
   --content-max: 1320px;
@@ -47,12 +45,12 @@
 .vitola-purchase-panel {
   position: sticky;
   top: 2rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f6f2 100%);
-  border: 1px solid rgba(198, 162, 90, 0.3);
-  border-radius: 8px;
+  background: linear-gradient(165deg, #1c1a16 0%, #12100d 100%);
+  border: 1px solid rgba(196, 165, 116, 0.28);
+  border-radius: 3px;
   padding: 2.5rem;
   margin: 2rem 0;
-  box-shadow: 0 4px 24px rgba(198, 162, 90, 0.08);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
   z-index: 100;
 }
 
@@ -68,10 +66,10 @@
 }
 
 .purchase-panel__name {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   font-size: 1.85rem;
   font-weight: 400;
-  color: #0a1826;
+  color: var(--cream);
   margin: 0 0 0.75rem 0;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -79,12 +77,12 @@
 }
 
 .purchase-panel__description {
-  font-family: 'Libre Baskerville', serif;
-  font-size: 1rem;
-  color: #65717f;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--gray-400);
   margin: 0 0 1.5rem 0;
-  font-style: italic;
-  font-weight: 400;
+  font-style: normal;
+  font-weight: 300;
 }
 
 .purchase-panel__price,
@@ -98,10 +96,10 @@
 
 .purchase-panel__price-label,
 .purchase-panel__box-label {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.85rem;
-  color: #65717f;
-  letter-spacing: 0.12em;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  color: var(--gray-400);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   font-weight: 400;
 }
@@ -133,39 +131,39 @@
   justify-content: center;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #c6a25a 0%, #93763c 100%);
-  border: 1px solid rgba(198, 162, 90, 0.2);
-  border-radius: 6px;
-  color: #ffffff;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.95rem;
+  background: linear-gradient(180deg, #cbb07a 0%, #b08d57 100%);
+  border: 1px solid rgba(196, 165, 116, 0.35);
+  border-radius: 3px;
+  color: #0d0c0a;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(198, 162, 90, 0.15);
+  box-shadow: var(--cds-shadow-btn, 0 10px 24px rgba(0, 0, 0, 0.42));
 }
 
 .purchase-panel__button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(198, 162, 90, 0.25);
-  background: linear-gradient(135deg, #d4b368 0%, #a3844a 100%);
+  background: linear-gradient(180deg, #d4bc8a 0%, #c4a574 100%);
 }
 
 .purchase-panel__button:active {
-  transform: translateY(0);
+  transform: translateY(3px);
+  box-shadow: var(--cds-shadow-btn-pressed, inset 0 3px 8px rgba(0, 0, 0, 0.4));
 }
 
 .purchase-panel__button--unit {
-  background: linear-gradient(135deg, #0a1826 0%, #163050 100%);
-  border: 1px solid rgba(15, 34, 56, 0.3);
-  box-shadow: 0 2px 8px rgba(10, 24, 38, 0.15);
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid rgba(196, 165, 116, 0.45);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
 }
 
 .purchase-panel__button--unit:hover {
-  background: linear-gradient(135deg, #163050 0%, #1a3a5c 100%);
-  box-shadow: 0 4px 12px rgba(10, 24, 38, 0.25);
+  background: rgba(196, 165, 116, 0.08);
+  color: var(--gold-light);
 }
 
 .purchase-panel__icon {
@@ -1007,12 +1005,12 @@ html {
 body {
   background-color: var(--navy-deep);
   background-image:
-    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(22, 48, 80, 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(196, 165, 116, 0.06) 0%, transparent 58%),
     linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
   background-attachment: fixed;
   color: var(--cream);
   font-family: var(--font-body);
-  font-weight: 400;
+  font-weight: 300;
   font-size: 1rem;
   line-height: 1.85;
   letter-spacing: 0.015em;
@@ -1106,18 +1104,19 @@ strong {
 .btn {
   display: inline-block;
   font-family: var(--font-ui);
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  padding: 1.15rem 3rem;
+  padding: 1.05rem 2.6rem;
   border: 1px solid var(--gold);
+  border-radius: 3px;
   color: var(--gold);
   background: transparent;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  box-shadow: var(--cds-shadow-btn, 0 10px 24px rgba(0, 0, 0, 0.42));
 }
 
 .btn::before {
@@ -1174,6 +1173,14 @@ strong {
   max-width: var(--content-max);
   margin: 0 auto;
   height: 5.5rem;
+  gap: 1rem;
+}
+
+.nav__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 0.5rem;
 }
 
 .nav__logo {
@@ -1241,9 +1248,9 @@ strong {
 
 .nav__menu-trigger {
   font-family: var(--font-ui);
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gray-300);
   background: none;
@@ -1361,9 +1368,9 @@ strong {
 
 .nav__links a {
   font-family: var(--font-ui);
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gray-300);
   position: relative;
@@ -4903,6 +4910,7 @@ body.is-age-locked .site-footer {
   width: 100%;
   justify-content: center;
   text-decoration: none;
-  background: linear-gradient(135deg, #2d5a3d 0%, #1a3d2a 100%) !important;
-  border: 1px solid rgba(76, 175, 80, 0.45);
+  background: linear-gradient(180deg, #cbb07a 0%, #b08d57 100%) !important;
+  border: 1px solid rgba(196, 165, 116, 0.45);
+  color: #0d0c0a !important;
 }

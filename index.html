@@ -5,44 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Cazador Sueño — puros premium de exportación. Compra internacional con envío a todo el mundo."
+      content="Cazador de Sueños Cigar SRL — puros premium dominicanos. El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán."
     />
-    <title>Cazador Sueño — Puros Premium</title>
+    <title>Cazador de Sueños Cigar SRL — Puros premium</title>
+    <script src="js/language-detect-early.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Outfit:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="css/luxury-tokens.css" />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/ai-sommelier.css" />
   </head>
   <body data-page="home">
     <header class="site-header">
       <div class="container site-header__inner">
-        <a href="index.html" class="logo">
-          <span class="logo__mark">CS</span>
-          <span class="logo__text">Cazador Sueño</span>
+        <a href="index.html" class="logo cds-brand" aria-label="Cazador de Sueños Cigar SRL">
+          <canvas class="logo-canvas" data-logo="images/logo.pdf" data-height="44"></canvas>
+          <span class="nav__logo-fallback">Cazador de Sueños</span>
         </a>
         <nav class="site-nav" aria-label="Principal">
           <a href="#catalogo">Catálogo</a>
           <a href="#envios">Envíos</a>
           <a href="#pagos">Pagos</a>
         </nav>
-        <button type="button" id="cart-toggle" class="cart-button" aria-label="Abrir carrito">
-          Carrito
-          <span id="cart-count" class="cart-button__count">0</span>
-        </button>
+        <div class="site-header__actions">
+          <div class="lang-selector">
+            <button type="button" class="lang-selector__button" aria-label="Seleccionar idioma">
+              <svg class="lang-selector__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              <span class="lang-selector__current">ES</span>
+            </button>
+          </div>
+          <button type="button" id="cart-toggle" class="cart-button" aria-label="Abrir carrito">
+            Carrito
+            <span id="cart-count" class="cart-button__count">0</span>
+          </button>
+        </div>
       </div>
     </header>
 
     <main>
       <section class="hero">
         <div class="container hero__inner">
-          <p class="hero__eyebrow">Exportación premium · Envío internacional</p>
-          <h1>El sueño del conocedor, en cada caja</h1>
+          <p class="hero__eyebrow">Cazador de Sueños Cigar SRL · República Dominicana</p>
+          <h1>Seis vitolas. Una casa.</h1>
           <p class="hero__lead">
-            Selección artesanal de puros con empaque certificado: 20 unidades por caja en líneas
-            Classic y Reserva, 10 unidades en la exclusiva línea Rango.
+            El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán.
+            Cajas de 20, salvo El Rango (10). Envío DHL Express.
           </p>
           <a href="#catalogo" class="btn btn--primary btn--lg">Ver catálogo</a>
         </div>
@@ -52,7 +67,7 @@
         <div class="container">
           <header class="section__header">
             <h2>Catálogo</h2>
-            <p>Compra por caja o puro suelto. Tu carrito se mantiene al navegar.</p>
+            <p>Compra por caja o puro suelto. Totales firmados en checkout.</p>
           </header>
           <div id="catalog-grid" class="catalog-grid"></div>
         </div>
@@ -63,15 +78,14 @@
           <article>
             <h3>Envío internacional</h3>
             <p>
-              Calculamos tarifas automáticamente según tu país: EE. UU., Europa, Japón, China y más.
-              El costo se suma al total en el checkout.
+              Tarifas DHL según destino. El costo se calcula en el checkout y forma parte del total
+              que confirma el servidor.
             </p>
           </article>
           <article>
-            <h3>Empaque certificado</h3>
+            <h3>Empaque de casa</h3>
             <p>
-              Todas las cajas estándar incluyen 20 puros. La línea Rango se presenta en cajas de 10
-              unidades, reflejado en precio y unidades totales.
+              Cajas de 20 puros, excepto El Rango (10). Fotografías reales de cada vitola.
             </p>
           </article>
           <article>
@@ -82,10 +96,10 @@
             </p>
           </article>
           <article id="pagos">
-            <h3>Pagos globales</h3>
+            <h3>Pagos</h3>
             <p>
-              Tarjeta internacional vía Stripe o transferencia bancaria directa con datos de cuenta
-              y referencia única de pedido.
+              Transferencia bancaria (República Dominicana y envíos desde EE.UU.) o PayPal.
+              Este sitio no pide número de tarjeta.
             </p>
           </article>
         </div>
@@ -94,9 +108,9 @@
 
     <footer class="site-footer">
       <div class="container site-footer__inner">
-        <p>© 2026 Cazador Sueño. Venta sujeta a regulaciones locales del importador.</p>
+        <p>© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
         <p>
-          <a href="mailto:ventas@cazadorsueno.com">ventas@cazadorsueno.com</a>
+          <a href="mailto:ventas@cazadordesuenocigars.com">ventas@cazadordesuenocigars.com</a>
         </p>
       </div>
     </footer>
@@ -120,6 +134,9 @@
       </footer>
     </aside>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="logo-render.js"></script>
+    <script src="js/language-switcher.js" defer></script>
     <script src="js/commerce-urls.js"></script>
     <script src="js/config.js"></script>
     <script src="js/policies.js"></script>

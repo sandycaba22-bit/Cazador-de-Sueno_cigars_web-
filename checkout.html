@@ -20,10 +20,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Libre+Baskerville:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Outfit:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/luxury-tokens.css" />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/checkout-onepage.css" />
 
@@ -38,8 +38,23 @@
     <main class="co" id="co-root">
       <header class="co__bar">
         <a class="co__back" href="index.html">← Seguir comprando</a>
-        <span class="co__brand">Cazador de Sueños</span>
-        <span class="co__secure" aria-label="Conexión segura">Pago seguro</span>
+        <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueños Cigar SRL">
+          <canvas class="logo-canvas cds-brand__mark" data-logo="images/logo.pdf" data-height="40"></canvas>
+          <span class="nav__logo-fallback">Cazador de Sueños</span>
+        </a>
+        <div class="nav__tools">
+          <div class="lang-selector">
+            <button type="button" class="lang-selector__button" aria-label="Seleccionar idioma">
+              <svg class="lang-selector__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              <span class="lang-selector__current">ES</span>
+            </button>
+          </div>
+          <span class="co__secure" aria-label="Conexión segura">Pago seguro</span>
+        </div>
       </header>
 
       <div id="co-alert" class="co__alert" role="alert" hidden></div>
@@ -57,7 +72,7 @@
         <!-- ------------------------------------------------ formulario -->
         <form id="co-form" class="co__form" novalidate autocomplete="on">
           <h1 class="co__title">Finalizar compra</h1>
-          <p class="co__lede">Envío DHL Express desde República Dominicana. Un solo paso.</p>
+          <p class="co__lede">Envío DHL Express desde República Dominicana. Un solo paso, con totales firmados por la casa.</p>
 
           <section class="co-block">
             <h2 class="co-block__title"><span class="co-step">1</span> Contacto</h2>
@@ -195,7 +210,10 @@
       primer pintado, y bank.js / orders.js / cart-ui.js desaparecieron: los datos
       bancarios y el registro del pedido ahora los provee el servidor.
     -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+    <script src="logo-render.js" defer></script>
     <script src="js/page-visibility.js" defer></script>
+    <script src="js/language-switcher.js" defer></script>
     <script src="js/config.js" defer></script>
     <script src="js/policies.js" defer></script>
     <script src="js/catalog.js" defer></script>

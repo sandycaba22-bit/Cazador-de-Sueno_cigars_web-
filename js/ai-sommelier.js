@@ -157,12 +157,7 @@
     fab.className = 'cds-sommelier-fab';
     fab.setAttribute('aria-label', copy.fab);
     fab.innerHTML = `
-      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-        <path d="M7.5 20.5c2.2-1.4 3.2-4.2 3-6.8.8-.2 2.2-.2 3 0-.2 2.6.8 5.4 3 6.8"/>
-        <path d="M12 13.6V4.8"/>
-        <path d="M10.2 7.2c1.2 1.1 2.4 1.1 3.6 0"/>
-        <path d="M9.6 5.4c1.6 1.2 3.2 1.2 4.8 0" opacity=".7"/>
-      </svg>
+      <span class="cds-sommelier-fab__mark" aria-hidden="true">CS</span>
       <span class="cds-sommelier-fab__pulse"></span>
     `;
 

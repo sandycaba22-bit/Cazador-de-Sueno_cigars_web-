@@ -4,27 +4,32 @@
   left: clamp(1rem, 3vw, 2rem);
   bottom: clamp(1rem, 3vw, 2rem);
   z-index: 920;
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: #e7d3a0;
-  background: linear-gradient(160deg, #121212, #050505);
-  border: 1px solid rgba(198, 162, 90, 0.38);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 0 18px rgba(198, 162, 90, 0.08);
+  color: #e4d2ae;
+  background: linear-gradient(165deg, #1a1a1a, #070707);
+  border: 1px solid rgba(196, 165, 116, 0.4);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 247, 230, 0.12);
   cursor: pointer;
-  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    color 0.45s ease, border-color 0.45s ease, opacity 0.3s ease;
 }
 
 .cds-sommelier-fab:hover,
 .cds-sommelier-fab:focus-visible {
-  transform: translateY(-3px) scale(1.04);
-  color: #c6a25a;
-  border-color: #c6a25a;
+  transform: translateY(-2px);
+  color: #c4a574;
+  border-color: #c4a574;
   outline: none;
+}
+
+.cds-sommelier-fab__mark {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
 }
 
 .cds-sommelier-fab[hidden],
@@ -106,7 +111,7 @@
 
 .cds-sommelier__kicker {
   margin: 0;
-  font-family: 'Libre Baskerville', Georgia, serif;
+  font-family: 'Outfit', 'Source Sans 3', system-ui, sans-serif;
   font-size: 0.62rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -155,7 +160,7 @@
 .cds-sommelier__msg {
   max-width: 92%;
   padding: 0.75rem 0.9rem;
-  font-family: 'Libre Baskerville', Georgia, serif;
+  font-family: 'Outfit', 'Source Sans 3', system-ui, sans-serif;
   font-size: 0.82rem;
   line-height: 1.65;
   white-space: pre-wrap;
@@ -247,7 +252,7 @@
   background: rgba(5, 5, 5, 0.55);
   border: 1px solid rgba(198, 162, 90, 0.18);
   color: #f4efe2;
-  font-family: 'Libre Baskerville', Georgia, serif;
+  font-family: 'Outfit', 'Source Sans 3', system-ui, sans-serif;
   font-size: 0.82rem;
   line-height: 1.5;
   padding: 0.65rem 0.75rem;
@@ -317,7 +322,7 @@
   text-transform: uppercase;
   color: rgba(231, 211, 160, 0.38);
   text-align: center;
-  font-family: 'Libre Baskerville', Georgia, serif;
+  font-family: 'Outfit', 'Source Sans 3', system-ui, sans-serif;
 }
 
 body.is-age-locked .cds-sommelier-fab,

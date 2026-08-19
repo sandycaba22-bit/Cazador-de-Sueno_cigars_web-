@@ -249,10 +249,10 @@
 
   function methodHint(id, ready) {
     if (id === 'cardnet') return 'Visa, Mastercard — procesado por CardNET con 3D Secure';
-    if (id === 'bank_transfer') return 'Banreservas o BHD, con referencia única de pedido';
+    if (id === 'bank_transfer') return 'Cuentas en República Dominicana. Desde EE.UU.: transferencia internacional al mismo beneficiario, o PayPal en USD.';
     if (id === 'paypal') {
       return ready
-        ? 'Paga con tu cuenta PayPal, sin compartir datos de tarjeta con este sitio'
+        ? 'USD desde Estados Unidos y el resto del mundo, sin compartir datos de tarjeta con este sitio'
         : 'Paga con tu cuenta PayPal — disponible en breve';
     }
     if (id === 'sandbox') return 'Simula una compra completa sin cargo real';
@@ -327,21 +327,74 @@
       </div>`;
   }
 
-  function renderBankDetails(bank) {
-    if (!bank) return '';
-    const accounts = (bank.accounts || [])
-      .map(
-        (account) => `
+  function accountRegion(account) {
+    const blob = `${account.bankName || ''} ${account.note || ''} ${account.currency || ''} ${account.accountType || ''}`.toLowerCase();
+    if (/\b(usa|ee\.?uu|united states|ach|zelle|routing)\b/.test(blob)) return 'US';
+    if (account.currency === 'USD' && /\b(chase|wells|bank of america|us bank)\b/.test(blob)) return 'US';
+    return 'DO';
+  }
+
+  function renderAccountCard(account) {
+    const extra = account.note
+      ? `<div><dt>Nota</dt><dd>${safe(account.note)}</dd></div>`
+      : '';
+    const currency = account.currency
+      ? `<div><dt>Moneda</dt><dd>${safe(account.currency)}</dd></div>`
+      : '';
+    return `
         <div class="co-bank__account">
           <p class="co-bank__bank">${safe(account.bankName)}</p>
           <dl>
             <div><dt>Titular</dt><dd>${safe(account.accountHolder)}</dd></div>
             <div><dt>Tipo</dt><dd>${safe(account.accountType)}</dd></div>
             <div><dt>Cuenta</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
+            ${currency}
+            ${extra}
           </dl>
-        </div>`
-      )
-      .join('');
+        </div>`;
+  }
+
+  function renderBankDetails(bank) {
+    if (!bank) return '';
+    const accounts = bank.accounts || [];
+    const dominican = accounts.filter((account) => accountRegion(account) === 'DO');
+    const american = accounts.filter((account) => accountRegion(account) === 'US');
+    const beneficiary = bank.beneficiary || {};
+
+    const doBlock = dominican.length
+      ? `
+      <div class="co-bank__region">
+        <h3 class="co-bank__region-title">República Dominicana</h3>
+        <p class="co-bank__region-note">Transferencia local en Banreservas o BHD. Incluya la referencia del pedido en el concepto.</p>
+        ${dominican.map(renderAccountCard).join('')}
+      </div>`
+      : '';
+
+    const usAccounts = american.length
+      ? american.map(renderAccountCard).join('')
+      : '';
+
+    const usBlock = `
+      <div class="co-bank__region">
+        <h3 class="co-bank__region-title">Estados Unidos</h3>
+        <p class="co-bank__region-note">
+          Para liquidar en USD desde EE.UU. use PayPal más arriba. Si prefiere transferencia internacional,
+          envíe el importe exacto al beneficiario en República Dominicana e incluya la referencia del pedido.
+        </p>
+        ${usAccounts}
+        ${
+          beneficiary.name
+            ? `<div class="co-bank__account">
+                <p class="co-bank__bank">Beneficiario internacional</p>
+                <dl>
+                  <div><dt>Nombre</dt><dd>${safe(beneficiary.name)}</dd></div>
+                  ${beneficiary.address ? `<div><dt>Dirección</dt><dd>${safe(beneficiary.address)}</dd></div>` : ''}
+                  ${beneficiary.taxId ? `<div><dt>RNC</dt><dd>${safe(beneficiary.taxId)}</dd></div>` : ''}
+                </dl>
+              </div>`
+            : ''
+        }
+      </div>`;
 
     return `
       <div class="co-bank">
@@ -350,7 +403,8 @@
           transferencia y envía el comprobante a
           <strong>${safe(bank.email)}</strong> dentro de ${safe(bank.proofDeadlineHours)} horas.
         </p>
-        ${accounts}
+        ${doBlock}
+        ${usBlock}
       </div>`;
   }
 

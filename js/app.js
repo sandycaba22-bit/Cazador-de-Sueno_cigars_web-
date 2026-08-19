@@ -13,12 +13,14 @@ function renderProductCard(product) {
   return `
     <article class="product-card" data-id="${product.id}">
       <div class="product-card__image">
-        <img src="${product.image}" alt="${escapeHtml(product.name)}" loading="lazy" width="280" height="200" />
+        <a href="${product.href || '#catalogo'}" class="product-card__photo" aria-label="${escapeHtml(product.name)}">
+          <img src="${product.image}" alt="${escapeHtml(product.name)}" loading="lazy" width="280" height="200" />
+        </a>
         ${rangoBadge}
       </div>
       <div class="product-card__body">
         <p class="product-card__origin">${escapeHtml(product.origin)} · ${escapeHtml(product.strength)}</p>
-        <h3 class="product-card__title">${escapeHtml(product.name)}</h3>
+        <h3 class="product-card__title"><a href="${product.href || '#catalogo'}">${escapeHtml(product.name)}</a></h3>
         <p class="product-card__desc">${escapeHtml(product.description)}</p>
         <div class="product-card__pricing">
           <span class="product-card__price">${formatCurrency(product.pricePerBox)}</span>

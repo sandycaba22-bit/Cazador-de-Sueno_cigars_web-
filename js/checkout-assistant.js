@@ -31,15 +31,19 @@
     root.id = 'ca-root';
     root.className = 'ca';
     root.innerHTML = `
-      <button type="button" class="ca__fab" id="ca-fab" aria-expanded="false" aria-controls="ca-panel">
+      <button type="button" class="ca__fab" id="ca-fab" aria-expanded="false" aria-controls="ca-panel" aria-label="Concierge de pago">
         <span class="ca__fab-dot" id="ca-dot" hidden></span>
-        ¿Necesitas ayuda?
+        <span class="ca__fab-mark" aria-hidden="true">CS</span>
+        <span class="ca__fab-pulse" aria-hidden="true"></span>
+        <span class="ca__fab-label">Concierge de pago</span>
       </button>
-      <section class="ca__panel" id="ca-panel" role="dialog" aria-label="Asistente de pago" hidden>
+      <section class="ca__panel" id="ca-panel" role="dialog" aria-label="Concierge de pago" hidden>
         <header class="ca__head">
+          <div class="ca__head-mark" aria-hidden="true">CS</div>
           <div>
-            <strong>Asistente de pago</strong>
-            <small>Dudas sobre métodos de pago o el carrito</small>
+            <p class="ca__head-kicker">Cazador de Sueños</p>
+            <strong>Concierge de pago</strong>
+            <small>Transferencia, PayPal o envío — sin datos de tarjeta</small>
           </div>
           <button type="button" class="ca__close" id="ca-close" aria-label="Cerrar">×</button>
         </header>
@@ -77,13 +81,15 @@
     const open = typeof force === 'boolean' ? force : !opened;
     opened = open;
     panel.hidden = !open;
-    document.getElementById('ca-fab').setAttribute('aria-expanded', String(open));
+    const fab = document.getElementById('ca-fab');
+    fab.setAttribute('aria-expanded', String(open));
+    fab.classList.toggle('is-open', open);
     document.getElementById('ca-dot').hidden = true;
 
     if (open && !history.length) {
       addMessage(
         'assistant',
-        'Hola. Le ayudo a completar su pedido: métodos de pago, envío o cualquier paso que se le atasque.'
+        'Bienvenido. Soy el concierge de la casa: transferencia bancaria (RD o EE.UU.), PayPal o cualquier duda sobre su pedido.'
       );
     }
     if (open) document.getElementById('ca-input').focus();

@@ -8,9 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+3:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Outfit:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="css/luxury-tokens.css" />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/checkout-onepage.css" />
   </head>
@@ -19,8 +20,23 @@
     <main class="co">
       <header class="co__bar">
         <a class="co__back" href="index.html">← Volver a la tienda</a>
-        <span class="co__brand">Cazador de Sueños</span>
-        <span class="co__secure">Pedido registrado</span>
+        <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueños Cigar SRL">
+          <canvas class="logo-canvas cds-brand__mark" data-logo="images/logo.pdf" data-height="40"></canvas>
+          <span class="nav__logo-fallback">Cazador de Sueños</span>
+        </a>
+        <div class="nav__tools">
+          <div class="lang-selector">
+            <button type="button" class="lang-selector__button" aria-label="Seleccionar idioma">
+              <svg class="lang-selector__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              <span class="lang-selector__current">ES</span>
+            </button>
+          </div>
+          <span class="co__secure">Pedido registrado</span>
+        </div>
       </header>
 
       <div id="oc-content" class="co-summary-card">
@@ -28,6 +44,9 @@
       </div>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+    <script src="logo-render.js" defer></script>
+    <script src="js/language-switcher.js" defer></script>
     <script src="js/config.js" defer></script>
     <script src="js/policies.js" defer></script>
     <script>
@@ -101,19 +120,30 @@
               comprobante a <strong>${safe(order.bankTransfer.email)}</strong> dentro de
               ${safe(order.bankTransfer.proofDeadlineHours)} horas para que preparemos el envío.
             </p>
-            ${(order.bankTransfer.accounts || [])
-              .map(
-                (account) => `
-              <div class="co-bank__account">
-                <p class="co-bank__bank">${safe(account.bankName)}</p>
-                <dl>
-                  <div><dt>Titular</dt><dd>${safe(account.accountHolder)}</dd></div>
-                  <div><dt>Tipo</dt><dd>${safe(account.accountType)}</dd></div>
-                  <div><dt>Cuenta</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
-                </dl>
-              </div>`
-              )
-              .join('')}
+            <div class="co-bank__region">
+              <h3 class="co-bank__region-title">República Dominicana</h3>
+              <p class="co-bank__region-note">Transferencia local. Incluya la referencia en el concepto.</p>
+              ${(order.bankTransfer.accounts || [])
+                .map(
+                  (account) => `
+                <div class="co-bank__account">
+                  <p class="co-bank__bank">${safe(account.bankName)}</p>
+                  <dl>
+                    <div><dt>Titular</dt><dd>${safe(account.accountHolder)}</dd></div>
+                    <div><dt>Tipo</dt><dd>${safe(account.accountType)}</dd></div>
+                    <div><dt>Cuenta</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
+                  </dl>
+                </div>`
+                )
+                .join('')}
+            </div>
+            <div class="co-bank__region">
+              <h3 class="co-bank__region-title">Estados Unidos</h3>
+              <p class="co-bank__region-note">
+                Si paga desde EE.UU. en USD, use PayPal o una transferencia internacional al mismo
+                beneficiario, con esta referencia en el concepto.
+              </p>
+            </div>
             <p class="co-note"><strong>Monto exacto: ${money(order.totalCents, order.currency)}</strong></p>
           </div>`
           : '';
