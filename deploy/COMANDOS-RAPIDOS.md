@@ -58,3 +58,5 @@ dig cazadordesuenocigars.com +short
 - http://34.24.248.250 (antes de SSL/DNS)
 - https://www.cazadordesuenocigars.com (después de DNS + certbot)
 - https://www.cazadordesuenocigars.com/api/ai-sommelier/health (debe devolver `{"ok":true,...}` si el sommelier está en marcha)
+- https://www.cazadordesuenocigars.com/api/commerce/health (debe devolver `{"ok":true,"service":"cds-commerce",...}`)
+- https://www.cazadordesuenocigars.com/server/commerce/server.js (debe ser **404**; el código de pasarelas no es público)

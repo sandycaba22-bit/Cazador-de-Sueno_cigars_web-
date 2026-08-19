@@ -4,6 +4,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { CORE_SYSTEM_INSTRUCTION, buildSystemPrompt } = require('./system-prompt');
+const { CHECKOUT_CORE_INSTRUCTION, buildCheckoutPrompt } = require('./checkout-prompt');
 
 loadEnvFile(path.join(__dirname, '.env'));
 
@@ -293,24 +294,29 @@ function geminiUrl(model) {
   return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(GEMINI_API_KEY)}`;
 }
 
-function buildGeminiBody(messages, language) {
+/** Instrucciones de sistema del sommelier (comportamiento por defecto). */
+function sommelierSystemParts(language) {
+  return [
+    { text: CORE_SYSTEM_INSTRUCTION },
+    {
+      text: buildSystemPrompt({
+        language,
+        whatsappDisplay: HOUSE_WHATSAPP_DISPLAY,
+        email: HOUSE_EMAIL
+      })
+    }
+  ];
+}
+
+function buildGeminiBody(messages, language, options = {}) {
   return {
     system_instruction: {
-      parts: [
-        { text: CORE_SYSTEM_INSTRUCTION },
-        {
-          text: buildSystemPrompt({
-            language,
-            whatsappDisplay: HOUSE_WHATSAPP_DISPLAY,
-            email: HOUSE_EMAIL
-          })
-        }
-      ]
+      parts: options.systemParts || sommelierSystemParts(language)
     },
     contents: toGeminiContents(messages),
     generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 1024,
+      temperature: options.temperature ?? 0.7,
+      maxOutputTokens: options.maxOutputTokens ?? 1024,
       thinkingConfig: { thinkingBudget: 0 }
     },
     safetySettings: [
@@ -331,12 +337,14 @@ async function openGeminiStream(model, body) {
   return response;
 }
 
-async function streamGeminiToSse(res, messages, language, ip, logMeta = {}) {
+async function streamGeminiToSse(res, messages, language, ip, logMeta = {}, options = {}) {
   const models = [GEMINI_MODEL, ...FALLBACK_MODELS].filter(
     (model, index, list) => model && list.indexOf(model) === index
   );
   let lastError = 'No se pudo contactar al sommelier.';
-  const body = buildGeminiBody(messages, language);
+  const body = buildGeminiBody(messages, language, options);
+  // El asistente de checkout no capta leads B2B: solo desatasca la compra.
+  const captureLeads = options.captureLeads !== false;
 
   for (const model of models) {
     let response;
@@ -415,7 +423,7 @@ async function streamGeminiToSse(res, messages, language, ip, logMeta = {}) {
     }
 
     const { clean, lead: rawLead } = extractLead(filter.assembled);
-    const lead = normalizeLead(rawLead, language, ip);
+    const lead = captureLeads ? normalizeLead(rawLead, language, ip) : null;
     if (lead) {
       persistLead(lead);
       sendSse(res, 'lead', {
@@ -521,6 +529,152 @@ async function handleChat(req, res) {
   res.end();
 }
 
+/**
+ * Sanea el estado del checkout que envía el navegador.
+ *
+ * Es solo contexto para el modelo, nunca una fuente de verdad: el importe real
+ * lo decide el servicio de comercio. Aun así se recorta y se normaliza para que
+ * nadie pueda inyectar instrucciones al modelo a través de estos campos.
+ */
+function sanitizeCheckoutContext(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  const text = (value, max) => String(value == null ? '' : value).replace(/[\r\n]+/g, ' ').slice(0, max);
+  const methods = Array.isArray(raw.availableMethods) ? raw.availableMethods : [];
+
+  return {
+    method: text(raw.method, 40),
+    availableMethods: methods.slice(0, 6).map((m) => text(m, 40)),
+    totalCents: Number.isFinite(Number(raw.totalCents)) ? Math.abs(Number(raw.totalCents)) : 0,
+    currency: text(raw.currency, 8),
+    country: text(raw.country, 8),
+    boxes: Number.isFinite(Number(raw.boxes)) ? Math.abs(Math.floor(Number(raw.boxes))) : 0,
+    lastError: text(raw.lastError, 200)
+  };
+}
+
+/** Detecta un PAN escrito en el chat para cortarlo antes de enviarlo a Gemini. */
+function containsCardNumber(text) {
+  const digits = String(text || '').replace(/[\s-]/g, '');
+  const match = digits.match(/\d{13,19}/);
+  if (!match) return false;
+  return luhnValid(match[0]);
+}
+
+function luhnValid(number) {
+  let sum = 0;
+  let double = false;
+  for (let i = number.length - 1; i >= 0; i -= 1) {
+    let digit = Number(number[i]);
+    if (double) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    double = !double;
+  }
+  return sum % 10 === 0;
+}
+
+async function handleCheckoutAssistant(req, res) {
+  setCors(req, res);
+  if (!originAllowed(req)) {
+    res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: 'Origen no permitido' }));
+    return;
+  }
+
+  const ip = clientIp(req);
+  if (rateLimited(ip)) {
+    res.writeHead(429, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: 'Demasiadas consultas seguidas. Espere un momento.' }));
+    return;
+  }
+
+  if (!GEMINI_API_KEY) {
+    res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: 'Asistente no disponible.' }));
+    return;
+  }
+
+  let payload;
+  try {
+    payload = await readJsonBody(req);
+  } catch (err) {
+    res.writeHead(err.statusCode || 400, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: err.message || 'Solicitud inválida' }));
+    return;
+  }
+
+  const messages = sanitizeMessages(payload.messages);
+  if (!messages.length || messages[messages.length - 1].role !== 'user') {
+    res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: 'Se requiere un mensaje del cliente.' }));
+    return;
+  }
+
+  const visitorMessage = messages[messages.length - 1].content;
+
+  // Un número de tarjeta escrito en el chat se corta aquí: no llega al modelo,
+  // no se registra y no queda en el historial del navegador.
+  if (containsCardNumber(visitorMessage)) {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no'
+    });
+    const warning =
+      'Por su seguridad no puedo recibir números de tarjeta por este chat. Borre ese mensaje e introduzca la tarjeta únicamente en la ventana segura de CardNET que se abre al confirmar el pedido.';
+    sendSse(res, 'meta', { model: 'guardia-pci', whatsapp: HOUSE_WHATSAPP_DISPLAY });
+    sendSse(res, 'token', { text: warning });
+    sendSse(res, 'done', { text: warning });
+    res.end();
+    console.warn(`[checkout-assistant] mensaje con posible PAN bloqueado · ip=${ip}`);
+    return;
+  }
+
+  const language = String(payload.language || 'es').slice(0, 8);
+  const context = sanitizeCheckoutContext(payload.context);
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream; charset=utf-8',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no'
+  });
+
+  try {
+    await streamGeminiToSse(
+      res,
+      messages,
+      language,
+      ip,
+      { userText: visitorMessage, page: 'checkout' },
+      {
+        systemParts: [
+          { text: CHECKOUT_CORE_INSTRUCTION },
+          {
+            text: buildCheckoutPrompt({
+              context,
+              whatsappDisplay: HOUSE_WHATSAPP_DISPLAY,
+              email: HOUSE_EMAIL
+            })
+          }
+        ],
+        captureLeads: false,
+        temperature: 0.4,
+        maxOutputTokens: 512
+      }
+    );
+  } catch (err) {
+    console.error('[checkout-assistant]', err);
+    sendSse(res, 'error', {
+      message: 'El asistente no está disponible. Escríbanos por WhatsApp y le ayudamos.'
+    });
+  }
+  res.end();
+}
+
 function handleHealth(req, res) {
   setCors(req, res);
   res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -538,10 +692,18 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
   const route = url.pathname.replace(/\/+$/, '') || '/';
 
-  if (req.method === 'OPTIONS' && (route === '/api/ai-sommelier' || route === '/ai-sommelier')) {
+  if (req.method === 'OPTIONS') {
     setCors(req, res);
     res.writeHead(204);
     res.end();
+    return;
+  }
+
+  if (
+    req.method === 'POST' &&
+    (route === '/api/ai-sommelier/checkout' || route === '/checkout')
+  ) {
+    await handleCheckoutAssistant(req, res);
     return;
   }
 

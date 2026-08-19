@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pedido confirmado — Cazador Sueño</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Pedido confirmado — Cazador de Sueños</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,129 +12,159 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/checkout-onepage.css" />
   </head>
-  <body data-page="confirmation">
-    <header class="site-header site-header--compact">
-      <div class="container site-header__inner">
-        <a href="index.html" class="logo">
-          <span class="logo__mark">CS</span>
-          <span class="logo__text">Cazador Sueño</span>
-        </a>
-      </div>
-    </header>
 
-    <main class="confirmation-page">
-      <div class="container confirmation-card" id="confirmation-content">
+  <body data-page="confirmation">
+    <main class="co">
+      <header class="co__bar">
+        <a class="co__back" href="index.html">← Volver a la tienda</a>
+        <span class="co__brand">Cazador de Sueños</span>
+        <span class="co__secure">Pedido registrado</span>
+      </header>
+
+      <div id="oc-content" class="co-summary-card">
         <p>Cargando confirmación…</p>
       </div>
     </main>
 
-    <script src="js/config.js"></script>
-    <script src="js/policies.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/bank.js"></script>
-    <script src="js/orders.js"></script>
-    <script src="js/whatsapp-commerce.js"></script>
+    <script src="js/config.js" defer></script>
+    <script src="js/policies.js" defer></script>
     <script>
+      /**
+       * La confirmación lee el pedido del servidor, no de sessionStorage.
+       * La referencia por sí sola no basta: hace falta el token de acceso que
+       * el servidor emitió al crear el pedido, para que nadie pueda enumerar
+       * referencias ajenas y leer datos personales de otros clientes.
+       */
       document.addEventListener('DOMContentLoaded', async () => {
+        const container = document.getElementById('oc-content');
         const params = new URLSearchParams(window.location.search);
-        const ref = params.get('ref');
-        const method = params.get('method');
-        const container = document.getElementById('confirmation-content');
+        const reference = params.get('ref');
+        const accessToken = params.get('t');
 
-        let order = null;
-        try {
-          order = JSON.parse(sessionStorage.getItem('cazador_sueno_last_order'));
-        } catch {
-          order = null;
-        }
+        const money = (cents, currency) =>
+          new Intl.NumberFormat('es-DO', {
+            style: 'currency',
+            currency: currency || 'USD',
+            minimumFractionDigits: 2,
+          }).format((Number(cents) || 0) / 100);
 
-        if ((!order || order.reference !== ref) && ref) {
-          order = await fetchOrderByReference(ref);
-        }
+        const safe = (value) => {
+          const div = document.createElement('div');
+          div.textContent = value == null ? '' : String(value);
+          return div.innerHTML;
+        };
 
-        if (!order || order.reference !== ref) {
+        function notFound(message) {
           container.innerHTML = `
-            <h1>Pedido no encontrado</h1>
-            <p>No pudimos recuperar los detalles. Si completaste un pago, revisa tu correo o contáctanos.</p>
-            <a href="index.html" class="btn btn--primary">Volver al inicio</a>
-          `;
+            <h1>No encontramos ese pedido</h1>
+            <p>${safe(message)}</p>
+            <a href="index.html" class="co-btn co-btn--gold">Volver al inicio</a>`;
+        }
+
+        if (!reference || !accessToken) {
+          notFound('El enlace de confirmación está incompleto. Revisa el correo que te enviamos.');
           return;
         }
 
-        const isBank = method === 'bank' || order.paymentMethod === 'bank_transfer';
-        const isSandbox = method === 'sandbox' || order.paymentMethod === 'sandbox';
+        let order;
+        try {
+          const response = await fetch(
+            `/api/commerce/orders/${encodeURIComponent(reference)}?t=${encodeURIComponent(accessToken)}`
+          );
+          if (!response.ok) throw new Error('no disponible');
+          order = await response.json();
+        } catch {
+          notFound(
+            'No pudimos recuperar los detalles ahora mismo. Si completaste el pago, revisa tu correo o escríbenos por WhatsApp con tu referencia.'
+          );
+          return;
+        }
 
-        const itemsHtml = order.items
+        const isBank = order.paymentMethod === 'bank_transfer';
+        const isPaid = order.paymentStatus === 'paid';
+
+        const items = order.items
           .map(
-            (i) => `
-            <li>
-              <strong>${escapeHtml(i.name)}</strong> —
-              ${escapeHtml(i.displayLabel || `${i.quantity} uds.`)} · ${formatCurrency(i.lineTotal)}
-            </li>`
+            (item) =>
+              `<li><strong>${safe(item.name)}</strong> — ${safe(item.displayLabel)} · ${money(item.lineTotalCents, order.currency)}</li>`
           )
           .join('');
 
+        const bank = order.bankTransfer
+          ? `
+          <div class="co-bank">
+            <h2>Datos para tu transferencia</h2>
+            <p class="co-note">
+              Pon la referencia <strong>${safe(order.reference)}</strong> en el concepto y envía el
+              comprobante a <strong>${safe(order.bankTransfer.email)}</strong> dentro de
+              ${safe(order.bankTransfer.proofDeadlineHours)} horas para que preparemos el envío.
+            </p>
+            ${(order.bankTransfer.accounts || [])
+              .map(
+                (account) => `
+              <div class="co-bank__account">
+                <p class="co-bank__bank">${safe(account.bankName)}</p>
+                <dl>
+                  <div><dt>Titular</dt><dd>${safe(account.accountHolder)}</dd></div>
+                  <div><dt>Tipo</dt><dd>${safe(account.accountType)}</dd></div>
+                  <div><dt>Cuenta</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
+                </dl>
+              </div>`
+              )
+              .join('')}
+            <p class="co-note"><strong>Monto exacto: ${money(order.totalCents, order.currency)}</strong></p>
+          </div>`
+          : '';
+
         container.innerHTML = `
-          <div class="confirmation-icon">${isSandbox ? '🧪' : isBank ? '🏦' : '✓'}</div>
-          <h1>${
-            isSandbox
-              ? 'Pedido de prueba registrado (sandbox)'
-              : isBank
-                ? 'Pedido registrado — transferencia pendiente'
-                : '¡Pago confirmado!'
-          }</h1>
-          <p class="confirmation-ref">Referencia: <strong>${escapeHtml(order.reference)}</strong></p>
-          <p>Estado: <strong>${escapeHtml(order.status || order.paymentStatus)}</strong></p>
-          <p>Envío a ${escapeHtml(order.shipping.countryName || order.shipping.country)} · ${escapeHtml(order.shipping.city)}</p>
-          <p>Transportista: <strong>${escapeHtml(order.shipping.carrier || 'DHL Express')}</strong> · ${escapeHtml(order.shippingBoxes || order.shipping?.boxes || 0)} caja(s)</p>
-          <p>Entrega estimada: ${escapeHtml(order.estimatedDelivery)} días hábiles</p>
+          <h1>${isPaid ? 'Pago confirmado' : isBank ? 'Pedido reservado — falta la transferencia' : 'Pedido registrado'}</h1>
+          <p class="co-note">Referencia: <strong>${safe(order.reference)}</strong></p>
 
-          <ul class="confirmation-items">${itemsHtml}</ul>
+          <ul class="co-meta">
+            <li><span>Estado</span><strong>${safe(order.status)}</strong></li>
+            <li><span>Destino</span><strong>${safe(order.shipping.countryName)} · ${safe(order.shipping.city)}</strong></li>
+            <li><span>Transportista</span><strong>${safe(order.shipping.carrier)}</strong></li>
+            <li><span>Cajas</span><strong>${safe(order.shipping.boxes)}</strong></li>
+            <li><span>Entrega estimada</span><strong>${safe(order.shipping.estimatedDays)} días</strong></li>
+          </ul>
 
-          <dl class="summary-lines">
-            <div><dt>Subtotal</dt><dd>${formatCurrency(order.subtotal)}</dd></div>
-            <div><dt>Envío</dt><dd>${formatCurrency(order.shippingCost)}</dd></div>
-            <div class="summary-lines__total"><dt>Total</dt><dd>${formatCurrency(order.total)}</dd></div>
+          <ul class="co-items">${items}</ul>
+
+          <dl class="co-totals">
+            <div><dt>Subtotal</dt><dd>${money(order.subtotalCents, order.currency)}</dd></div>
+            <div><dt>Envío DHL</dt><dd>${money(order.shippingCents, order.currency)}</dd></div>
+            <div class="co-totals__grand"><dt>Total</dt><dd>${money(order.totalCents, order.currency)}</dd></div>
           </dl>
 
-          <div id="bank-block"></div>
+          ${bank}
 
-          <aside class="policy-banner policy-banner--confirmed" role="note">
+          <div class="co-warn" role="note">
             <strong>Venta final — sin devoluciones ni reembolsos.</strong>
-            <p>${escapeHtml(SALES_POLICY.summary)}</p>
-            <p class="policy-legal">${escapeHtml(SALES_POLICY.legalNotice)}</p>
-            <p class="policy-legal">${escapeHtml(CUSTOMS_DISCLAIMER.checkoutText)}</p>
-          </aside>
-
-          <div class="confirmation-actions">
-            <button type="button" class="btn btn--whatsapp" id="confirmation-whatsapp">
-              ${isBank ? 'Enviar comprobante por WhatsApp' : 'Enviar pedido por WhatsApp'}
-            </button>
-            <a href="index.html" class="btn btn--primary">Seguir comprando</a>
+            <p>${safe(typeof SALES_POLICY !== 'undefined' ? SALES_POLICY.legalNotice : '')}</p>
           </div>
-        `;
 
-        if (isBank) {
-          const bankBlock = document.getElementById('bank-block');
-          renderBankTransferDetails(order, bankBlock, { showReference: true, showAmount: true });
-        }
+          <div class="co-submit">
+            <button type="button" id="oc-whatsapp" class="co-btn co-btn--gold co-btn--block">
+              ${isBank ? 'Enviar comprobante por WhatsApp' : 'Escribirnos por WhatsApp'}
+            </button>
+            <a href="index.html" class="co-btn co-btn--ghost co-btn--block">Seguir comprando</a>
+          </div>`;
 
-        const waBtn = document.getElementById('confirmation-whatsapp');
-        if (waBtn) {
-          waBtn.addEventListener('click', () => {
-            const message = [
-              buildWhatsAppOrderMessage(order, null),
-              '',
-              isBank
-                ? '📎 Adjunto el comprobante de la transferencia con esta referencia.'
-                : '',
-            ]
-              .filter(Boolean)
-              .join('\n');
-            openWhatsAppWithMessage(message);
-          });
-        }
+        document.getElementById('oc-whatsapp').addEventListener('click', () => {
+          const phone =
+            (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.whatsapp && APP_CONFIG.whatsapp.phone) ||
+            '18094645016';
+          const text = [
+            `Pedido ${order.reference}`,
+            `Total: ${money(order.totalCents, order.currency)}`,
+            isBank ? 'Adjunto el comprobante de la transferencia.' : '',
+          ]
+            .filter(Boolean)
+            .join('\n');
+          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+        });
       });
     </script>
   </body>

@@ -1,623 +1,757 @@
 /**
- * Lógica de checkout: Stripe, transferencia bancaria, sandbox y venta final.
+ * Checkout de una sola página.
+ *
+ * Cambios de fondo respecto a la versión anterior:
+ *
+ *  - Los importes los calcula y firma el servidor. Esta página muestra lo que
+ *    el servidor dice, y reenvía la cotización firmada al pagar. Antes el
+ *    navegador enviaba el importe a cobrar, lo que permitía pagar un dólar por
+ *    un pedido de dos mil.
+ *  - Los métodos de pago se piden al servidor. Antes la web decidía sola si
+ *    mostrar "tarjeta" mirando una clave que era un texto de relleno.
+ *  - No hay modo de emergencia silencioso. Si el pedido no llega al servidor,
+ *    el comprador lo sabe. Antes se guardaba en localStorage y se le decía que
+ *    todo había ido bien.
  */
 
-let stripeInstance = null;
-let cardElement = null;
+(function () {
+  'use strict';
 
-function initStripe() {
-  if (!isStripeConfigured()) return null;
-  if (typeof Stripe === 'undefined') {
-    console.warn('Stripe.js no cargado.');
-    return null;
+  const API = '/api/commerce';
+  const QUOTE_DEBOUNCE_MS = 350;
+
+  /** @type {{ config: object|null, quote: object|null, quoteToken: string|null, method: string|null, idempotencyKey: string|null, submitting: boolean }} */
+  const state = {
+    config: null,
+    quote: null,
+    quoteToken: null,
+    method: null,
+    idempotencyKey: null,
+    submitting: false,
+  };
+
+  const el = (id) => document.getElementById(id);
+
+  function money(cents, currency) {
+    return new Intl.NumberFormat('es-DO', {
+      style: 'currency',
+      currency: currency || 'USD',
+      minimumFractionDigits: 2,
+    }).format((Number(cents) || 0) / 100);
   }
-  if (!stripeInstance) {
-    stripeInstance = Stripe(APP_CONFIG.stripe.publishableKey);
+
+  function safe(text) {
+    const div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
   }
-  return stripeInstance;
-}
 
-function mountCardElement() {
-  if (!isStripeConfigured()) return;
+  function showAlert(message, tone) {
+    const box = el('co-alert');
+    if (!box) return;
+    box.hidden = false;
+    box.textContent = message;
+    box.className = `co__alert co__alert--${tone || 'error'}`;
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 
-  try {
-    const stripe = initStripe();
-    const container = $('#card-element');
-    if (!stripe || !container) return;
+  function clearAlert() {
+    const box = el('co-alert');
+    if (box) box.hidden = true;
+  }
 
-    if (cardElement) return;
+  function newIdempotencyKey() {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    return [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
 
-    const elements = stripe.elements({ locale: APP_CONFIG.locale });
-    cardElement = elements.create('card', {
-      style: {
-        base: {
-          color: '#f5f0e8',
-          fontFamily: '"Cormorant Garamond", Georgia, serif',
-          fontSize: '16px',
-          '::placeholder': { color: '#8a8278' },
-        },
-        invalid: { color: '#e07a5f' },
-      },
+  // ------------------------------------------------------------- carrito
+
+  /** Convierte el carrito local al formato mínimo que espera el servidor. */
+  function cartPayload() {
+    if (typeof getCartItems !== 'function') return [];
+    return getCartItems().map((item) => ({
+      productId: item.productId,
+      unitType: item.unitType,
+      quantity: item.quantity,
+    }));
+  }
+
+  // -------------------------------------------------------------- red
+
+  async function apiFetch(path, options) {
+    const response = await fetch(`${API}${path}`, {
+      headers: { 'Content-Type': 'application/json', ...(options && options.headers) },
+      ...options,
     });
 
-    cardElement.mount('#card-element');
-    cardElement.on('change', (event) => {
-      const errorEl = $('#card-errors');
-      if (errorEl) errorEl.textContent = event.error ? event.error.message : '';
-    });
-  } catch (err) {
-    console.error('[Checkout] Stripe mount error:', err);
-    const errorEl = $('#card-errors');
-    if (errorEl) {
-      errorEl.textContent =
-        'No se pudo cargar el formulario de tarjeta. Usa transferencia bancaria o modo sandbox.';
-    }
-  }
-}
-
-function destroyCardElement() {
-  if (cardElement) {
+    const text = await response.text();
+    let body = {};
     try {
-      cardElement.destroy();
+      body = text ? JSON.parse(text) : {};
     } catch {
-      /* ignore */
+      // Una respuesta que no es JSON casi siempre significa que Nginx no está
+      // enrutando /api/commerce al servicio. Merece un mensaje explícito.
+      throw new Error(
+        'El servicio de pagos no está respondiendo. Escríbenos por WhatsApp y completamos tu pedido.'
+      );
     }
-    cardElement = null;
-  }
-}
 
-function getCheckoutFormData() {
-  const form = $('#checkout-form');
-  if (!form) return null;
+    if (!response.ok) {
+      const error = new Error(body.error || 'No pudimos completar la operación.');
+      error.code = body.code;
+      error.retryable = body.retryable;
+      error.status = response.status;
+      throw error;
+    }
 
-  return {
-    fullName: form.fullName.value.trim(),
-    email: form.email.value.trim(),
-    phone: form.phone.value.trim(),
-    address: form.address.value.trim(),
-    city: form.city.value.trim(),
-    state: form.state.value.trim(),
-    postalCode: form.postalCode.value.trim(),
-    country: form.country.value,
-    paymentMethod: form.paymentMethod.value,
-    notes: form.notes?.value?.trim() || '',
-    acceptFinalSale: form.acceptFinalSale?.checked || false,
-    acceptCustomsDisclaimer: form.acceptCustomsDisclaimer?.checked || false,
-    paymentProofFileName: form.paymentProof?.files?.[0]?.name || '',
-  };
-}
-
-function validateCheckoutForm(data) {
-  const errors = [];
-  if (!data.fullName) errors.push('Nombre completo requerido.');
-  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.push('Correo electrónico válido requerido.');
-  }
-  if (!data.address) errors.push('Dirección requerida.');
-  if (!data.city) errors.push('Ciudad requerida.');
-  if (!data.country) errors.push('País de destino requerido.');
-  if (!data.paymentMethod) errors.push('Selecciona un método de pago.');
-
-  if (data.paymentMethod === 'card' && !isStripeConfigured()) {
-    errors.push('Pagos con tarjeta no configurados. Usa transferencia o modo sandbox.');
+    return body;
   }
 
-  const policyCheck = validateFinalSaleAcceptance(data.acceptFinalSale);
-  if (!policyCheck.valid) errors.push(policyCheck.error);
+  // ------------------------------------------------------------ resumen
 
-  const customsCheck = validateCustomsDisclaimer(data.acceptCustomsDisclaimer);
-  if (!customsCheck.valid) errors.push(customsCheck.error);
+  function renderItems() {
+    const container = el('co-items');
+    if (!container || !state.quote) return;
 
-  return errors;
-}
-
-function buildOrderPayload(formData, summary) {
-  const destinationName = getCountryName(formData.country);
-
-  return {
-    reference: generateOrderReference(),
-    customer: {
-      fullName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-    },
-    shipping: {
-      address: formData.address,
-      city: formData.city,
-      state: formData.state,
-      postalCode: formData.postalCode,
-      country: formData.country,
-      countryName: destinationName,
-      carrier: summary.shipping.carrier,
-      boxes: summary.shippingBoxes,
-      originCountry: summary.shipping.originCountry,
-      originLabel: summary.shipping.originLabel,
-      zone: summary.shipping.zone.name,
-    },
-    items: summary.items.map((i) => ({
-      productId: i.productId,
-      name: i.product.name,
-      line: i.product.line,
-      unitType: i.unitType,
-      unitsPerBox: i.product.unitsPerBox,
-      quantity: i.quantity,
-      totalUnits: i.totalUnits,
-      pricePerBox: i.product.pricePerBox,
-      pricePerUnit: i.product.pricePerUnit,
-      lineTotal: i.lineTotal,
-      displayLabel: i.displayLabel,
-      packagingLabel: i.product.packagingLabel,
-      isLegacy: Boolean(i.isLegacy),
-    })),
-    subtotal: summary.subtotal,
-    shippingCost: summary.shippingCost,
-    shippingBoxes: summary.shippingBoxes,
-    shippingZone: summary.shipping.zone.name,
-    estimatedDelivery: summary.shipping.estimatedDays,
-    total: summary.total,
-    currency: APP_CONFIG.currency,
-    paymentMethod: formData.paymentMethod,
-    notes: formData.notes,
-    paymentProofFileName: formData.paymentProofFileName || '',
-    policy: {
-      id: SALES_POLICY.id,
-      accepted: true,
-      acceptedAt: new Date().toISOString(),
-      noRefunds: true,
-    },
-    customsDisclaimer: {
-      id: CUSTOMS_DISCLAIMER.id,
-      accepted: true,
-      acceptedAt: new Date().toISOString(),
-    },
-    createdAt: new Date().toISOString(),
-  };
-}
-
-async function createStripePaymentIntent(order) {
-  const response = await fetch(`${APP_CONFIG.stripe.apiBaseUrl}/create-payment-intent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      amount: Math.round(order.total * 100),
-      currency: order.currency.toLowerCase(),
-      metadata: {
-        orderReference: order.reference,
-        customerEmail: order.customer.email,
-        finalSale: 'true',
-        noRefunds: 'true',
-        customsDisclaimer: 'accepted',
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || 'No se pudo iniciar el pago con tarjeta.');
+    container.innerHTML = state.quote.lines
+      .map(
+        (line) => `
+        <article class="co-item" data-product="${safe(line.productId)}" data-unit="${safe(line.unitType)}">
+          <div class="co-item__body">
+            <p class="co-item__name">${safe(line.name)}</p>
+            <p class="co-item__meta">${safe(line.packagingLabel)} · ${safe(line.displayLabel)}</p>
+            <div class="co-item__qty">
+              <button type="button" data-action="dec" aria-label="Quitar uno">−</button>
+              <span>${line.quantity}</span>
+              <button type="button" data-action="inc" aria-label="Añadir uno">+</button>
+              <button type="button" class="co-item__remove" data-action="remove">Eliminar</button>
+            </div>
+          </div>
+          <div class="co-item__price">${money(line.lineTotalCents, state.quote.currency)}</div>
+        </article>`
+      )
+      .join('');
   }
 
-  return response.json();
-}
+  function renderTotals() {
+    const q = state.quote;
+    if (!q) return;
 
-async function processStripePayment(order) {
-  const stripe = initStripe();
-  if (!stripe || !cardElement) {
-    throw new Error('Stripe no está configurado correctamente.');
+    el('co-subtotal').textContent = money(q.subtotalCents, q.currency);
+    el('co-shipping').textContent = money(q.shippingCents, q.currency);
+    el('co-total').textContent = money(q.totalCents, q.currency);
+    el('co-zone').textContent = q.shipping.zone ? `(${q.shipping.zone})` : '';
+    el('co-units').textContent = String(q.totalUnits);
+    el('co-boxes').textContent = `${q.shippingBoxes} / ${q.shipping.maxBoxes}`;
+    el('co-eta').textContent = `${q.shipping.estimatedDays} días`;
   }
 
-  const { clientSecret } = await createStripePaymentIntent(order);
-
-  const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-    payment_method: {
-      card: cardElement,
-      billing_details: {
-        name: order.customer.fullName,
-        email: order.customer.email,
-        phone: order.customer.phone,
-        address: {
-          line1: order.shipping.address,
-          city: order.shipping.city,
-          state: order.shipping.state,
-          postal_code: order.shipping.postalCode,
-          country: order.shipping.country === 'OTHER' ? undefined : order.shipping.country,
-        },
-      },
-    },
-  });
-
-  if (error) throw new Error(error.message);
-  return paymentIntent;
-}
-
-async function finalizeOrder(order, paymentStatus) {
-  order.paymentStatus = paymentStatus;
-  order.refundEligible = false;
-
-  const registered = await registerOrder(order);
-  sessionStorage.setItem('cazador_sueno_last_order', JSON.stringify(registered.order || order));
-  clearCart();
-  return registered.order || order;
-}
-
-async function submitCheckout(event) {
-  event.preventDefault();
-
-  const formData = getCheckoutFormData();
-  const errors = validateCheckoutForm(formData);
-  if (errors.length) {
-    showToast(errors[0], 'error');
-    return;
+  function setBusy(busy) {
+    const button = el('co-submit');
+    if (!button) return;
+    state.submitting = busy;
+    button.disabled = busy || !state.quoteToken;
+    button.textContent = busy ? 'Procesando…' : 'Confirmar pedido';
   }
 
-  const summary = safeGetCartSummary(formData.country);
-  if (summary.isEmpty) {
-    showToast('Tu carrito está vacío.', 'error');
-    return;
+  // ---------------------------------------------------------- cotización
+
+  let quoteTimer = null;
+
+  function scheduleQuote() {
+    clearTimeout(quoteTimer);
+    quoteTimer = setTimeout(refreshQuote, QUOTE_DEBOUNCE_MS);
   }
 
-  if (!summary.dhlValidation.valid) {
-    showToast(summary.dhlValidation.error, 'error');
-    return;
-  }
+  async function refreshQuote() {
+    const items = cartPayload();
+    const country = el('co-form').country.value;
 
-  const order = buildOrderPayload(formData, summary);
-  const submitBtn = $('#submit-checkout');
-
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Procesando…';
-  }
-
-  try {
-    if (formData.paymentMethod === 'sandbox') {
-      const saved = await finalizeOrder(order, 'paid_sandbox');
-      window.location.href = `order-confirmation.html?ref=${encodeURIComponent(saved.reference)}&method=sandbox`;
+    if (!items.length) {
+      el('co-empty').hidden = false;
+      el('co-layout').hidden = true;
       return;
     }
 
-    if (formData.paymentMethod === 'card') {
-      const paymentIntent = await processStripePayment(order);
-      order.stripePaymentIntentId = paymentIntent.id;
-      const saved = await finalizeOrder(order, 'paid');
-      window.location.href = `order-confirmation.html?ref=${encodeURIComponent(saved.reference)}&method=card`;
-      return;
-    }
+    try {
+      const data = await apiFetch('/quote', {
+        method: 'POST',
+        body: JSON.stringify({ items, country }),
+      });
 
-    if (formData.paymentMethod === 'bank_transfer') {
-      const saved = await finalizeOrder(order, 'pending_transfer');
-      window.location.href = `order-confirmation.html?ref=${encodeURIComponent(saved.reference)}&method=bank`;
-      return;
-    }
+      state.quote = data.quote;
+      state.quoteToken = data.quoteToken;
+      // Una cotización nueva es un intento nuevo: la clave de idempotencia
+      // solo debe reutilizarse para reintentar exactamente el mismo pago.
+      state.idempotencyKey = newIdempotencyKey();
 
-    showToast('Método de pago no válido.', 'error');
-  } catch (err) {
-    showToast(err.message || 'Error al procesar el pedido.', 'error');
-  } finally {
-    if (submitBtn) {
-      const summaryAfter = safeGetCartSummary(formData.country);
-      submitBtn.disabled = !summaryAfter.isEmpty && !summaryAfter.dhlValidation.valid;
-      submitBtn.textContent = 'Confirmar pedido — venta final';
+      el('co-boxes-warning').hidden = true;
+      renderItems();
+      renderTotals();
+      clearAlert();
+      setBusy(false);
+    } catch (error) {
+      state.quote = null;
+      state.quoteToken = null;
+      setBusy(false);
+
+      if (error.code === 'DHL_BOX_LIMIT') {
+        const warning = el('co-boxes-warning');
+        warning.hidden = false;
+        warning.textContent = error.message;
+      }
+      showAlert(error.message);
     }
   }
-}
 
-function renderCheckoutItem(item) {
-  const lineClass = isRangoLine(item.product.line) ? 'is-rango' : 'is-standard';
-  const imageSrc = item.product.image || 'img/hero-atmosphere.jpg';
-  const unitLabel =
-    item.unitType === UNIT_TYPES.BOX && !item.isLegacy
-      ? `${formatCurrency(item.product.pricePerBox)}/caja`
-      : `${formatCurrency(item.product.pricePerUnit)}/ud.`;
+  // ----------------------------------------------------- métodos de pago
 
-  return `
-    <article class="checkout-line ${lineClass}" data-line-id="${escapeHtml(item.lineId)}">
-      <img class="checkout-line__thumb" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(item.product.name)}" loading="lazy" />
-      <div class="checkout-line__body">
-        <p class="checkout-line__name">${escapeHtml(item.product.name)}</p>
-        <span class="checkout-line__meta">${escapeHtml(item.product.packagingLabel)} · ${escapeHtml(item.displayLabel)}</span>
-        <div class="checkout-line__pricing">
-          <span class="checkout-line__qty">
-            <button type="button" class="checkout-qty-btn" data-action="decrease" aria-label="Reducir">−</button>
-            <span>${item.quantity}</span>
-            <button type="button" class="checkout-qty-btn" data-action="increase" aria-label="Aumentar">+</button>
+  function renderPaymentMethods() {
+    const container = el('co-methods');
+    const methods = (state.config && state.config.paymentMethods) || [];
+
+    if (!methods.length) {
+      container.innerHTML =
+        '<p class="co-methods__empty">No hay métodos de pago disponibles ahora mismo. Escríbenos por WhatsApp y completamos tu pedido.</p>';
+      return;
+    }
+
+    container.innerHTML = methods
+      .map(
+        (method, index) => `
+        <label class="co-method${method.id === 'paypal' ? ' co-method--paypal' : ''}">
+          <input type="radio" name="paymentMethod" value="${safe(method.id)}" ${index === 0 ? 'checked' : ''} />
+          <span class="co-method__body">
+            <strong>${method.id === 'paypal' ? paypalWordmark() : safe(method.label)}</strong>
+            <small>${safe(methodHint(method.id, method.ready))}</small>
           </span>
-          <span>${unitLabel}</span>
-        </div>
-        <button type="button" class="checkout-line__remove" data-action="remove">Eliminar</button>
-      </div>
-      <div class="checkout-line__total">${formatCurrency(item.lineTotal)}</div>
-    </article>`;
-}
+        </label>`
+      )
+      .join('');
 
-function bindCheckoutLineEvents(container, refreshSummary) {
-  if (!container || container.dataset.bound === 'true') return;
-  container.dataset.bound = 'true';
+    state.method = methods[0].id;
 
-  container.addEventListener('click', (event) => {
-    const line = event.target.closest('.checkout-line');
-    if (!line) return;
-    const lineId = line.dataset.lineId;
-    const actionBtn = event.target.closest('[data-action]');
-    if (!actionBtn) return;
+    container.querySelectorAll('input[name="paymentMethod"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        state.method = input.value;
+        renderMethodDetail();
+      });
+    });
 
-    const action = actionBtn.dataset.action;
-    const items = getCartItems();
-    const current = items.find((i) => i.lineId === lineId);
-    if (!current) return;
+    renderMethodDetail();
+  }
 
-    if (action === 'remove') {
-      removeFromCart(lineId);
-      refreshSummary();
-      showToast('Artículo eliminado.', 'info');
+  function paypalWordmark() {
+    return `<span class="co-paypal-wordmark" aria-label="PayPal"><span>Pay</span><span>Pal</span></span>`;
+  }
+
+  function methodHint(id, ready) {
+    if (id === 'cardnet') return 'Visa, Mastercard — procesado por CardNET con 3D Secure';
+    if (id === 'bank_transfer') return 'Banreservas o BHD, con referencia única de pedido';
+    if (id === 'paypal') {
+      return ready
+        ? 'Paga con tu cuenta PayPal, sin compartir datos de tarjeta con este sitio'
+        : 'Paga con tu cuenta PayPal — disponible en breve';
+    }
+    if (id === 'sandbox') return 'Simula una compra completa sin cargo real';
+    return '';
+  }
+
+  function currentMethod() {
+    const methods = (state.config && state.config.paymentMethods) || [];
+    return methods.find((m) => m.id === state.method) || null;
+  }
+
+  function renderMethodDetail() {
+    const panel = el('co-method-detail');
+    const method = currentMethod();
+    if (!panel || !method) return;
+
+    if (method.id === 'bank_transfer') {
+      panel.hidden = false;
+      panel.innerHTML = renderBankDetails(method.client);
+      syncSubmitVisibility();
       return;
     }
 
-    const delta = action === 'increase' ? qtyStepForItem(current) : -qtyStepForItem(current);
-    const result = updateCartQuantity(lineId, current.quantity + delta);
-    if (result.success) {
-      refreshSummary();
-    } else {
-      showToast(result.error, 'error');
+    if (method.id === 'cardnet') {
+      panel.hidden = false;
+      panel.innerHTML = `
+        <p class="co-note">
+          Al confirmar se abrirá la ventana segura de CardNET para introducir tu tarjeta.
+          Los datos viajan directamente al banco: este sitio nunca los recibe ni los guarda.
+        </p>
+        <button type="button" id="co-card-trigger" class="co-hidden-trigger" aria-hidden="true" tabindex="-1"></button>`;
+      loadCardnet(method.client);
+      syncSubmitVisibility();
+      return;
     }
-  });
-}
 
-function qtyStepForItem(item) {
-  if (item.isLegacy || item.unitType === UNIT_TYPES.UNIT) return 1;
-  return 1;
-}
+    if (method.id === 'paypal') {
+      panel.hidden = false;
+      panel.innerHTML = renderPaypalDetail(method);
+      mountPaypal(method);
+      syncSubmitVisibility();
+      return;
+    }
 
-function safeGetCartSummary(countryCode) {
-  try {
-    return getCartSummary(countryCode);
-  } catch (err) {
-    console.error('[Checkout] Error leyendo carrito:', err);
-    showCheckoutFatalError(
-      'No se pudo leer el carrito. Vacía el carrito del navegador o vuelve a añadir productos.'
-    );
+    panel.hidden = false;
+    panel.innerHTML = '<p class="co-note">Modo de prueba: no se realizará ningún cargo real.</p>';
+    syncSubmitVisibility();
+  }
+
+  function syncSubmitVisibility() {
+    const button = el('co-submit');
+    if (!button) return;
+    const paypal = state.method === 'paypal';
+    button.hidden = paypal;
+    button.setAttribute('aria-hidden', paypal ? 'true' : 'false');
+  }
+
+  function renderPaypalDetail(method) {
+    const ready = Boolean(method.ready && method.client && method.client.clientId);
+    const hint = ready
+      ? 'Al pulsar el botón se abrirá la ventana segura de PayPal. Este sitio nunca recibe los datos de tu tarjeta ni de tu cuenta.'
+      : 'El botón de PayPal ya está en el checkout. El cobro se habilitará en breve; mientras tanto puede pagar con tarjeta o transferencia.';
+
+    return `
+      <div class="co-paypal">
+        <p class="co-note">${hint}</p>
+        <div id="co-paypal-buttons" class="co-paypal-buttons">
+          <button type="button" class="co-paypal-btn" id="co-paypal-static" ${ready ? '' : 'disabled'} aria-disabled="${ready ? 'false' : 'true'}">
+            ${paypalWordmark()}
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function renderBankDetails(bank) {
+    if (!bank) return '';
+    const accounts = (bank.accounts || [])
+      .map(
+        (account) => `
+        <div class="co-bank__account">
+          <p class="co-bank__bank">${safe(account.bankName)}</p>
+          <dl>
+            <div><dt>Titular</dt><dd>${safe(account.accountHolder)}</dd></div>
+            <div><dt>Tipo</dt><dd>${safe(account.accountType)}</dd></div>
+            <div><dt>Cuenta</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
+          </dl>
+        </div>`
+      )
+      .join('');
+
+    return `
+      <div class="co-bank">
+        <p class="co-note">
+          Al confirmar recibirás una referencia única. Ponla en el concepto de la
+          transferencia y envía el comprobante a
+          <strong>${safe(bank.email)}</strong> dentro de ${safe(bank.proofDeadlineHours)} horas.
+        </p>
+        ${accounts}
+      </div>`;
+  }
+
+  // ------------------------------------------------------ tarjeta CardNET
+
+  let cardnetReady = null;
+
+  /**
+   * Carga la librería de CardNET solo cuando hace falta. Es la única forma de
+   * que el iframe de captura viva en su dominio y el PAN no pase por aquí.
+   */
+  function loadCardnet(client) {
+    if (!client || cardnetReady) return cardnetReady;
+
+    cardnetReady = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = client.scriptUrl;
+      script.async = true;
+      script.onload = () => {
+        try {
+          window.PWCheckout.SetProperties({
+            name: 'Cazador de Sueños Cigars',
+            description: 'Compra de puros premium',
+            currency: client.currency,
+            lang: 'ESP',
+            form_id: 'co-form',
+            checkout_card: 1,
+            autoSubmit: 'false',
+            empty: 'true',
+          });
+          window.PWCheckout.Bind('tokenCreated', onCardTokenCreated);
+          window.PWCheckout.AddActionButton('co-card-trigger');
+          resolve(window.PWCheckout);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      script.onerror = () =>
+        reject(new Error('No pudimos cargar el formulario de tarjeta. Usa transferencia bancaria.'));
+      document.head.appendChild(script);
+    });
+
+    cardnetReady.catch((error) => {
+      cardnetReady = null;
+      showAlert(error.message);
+    });
+
+    return cardnetReady;
+  }
+
+  function onCardTokenCreated(token) {
+    const trxToken = token && (token.TokenId || token.tokenId || token);
+    if (!trxToken) {
+      setBusy(false);
+      showAlert('No recibimos los datos de la tarjeta. Inténtalo de nuevo.');
+      return;
+    }
+    submitOrder({ trxToken });
+  }
+
+  // ----------------------------------------------------------- PayPal
+
+  let paypalSdkReady = null;
+  let paypalButtons = null;
+
+  /**
+   * Si hay Client ID, sustituye el botón estático por los Smart Payment Buttons
+   * oficiales. Si no, el botón dorado permanece visible e inerte: el componente
+   * ya está en su sitio para cuando lleguen las credenciales.
+   */
+  function mountPaypal(method) {
+    const ready = Boolean(method && method.ready && method.client && method.client.clientId);
+    if (!ready) return;
+
+    loadPaypalSdk(method.client)
+      .then(() => renderPaypalButtons())
+      .catch((error) => showAlert(error.message));
+  }
+
+  function loadPaypalSdk(client) {
+    if (window.paypal) return Promise.resolve(window.paypal);
+    if (paypalSdkReady) return paypalSdkReady;
+
+    paypalSdkReady = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = client.scriptUrl;
+      script.async = true;
+      script.onload = () => {
+        if (!window.paypal) {
+          reject(new Error('No pudimos cargar PayPal. Use transferencia bancaria.'));
+          return;
+        }
+        resolve(window.paypal);
+      };
+      script.onerror = () => {
+        paypalSdkReady = null;
+        reject(new Error('No pudimos cargar PayPal. Use transferencia bancaria.'));
+      };
+      document.head.appendChild(script);
+    });
+
+    return paypalSdkReady;
+  }
+
+  function renderPaypalButtons() {
+    const host = el('co-paypal-buttons');
+    if (!host || !window.paypal) return;
+
+    host.innerHTML = '';
+    if (paypalButtons && typeof paypalButtons.close === 'function') {
+      try {
+        paypalButtons.close();
+      } catch {
+        /* el SDK a veces ya desmontó el botón */
+      }
+    }
+
+    paypalButtons = window.paypal.Buttons({
+      fundingSource: window.paypal.FUNDING.PAYPAL,
+      style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
+      createOrder: async () => {
+        const data = readForm();
+        const errors = localErrors(data);
+        if (errors.length) {
+          showAlert(errors[0]);
+          throw new Error('validacion');
+        }
+        if (!state.quoteToken) {
+          showAlert('El precio del pedido caducó. Recargamos el resumen.');
+          refreshQuote();
+          throw new Error('cotizacion');
+        }
+        const created = await apiFetch('/paypal/orders', {
+          method: 'POST',
+          body: JSON.stringify({ quoteToken: state.quoteToken }),
+        });
+        return created.paypalOrderId;
+      },
+      onApprove: async (data) => {
+        await submitOrder({ paypalOrderId: data.orderID });
+      },
+      onCancel: () => {
+        setBusy(false);
+        showAlert('Cancelaste el pago en PayPal. Puedes intentarlo de nuevo o elegir otro método.', 'info');
+      },
+      onError: () => {
+        setBusy(false);
+        showAlert('PayPal no pudo completar el pago. Prueba de nuevo o usa transferencia bancaria.');
+      },
+    });
+
+    return paypalButtons.render(host);
+  }
+
+  // ------------------------------------------------------------- envío
+
+  function readForm() {
+    const form = el('co-form');
     return {
-      items: [],
-      subtotal: 0,
-      totalUnits: 0,
-      shippingBoxes: 0,
-      shipping: calculateShipping(countryCode, 0),
-      dhlValidation: validateDhlBoxLimit(0),
-      shippingCost: 0,
-      total: 0,
-      isEmpty: true,
+      customer: {
+        fullName: form.fullName.value.trim(),
+        email: form.email.value.trim(),
+        phone: form.phone.value.trim(),
+      },
+      shipping: {
+        address: form.address.value.trim(),
+        city: form.city.value.trim(),
+        state: form.state.value.trim(),
+        postalCode: form.postalCode.value.trim(),
+        country: form.country.value,
+      },
+      notes: form.notes.value.trim(),
+      acceptances: {
+        finalSale: form.acceptFinalSale.checked,
+        customs: form.acceptCustoms.checked,
+      },
     };
   }
-}
 
-function updateCheckoutSubmitState(summary) {
-  const submitBtn = $('#submit-checkout');
-  const warnEl = document.getElementById('dhl-box-warning');
-  const overLimit = !summary.dhlValidation.valid;
-
-  if (warnEl) {
-    warnEl.hidden = !overLimit;
-    warnEl.textContent = overLimit ? summary.dhlValidation.error : '';
+  /** Validación local: solo para dar respuesta inmediata. El servidor revalida. */
+  function localErrors(data) {
+    const errors = [];
+    if (data.customer.fullName.length < 3) errors.push('Escribe tu nombre completo.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.customer.email)) {
+      errors.push('Escribe un correo electrónico válido.');
+    }
+    if (data.customer.phone.replace(/\D/g, '').length < 7) {
+      errors.push('Escribe un teléfono de contacto para la entrega.');
+    }
+    if (data.shipping.address.length < 5) errors.push('Escribe la dirección de entrega.');
+    if (data.shipping.city.length < 2) errors.push('Escribe la ciudad de entrega.');
+    if (!data.shipping.country) errors.push('Selecciona el país de destino.');
+    if (!data.acceptances.finalSale) errors.push('Debes aceptar la política de venta final.');
+    if (!data.acceptances.customs) errors.push('Debes aceptar la responsabilidad aduanera.');
+    return errors;
   }
 
-  if (submitBtn) {
-    submitBtn.disabled = summary.isEmpty || overLimit;
-    submitBtn.title = overLimit ? summary.dhlValidation.error : '';
-  }
-}
-
-function setCheckoutEmptyState(isEmpty) {
-  const emptyEl = document.getElementById('checkout-empty');
-  const mainEl = document.getElementById('checkout-main');
-  const summaryEl = document.getElementById('checkout-summary-panel');
-
-  if (emptyEl) emptyEl.hidden = !isEmpty;
-  if (mainEl) mainEl.hidden = isEmpty;
-  if (summaryEl) summaryEl.hidden = isEmpty;
-}
-
-function showCheckoutFatalError(message) {
-  const banner = document.getElementById('checkout-error-banner');
-  if (banner) {
-    banner.hidden = false;
-    banner.textContent = message;
-  }
-}
-
-function setupPaymentMethods(form) {
-  const cardOption = document.getElementById('payment-option-card');
-  const cardInput = form.querySelector('input[name="paymentMethod"][value="card"]');
-  const sandboxOption = document.getElementById('payment-option-sandbox');
-  const sandboxInput = form.querySelector('input[name="paymentMethod"][value="sandbox"]');
-  const stripeNotice = document.getElementById('stripe-unavailable-notice');
-
-  if (!isStripeConfigured()) {
-    if (cardOption) cardOption.hidden = true;
-    if (cardInput) cardInput.disabled = true;
-    if (stripeNotice) stripeNotice.hidden = false;
-  }
-
-  if (isSandboxCheckoutEnabled()) {
-    if (sandboxOption) sandboxOption.hidden = false;
-    if (sandboxInput) sandboxInput.disabled = false;
-  } else {
-    if (sandboxOption) sandboxOption.hidden = true;
-    if (sandboxInput) sandboxInput.disabled = true;
-  }
-
-  const defaultMethod = isStripeConfigured()
-    ? 'card'
-    : 'bank_transfer';
-
-  form.querySelectorAll('input[name="paymentMethod"]').forEach((input) => {
-    input.checked = input.value === defaultMethod;
-  });
-}
-
-function renderAlwaysVisibleBankDetails(container, summary) {
-  if (!container || typeof renderBankTransferDetails !== 'function') return;
-
-  const previewOrder = {
-    reference: '(se generará al confirmar)',
-    total: summary?.total || 0,
-    customer: { fullName: '', email: '' },
-  };
-
-  renderBankTransferDetails(previewOrder, container, {
-    showReference: false,
-    showAmount: Boolean(summary && !summary.isEmpty),
-  });
-}
-
-function initCheckoutPage() {
-  try {
-    const form = $('#checkout-form');
-    if (!form) {
-      showCheckoutFatalError('No se encontró el formulario de checkout.');
+  async function submitOrder(paymentPayload) {
+    if (!state.quoteToken) {
+      showAlert('El precio del pedido caducó. Recargamos el resumen, revísalo y confirma otra vez.');
+      refreshQuote();
       return;
     }
 
-    initGlobalCart();
-    setupPaymentMethods(form);
+    setBusy(true);
+    clearAlert();
 
-    const countrySelect = form.country;
-    const preferredCountry = getPreferredShippingCountry();
+    const data = readForm();
 
-    getCountryList().forEach(({ code, name }) => {
-      const opt = document.createElement('option');
-      opt.value = code;
-      opt.textContent = name;
-      if (code === preferredCountry) opt.selected = true;
-      countrySelect.appendChild(opt);
-    });
+    try {
+      const result = await apiFetch('/orders', {
+        method: 'POST',
+        headers: { 'Idempotency-Key': state.idempotencyKey },
+        body: JSON.stringify({
+          quoteToken: state.quoteToken,
+          paymentMethod: state.method,
+          paymentPayload: paymentPayload || {},
+          ...data,
+        }),
+      });
 
-    const bankAlways = document.getElementById('bank-transfer-always');
+      if (typeof clearCart === 'function') clearCart();
 
-    function refreshSummary() {
-      const country = countrySelect.value || preferredCountry || 'US';
-      const summary = safeGetCartSummary(country);
+      const url = new URL('order-confirmation.html', window.location.href);
+      url.searchParams.set('ref', result.reference);
+      url.searchParams.set('t', result.accessToken);
+      window.location.assign(url.toString());
+    } catch (error) {
+      setBusy(false);
 
-      setCheckoutEmptyState(summary.isEmpty);
-
-      if (summary.isEmpty) {
-        updateCheckoutSubmitState(summary);
-        if (bankAlways) renderAlwaysVisibleBankDetails(bankAlways, summary);
+      // Una cotización caducada se puede rehacer sola; el resto necesita al
+      // comprador. En ningún caso reintentamos un cobro automáticamente.
+      if (error.code === 'QUOTE_EXPIRED' || error.code === 'QUOTE_INVALID') {
+        showAlert('El precio se actualizó mientras completabas el formulario. Revísalo y confirma otra vez.');
+        refreshQuote();
         return;
       }
 
-      const listEl = $('#checkout-items');
-      if (listEl) {
-        listEl.innerHTML = summary.items.map(renderCheckoutItem).join('');
-        bindCheckoutLineEvents(listEl, refreshSummary);
+      showAlert(error.message);
+      window.dispatchEvent(
+        new CustomEvent('checkout:error', {
+          detail: { code: error.code, message: error.message, method: state.method },
+        })
+      );
+    }
+  }
+
+  async function onSubmit(event) {
+    event.preventDefault();
+    if (state.submitting) return;
+
+    const data = readForm();
+    const errors = localErrors(data);
+    if (errors.length) {
+      showAlert(errors[0]);
+      return;
+    }
+
+    if (!state.method) {
+      showAlert('Elige un método de pago.');
+      return;
+    }
+
+    if (state.method === 'cardnet') {
+      const method = currentMethod();
+      setBusy(true);
+      try {
+        await loadCardnet(method.client);
+        // Abre el iframe de CardNET. El pedido se envía en 'tokenCreated'.
+        el('co-card-trigger').click();
+      } catch {
+        setBusy(false);
       }
-
-      const set = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val;
-      };
-
-      set('summary-subtotal', formatCurrency(summary.subtotal));
-      set('summary-shipping', formatCurrency(summary.shippingCost));
-      set('summary-total', formatCurrency(summary.total));
-      set('summary-delivery', `${summary.shipping.estimatedDays} días hábiles`);
-      set('summary-zone', summary.shipping.zone.name);
-      set('summary-units', String(summary.totalUnits));
-      set('summary-carrier', summary.shipping.carrier);
-      set('summary-origin', summary.shipping.originLabel);
-      set('summary-destination', getCountryName(country));
-      set('summary-boxes', String(summary.shippingBoxes));
-      set('summary-max-boxes', String(summary.shipping.maxBoxes));
-
-      updateCheckoutSubmitState(summary);
-      if (bankAlways) renderAlwaysVisibleBankDetails(bankAlways, summary);
+      return;
     }
 
-    function refreshBankPanels() {
-      const country = countrySelect.value || preferredCountry || 'US';
-      const summary = safeGetCartSummary(country);
-      if (bankAlways) renderAlwaysVisibleBankDetails(bankAlways, summary);
+    if (state.method === 'paypal') {
+      showAlert('Usa el botón de PayPal para completar el pago.');
+      return;
     }
 
-    countrySelect.addEventListener('change', refreshSummary);
-    refreshSummary();
-    refreshBankPanels();
+    submitOrder({});
+  }
 
-    const paymentRadios = $$('input[name="paymentMethod"]');
-    const cardSection = $('#card-payment-section');
-    const bankSection = $('#bank-transfer-preview');
-    const sandboxNotice = $('#sandbox-payment-notice');
-    const proofArea = document.getElementById('proof-upload-area');
-    const proofInput = document.getElementById('payment-proof');
-    const proofName = document.getElementById('proof-file-name');
+  // ----------------------------------------------------------- arranque
 
-    if (proofArea && proofInput) {
-      proofArea.addEventListener('click', () => proofInput.click());
-      proofInput.addEventListener('change', () => {
-        if (proofName) {
-          proofName.textContent = proofInput.files?.[0]
-            ? `Archivo: ${proofInput.files[0].name}`
-            : '';
-        }
-      });
+  function renderStaticCopy() {
+    if (typeof SALES_POLICY !== 'undefined') {
+      el('co-policy-sale').textContent = SALES_POLICY.checkoutText;
     }
+    if (typeof CUSTOMS_DISCLAIMER !== 'undefined') {
+      el('co-policy-customs').textContent = CUSTOMS_DISCLAIMER.checkoutText;
+    }
+    if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.trust) {
+      el('co-trust-1').textContent = APP_CONFIG.trust.authenticity;
+      el('co-trust-2').textContent = APP_CONFIG.trust.delivery;
+      el('co-trust-3').textContent = APP_CONFIG.trust.policy;
+    }
+  }
 
-    function togglePaymentUI() {
-      const method = form.paymentMethod.value;
-      if (cardSection) cardSection.hidden = method !== 'card';
-      if (bankSection) bankSection.hidden = true;
-      if (sandboxNotice) sandboxNotice.hidden = method !== 'sandbox';
-      if (proofArea) proofArea.hidden = method === 'card';
+  function fillCountries(countries) {
+    const select = el('co-form').country;
+    const preferred =
+      typeof getPreferredShippingCountry === 'function' ? getPreferredShippingCountry() : 'US';
 
-      if (method === 'card') {
-        mountCardElement();
+    select.innerHTML = countries
+      .map(
+        (country) =>
+          `<option value="${safe(country.code)}"${country.code === preferred ? ' selected' : ''}>${safe(country.name)}</option>`
+      )
+      .join('');
+  }
+
+  function bindEvents() {
+    const form = el('co-form');
+
+    form.addEventListener('submit', onSubmit);
+    form.country.addEventListener('change', scheduleQuote);
+
+    el('co-items').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+      const item = button.closest('.co-item');
+      const lineId = `${item.dataset.product}::${item.dataset.unit}`;
+      const action = button.dataset.action;
+
+      if (action === 'remove') {
+        removeFromCart(lineId);
       } else {
-        destroyCardElement();
-      }
-
-      refreshBankPanels();
-    }
-
-    paymentRadios.forEach((radio) => radio.addEventListener('change', togglePaymentUI));
-    countrySelect.addEventListener('change', () => {
-      refreshSummary();
-      refreshBankPanels();
-    });
-
-    togglePaymentUI();
-    form.addEventListener('submit', submitCheckout);
-    window.addEventListener('cart:updated', refreshSummary);
-    window.addEventListener('cart:updated', refreshBankPanels);
-    window.addEventListener('cds:cart-updated', () => {
-      refreshSummary();
-      refreshBankPanels();
-    });
-
-    const whatsappBtn = document.getElementById('whatsapp-checkout-btn');
-    if (whatsappBtn) {
-      whatsappBtn.addEventListener('click', () => {
-        const formData = getCheckoutFormData();
-        const summary = safeGetCartSummary(formData?.country || countrySelect.value || 'US');
-        if (summary.isEmpty) {
-          showToast('Tu carrito está vacío.', 'error');
+        const line = state.quote.lines.find(
+          (l) => l.productId === item.dataset.product && l.unitType === item.dataset.unit
+        );
+        const next = line.quantity + (action === 'inc' ? 1 : -1);
+        const result = updateCartQuantity(lineId, next);
+        if (!result.success) {
+          showAlert(result.error);
           return;
         }
-        const message = buildCheckoutWhatsAppPreview(formData || {}, summary);
-        openWhatsAppWithMessage(message);
-      });
-    }
-  } catch (err) {
-    console.error('[Checkout] init error:', err);
-    showCheckoutFatalError(
-      err.message || 'Error al inicializar el checkout. Recarga la página e intenta de nuevo.'
-    );
+      }
+      refreshQuote();
+    });
+
+    el('co-whatsapp').addEventListener('click', () => {
+      const phone = (state.config && state.config.contact && state.config.contact.whatsapp) || '';
+      const lines = state.quote
+        ? state.quote.lines.map((l) => `• ${l.name} — ${l.displayLabel}`).join('\n')
+        : '';
+      const total = state.quote ? money(state.quote.totalCents, state.quote.currency) : '';
+      const message = `Hola, quiero completar este pedido:\n${lines}\n\nTotal estimado: ${total}`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
+    });
+
+    window.addEventListener('cart:updated', scheduleQuote);
+    window.addEventListener('cds:cart-updated', scheduleQuote);
   }
-}
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    initCheckoutPage,
-    submitCheckout,
-    buildOrderPayload,
-    processStripePayment,
+  async function init() {
+    renderStaticCopy();
+
+    if (typeof initCartPersistence === 'function') initCartPersistence();
+
+    if (!cartPayload().length) {
+      el('co-empty').hidden = false;
+      return;
+    }
+
+    el('co-layout').hidden = false;
+
+    try {
+      state.config = await apiFetch('/config', { method: 'GET' });
+    } catch (error) {
+      el('co-layout').hidden = true;
+      showAlert(error.message);
+      return;
+    }
+
+    fillCountries(state.config.countries);
+    renderPaymentMethods();
+    bindEvents();
+    await refreshQuote();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    init().catch((error) => {
+      console.error('[checkout]', error);
+      showAlert('No pudimos iniciar el checkout. Recarga la página o escríbenos por WhatsApp.');
+    });
+  });
+
+  // Superficie mínima para el asistente de IA, que solo lee.
+  window.CDS_CHECKOUT = {
+    getState() {
+      return {
+        method: state.method,
+        hasQuote: Boolean(state.quoteToken),
+        totalCents: state.quote ? state.quote.totalCents : 0,
+        currency: state.quote ? state.quote.currency : 'USD',
+        country: state.quote ? state.quote.country : null,
+        boxes: state.quote ? state.quote.shippingBoxes : 0,
+        availableMethods: ((state.config && state.config.paymentMethods) || []).map((m) => m.id),
+      };
+    },
   };
-}
-
+})();

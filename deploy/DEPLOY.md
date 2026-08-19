@@ -104,9 +104,10 @@ El script respalda el sitio antes de sobrescribir, sube la capa de comercio
 
 ```bash
 rsync -avz \
-  --exclude 'deploy/' --exclude '.git/' --exclude 'server/' \
+  --exclude 'deploy/' --exclude '.git/' \
   --exclude 'index.html' --exclude 'index_temp.html' --exclude 'index_server.html' \
   --exclude 'admin.html' --exclude 'cart-test.html' \
+  --exclude '.env' --exclude 'server/commerce/.env' --exclude '.commerce-data/' \
   ./ USUARIO@IP_EXTERNA:/var/www/cazador-de-suenos-cigars/
 ```
 
@@ -210,6 +211,50 @@ En el navegador:
 
 ---
 
+## PASO 6 — API de comercio (cds-commerce)
+
+El checkout nuevo no calcula precios en el navegador. Nginx reenvía `/api/commerce` al proceso Node en `127.0.0.1:8788`, que firma el total, cobra con CardNET/PayPal/transferencia y guarda los pedidos **fuera** del webroot.
+
+El script de Windows ya sube `server/commerce` (nunca un `.env`), parchea Nginx y arranca el servicio. Si lo haces a mano en el servidor:
+
+```bash
+sudo bash /var/www/cazador-de-suenos-cigars/deploy/ensure-nginx-commerce.sh
+sudo bash /var/www/cazador-de-suenos-cigars/deploy/install-cds-commerce.sh
+curl -sS http://127.0.0.1:8788/api/commerce/health
+curl -sS https://www.cazadordesuenocigars.com/api/commerce/health
+```
+
+`ensure-nginx-commerce.sh` inserta el proxy a `:8788` y el bloqueo de `/server/` **sin sustituir el certificado SSL**. No uses `setup-server.sh` en un sitio que ya tiene HTTPS.
+
+Edita las claves (el instalador no pisa un fichero que ya exista):
+
+```bash
+sudo nano /etc/cazador-de-suenos/commerce.env
+# Obligatorio: COMMERCE_QUOTE_SECRET (el instalador la genera si el fichero es nuevo)
+# Sandbox: COMMERCE_SANDBOX_ENABLED=false
+# CardNET: CARDNET_ENABLED=true + PUBLIC/PRIVATE_ACCOUNT_KEY + CARDNET_USD_DOP_RATE si liquidas en DOP
+# PayPal:  PAYPAL_ENABLED=true + PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET cuando las tengas
+sudo systemctl restart cds-commerce
+sudo journalctl -u cds-commerce -f
+```
+
+Comprueba que Nginx **no** sirve el código ni los pedidos:
+
+```bash
+curl -I https://www.cazadordesuenocigars.com/server/commerce/server.js   # 404
+curl -I https://www.cazadordesuenocigars.com/data/orders.json            # 404
+```
+
+Si el sitio ya tenía el Nginx viejo, copia la config nueva (incluye el proxy a `:8788` y el bloqueo de `/server/` y `/data/`):
+
+```bash
+sudo cp /var/www/cazador-de-suenos-cigars/deploy/nginx-cazador-de-suenos.conf \
+        /etc/nginx/sites-available/cazador-de-suenos
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+---
+
 ## Mantenimiento
 
 ```powershell
@@ -217,11 +262,13 @@ En el navegador:
 .\deploy\deploy-from-windows.ps1 -SshUser TU_USUARIO
 ```
 
-En el servidor, recargar Nginx y el sommelier:
+En el servidor, recargar Nginx y los procesos Node:
 
 ```bash
 sudo systemctl reload nginx
+sudo systemctl restart cds-commerce
 sudo systemctl restart cds-ai-sommelier
+curl -sS http://127.0.0.1:8788/api/commerce/health
 ```
 
 ### Advertencia: index.html está desincronizado
@@ -293,4 +340,7 @@ Los leads B2B quedan en `server/ai-sommelier/data/leads.jsonl`. El widget tambi�
 | `/etc/nginx/sites-available/cazador-de-suenos` | Config Nginx |
 | `/etc/letsencrypt/live/www.cazadordesuenocigars.com/` | Certificados SSL |
 | `/etc/cazador-de-suenos/ai-sommelier.env` | Clave Gemini (no versionar) |
+| `/etc/cazador-de-suenos/commerce.env` | Claves CardNET/PayPal y firma de cotizaciones (no versionar) |
+| `/var/lib/cazador-de-suenos/commerce/` | Pedidos (fuera del webroot, modo 0700) |
 | `127.0.0.1:8787` | Proceso Node del sommelier |
+| `127.0.0.1:8788` | Proceso Node de comercio (cds-commerce) |

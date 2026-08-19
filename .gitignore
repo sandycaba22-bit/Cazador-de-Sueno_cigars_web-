@@ -28,6 +28,10 @@ temp/
 cache/
 data/
 
+# Pedidos de clientes (datos personales). En producción viven en
+# /var/lib/cazador-de-suenos/commerce; esto cubre el directorio de desarrollo.
+.commerce-data/
+
 # Dependencias
 node_modules/
 

@@ -1,0 +1,41 @@
+[Unit]
+Description=Cazador de Sueños — API de comercio (checkout, CardNET, PayPal, pedidos)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/cazador-de-suenos-cigars
+# NODE_ENV queda fijado aquí por si commerce.env lo omite: sin esto el sandbox
+# de desarrollo se activaría en el servidor y un fallo de CardNET se pintaría
+# como pedido confirmado.
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/cazador-de-suenos/commerce.env
+ExecStart=/usr/bin/node /var/www/cazador-de-suenos-cigars/server/commerce/server.js
+Restart=always
+RestartSec=4
+User=www-data
+Group=www-data
+
+# Los pedidos viven fuera del webroot. systemd crea el directorio con los
+# permisos correctos y se lo entrega solo a este servicio.
+StateDirectory=cazador-de-suenos/commerce
+StateDirectoryMode=0700
+
+# Endurecimiento: el servicio maneja datos personales y habla con el banco.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+# MemoryDenyWriteExecute no se usa: V8 necesita mapas WX para el JIT y Node no arranca.
+ReadWritePaths=/var/lib/cazador-de-suenos/commerce
+
+[Install]
+WantedBy=multi-user.target

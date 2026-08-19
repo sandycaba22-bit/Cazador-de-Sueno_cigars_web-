@@ -1,8 +1,19 @@
 /**
- * Catálogo de puros — reglas de empaque:
- * - Línea estándar (Classic / Reserva): 20 unidades por caja
- * - Línea Rango: 10 unidades por caja
- * Venta por caja o por puro suelto (precio unitario derivado).
+ * Catálogo de puros — fuente autoritativa de precios.
+ *
+ * Este fichero es el que consulta el servidor para calcular cuánto se cobra
+ * (server/commerce/pricing.js), así que debe describir EXACTAMENTE las mismas
+ * vitolas que las páginas de producto añaden al carrito.
+ *
+ * Los datos replican config/products.json, que es lo que cargan las páginas de
+ * vitolas a través de js/shopping-cart.js. La prueba
+ * server/commerce/test/catalog-sync.test.js falla si ambos ficheros divergen:
+ * cuando se cambie un precio, hay que cambiarlo en los dos.
+ *
+ * Reglas de empaque:
+ * - Vitolas estándar: 20 unidades por caja
+ * - El Rango (doble perfecto): 10 unidades por caja
+ * Venta por caja o por puro suelto.
  */
 
 const PACKAGING = {
@@ -35,86 +46,104 @@ function isRangoLine(line) {
 
 const CATALOG = [
   {
-    id: 'cs-classic-robusto',
-    name: 'Classic Robusto',
+    id: 'emperador',
+    name: 'El Emperador',
+    nameEn: 'The Emperor',
     line: PRODUCT_LINES.CLASSIC,
-    description: 'Mezcla equilibrada con notas de cedro y cacao. Caja estándar de 20 unidades.',
-    pricePerBox: 189.0,
-    stockBoxes: 48,
-    image: 'assets/products/classic-robusto.svg',
+    description: 'Gran Toro 58×6 — El Primer Sueño',
+    pricePerUnit: 12.0,
+    unitsPerBox: PACKAGING.STANDARD_UNITS,
+    stockUnits: 100,
+    image: 'img/el-emperador-cigarro.jpg',
+    strength: 'Media-Full',
+    origin: 'República Dominicana',
+  },
+  {
+    id: 'puro-habano',
+    name: 'Puro Habano',
+    nameEn: 'Puro Habano',
+    line: PRODUCT_LINES.CLASSIC,
+    description: 'Churchill 48×7 — Raíces Cubanas',
+    pricePerUnit: 14.0,
+    unitsPerBox: PACKAGING.STANDARD_UNITS,
+    stockUnits: 100,
+    image: 'img/puro-habano-cigarro.jpg',
+    strength: 'Media-Full',
+    origin: 'República Dominicana',
+  },
+  {
+    id: 'exquisito',
+    name: 'El Exquisito',
+    nameEn: 'The Exquisite',
+    line: PRODUCT_LINES.RESERVA,
+    description: 'Gran Toro 58×6 — Edición de Autor',
+    pricePerUnit: 13.5,
+    unitsPerBox: PACKAGING.STANDARD_UNITS,
+    stockUnits: 50,
+    image: 'img/el-exquisito-cigarro.jpg',
+    strength: 'Media-Full',
+    origin: 'República Dominicana',
+  },
+  {
+    id: 'rango',
+    name: 'El Rango',
+    nameEn: 'The Range',
+    line: PRODUCT_LINES.RANGO,
+    description: 'Doble Perfecto 60×4½ — Formato Figurado',
+    pricePerUnit: 16.0,
+    unitsPerBox: PACKAGING.RANGO_UNITS,
+    stockUnits: 100,
+    image: 'img/el-rango-cigarro.jpg',
+    strength: 'Full',
+    origin: 'República Dominicana',
+  },
+  {
+    id: 'ligero',
+    name: 'Ligero 007',
+    nameEn: 'Ligero 007',
+    line: PRODUCT_LINES.RESERVA,
+    description: 'Robusto 5×50 — Obra Maestra',
+    pricePerUnit: 11.0,
+    unitsPerBox: PACKAGING.STANDARD_UNITS,
+    stockUnits: 50,
+    image: 'images/ligero-007/cigarro.jpg',
     strength: 'Media',
     origin: 'República Dominicana',
   },
   {
-    id: 'cs-classic-toro',
-    name: 'Classic Toro',
+    id: 'sultan',
+    name: 'El Sultán',
+    nameEn: 'The Sultan',
     line: PRODUCT_LINES.CLASSIC,
-    description: 'Formato toro, humo cremoso y final prolongado. Caja de 20 puros.',
-    pricePerBox: 199.0,
-    stockBoxes: 36,
-    image: 'assets/products/classic-toro.svg',
-    strength: 'Media',
+    description: 'Robusto 5×50 — Valle del Cibao',
+    pricePerUnit: 15.0,
+    unitsPerBox: PACKAGING.STANDARD_UNITS,
+    stockUnits: 100,
+    image: 'img/el-sultan-cigarro.jpg',
+    strength: 'Media-Full',
     origin: 'República Dominicana',
-  },
-  {
-    id: 'cs-reserva-churchill',
-    name: 'Reserva Churchill',
-    line: PRODUCT_LINES.RESERVA,
-    description: 'Tabaco añejado 5 años. Presentación premium de 20 unidades.',
-    pricePerBox: 289.0,
-    stockBoxes: 24,
-    image: 'assets/products/reserva-churchill.svg',
-    strength: 'Media-Full',
-    origin: 'Nicaragua',
-  },
-  {
-    id: 'cs-reserva-lancero',
-    name: 'Reserva Lancero',
-    line: PRODUCT_LINES.RESERVA,
-    description: 'Edición limitada. Caja estándar con 20 lanceros.',
-    pricePerBox: 319.0,
-    stockBoxes: 18,
-    image: 'assets/products/reserva-lancero.svg',
-    strength: 'Full',
-    origin: 'Nicaragua',
-  },
-  {
-    id: 'cs-rango-petit',
-    name: 'Rango Petit Corona',
-    line: PRODUCT_LINES.RANGO,
-    description: 'Línea Rango — empaque exclusivo de 10 unidades por caja.',
-    pricePerBox: 149.0,
-    stockBoxes: 30,
-    image: 'assets/products/rango-petit.svg',
-    strength: 'Media-Full',
-    origin: 'Honduras',
-  },
-  {
-    id: 'cs-rango-corona',
-    name: 'Rango Corona Gorda',
-    line: PRODUCT_LINES.RANGO,
-    description: 'Selección artesanal Rango. Cada caja contiene 10 puros.',
-    pricePerBox: 169.0,
-    stockBoxes: 22,
-    image: 'assets/products/rango-corona.svg',
-    strength: 'Full',
-    origin: 'Honduras',
   },
 ];
 
+/**
+ * El precio por caja se deriva del precio unitario, nunca al revés: así una
+ * caja siempre cuesta exactamente lo que cuestan sus puros y no hay redondeos
+ * que hagan divergir el total del cliente y el del servidor.
+ */
 function enrichProduct(product) {
-  const unitsPerBox = getUnitsPerBox(product.line);
-  const stockUnits = product.stockBoxes * unitsPerBox;
+  const unitsPerBox = product.unitsPerBox || getUnitsPerBox(product.line);
+  const stockUnits = product.stockUnits;
   return {
     ...product,
     unitsPerBox,
     stockUnits,
+    stockBoxes: Math.floor(stockUnits / unitsPerBox),
     packagingLabel:
       unitsPerBox === PACKAGING.RANGO_UNITS
         ? `Caja Rango (${PACKAGING.RANGO_UNITS} uds.)`
         : `Caja estándar (${PACKAGING.STANDARD_UNITS} uds.)`,
-    pricePerUnit: Math.round((product.pricePerBox / unitsPerBox) * 100) / 100,
-    inStock: product.stockBoxes > 0,
+    pricePerBox: Math.round(product.pricePerUnit * unitsPerBox * 100) / 100,
+    inStock: stockUnits > 0,
   };
 }
 

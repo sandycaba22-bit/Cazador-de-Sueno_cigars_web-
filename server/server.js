@@ -1,150 +1,147 @@
 /**
- * Servidor Express — sitio estático, Stripe y registro inmediato de pedidos.
+ * Servidor de desarrollo local.
+ *
+ * Sirve el sitio estático y monta la API de comercio en el mismo puerto, para
+ * poder probar el checkout completo con `npm run dev` sin montar Nginx.
+ *
+ * EN PRODUCCIÓN ESTE FICHERO NO SE USA. Allí Nginx sirve los estáticos y hace
+ * de proxy hacia cds-commerce (8788) y cds-ai-sommelier (8787). La versión
+ * anterior de este archivo servía el repositorio entero con express.static, lo
+ * que dejaba data/orders.json —con los datos personales de cada cliente—
+ * accesible por HTTP.
  */
 
-require('dotenv').config();
-
+const http = require('http');
+const fs = require('fs');
+const fsp = require('fs/promises');
 const path = require('path');
-const express = require('express');
-const cors = require('cors');
-const Stripe = require('stripe');
-const { createOrder, getOrder } = require('./orders-store');
 
-const PORT = process.env.PORT || 3000;
+const { config } = require('./commerce/config');
+const { createLogger } = require('./commerce/logger');
+const { createCommerceApp } = require('./commerce/app');
+
+const PORT = Number(process.env.PORT || 3000);
 const ROOT = path.join(__dirname, '..');
 
-const stripeSecret = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
+/** Rutas que jamás deben servirse como fichero, ni siquiera en desarrollo. */
+const BLOCKED = [
+  /^\/server(\/|$)/,
+  /^\/deploy(\/|$)/,
+  /^\/data(\/|$)/,
+  /^\/\.commerce-data(\/|$)/,
+  /^\/node_modules(\/|$)/,
+  /^\/\.git(\/|$)/,
+  /\/\.env/,
+  /^\/package(-lock)?\.json$/,
+];
 
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000')
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.pdf': 'application/pdf',
+};
 
-const app = express();
+const log = createLogger({ service: 'cds-dev', env: config.nodeEnv });
+const commerce = createCommerceApp({ config, logger: log });
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Origen no permitido por CORS'));
-      }
-    },
-  })
-);
+const AI_PORT = Number(process.env.AI_SOMMELIER_PORT || 8787);
 
-app.post(
-  '/api/stripe-webhook',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
-    if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) {
-      return res.status(503).send('Webhook no configurado');
+/**
+ * Reproduce el proxy que hace Nginx hacia el servicio del sommelier, para poder
+ * probar el asistente del checkout en local. Si ese servicio no está levantado
+ * responde 503 con JSON: el asistente lo interpreta y avisa al cliente, en vez
+ * de recibir una página de error y romperse al parsearla.
+ */
+function proxyToSommelier(req, res) {
+  const upstream = http.request(
+    { host: '127.0.0.1', port: AI_PORT, path: req.url, method: req.method, headers: req.headers },
+    (upstreamRes) => {
+      res.writeHead(upstreamRes.statusCode || 502, upstreamRes.headers);
+      upstreamRes.pipe(res);
     }
+  );
 
-    const sig = req.headers['stripe-signature'];
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (err) {
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    if (event.type === 'payment_intent.succeeded') {
-      const intent = event.data.object;
-      console.log('[Webhook] Pago exitoso:', intent.metadata?.orderReference);
-    }
-
-    res.json({ received: true });
-  }
-);
-
-app.use(express.json({ limit: '1mb' }));
-
-/** Registro inmediato de pedidos — tarjeta y transferencia */
-app.post('/api/orders', (req, res) => {
-  const result = createOrder(req.body);
-
-  if (!result.success) {
-    return res.status(400).json({ error: result.errors.join(' ') });
-  }
-
-  res.status(201).json({
-    success: true,
-    order: result.order,
-    message:
-      result.order.paymentStatus === 'pending_transfer'
-        ? 'Pedido registrado. Realiza la transferencia con la referencia indicada.'
-        : 'Pedido confirmado y pagado.',
+  upstream.on('error', () => {
+    log.warn('ai.no_disponible', { port: AI_PORT });
+    res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' }).end(
+      JSON.stringify({
+        error: 'El asistente no está disponible ahora mismo.',
+        hint: `Arranca el sommelier: node server/ai-sommelier/server.js (puerto ${AI_PORT})`,
+      })
+    );
   });
-});
 
-app.get('/api/orders/:reference', (req, res) => {
-  const order = getOrder(req.params.reference);
-  if (!order) {
-    return res.status(404).json({ error: 'Pedido no encontrado.' });
-  }
-  res.json(order);
-});
+  req.pipe(upstream);
+}
 
-app.post('/api/create-payment-intent', async (req, res) => {
-  if (!stripe) {
-    return res.status(503).json({
-      error: 'Stripe no configurado. Define STRIPE_SECRET_KEY en .env',
-    });
+async function serveStatic(pathname, res) {
+  const relative = decodeURIComponent(pathname).replace(/^\/+/, '') || 'index.html';
+  const target = path.join(ROOT, relative);
+
+  // Barrera contra salto de directorio: el fichero resuelto debe seguir dentro
+  // de la raíz del sitio.
+  if (!path.resolve(target).startsWith(path.resolve(ROOT))) {
+    res.writeHead(403).end('Prohibido');
+    return;
   }
 
-  const { amount, currency = 'usd', metadata = {} } = req.body;
-
-  if (!Number.isInteger(amount) || amount < 50) {
-    return res.status(400).json({
-      error: 'Monto inválido. Debe ser un entero en centavos (mínimo 50).',
-    });
-  }
-
+  let filePath = target;
   try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: currency.toLowerCase(),
-      automatic_payment_methods: { enabled: true },
-      metadata: {
-        ...metadata,
-        finalSale: 'true',
-        noRefunds: 'true',
-      },
-    });
-
-    res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (err) {
-    console.error('[Stripe]', err.message);
-    res.status(500).json({ error: err.message });
+    const stat = await fsp.stat(filePath);
+    if (stat.isDirectory()) filePath = path.join(filePath, 'index.html');
+  } catch {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('No encontrado');
+    return;
   }
+
+  const contentType = MIME[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
+  res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache' });
+  fs.createReadStream(filePath).pipe(res);
+}
+
+const server = http.createServer(async (req, res) => {
+  const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+
+  if (await commerce(req, res)) return;
+
+  if (url.pathname.startsWith('/api/ai-sommelier')) {
+    proxyToSommelier(req, res);
+    return;
+  }
+
+  if (BLOCKED.some((pattern) => pattern.test(url.pathname))) {
+    log.warn('estatico.ruta_bloqueada', { path: url.pathname });
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('No encontrado');
+    return;
+  }
+
+  // Sin comodín hacia index.html para /api/*: una ruta inexistente debe
+  // responder JSON, no HTML que el frontend intentaría parsear como JSON.
+  if (url.pathname.startsWith('/api/')) {
+    res
+      .writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' })
+      .end(JSON.stringify({ error: 'Recurso no encontrado.', code: 'NOT_FOUND' }));
+    return;
+  }
+
+  await serveStatic(url.pathname, res);
 });
 
-app.get('/api/health', (_req, res) => {
-  res.json({
-    ok: true,
-    stripe: Boolean(stripe),
-    orders: true,
-    timestamp: new Date().toISOString(),
+server.listen(PORT, () => {
+  log.info('dev.iniciado', {
+    url: `http://localhost:${PORT}`,
+    checkout: `http://localhost:${PORT}/checkout.html`,
+    dataDir: config.dataDir,
+    sandbox: config.sandbox.enabled,
   });
-});
-
-app.use(express.static(ROOT));
-
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(ROOT, 'index.html'));
-});
-
-app.listen(PORT, () => {
-  console.log(`Cazador Sueño — http://localhost:${PORT}`);
-  if (!stripe) {
-    console.warn('⚠ STRIPE_SECRET_KEY no definida. Pagos con tarjeta deshabilitados.');
-  }
 });

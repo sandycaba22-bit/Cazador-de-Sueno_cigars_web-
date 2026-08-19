@@ -1,0 +1,906 @@
+/**
+ * Checkout de una sola página.
+ * Reemplaza a css/checkout-commerce.css, que servía a la estructura anterior
+ * de varios paneles y un cajón de carrito superpuesto.
+ */
+
+/**
+ * El atributo hidden tiene que ganar siempre.
+ *
+ * El checkout oculta y muestra piezas enteras (el formulario, el aviso de
+ * carrito vacío, el panel del asistente) con element.hidden. Como esos
+ * contenedores declaran display:grid o display:flex, su especificidad supera
+ * al display:none que el navegador aplica a [hidden] y quedaban visibles a la
+ * vez el formulario y el mensaje de "carrito vacío".
+ */
+[hidden] {
+  display: none !important;
+}
+
+.co {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* --------------------------------------------------------------- barra */
+
+.co__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.co__back {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.co__back:hover {
+  color: var(--accent);
+}
+
+.co__brand {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.co__secure {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.co__secure::before {
+  content: '🔒 ';
+}
+
+/* --------------------------------------------------------------- avisos */
+
+.co__alert {
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--error);
+  background: rgba(224, 122, 95, 0.12);
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.co__alert--info {
+  border-color: var(--accent);
+  background: rgba(201, 169, 98, 0.12);
+}
+
+.co__alert--success {
+  border-color: var(--success);
+  background: rgba(107, 158, 120, 0.12);
+}
+
+.co-warn {
+  margin: 0.75rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(224, 122, 95, 0.12);
+  border: 1px solid var(--error);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* -------------------------------------------------------- carrito vacío */
+
+.co__empty {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.co__empty h1 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.co__empty p {
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.co__empty-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------- rejilla */
+
+.co__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.co__title {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  margin: 0 0 0.35rem;
+}
+
+.co__lede {
+  color: var(--text-muted);
+  margin: 0 0 2rem;
+  font-size: 0.95rem;
+}
+
+/* --------------------------------------------------------------- bloques */
+
+.co-block {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.co-block:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.co-block__title {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 1.1rem;
+}
+
+.co-step {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------- campos */
+
+.co-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.co-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.co-field--wide {
+  grid-column: 1 / -1;
+}
+
+.co-field small {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.co-field input,
+.co-field select,
+.co-field textarea {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  transition: border-color 0.15s ease;
+}
+
+.co-field input:focus,
+.co-field select:focus,
+.co-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.co-field textarea {
+  resize: vertical;
+}
+
+.co-optional {
+  margin-top: 1rem;
+}
+
+.co-optional summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.87rem;
+  padding: 0.4rem 0;
+}
+
+.co-optional[open] summary {
+  margin-bottom: 0.9rem;
+}
+
+/* ------------------------------------------------------- métodos de pago */
+
+.co-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.co-methods__loading,
+.co-methods__empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.co-method {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.95rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.co-method:hover {
+  border-color: var(--accent);
+}
+
+.co-method:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--surface-elevated);
+}
+
+.co-method input {
+  margin-top: 0.25rem;
+  accent-color: var(--accent);
+}
+
+.co-method__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.co-method__body strong {
+  font-size: 1rem;
+}
+
+.co-method__body small {
+  color: var(--text-muted);
+  font-size: 0.83rem;
+}
+
+.co-method-detail {
+  margin-top: 1.1rem;
+}
+
+.co-note {
+  font-size: 0.87rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: 0 0 1rem;
+}
+
+.co-hidden-trigger {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}
+
+/* --------------------------------------------------------------- PayPal */
+
+.co-method--paypal .co-paypal-wordmark {
+  font-size: 1.15rem;
+}
+
+.co-paypal-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: 'Helveticaneue', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.co-paypal-wordmark span:first-child {
+  color: #003087;
+}
+
+.co-paypal-wordmark span:last-child {
+  color: #009cde;
+}
+
+.co-method:has(input:checked).co-method--paypal .co-paypal-wordmark span:first-child,
+.co-method:has(input:checked).co-method--paypal .co-paypal-wordmark span:last-child {
+  color: inherit;
+}
+
+.co-method:has(input:checked).co-method--paypal .co-paypal-wordmark span:first-child {
+  color: #c9a962;
+}
+
+.co-method:has(input:checked).co-method--paypal .co-paypal-wordmark span:last-child {
+  color: #e4d5a8;
+}
+
+.co-paypal-buttons {
+  width: 100%;
+  max-width: 360px;
+  min-height: 45px;
+}
+
+.co-paypal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 45px;
+  border: none;
+  border-radius: 4px;
+  background: #ffc439;
+  color: #003087;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.co-paypal-btn:hover:not(:disabled) {
+  background: #f2b824;
+}
+
+.co-paypal-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.co-paypal-btn .co-paypal-wordmark {
+  font-size: 1.45rem;
+}
+
+.co-paypal .co-note {
+  margin-bottom: 0.85rem;
+}
+
+/* --------------------------------------------------------------- banco */
+
+.co-bank__account {
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+}
+
+.co-bank__bank {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--accent);
+  margin: 0 0 0.6rem;
+}
+
+.co-bank dl {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.87rem;
+}
+
+.co-bank dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.co-bank dt {
+  color: var(--text-muted);
+}
+
+.co-bank dd {
+  margin: 0;
+  text-align: right;
+}
+
+.co-bank code {
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+}
+
+/* --------------------------------------------------------------- legal */
+
+.co-block--legal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.co-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.co-check input {
+  margin-top: 0.2rem;
+  accent-color: var(--accent);
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------- botones */
+
+.co-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.6rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.co-btn--gold {
+  background: var(--accent);
+  color: #1a1612;
+  font-weight: 600;
+}
+
+.co-btn--gold:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.co-btn--ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.co-btn--ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.co-btn--block {
+  width: 100%;
+}
+
+.co-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.co-submit {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.co-submit__note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------- resumen */
+
+.co__summary {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.co-summary-card {
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.co-summary-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin: 0 0 1.1rem;
+}
+
+.co-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1.2rem;
+}
+
+.co-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.co-item__name {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+}
+
+.co-item__meta {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.co-item__qty {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+}
+
+.co-item__qty button {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.co-item__qty button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.co-item__remove {
+  width: auto !important;
+  padding: 0 0.5rem;
+  margin-left: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--text-muted) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+.co-item__price {
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.co-totals {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.co-totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.co-totals dt {
+  color: var(--text-muted);
+}
+
+.co-totals dd {
+  margin: 0;
+}
+
+.co-totals__zone {
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.co-totals__grand {
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.15rem;
+  font-family: var(--font-display);
+}
+
+.co-totals__grand dt {
+  color: var(--text);
+}
+
+.co-totals__grand dd {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.co-meta {
+  list-style: none;
+  padding: 0;
+  margin: 1.2rem 0 0;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+}
+
+.co-meta li {
+  display: flex;
+  justify-content: space-between;
+}
+
+.co-meta span {
+  color: var(--text-muted);
+}
+
+.co-trust {
+  list-style: none;
+  padding: 1.1rem 0 0;
+  margin: 1.1rem 0 0;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.co-trust li::before {
+  content: '· ';
+  color: var(--accent);
+}
+
+/* ------------------------------------------------ asistente de checkout */
+
+.ca {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 900;
+  font-family: var(--font-body);
+}
+
+.ca__fab {
+  position: relative;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--surface-elevated);
+  color: var(--accent);
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.ca__fab:hover {
+  background: var(--accent);
+  color: #1a1612;
+}
+
+.ca__fab-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--error);
+}
+
+.ca__panel {
+  position: absolute;
+  right: 0;
+  bottom: 3.6rem;
+  width: min(360px, calc(100vw - 2.5rem));
+  max-height: min(520px, calc(100vh - 6rem));
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.ca__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ca__head strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--accent);
+}
+
+.ca__head small {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.ca__close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ca__log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 120px;
+}
+
+.ca__msg {
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  max-width: 90%;
+  white-space: pre-wrap;
+}
+
+.ca__msg--assistant {
+  background: var(--bg-alt);
+  color: var(--text);
+  align-self: flex-start;
+}
+
+.ca__msg--user {
+  background: var(--accent);
+  color: #1a1612;
+  align-self: flex-end;
+}
+
+.ca__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0 1rem;
+}
+
+.ca__chip {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.ca__chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ca__form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem 0.4rem;
+}
+
+.ca__form input {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.ca__form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ca__form button {
+  width: 2.5rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #1a1612;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.ca__legal {
+  margin: 0;
+  padding: 0 1rem 0.9rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------- móvil */
+
+@media (max-width: 900px) {
+  .co__layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+  }
+
+  /* En móvil el resumen va primero: el comprador quiere ver qué paga. */
+  .co__summary {
+    position: static;
+    order: -1;
+  }
+
+  .co-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .co__title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .co {
+    padding: 1rem 0.9rem 3rem;
+  }
+
+  .co__bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .co__secure {
+    order: 3;
+    width: 100%;
+  }
+}

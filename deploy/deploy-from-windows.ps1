@@ -49,8 +49,8 @@ $CommerceFiles = @(
     "style.css"
 )
 $CommerceDirs = @(
-    "css",       # styles.css + checkout-commerce.css
-    "js",        # cart, checkout, commerce-urls, page-visibility, whatsapp-commerce...
+    "css",       # checkout-onepage.css y estilos del sitio
+    "js",        # cart, checkout, catalog, commerce-urls...
     "config",    # products.json y shipping-zones.json: el carrito los pide por fetch
     "locales",   # traducciones del selector de idioma
     "assets",    # imágenes de producto del carrito
@@ -64,10 +64,11 @@ $SiteFiles = @(
 )
 $SiteDirs = @("img", "images")
 
-# Nunca se publican: maquetas, páginas de prueba y el panel de administración.
+# Nunca se publican enteros: maquetas, páginas de prueba, el panel de
+# administración y secretos. server/commerce se sube aparte (cds-commerce).
 $NeverDeploy = @(
     "index_temp.html", "index_server.html", "cazador-de-suenos-completo.html",
-    "cart-test.html", "admin.html", "package.json", ".env.example", "server", "deploy"
+    "cart-test.html", "admin.html", "package.json", ".env.example"
 )
 
 $Files = @() + $CommerceFiles
@@ -105,6 +106,7 @@ if (-not $IncludeIndex) {
 if ($DryRun) {
     Write-Host ""
     Write-Host "Modo ensayo: no se sube nada. Destino habria sido ${Remote}:${RemotePath}/" -ForegroundColor Yellow
+    Write-Host "Tambien se subiria server/commerce (sin .env), install-cds-commerce.sh y ensure-nginx-commerce.sh"
     return
 }
 
@@ -153,44 +155,83 @@ foreach ($item in ($Files + $Dirs)) {
     if ($LASTEXITCODE -ne 0) { throw "Falló la subida de $item." }
 }
 
+# --- cds-commerce: adaptadores de pasarela y precios autoritativos -----------------
+# Antes se excluía todo /server, así que el checkout nuevo nunca llegaba a
+# producción y Nginx devolvía 404/410 en /api/commerce.
+Write-Host "==> Subiendo cds-commerce (pasarelas + API)..." -ForegroundColor Cyan
+$stageParent = Join-Path $env:TEMP "cds-commerce-upload"
+$stage = Join-Path $stageParent "commerce"
+if (Test-Path $stageParent) { Remove-Item -Recurse -Force $stageParent }
+New-Item -ItemType Directory -Path $stageParent | Out-Null
+Copy-Item (Join-Path $ProjectRoot "server\commerce") $stage -Recurse
+Get-ChildItem $stage -Recurse -Force -File | Where-Object {
+    $_.Name -eq ".env" -or $_.Name -eq ".env.local" -or $_.Extension -in @(".pem", ".key")
+} | Remove-Item -Force
+ssh $Remote "mkdir -p $RemotePath/server $RemotePath/deploy"
+if ($LASTEXITCODE -ne 0) { throw "No se pudo crear server/ en el destino." }
+scp -r -q $stage "${Remote}:${RemotePath}/server/"
+if ($LASTEXITCODE -ne 0) { throw "Falló la subida de server/commerce." }
+scp -q (Join-Path $ProjectRoot "deploy\install-cds-commerce.sh") "${Remote}:${RemotePath}/deploy/"
+if ($LASTEXITCODE -ne 0) { throw "Falló la subida de install-cds-commerce.sh." }
+scp -q (Join-Path $ProjectRoot "deploy\ensure-nginx-commerce.sh") "${Remote}:${RemotePath}/deploy/"
+if ($LASTEXITCODE -ne 0) { throw "Falló la subida de ensure-nginx-commerce.sh." }
+scp -q (Join-Path $ProjectRoot "deploy\nginx-cazador-de-suenos.conf") "${Remote}:${RemotePath}/deploy/"
+if ($LASTEXITCODE -ne 0) { throw "Falló la subida de nginx-cazador-de-suenos.conf." }
+
+Write-Host "==> Protegiendo /server/ y activando el proxy /api/commerce..." -ForegroundColor Cyan
+ssh $Remote "sudo bash $RemotePath/deploy/ensure-nginx-commerce.sh"
+if ($LASTEXITCODE -ne 0) { throw "No se pudo parchear Nginx. El código de comercio no debe quedar público: revisa el servidor." }
+
 Write-Host "==> Restaurando permisos del servidor web..." -ForegroundColor Cyan
 ssh $Remote "sudo chown -R www-data:www-data $RemotePath && sudo find $RemotePath -type f -exec chmod 644 {} \; && sudo find $RemotePath -type d -exec chmod 755 {} \;"
 if ($LASTEXITCODE -ne 0) { throw "No se pudieron restaurar los permisos. Revisa el servidor antes de continuar." }
 
 # Nota: no se ejecuta setup-server.sh. Ese script reescribe la configuración de Nginx
-# con un bootstrap HTTP para otro dominio (cazadordesuenocigars.com) y tumbaría el HTTPS
-# del sitio en vivo. Solo se usa en una instalación desde cero.
-Write-Host "==> Recargando Nginx..." -ForegroundColor Cyan
-ssh $Remote "sudo nginx -t && sudo systemctl reload nginx"
+# con un bootstrap HTTP y tumbaría el HTTPS del sitio en vivo.
+Write-Host "==> Instalando / reiniciando cds-commerce..." -ForegroundColor Cyan
+ssh $Remote "sudo bash $RemotePath/deploy/install-cds-commerce.sh"
+if ($LASTEXITCODE -ne 0) { throw "cds-commerce no arrancó. Revisa journalctl -u cds-commerce en el servidor." }
 
 # --- Verificación -------------------------------------------------------------------
 Write-Host "==> Verificando el sitio publicado..." -ForegroundColor Cyan
 $cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $checks = @(
-    @{ Url = "https://$Domain/";                          Contiene = $null },
-    @{ Url = "https://$Domain/checkout.html";             Contiene = "bank-transfer-always" },
-    @{ Url = "https://$Domain/js/commerce-urls.js";       Contiene = "getCheckoutUrl" },
-    @{ Url = "https://$Domain/js/page-visibility.js";     Contiene = $null },
-    @{ Url = "https://$Domain/css/checkout-commerce.css"; Contiene = $null },
-    @{ Url = "https://$Domain/order-confirmation.html";   Contiene = $null },
-    @{ Url = "https://$Domain/config/products.json";      Contiene = $null },
-    @{ Url = "https://$Domain/vitolas/puro-habano.html";  Contiene = "commerce-urls.js" }
+    @{ Url = "https://$Domain/";                                Contiene = $null },
+    @{ Url = "https://$Domain/checkout.html";                   Contiene = "checkout-onepage.css" },
+    @{ Url = "https://$Domain/js/checkout.js";                  Contiene = "/api/commerce" },
+    @{ Url = "https://$Domain/css/checkout-onepage.css";        Contiene = $null },
+    @{ Url = "https://$Domain/order-confirmation.html";         Contiene = $null },
+    @{ Url = "https://$Domain/config/products.json";            Contiene = $null },
+    @{ Url = "https://$Domain/vitolas/puro-habano.html";        Contiene = "commerce-urls.js" },
+    @{ Url = "https://$Domain/api/commerce/health";             Contiene = '"ok":true' },
+    @{ Url = "https://$Domain/server/commerce/server.js";       Contiene = $null; Esperado = 404 },
+    @{ Url = "https://$Domain/.env";                            Contiene = $null; Esperado = 404 }
 )
 
 $fallos = 0
 foreach ($check in $checks) {
     $url = "$($check.Url)?cb=$cb"
+    $esperado = if ($check.ContainsKey("Esperado")) { [int]$check.Esperado } else { 200 }
     try {
         $r = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 20
-        if ($check.Contiene -and ($r.Content -notmatch [regex]::Escape($check.Contiene))) {
+        if ($esperado -ne 200) {
+            Write-Warning "EXPUESTO $($check.Url) - se esperaba $esperado y llegó $($r.StatusCode)"
+            $fallos++
+        } elseif ($check.Contiene -and ($r.Content -notmatch [regex]::Escape($check.Contiene))) {
             Write-Warning "VIEJO  $($check.Url) - responde 200 pero le falta '$($check.Contiene)'"
             $fallos++
         } else {
             Write-Host "    OK $($r.StatusCode)  $($check.Url)" -ForegroundColor Green
         }
     } catch {
-        Write-Warning "FALLO  $($check.Url) - $($_.Exception.Message)"
-        $fallos++
+        $status = $null
+        try { $status = [int]$_.Exception.Response.StatusCode } catch { }
+        if ($esperado -ne 200 -and $status -eq $esperado) {
+            Write-Host "    OK $status  $($check.Url)" -ForegroundColor Green
+        } else {
+            Write-Warning "FALLO  $($check.Url) - $($_.Exception.Message)"
+            $fallos++
+        }
     }
 }
 
