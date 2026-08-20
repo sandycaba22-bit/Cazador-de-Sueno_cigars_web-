@@ -306,8 +306,13 @@ body.age-gate-open .age-gate {
 .hero-premium {
   position: relative;
   overflow: hidden;
-  min-height: clamp(42rem, calc(100vh - 1rem), 56rem);
-  padding: clamp(1.5rem, 2.5vw, 2rem) 0 clamp(4rem, 7vw, 6rem);
+  min-height: min(100vh, 52rem);
+  min-height: min(100dvh, 52rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 4rem) 0;
+  background: #0a0a0a;
 }
 
 .hero-premium::before {
@@ -315,38 +320,34 @@ body.age-gate-open .age-gate {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 35%, rgba(212, 175, 55, 0.14), transparent 26%),
-    linear-gradient(180deg, rgba(6, 6, 6, 0.34), rgba(6, 6, 6, 0.82)),
-    linear-gradient(90deg, rgba(8, 8, 8, 0.9) 0%, rgba(8, 8, 8, 0.52) 48%, rgba(8, 8, 8, 0.86) 100%),
-    url('../images/ligero-007/caja-abierta.jpg') center 34%/cover no-repeat;
-  opacity: 1;
-  transform: scale(1.03);
+    radial-gradient(ellipse 70% 55% at 50% 42%, rgba(28, 28, 28, 0.95) 0%, transparent 70%),
+    radial-gradient(ellipse 90% 80% at 50% 100%, rgba(197, 160, 89, 0.06) 0%, transparent 55%),
+    linear-gradient(180deg, #0c0c0c 0%, #080808 50%, #050505 100%);
+  pointer-events: none;
 }
 
 .hero-premium::after {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.18) 45%, rgba(0, 0, 0, 0.56)),
-    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.38) 100%);
+  background: radial-gradient(ellipse 50% 40% at 50% 38%, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.55) 100%);
   pointer-events: none;
 }
 
 .hero-premium__inner {
   position: relative;
   z-index: 1;
-  min-height: inherit;
+  width: 100%;
   display: grid;
   place-items: center;
 }
 
 .hero-premium__content {
   display: grid;
-  gap: 1.7rem;
-  width: min(100%, 50rem);
+  gap: 1.5rem;
+  width: min(100%, 44rem);
   margin-inline: auto;
-  padding: clamp(6rem, 14vw, 9rem) 0 clamp(4rem, 8vw, 6rem);
+  padding: clamp(1.5rem, 4vw, 2.5rem) 1rem;
   justify-items: center;
   text-align: center;
   animation: heroFade 0.9s ease both;
@@ -355,7 +356,6 @@ body.age-gate-open .age-gate {
 .hero__eyebrow,
 .section__eyebrow,
 .mastery-card__body span,
-.hero-premium__card-kicker,
 .site-footer__eyebrow {
   margin: 0;
   color: var(--cds-gold-soft);
@@ -366,92 +366,39 @@ body.age-gate-open .age-gate {
   text-transform: uppercase;
 }
 
-.hero-wordmark {
-  display: grid;
-  gap: 1rem;
-  justify-items: center;
-  max-width: 40rem;
-}
-
-.hero-wordmark h1 {
-  display: grid;
-  gap: 0.15rem;
-}
-
-.hero-wordmark__signature {
-  margin: 0;
-  color: rgba(248, 245, 239, 0.68);
-  font-family: var(--cds-font-body);
-  font-size: 0.74rem;
-  font-weight: 500;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-}
-
-.hero-premium h1 {
+.hero-premium__title {
   margin: 0;
   color: var(--cds-ivory);
   font-family: var(--cds-font-display);
-  font-size: clamp(3.8rem, 10vw, 7.2rem);
-  line-height: 0.9;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
   text-wrap: balance;
-  text-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
 }
 
 .hero-premium__subhead {
-  max-width: 38rem;
+  max-width: 34rem;
   margin: 0;
-  color: rgba(248, 245, 239, 0.82);
-  font-size: clamp(1rem, 2vw, 1.18rem);
-  line-height: 1.9;
+  color: rgba(248, 245, 239, 0.72);
+  font-family: var(--cds-font-body);
+  font-weight: 300;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.85;
   text-wrap: balance;
 }
 
 .hero-premium__actions {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  margin-top: 0.75rem;
 }
 
 .hero-premium__actions .btn {
   min-width: 14rem;
 }
 
-.hero-premium__highlights {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem 1.15rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hero-premium__highlights li {
-  color: rgba(248, 245, 239, 0.72);
-  font-family: var(--cds-font-body);
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.hero-premium__highlights li::before {
-  content: '';
-  display: inline-block;
-  width: 0.45rem;
-  height: 0.45rem;
-  margin-right: 0.65rem;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--cds-gold-soft), rgba(212, 175, 55, 0.4));
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.08);
-  vertical-align: middle;
-}
-
 .premium-media-frame,
-.hero-premium__card,
 .mastery-card,
 .info-grid article,
 .product-card {
@@ -464,7 +411,6 @@ body.age-gate-open .age-gate {
 }
 
 .premium-media-frame::before,
-.hero-premium__card::before,
 .mastery-card::before,
 .info-grid article::before,
 .product-card::before {
@@ -517,39 +463,6 @@ body.age-gate-open .age-gate {
   inset: -4rem -1.2rem -1rem;
   background: linear-gradient(180deg, rgba(18, 18, 18, 0), rgba(18, 18, 18, 0.92));
   z-index: -1;
-}
-
-.hero__smoke {
-  position: absolute;
-  width: 20rem;
-  height: 20rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 42%, transparent 72%);
-  filter: blur(34px);
-  opacity: 0.24;
-  pointer-events: none;
-  animation: smokeRise 18s ease-in-out infinite;
-}
-
-.hero__smoke--one {
-  left: -4rem;
-  bottom: 2rem;
-}
-
-.hero__smoke--two {
-  right: 24%;
-  bottom: -2rem;
-  width: 16rem;
-  height: 16rem;
-  animation-delay: -7s;
-}
-
-.hero__smoke--three {
-  right: -4rem;
-  bottom: 6rem;
-  width: 18rem;
-  height: 18rem;
-  animation-delay: -12s;
 }
 
 .premium-section {
@@ -963,22 +876,6 @@ body.age-gate-open .age-gate {
   color: var(--cds-gold-soft);
 }
 
-@keyframes smokeRise {
-  0% {
-    transform: translate3d(0, 1rem, 0) scale(0.94);
-    opacity: 0.08;
-  }
-
-  45% {
-    opacity: 0.24;
-  }
-
-  100% {
-    transform: translate3d(0, -4rem, 0) scale(1.12);
-    opacity: 0;
-  }
-}
-
 @keyframes heroFade {
   from {
     opacity: 0;
@@ -1043,21 +940,16 @@ body.age-gate-open .age-gate {
   }
 
   .hero-premium {
-    min-height: auto;
+    min-height: min(100svh, 36rem);
   }
 
-  .hero-premium h1 {
-    font-size: clamp(3rem, 15vw, 4.5rem);
+  .hero-premium__title {
+    font-size: clamp(2.4rem, 12vw, 3.6rem);
   }
 
   .hero-premium__content {
     width: min(100%, 38rem);
-    padding-top: clamp(4.5rem, 18vw, 6.5rem);
-  }
-
-  .hero-premium__highlights {
-    flex-direction: column;
-    align-items: center;
+    gap: 1.25rem;
   }
 
   .mastery-grid,
@@ -1080,10 +972,6 @@ body.age-gate-open .age-gate {
   .leaf-media {
     inset: auto;
     width: 100%;
-  }
-
-  .hero-premium {
-    min-height: 34rem;
   }
 
   .hero-premium__actions .btn {
@@ -1125,7 +1013,7 @@ body.age-gate-open .age-gate {
   }
 
   .hero-premium {
-    min-height: 32rem;
+    min-height: 28rem;
   }
 
   .premium-media-frame figcaption {
@@ -1141,7 +1029,6 @@ body.age-gate-open .age-gate {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__smoke,
   .hero-premium__content,
   .premium-media-frame img,
   .mastery-card img,

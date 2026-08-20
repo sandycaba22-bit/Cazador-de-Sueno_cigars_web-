@@ -75,7 +75,7 @@
 
         if (feedback) {
           feedback.textContent =
-            'Debes ser mayor de edad para acceder a este sitio. Gracias por respetar esta verificación.';
+            'Debes tener 21 años o más para acceder a este sitio. Gracias por respetar esta verificación.';
         }
 
         if (exitLink) {
