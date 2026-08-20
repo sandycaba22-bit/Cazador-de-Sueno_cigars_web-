@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=EB+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/luxury-tokens.css" />
@@ -24,14 +24,18 @@
     <header class="site-header">
       <div class="container site-header__inner">
         <a href="index.html" class="logo cds-brand" aria-label="Cazador de Sueños Cigar SRL">
-          <span class="nav__logo-fallback">Cazador de Sueños</span>
+          <span class="cds-brand__lockup">
+            <span class="nav__logo-fallback">Cazador de Sueños</span>
+            <span class="cds-brand__wordmark">Cigar SRL · Republica Dominicana</span>
+          </span>
         </a>
         <nav class="site-nav" aria-label="Principal">
-          <a href="#raiz">La Raíz</a>
-          <a href="#maestria">Maestría</a>
-          <a href="#catalogo">Vitolas</a>
-          <a href="#envios">Envíos</a>
-          <a href="#pagos">Pagos</a>
+          <a href="#la-casa">La Casa</a>
+          <a href="#las-vitolas">Las Vitolas</a>
+          <a href="#el-tabaco">El Tabaco</a>
+          <a href="#el-proceso">El Proceso</a>
+          <a href="#la-historia">La Historia</a>
+          <a href="#contacto">Contacto</a>
         </nav>
         <div class="site-header__actions">
           <div class="lang-selector">
@@ -53,37 +57,88 @@
     </header>
 
     <main>
-      <section class="hero hero-premium">
+      <section id="la-casa" class="hero hero-premium">
         <div class="hero__smoke hero__smoke--one" aria-hidden="true"></div>
         <div class="hero__smoke hero__smoke--two" aria-hidden="true"></div>
         <div class="hero__smoke hero__smoke--three" aria-hidden="true"></div>
         <div class="container hero__inner hero-premium__inner">
           <div class="hero-premium__content">
-            <p class="hero__eyebrow">Cazador de Sueños Cigar SRL · República Dominicana</p>
-            <h1>Cazador de Sueños</h1>
+            <div class="hero-premium__intro">
+              <p class="hero__eyebrow">Casa tabacalera dominicana · legado familiar</p>
+              <span class="hero-premium__divider" aria-hidden="true"></span>
+            </div>
+            <div class="hero-wordmark" aria-label="Cazador de Sueños">
+              <span class="hero-wordmark__ornament" aria-hidden="true"></span>
+              <h1>
+                <span>Cazador de</span>
+                <span>Sueños</span>
+              </h1>
+              <p class="hero-wordmark__signature">Cigar SRL · Republica Dominicana</p>
+            </div>
             <p class="hero__lead">
               Una casa de tabaco nacida del legado familiar, la fermentación ancestral y la paciencia
               convertida en arte.
             </p>
             <div class="hero-premium__actions">
-              <a href="#catalogo" class="btn btn--primary btn--lg">Ver vitolas</a>
-              <a href="#raiz" class="btn btn--secondary btn--lg">Descubrir la historia</a>
+              <a href="#las-vitolas" class="btn btn--primary btn--lg">Ver vitolas</a>
+              <a href="#la-historia" class="btn btn--secondary btn--lg">Descubrir la historia</a>
             </div>
           </div>
-          <aside class="hero-premium__card">
-            <span class="hero-premium__card-kicker">La Casa</span>
-            <p>
-              El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán. Cajas de 20,
-              salvo El Rango (10). Envío DHL Express.
-            </p>
-          </aside>
+          <div class="hero-premium__rail">
+            <figure class="hero-premium__media premium-media-frame">
+              <img src="images/ligero-007/caja-abierta.jpg" alt="Vitola artesanal de Cazador de Sueños presentada en su caja" />
+              <figcaption>Vitola de la casa · fotografia real del proyecto</figcaption>
+            </figure>
+            <figure class="hero-premium__detail premium-media-frame">
+              <img src="images/ligero-007/cigarro.jpg" alt="Cigarro Cazador de Sueños con acabado artesanal" />
+              <figcaption>Hecho a mano · presencia de coleccion</figcaption>
+            </figure>
+            <aside class="hero-premium__card">
+              <span class="hero-premium__card-kicker">La Casa</span>
+              <span class="hero-premium__card-divider" aria-hidden="true"></span>
+              <p class="hero-premium__card-title">Reserva dominicana</p>
+              <p>
+                El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán. Cajas de 20,
+                salvo El Rango (10). Envío DHL Express.
+              </p>
+              <p class="hero-premium__card-note">
+                Contenido real, fotografias reales y una firma sensorial definida por origen,
+                paciencia y oficio.
+              </p>
+            </aside>
+          </div>
         </div>
       </section>
 
-      <section id="raiz" class="section premium-section premium-section--story">
+      <section id="el-tabaco" class="section premium-section premium-section--leaf">
+        <div class="container leaf-grid">
+          <div class="leaf-copy">
+            <p class="section__eyebrow">El Tabaco</p>
+            <span class="section__ornament" aria-hidden="true"></span>
+            <h2>Origen, cultivo y carácter dominicano.</h2>
+            <p data-i18n="maestria.intro">
+              Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen,
+              cultivo, fermentación, mano experta, reposo y legado.
+            </p>
+            <p data-i18n="maestria.chapter3.text">
+              El campo define la identidad. La hoja madura bajo el sol, acumula fuerza y revela su
+              destino en la textura, el color y la elasticidad.
+            </p>
+            <a href="#el-proceso" class="btn btn--secondary">Seguir el recorrido</a>
+          </div>
+          <figure class="leaf-media premium-media-frame">
+            <img src="images/historia-semillero.jpg" alt="Semillero y comienzo del proceso tabacalero" />
+            <figcaption>Semillero y comienzo del proceso tabacalero</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="la-historia" class="section premium-section premium-section--story">
+        <div id="raiz" class="section-anchor" aria-hidden="true"></div>
         <div class="container story-grid">
           <div class="story-copy">
-            <p class="section__eyebrow">La Raíz de Todo</p>
+            <p class="section__eyebrow">La Historia</p>
+            <span class="section__ornament" aria-hidden="true"></span>
             <h2>Legado familiar, técnica ancestral y memoria viva.</h2>
             <p data-i18n="maestria.chapter7.text1">
               Todo comenzó en la región norte de la República Dominicana, donde un antepasado de
@@ -107,20 +162,22 @@
             </p>
           </div>
           <div class="story-visual">
-            <figure class="story-photo story-photo--primary">
+            <figure class="story-photo story-photo--primary premium-media-frame">
               <img src="images/historia-montana.jpg" alt="Origen montañoso de Cazador de Sueños" />
             </figure>
-            <figure class="story-photo story-photo--secondary">
+            <figure class="story-photo story-photo--secondary premium-media-frame">
               <img src="images/historia-semillero.jpg" alt="Semillero y comienzo del proceso tabacalero" />
             </figure>
           </div>
         </div>
       </section>
 
-      <section id="maestria" class="section premium-section premium-section--mastery">
+      <section id="el-proceso" class="section premium-section premium-section--mastery">
+        <div id="maestria" class="section-anchor" aria-hidden="true"></div>
         <div class="container">
           <header class="section__header section__header--centered">
-            <p class="section__eyebrow" data-i18n="maestria.label">Maestría</p>
+            <p class="section__eyebrow" data-i18n="maestria.label">El Proceso</p>
+            <span class="section__ornament" aria-hidden="true"></span>
             <h2 data-i18n="maestria.title">El Arte de la Paciencia</h2>
             <p data-i18n="maestria.intro">
               Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen,
@@ -128,7 +185,7 @@
             </p>
           </header>
           <div class="mastery-grid">
-            <article class="mastery-card">
+            <article class="mastery-card premium-media-frame">
               <img src="images/maestria-hoja.jpg" alt="Selección de hoja para la elaboración" />
               <div class="mastery-card__body">
                 <span data-i18n="maestria.chapter3.kicker">La Hoja</span>
@@ -139,7 +196,7 @@
                 </p>
               </div>
             </article>
-            <article class="mastery-card">
+            <article class="mastery-card premium-media-frame">
               <img src="images/maestria-pilon.jpg" alt="Pilón y fermentación del tabaco" />
               <div class="mastery-card__body">
                 <span data-i18n="maestria.chapter4.kicker">El Pilón</span>
@@ -150,7 +207,7 @@
                 </p>
               </div>
             </article>
-            <article class="mastery-card">
+            <article class="mastery-card premium-media-frame">
               <img src="images/maestria-manos.jpg" alt="Manos expertas en el torcido del cigarro" />
               <div class="mastery-card__body">
                 <span data-i18n="maestria.chapter5.kicker">El Maestro Torcedor</span>
@@ -161,7 +218,7 @@
                 </p>
               </div>
             </article>
-            <article class="mastery-card">
+            <article class="mastery-card premium-media-frame">
               <img src="images/maestria-cava.jpg" alt="Añejamiento y reposo en cava" />
               <div class="mastery-card__body">
                 <span data-i18n="maestria.chapter6.kicker">El Añejamiento</span>
@@ -176,11 +233,13 @@
         </div>
       </section>
 
-      <section id="catalogo" class="section premium-section">
+      <section id="las-vitolas" class="section premium-section">
+        <div id="catalogo" class="section-anchor" aria-hidden="true"></div>
         <div class="container">
           <header class="section__header section__header--centered">
-            <p class="section__eyebrow">Vitolas</p>
-            <h2>Showcase de la casa</h2>
+            <p class="section__eyebrow">Las Vitolas</p>
+            <span class="section__ornament" aria-hidden="true"></span>
+            <h2>La colección de la casa</h2>
             <p>
               Compra por caja o puro suelto. Totales firmados en checkout. Aquí conviven la casa, el
               origen y la firma sensorial de cada línea.
@@ -223,10 +282,13 @@
       </section>
     </main>
 
-    <footer class="site-footer">
+    <footer id="contacto" class="site-footer">
       <div class="container site-footer__inner">
-        <p>© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
-        <p>
+        <div>
+          <p class="site-footer__eyebrow">Contacto</p>
+          <p>© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
+        </div>
+        <p class="site-footer__contact">
           <a href="mailto:ventas@cazadordesuenocigars.com">ventas@cazadordesuenocigars.com</a>
         </p>
       </div>
@@ -251,7 +313,6 @@
       </footer>
     </aside>
 
-
     <script src="js/language-switcher.js" defer></script>
     <script src="js/commerce-urls.js"></script>
     <script src="js/config.js"></script>
@@ -272,4 +333,3 @@
     <script src="/js/ai-sommelier.js" defer></script>
   </body>
 </html>
-
