@@ -8,6 +8,14 @@
       content="Cazador de Sueños Cigar SRL — puros premium dominicanos. El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán."
     />
     <title>Cazador de Sueños Cigar SRL — Puros premium</title>
+    <script>
+      (function () {
+        var accepted = document.cookie.indexOf('cds_age_gate=accepted') !== -1;
+        if (!accepted) {
+          document.documentElement.classList.add('age-gate-pending');
+        }
+      })();
+    </script>
     <script src="js/language-detect-early.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,6 +29,41 @@
     <link rel="stylesheet" href="css/ai-sommelier.css" />
   </head>
   <body data-page="home">
+    <div class="age-gate" data-age-gate aria-hidden="true">
+      <div class="age-gate__backdrop" aria-hidden="true"></div>
+      <section
+        class="age-gate__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="age-gate-title"
+        aria-describedby="age-gate-description"
+      >
+        <p class="age-gate__eyebrow">Bienvenido</p>
+        <h2 id="age-gate-title">Acceso exclusivo para mayores de edad.</h2>
+        <p id="age-gate-description" class="age-gate__description">
+          Este sitio presenta productos de tabaco premium. Confirma que eres mayor de 18 años o
+          de la edad legal aplicable en tu jurisdicción para continuar.
+        </p>
+        <div class="age-gate__actions">
+          <button type="button" class="btn btn--primary" data-age-gate-accept>
+            Sí, soy mayor de edad
+          </button>
+          <button type="button" class="btn btn--secondary" data-age-gate-deny>No</button>
+        </div>
+        <p class="age-gate__note" data-age-gate-feedback>
+          La confirmación se guarda en una cookie para no volver a interrumpir tu visita.
+        </p>
+        <a
+          class="age-gate__exit"
+          data-age-gate-exit
+          href="https://www.google.com"
+          target="_self"
+          hidden
+        >
+          Salir del sitio
+        </a>
+      </section>
+    </div>
     <header class="site-header">
       <div class="container site-header__inner">
         <a href="index.html" class="logo cds-brand" aria-label="Cazador de Sueños Cigar SRL">
@@ -66,55 +109,24 @@
             <p class="hero__eyebrow">Casa tabacalera dominicana · legado familiar</p>
             <div class="hero-wordmark" aria-label="Cazador de Sueños">
               <p class="hero-wordmark__signature">Cigar SRL · Republica Dominicana</p>
-              <h1>Cazador de Sueños</h1>
-              <p class="hero-premium__subhead">
-                Una casa de tabaco nacida del legado familiar, la fermentación ancestral y la paciencia
-                convertida en arte.
-              </p>
+              <h1>
+                <span>Cazador de</span>
+                <span>Sueños</span>
+              </h1>
             </div>
+            <p class="hero-premium__subhead">
+              Una casa de tabaco nacida del legado familiar, la fermentación ancestral y la paciencia
+              convertida en arte.
+            </p>
             <div class="hero-premium__actions">
               <a href="#las-vitolas" class="btn btn--primary btn--lg">Ver vitolas</a>
-              <a href="#la-historia" class="btn btn--secondary btn--lg">Descubrir la historia</a>
+              <a href="#la-historia" class="btn btn--secondary btn--lg">Descubrir la casa</a>
             </div>
-            <dl class="hero-premium__facts" aria-label="Hechos destacados de la casa">
-              <div>
-                <dt>6</dt>
-                <dd>Vitolas de la casa</dd>
-              </div>
-              <div>
-                <dt>DHL</dt>
-                <dd>Envío internacional</dd>
-              </div>
-              <div>
-                <dt>Caja / Unidad</dt>
-                <dd>Compra flexible</dd>
-              </div>
-            </dl>
-          </div>
-          <div class="hero-premium__visual">
-            <figure class="hero-premium__media premium-media-frame">
-              <img src="images/ligero-007/caja-abierta.jpg" alt="Vitola artesanal de Cazador de Sueños presentada en su caja" />
-              <figcaption>Vitola de la casa · fotografia real del proyecto</figcaption>
-            </figure>
-            <div class="hero-premium__stack">
-              <figure class="hero-premium__detail premium-media-frame">
-                <img src="images/ligero-007/cigarro.jpg" alt="Cigarro Cazador de Sueños con acabado artesanal" />
-                <figcaption>Hecho a mano · presencia de coleccion</figcaption>
-              </figure>
-              <aside class="hero-premium__card">
-                <span class="hero-premium__card-kicker">La Casa</span>
-                <span class="hero-premium__card-divider" aria-hidden="true"></span>
-                <p class="hero-premium__card-title">Reserva dominicana</p>
-                <p>
-                  El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán. Cajas de 20,
-                  salvo El Rango (10). Envío DHL Express.
-                </p>
-                <p class="hero-premium__card-note">
-                  Contenido real, fotografias reales y una firma sensorial definida por origen,
-                  paciencia y oficio.
-                </p>
-              </aside>
-            </div>
+            <ul class="hero-premium__highlights" aria-label="Aspectos destacados de la casa">
+              <li>Vitolas artesanales dominicanas</li>
+              <li>Presentación sobria y de colección</li>
+              <li>Compra por caja o por unidad</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -330,6 +342,7 @@
     <script src="js/cart.js"></script>
     <script src="js/whatsapp-commerce.js"></script>
     <script src="js/cart-ui.js"></script>
+    <script src="js/age-gate.js"></script>
     <script src="js/app.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
