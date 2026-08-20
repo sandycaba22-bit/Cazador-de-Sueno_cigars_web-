@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=EB+Garamond:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/luxury-tokens.css" />
@@ -63,49 +63,58 @@
         <div class="hero__smoke hero__smoke--three" aria-hidden="true"></div>
         <div class="container hero__inner hero-premium__inner">
           <div class="hero-premium__content">
-            <div class="hero-premium__intro">
-              <p class="hero__eyebrow">Casa tabacalera dominicana · legado familiar</p>
-              <span class="hero-premium__divider" aria-hidden="true"></span>
-            </div>
+            <p class="hero__eyebrow">Casa tabacalera dominicana · legado familiar</p>
             <div class="hero-wordmark" aria-label="Cazador de Sueños">
-              <span class="hero-wordmark__ornament" aria-hidden="true"></span>
-              <h1>
-                <span>Cazador de</span>
-                <span>Sueños</span>
-              </h1>
               <p class="hero-wordmark__signature">Cigar SRL · Republica Dominicana</p>
+              <h1>Cazador de Sueños</h1>
+              <p class="hero-premium__subhead">
+                Una casa de tabaco nacida del legado familiar, la fermentación ancestral y la paciencia
+                convertida en arte.
+              </p>
             </div>
-            <p class="hero__lead">
-              Una casa de tabaco nacida del legado familiar, la fermentación ancestral y la paciencia
-              convertida en arte.
-            </p>
             <div class="hero-premium__actions">
               <a href="#las-vitolas" class="btn btn--primary btn--lg">Ver vitolas</a>
               <a href="#la-historia" class="btn btn--secondary btn--lg">Descubrir la historia</a>
             </div>
+            <dl class="hero-premium__facts" aria-label="Hechos destacados de la casa">
+              <div>
+                <dt>6</dt>
+                <dd>Vitolas de la casa</dd>
+              </div>
+              <div>
+                <dt>DHL</dt>
+                <dd>Envío internacional</dd>
+              </div>
+              <div>
+                <dt>Caja / Unidad</dt>
+                <dd>Compra flexible</dd>
+              </div>
+            </dl>
           </div>
-          <div class="hero-premium__rail">
+          <div class="hero-premium__visual">
             <figure class="hero-premium__media premium-media-frame">
               <img src="images/ligero-007/caja-abierta.jpg" alt="Vitola artesanal de Cazador de Sueños presentada en su caja" />
               <figcaption>Vitola de la casa · fotografia real del proyecto</figcaption>
             </figure>
-            <figure class="hero-premium__detail premium-media-frame">
-              <img src="images/ligero-007/cigarro.jpg" alt="Cigarro Cazador de Sueños con acabado artesanal" />
-              <figcaption>Hecho a mano · presencia de coleccion</figcaption>
-            </figure>
-            <aside class="hero-premium__card">
-              <span class="hero-premium__card-kicker">La Casa</span>
-              <span class="hero-premium__card-divider" aria-hidden="true"></span>
-              <p class="hero-premium__card-title">Reserva dominicana</p>
-              <p>
-                El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán. Cajas de 20,
-                salvo El Rango (10). Envío DHL Express.
-              </p>
-              <p class="hero-premium__card-note">
-                Contenido real, fotografias reales y una firma sensorial definida por origen,
-                paciencia y oficio.
-              </p>
-            </aside>
+            <div class="hero-premium__stack">
+              <figure class="hero-premium__detail premium-media-frame">
+                <img src="images/ligero-007/cigarro.jpg" alt="Cigarro Cazador de Sueños con acabado artesanal" />
+                <figcaption>Hecho a mano · presencia de coleccion</figcaption>
+              </figure>
+              <aside class="hero-premium__card">
+                <span class="hero-premium__card-kicker">La Casa</span>
+                <span class="hero-premium__card-divider" aria-hidden="true"></span>
+                <p class="hero-premium__card-title">Reserva dominicana</p>
+                <p>
+                  El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán. Cajas de 20,
+                  salvo El Rango (10). Envío DHL Express.
+                </p>
+                <p class="hero-premium__card-note">
+                  Contenido real, fotografias reales y una firma sensorial definida por origen,
+                  paciencia y oficio.
+                </p>
+              </aside>
+            </div>
           </div>
         </div>
       </section>
@@ -114,7 +123,6 @@
         <div class="container leaf-grid">
           <div class="leaf-copy">
             <p class="section__eyebrow">El Tabaco</p>
-            <span class="section__ornament" aria-hidden="true"></span>
             <h2>Origen, cultivo y carácter dominicano.</h2>
             <p data-i18n="maestria.intro">
               Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen,
@@ -138,7 +146,6 @@
         <div class="container story-grid">
           <div class="story-copy">
             <p class="section__eyebrow">La Historia</p>
-            <span class="section__ornament" aria-hidden="true"></span>
             <h2>Legado familiar, técnica ancestral y memoria viva.</h2>
             <p data-i18n="maestria.chapter7.text1">
               Todo comenzó en la región norte de la República Dominicana, donde un antepasado de
@@ -177,7 +184,6 @@
         <div class="container">
           <header class="section__header section__header--centered">
             <p class="section__eyebrow" data-i18n="maestria.label">El Proceso</p>
-            <span class="section__ornament" aria-hidden="true"></span>
             <h2 data-i18n="maestria.title">El Arte de la Paciencia</h2>
             <p data-i18n="maestria.intro">
               Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen,
@@ -238,7 +244,6 @@
         <div class="container">
           <header class="section__header section__header--centered">
             <p class="section__eyebrow">Las Vitolas</p>
-            <span class="section__ornament" aria-hidden="true"></span>
             <h2>La colección de la casa</h2>
             <p>
               Compra por caja o puro suelto. Totales firmados en checkout. Aquí conviven la casa, el
@@ -284,8 +289,9 @@
 
     <footer id="contacto" class="site-footer">
       <div class="container site-footer__inner">
-        <div>
+        <div class="site-footer__brand">
           <p class="site-footer__eyebrow">Contacto</p>
+          <p class="site-footer__title">Cazador de Sueños Cigar SRL</p>
           <p>© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
         </div>
         <p class="site-footer__contact">
