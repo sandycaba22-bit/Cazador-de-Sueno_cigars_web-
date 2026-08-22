@@ -69,6 +69,26 @@
   <link rel="stylesheet" href="../style.css">
 </head>
 <body class="vitola-page">
+  <script>
+    (function () {
+      if (document.cookie.indexOf('cds_age_gate=accepted') === -1) {
+        document.documentElement.classList.add('age-gate-pending');
+        document.body.classList.add('is-age-locked');
+      }
+    })();
+  </script>
+  <div id="age-gate" class="age-gate" role="dialog" aria-labelledby="age-gate-title" aria-modal="true" aria-hidden="false">
+    <div class="age-gate__splash">
+      <p class="age-gate__label">Verificación de Edad</p>
+      <h1 class="age-gate__title" id="age-gate-title">Cazador de Sueños Cigars</h1>
+      <p class="age-gate__text">Este sitio contiene información sobre productos de tabaco reservados para mayores de edad. Confirme que tiene 21 años o más para continuar.</p>
+      <div class="age-gate__actions">
+        <button type="button" class="btn btn--primary age-gate__enter" id="age-enter">Sí, tengo 21 años o más</button>
+        <button type="button" class="age-gate__exit" id="age-exit">No, salir del sitio</button>
+      </div>
+      <p class="age-gate__legal">Al ingresar, usted confirma cumplir con la edad legal en su jurisdicción.</p>
+    </div>
+  </div>
 
   <header class="site-header site-header--scrolled">
     <nav class="nav" aria-label="Navegación principal">
@@ -403,6 +423,7 @@
     </div>
   </footer>
 
+  <script src="../js/age-gate.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="../logo-render.js"></script>
   <script src="vitola-page.js"></script>

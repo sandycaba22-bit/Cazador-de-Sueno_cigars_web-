@@ -12,7 +12,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
 </head>
-<body class="vitola-page is-age-locked">
+<body class="vitola-page">
+  <script>
+    (function () {
+      if (document.cookie.indexOf('cds_age_gate=accepted') === -1) {
+        document.documentElement.classList.add('age-gate-pending');
+        document.body.classList.add('is-age-locked');
+      }
+    })();
+  </script>
 
   <div id="age-gate" class="age-gate" role="dialog" aria-labelledby="age-gate-title" aria-modal="true" aria-hidden="false">
     <div class="age-gate__splash">
@@ -26,9 +34,7 @@
       <p class="age-gate__legal">Al ingresar, usted confirma cumplir con la edad legal en su jurisdicción.</p>
     </div>
   </div>
-  <script src="../age-gate.js"></script>
-</div>
-  </div>
+  <script src="../js/age-gate.js"></script>
 
   <header class="site-header site-header--scrolled">
     <nav class="nav" aria-label="Navegación principal">

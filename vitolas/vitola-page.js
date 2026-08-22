@@ -112,7 +112,19 @@
     initCommerceFloats();
   }
 
-  if (localStorage.getItem('cds-age-verified') === '1') {
+  function isAgeVerified() {
+    if (document.cookie.indexOf('cds_age_gate=accepted') !== -1) {
+      return true;
+    }
+
+    try {
+      return localStorage.getItem('cds-age-verified') === '1';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  if (isAgeVerified()) {
     onReady();
   } else {
     window.addEventListener('cds:age-verified', onReady, { once: true });
