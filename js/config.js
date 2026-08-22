@@ -6,11 +6,11 @@ const APP_CONFIG = {
   currency: 'USD',
   locale: 'es',
 
-  /** Modo prueba: permite checkout sin Stripe/API en entornos estáticos (Nginx). */
+  /** Cobro simulado retirado: el checkout solo usa pasarelas reales del servidor. */
   sandbox: {
-    enabled: true,
-    allowMockCheckout: true,
-    label: 'Pago de prueba (sandbox — sin cargo real)',
+    enabled: false,
+    allowMockCheckout: false,
+    label: '',
     ordersStorageKey: 'cazador_sueno_orders',
   },
 

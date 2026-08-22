@@ -26,12 +26,6 @@
     <link rel="stylesheet" href="css/luxury-tokens.css" />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/checkout-onepage.css" />
-
-    <!--
-      La librería de la pasarela ya no se carga aquí. Se inyecta bajo demanda
-      cuando el comprador elige tarjeta, para no penalizar a quien paga por
-      transferencia (que es la mayoría) con una descarga de terceros.
-    -->
   </head>
 
   <body data-page="checkout">
@@ -39,8 +33,14 @@
       <header class="co__bar">
         <a class="co__back" href="index.html">← Seguir comprando</a>
         <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueños Cigar SRL">
-          <canvas class="logo-canvas cds-brand__mark" data-logo="images/logo.pdf" data-height="40"></canvas>
-          <span class="nav__logo-fallback">Cazador de Sueños</span>
+          <img
+            src="images/logo.png"
+            alt="Cazador de Sueños"
+            class="cds-brand__mark site-logo site-logo--compact"
+            width="339"
+            height="256"
+            decoding="async"
+          />
         </a>
         <div class="nav__tools">
           <div class="lang-selector">
@@ -61,42 +61,30 @@
 
       <section id="co-empty" class="co__empty" hidden>
         <h1>Tu carrito está vacío</h1>
-        <p>Añade una caja desde el catálogo antes de finalizar la compra.</p>
-        <div class="co__empty-actions">
-          <a class="co-btn co-btn--gold" href="index.html#catalogo">Ver catálogo</a>
-          <a class="co-btn co-btn--ghost" href="vitolas/el-rango.html">Explorar vitolas</a>
-        </div>
+        <a class="co-btn co-btn--gold" href="index.html#catalogo">Ver catálogo</a>
       </section>
 
       <div id="co-layout" class="co__layout" hidden>
-        <!-- ------------------------------------------------ formulario -->
-        <form id="co-form" class="co__form" novalidate autocomplete="on">
-          <h1 class="co__title">Finalizar compra</h1>
-          <p class="co__lede">Envío DHL Express desde República Dominicana. Un solo paso, con totales firmados por la casa.</p>
+        <form id="co-form" class="co__form co__form--compact" novalidate autocomplete="on">
+          <h1 class="co__title">Checkout</h1>
 
-          <section class="co-block">
-            <h2 class="co-block__title"><span class="co-step">1</span> Contacto</h2>
+          <section class="co-block co-block--compact">
+            <h2 class="co-block__title">Datos</h2>
             <div class="co-grid">
               <label class="co-field co-field--wide">
-                <span>Nombre completo</span>
+                <span>Nombre</span>
                 <input type="text" name="fullName" autocomplete="name" required />
               </label>
               <label class="co-field">
-                <span>Correo electrónico</span>
+                <span>Correo</span>
                 <input type="email" name="email" autocomplete="email" inputmode="email" required />
               </label>
               <label class="co-field">
-                <span>Teléfono <small>para la entrega DHL</small></span>
+                <span>Teléfono</span>
                 <input type="tel" name="phone" autocomplete="tel" inputmode="tel" required />
               </label>
-            </div>
-          </section>
-
-          <section class="co-block">
-            <h2 class="co-block__title"><span class="co-step">2</span> Entrega</h2>
-            <div class="co-grid">
               <label class="co-field">
-                <span>País de destino</span>
+                <span>País</span>
                 <select name="country" required></select>
               </label>
               <label class="co-field">
@@ -108,48 +96,39 @@
                 <input type="text" name="address" autocomplete="street-address" required />
               </label>
             </div>
-
-            <!-- Campos que la mayoría de destinos internacionales no necesitan:
-                 fuera del camino principal, disponibles con un clic. -->
             <details class="co-optional">
-              <summary>Añadir estado, código postal o notas de entrega</summary>
+              <summary>Más (estado, C.P., notas)</summary>
               <div class="co-grid">
                 <label class="co-field">
-                  <span>Estado o provincia</span>
+                  <span>Estado</span>
                   <input type="text" name="state" autocomplete="address-level1" />
                 </label>
                 <label class="co-field">
-                  <span>Código postal</span>
+                  <span>C.P.</span>
                   <input type="text" name="postalCode" autocomplete="postal-code" />
                 </label>
                 <label class="co-field co-field--wide">
-                  <span>Notas para el repartidor</span>
+                  <span>Notas</span>
                   <textarea name="notes" rows="2"></textarea>
                 </label>
               </div>
             </details>
           </section>
 
-          <section class="co-block">
-            <h2 class="co-block__title"><span class="co-step">3</span> Pago</h2>
-
-            <!-- Los métodos los dicta el servidor: la web no puede ofrecer una
-                 pasarela que el backend no sea capaz de procesar. -->
+          <section class="co-block co-block--compact">
+            <h2 class="co-block__title">Pago</h2>
             <div id="co-methods" class="co-methods" role="radiogroup" aria-label="Método de pago">
-              <p class="co-methods__loading">Cargando métodos de pago…</p>
+              <p class="co-methods__loading">Cargando…</p>
             </div>
-
             <div id="co-method-detail" class="co-method-detail" hidden></div>
           </section>
 
-          <section class="co-block co-block--legal">
-            <label class="co-check">
-              <input type="checkbox" name="acceptFinalSale" required />
-              <span id="co-policy-sale"></span>
-            </label>
-            <label class="co-check">
-              <input type="checkbox" name="acceptCustoms" required />
-              <span id="co-policy-customs"></span>
+          <section class="co-block co-block--legal co-block--compact">
+            <label class="co-check co-check--single">
+              <input type="checkbox" name="acceptTerms" />
+              <span id="co-policy-terms">
+                Acepto venta final (sin devoluciones) y la responsabilidad aduanera en destino.
+              </span>
             </label>
           </section>
 
@@ -157,28 +136,20 @@
             <button type="submit" id="co-submit" class="co-btn co-btn--gold co-btn--block" disabled>
               Confirmar pedido
             </button>
-            <p class="co-submit__note">
-              Venta final. Al confirmar aceptas que no se admiten devoluciones ni reembolsos.
-            </p>
-            <button type="button" id="co-whatsapp" class="co-btn co-btn--ghost co-btn--block">
-              Prefiero coordinar por WhatsApp
-            </button>
           </div>
         </form>
 
-        <!-- --------------------------------------------------- resumen -->
         <aside class="co__summary" aria-label="Resumen del pedido">
           <div class="co-summary-card">
-            <h2>Tu pedido</h2>
+            <h2>Pedido</h2>
             <div id="co-items" class="co-items"></div>
-
             <dl class="co-totals">
               <div>
                 <dt>Subtotal</dt>
                 <dd id="co-subtotal">—</dd>
               </div>
               <div>
-                <dt>Envío DHL <span id="co-zone" class="co-totals__zone"></span></dt>
+                <dt>Envío <span id="co-zone" class="co-totals__zone"></span></dt>
                 <dd id="co-shipping">—</dd>
               </div>
               <div class="co-totals__grand">
@@ -186,32 +157,17 @@
                 <dd id="co-total">—</dd>
               </div>
             </dl>
-
             <p id="co-boxes-warning" class="co-warn" role="alert" hidden></p>
-
             <ul class="co-meta">
               <li><span>Puros</span><strong id="co-units">0</strong></li>
               <li><span>Cajas</span><strong id="co-boxes">0</strong></li>
               <li><span>Entrega</span><strong id="co-eta">—</strong></li>
-            </ul>
-
-            <ul class="co-trust">
-              <li id="co-trust-1"></li>
-              <li id="co-trust-2"></li>
-              <li id="co-trust-3"></li>
             </ul>
           </div>
         </aside>
       </div>
     </main>
 
-    <!--
-      Ocho scripts diferidos en lugar de catorce bloqueantes. Ninguno retrasa el
-      primer pintado, y bank.js / orders.js / cart-ui.js desaparecieron: los datos
-      bancarios y el registro del pedido ahora los provee el servidor.
-    -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
-    <script src="logo-render.js" defer></script>
     <script src="js/page-visibility.js" defer></script>
     <script src="js/language-switcher.js" defer></script>
     <script src="js/config.js" defer></script>
@@ -222,6 +178,5 @@
     <script src="js/cart-legacy-bridge.js" defer></script>
     <script src="js/cart.js" defer></script>
     <script src="js/checkout.js" defer></script>
-    <script src="js/checkout-assistant.js" defer></script>
   </body>
 </html>

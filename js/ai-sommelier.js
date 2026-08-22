@@ -5,6 +5,9 @@
 (function () {
   'use strict';
 
+  // En la portada el sommelier FAB no se monta: conversión solo vía Carrito del header.
+  if (document.body && document.body.getAttribute('data-page') === 'home') return;
+
   const API_URL = '/api/ai-sommelier';
   const STORAGE_KEY = 'cds-sommelier-open';
   const MAX_TURNS = 16;

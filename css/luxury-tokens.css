@@ -266,21 +266,54 @@ html[dir='rtl'] .lang-selector__dropdown {
   left: 0;
 }
 
-/* —— Marca en cabeceras de comercio —— */
+/* —— Logo oficial (PNG blanco sobre transparencia) —— */
+.site-logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: clamp(2.25rem, 5vw, 2.75rem);
+  object-fit: contain;
+  background: transparent !important;
+  border: 0;
+  box-shadow: none;
+  filter: none;
+  image-rendering: auto;
+}
+
+@media (min-width: 769px) {
+  .site-logo {
+    max-height: clamp(3rem, 4vw, 4rem);
+  }
+}
+
+.site-logo--hero {
+  max-height: clamp(3rem, 5vw, 3.5rem);
+}
+
+.site-logo--compact {
+  max-height: 2.5rem;
+}
+
 .cds-brand {
   display: inline-flex;
   align-items: center;
   gap: 0.7rem;
   color: var(--cds-cream);
   text-decoration: none;
+  background: transparent !important;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 .cds-brand:hover {
-  color: var(--cds-gold-light);
+  color: var(--cds-cream);
+  opacity: 0.9;
 }
 
 .cds-brand__mark {
   display: block;
+  background: transparent !important;
 }
 
 .logo-canvas {

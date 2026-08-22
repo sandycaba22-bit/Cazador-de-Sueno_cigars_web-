@@ -86,6 +86,8 @@ function getUnifiedCartCount() {
 }
 
 function initFloatingCommerceWidgets() {
+  // La portada solo usa el Carrito del header; sin FABs de WhatsApp/CS/carrito flotante.
+  if (document.body && document.body.getAttribute('data-page') === 'home') return;
   if (!APP_CONFIG.whatsapp?.enabled) return;
 
   if (!document.getElementById('cds-float-whatsapp')) {

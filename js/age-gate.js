@@ -61,11 +61,6 @@
   }
 
   function handleExit() {
-    if (window.history.length > 1) {
-      window.history.back();
-      return;
-    }
-
     window.location.replace('https://www.google.com');
   }
 

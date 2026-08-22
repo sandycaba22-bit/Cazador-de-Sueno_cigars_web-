@@ -9,7 +9,7 @@ const SALES_POLICY = {
   summary:
     'Todos los pedidos de Cazador Sueño son venta final. Una vez confirmado y pagado el pedido, no se admiten devoluciones, cambios ni reembolsos bajo ninguna circunstancia.',
   checkoutText:
-    'Entiendo y acepto que, una vez realizado y pagado mi pedido, no se admiten devoluciones ni reembolsos bajo ninguna circunstancia. Esta es una venta final.',
+    'Acepto venta final (sin devoluciones) y la responsabilidad aduanera en destino.',
   legalNotice:
     'Al confirmar su compra, usted renuncia expresamente a cualquier derecho de desistimiento, devolución o contracargo una vez procesado el pago, salvo lo que exija de forma imperativa la legislación local aplicable al consumidor.',
   filterBlockedReason:

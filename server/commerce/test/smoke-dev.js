@@ -59,7 +59,7 @@ async function main() {
     console.log(`   ${ok ? 'OK  ' : 'FALLA'}  ${String(code).padEnd(6)} ${path}`);
   }
 
-  console.log('\n  Compra completa (sandbox)');
+  console.log('\n  Compra completa (transferencia bancaria)');
   const quote = await fetch(`${BASE}/api/commerce/quote`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -80,7 +80,7 @@ async function main() {
     headers: { 'Content-Type': 'application/json', 'Idempotency-Key': `smoke-${Date.now()}` },
     body: JSON.stringify({
       quoteToken: quote.quoteToken,
-      paymentMethod: 'sandbox',
+      paymentMethod: 'bank_transfer',
       paymentPayload: {},
       customer: { fullName: 'Prueba Humo', email: 'humo@ejemplo.com', phone: '8095551234' },
       shipping: { address: 'Calle 1', city: 'Miami', country: 'US', state: 'FL', postalCode: '33101' },
@@ -88,11 +88,11 @@ async function main() {
     }),
   }).then((r) => r.json());
 
-  if (order.paymentStatus !== 'paid') {
-    console.log('   FALLA  el pedido no se confirmó:', JSON.stringify(order));
+  if (order.paymentStatus !== 'pending_transfer') {
+    console.log('   FALLA  el pedido no quedó pendiente de transferencia:', JSON.stringify(order));
     fallos += 1;
   } else {
-    console.log(`   OK     pedido ${order.reference} confirmado`);
+    console.log(`   OK     pedido ${order.reference} reservado (transferencia)`);
 
     const consulta = await status(
       `/api/commerce/orders/${order.reference}?t=${encodeURIComponent(order.accessToken)}`

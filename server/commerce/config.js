@@ -109,11 +109,12 @@ const config = {
   },
 
   /**
-   * Modo sandbox. Debe estar apagado en producción: es lo que provocaba que un
-   * fallo de la API se registrara como "pedido confirmado" en el navegador.
+   * Sandbox de cobro simulado: desactivado de forma permanente. El código del
+   * adaptador puede existir para pruebas unitarias aisladas, pero el registro
+   * de pasarelas ya no lo monta nunca.
    */
   sandbox: {
-    enabled: bool(process.env.COMMERCE_SANDBOX_ENABLED, !IS_PRODUCTION),
+    enabled: false,
   },
 
   cardnet: {
@@ -136,14 +137,30 @@ const config = {
 
   /**
    * PayPal Checkout. El Client ID es público (viaja al SDK del navegador).
-   * El secret jamás sale de este proceso. Sin ambos, el checkout muestra el
-   * botón estático pero no cobra.
+   * El secret jamás sale de este proceso.
+   * Con Client ID + Secret se activa solo (salvo PAYPAL_ENABLED=false).
+   * En producción el modo por defecto es live.
    */
   paypal: {
-    enabled: bool(process.env.PAYPAL_ENABLED, false),
-    clientId: process.env.PAYPAL_CLIENT_ID || '',
-    clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
-    mode: (process.env.PAYPAL_MODE || 'sandbox').toLowerCase() === 'live' ? 'live' : 'sandbox',
+    enabled: (() => {
+      const hasKeys = Boolean(
+        String(process.env.PAYPAL_CLIENT_ID || '').trim() &&
+          String(process.env.PAYPAL_CLIENT_SECRET || '').trim()
+      );
+      // Si hay claves, preferimos activar. Solo un "false" explícito lo apaga.
+      if (Object.prototype.hasOwnProperty.call(process.env, 'PAYPAL_ENABLED')) {
+        const raw = String(process.env.PAYPAL_ENABLED || '').trim();
+        if (/^(0|false|no|off)$/i.test(raw)) return false;
+        if (/^(1|true|yes|on)$/i.test(raw)) return true;
+      }
+      return hasKeys;
+    })(),
+    clientId: String(process.env.PAYPAL_CLIENT_ID || '').trim(),
+    clientSecret: String(process.env.PAYPAL_CLIENT_SECRET || '').trim(),
+    mode:
+      (process.env.PAYPAL_MODE || (IS_PRODUCTION ? 'live' : 'sandbox')).toLowerCase() === 'live'
+        ? 'live'
+        : 'sandbox',
     currency: (process.env.PAYPAL_CURRENCY || 'USD').toUpperCase(),
     timeoutMs: int(process.env.PAYPAL_TIMEOUT_MS, 30_000),
   },
@@ -167,7 +184,7 @@ function collectConfigWarnings(cfg = config) {
     );
   }
   if (cfg.isProduction && cfg.sandbox.enabled) {
-    warnings.push('COMMERCE_SANDBOX_ENABLED está activo en producción. Desactívalo.');
+    warnings.push('COMMERCE_SANDBOX_ENABLED está activo; el registro ya no monta sandbox, desactívalo de todos modos.');
   }
   if (cfg.cardnet.enabled) {
     if (!cfg.cardnet.publicAccountKey) warnings.push('CARDNET_PUBLIC_ACCOUNT_KEY vacía.');
@@ -230,7 +247,9 @@ function collectProductionBlocks(cfg = config) {
     blocks.push('COMMERCE_HOST no es loopback: el servicio quedaría expuesto sin pasar por Nginx.');
   }
   if (cfg.sandbox.enabled) {
-    blocks.push('COMMERCE_SANDBOX_ENABLED está activo en producción. Desactívalo.');
+    blocks.push(
+      'COMMERCE_SANDBOX_ENABLED está activo. El cobro simulado está retirado del checkout; desactívalo.'
+    );
   }
   if (!cfg.quoteSecretProvided) {
     blocks.push(

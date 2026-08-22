@@ -231,9 +231,9 @@ Edita las claves (el instalador no pisa un fichero que ya exista):
 ```bash
 sudo nano /etc/cazador-de-suenos/commerce.env
 # Obligatorio: COMMERCE_QUOTE_SECRET (el instalador la genera si el fichero es nuevo)
-# Sandbox: COMMERCE_SANDBOX_ENABLED=false
+# Sandbox: COMMERCE_SANDBOX_ENABLED=false (retirado del checkout; no ofrecerlo)
 # CardNET: CARDNET_ENABLED=true + PUBLIC/PRIVATE_ACCOUNT_KEY + CARDNET_USD_DOP_RATE si liquidas en DOP
-# PayPal:  PAYPAL_ENABLED=true + PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET cuando las tengas
+# PayPal:  PAYPAL_ENABLED=true + PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET + PAYPAL_MODE=live
 sudo systemctl restart cds-commerce
 sudo journalctl -u cds-commerce -f
 ```

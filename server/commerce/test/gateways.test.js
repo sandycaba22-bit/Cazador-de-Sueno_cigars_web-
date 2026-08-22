@@ -3,7 +3,7 @@
  *
  * El checkout no habla con CardNET, PayPal ni el banco a pelo: pide un id y
  * trabaja contra gateways/base.js. Estas pruebas clavan ese contrato y el
- * modo producción: sandbox apagado, precios del servidor, ninguna clave privada
+ * modo producción: sin sandbox, precios del servidor, ninguna clave privada
  * en la descripción pública.
  */
 
@@ -45,20 +45,42 @@ function productionLike(overrides = {}) {
   };
 }
 
-test('el registro expone exactamente las cuatro pasarelas del contrato', () => {
+test('el registro expone exactamente las tres pasarelas del contrato (sin sandbox)', () => {
   const registry = createGatewayRegistry(productionLike(), APP_CONFIG);
   const ids = registry.list().map((g) => g.id).sort();
-  assert.deepEqual(ids, ['bank_transfer', 'cardnet', 'paypal', 'sandbox']);
+  assert.deepEqual(ids, ['bank_transfer', 'cardnet', 'paypal']);
 });
 
-test('en producción el checkout no ofrece sandbox ni CardNET sin claves', () => {
+test('en producción el checkout ofrece transferencia y PayPal (aunque aún no cobre)', () => {
   const registry = createGatewayRegistry(productionLike(), APP_CONFIG);
   const ids = registry.describeAvailable().map((m) => m.id);
 
   assert.ok(ids.includes('bank_transfer'));
-  assert.ok(ids.includes('paypal'), 'PayPal se pinta aunque aún no cobre');
+  assert.ok(ids.includes('paypal'), 'PayPal se lista siempre; ready depende de credenciales');
   assert.equal(ids.includes('sandbox'), false);
   assert.equal(ids.includes('cardnet'), false);
+  assert.equal(registry.describeAvailable().find((m) => m.id === 'paypal').ready, false);
+});
+
+test('PayPal aparece listo cuando hay Client ID + Secret y está habilitado', () => {
+  const registry = createGatewayRegistry(
+    productionLike({
+      paypal: {
+        enabled: true,
+        clientId: 'PAYPAL-LIVE-ID',
+        clientSecret: 'PAYPAL-LIVE-SECRET',
+        mode: 'live',
+        currency: 'USD',
+      },
+    }),
+    APP_CONFIG
+  );
+  const paypal = registry.describeAvailable().find((m) => m.id === 'paypal');
+  assert.ok(paypal);
+  assert.equal(paypal.ready, true);
+  assert.equal(paypal.client.mode, 'live');
+  assert.match(paypal.client.scriptUrl, /paypal\.com\/sdk\/js/);
+  assert.doesNotMatch(JSON.stringify(paypal), /PAYPAL-LIVE-SECRET/);
 });
 
 test('CardNET aparece solo cuando las dos claves están y el interruptor está on', () => {
@@ -90,7 +112,7 @@ test('cobrar con una pasarela no configurada se rechaza antes de tocar la red', 
   const registry = createGatewayRegistry(productionLike(), APP_CONFIG);
   assert.throws(
     () => registry.get('sandbox'),
-    (error) => error.code === ERROR_CODES.GATEWAY_NOT_CONFIGURED
+    (error) => error.code === ERROR_CODES.GATEWAY_UNKNOWN
   );
   assert.throws(
     () => registry.get('cardnet'),
@@ -103,10 +125,7 @@ test('cobrar con una pasarela no configurada se rechaza antes de tocar la red', 
 });
 
 test('ninguna pasarela declara que necesita datos de tarjeta en este servidor', () => {
-  const registry = createGatewayRegistry(
-    productionLike({ sandbox: { enabled: true } }),
-    APP_CONFIG
-  );
+  const registry = createGatewayRegistry(productionLike(), APP_CONFIG);
   for (const gateway of registry.list()) {
     assert.equal(
       gateway.requiresCardData,

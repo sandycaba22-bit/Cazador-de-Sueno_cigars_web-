@@ -39,8 +39,14 @@
   <header class="site-header site-header--scrolled">
     <nav class="nav" aria-label="Navegación principal">
       <a href="../index.html" class="nav__logo" aria-label="Cazador de Sueños Cigars">
-        <canvas class="logo-canvas nav__logo-img logo-canvas--ready" data-logo="../images/logo.pdf" data-height="44"></canvas>
-        <span class="nav__logo-fallback">Cazador de Sueños</span>
+        <img
+          src="../images/logo.png"
+          alt="Cazador de Sueños"
+          class="nav__logo-img site-logo"
+          width="339"
+          height="256"
+          decoding="async"
+        />
       </a>
       <ul class="nav__links">
         <li><a href="../index.html#legado">El Legado</a></li>
@@ -164,10 +170,7 @@
       <p class="footer__copy">&copy; 2026 Cazador de Sueños Cigars. Todos los derechos reservados.</p>
     </div>
   </footer>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="../logo-render.js"></script>
-  <script src="vitola-page.js"></script>
+<script src="vitola-page.js"></script>
   <script src="../nav.js"></script>
 </body>
 </html>

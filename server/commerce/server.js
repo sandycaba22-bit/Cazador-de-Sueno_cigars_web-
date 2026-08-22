@@ -43,7 +43,6 @@ server.listen(config.port, config.host, () => {
     corsOrigins: config.corsOrigins,
     cardnet: config.cardnet.enabled ? 'habilitada' : 'deshabilitada',
     paypal: config.paypal.enabled ? config.paypal.mode : 'inactivo',
-    sandbox: config.sandbox.enabled ? 'activo' : 'inactivo',
   });
 });
 

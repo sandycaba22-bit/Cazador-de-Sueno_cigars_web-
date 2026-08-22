@@ -27,7 +27,7 @@ function registroConPasarela(gateway) {
     label: 'Pasarela de prueba',
     isConfigured: () => true,
     validatePayload() {},
-    describe: () => ({ id: gateway.id, label: 'Pasarela de prueba', available: true, client: null }),
+    describe: () => ({ id: gateway.id, label: 'Pasarela de prueba', available: true, ready: true, client: null }),
     ...gateway,
   };
   return {
@@ -44,6 +44,23 @@ function registroConPasarela(gateway) {
   };
 }
 
+/** Pasarela de prueba que aprueba el cobro (sustituye al sandbox retirado). */
+function pasarelaAprobada(id = 'test_pay') {
+  return registroConPasarela({
+    id,
+    async charge(ctx) {
+      return {
+        status: 'paid',
+        gateway: id,
+        transactionId: `test_${ctx.idempotencyKey.slice(0, 12)}`,
+        authorizationCode: '000000',
+        customerMessage: 'Pago de prueba aprobado.',
+        diagnostics: { simulated: true },
+      };
+    },
+  });
+}
+
 function testConfig(overrides = {}) {
   return {
     nodeEnv: 'test',
@@ -57,7 +74,7 @@ function testConfig(overrides = {}) {
     quoteTtlSeconds: 900,
     idempotencyTtlSeconds: 3600,
     rateLimit: { windowMs: 60_000, maxQuotes: 500, maxPayments: 500 },
-    sandbox: { enabled: true },
+    sandbox: { enabled: false },
     cardnet: {
       enabled: false,
       baseUrl: 'https://example.invalid',
@@ -73,7 +90,7 @@ function testConfig(overrides = {}) {
       enabled: false,
       clientId: '',
       clientSecret: '',
-      mode: 'sandbox',
+      mode: 'live',
       currency: 'USD',
       timeoutMs: 5000,
     },
@@ -158,9 +175,11 @@ test('el endpoint de salud informa qué pasarelas están configuradas', async ()
     const sandbox = body.gateways.find((g) => g.id === 'sandbox');
     const cardnet = body.gateways.find((g) => g.id === 'cardnet');
     const paypal = body.gateways.find((g) => g.id === 'paypal');
-    assert.equal(sandbox.configured, true);
+    const bank = body.gateways.find((g) => g.id === 'bank_transfer');
+    assert.equal(sandbox, undefined, 'sandbox no debe existir en el registro');
     assert.equal(cardnet.configured, false);
     assert.equal(paypal.configured, false);
+    assert.equal(bank.configured, true);
   } finally {
     await api.close();
   }
@@ -207,9 +226,11 @@ test('el checkout solo ve los métodos que el servidor puede procesar', async ()
     const ids = body.paymentMethods.map((m) => m.id);
 
     assert.ok(ids.includes('bank_transfer'));
-    assert.ok(ids.includes('sandbox'));
-    assert.ok(ids.includes('paypal'), 'PayPal se pinta aunque aún no cobre');
+    assert.equal(ids.includes('sandbox'), false);
+    assert.ok(ids.includes('paypal'), 'PayPal aparece aunque aún no cobre');
     assert.equal(ids.includes('cardnet'), false, 'CardNET está deshabilitada en esta config');
+    const paypal = body.paymentMethods.find((m) => m.id === 'paypal');
+    assert.equal(paypal.ready, false);
   } finally {
     await api.close();
   }
@@ -235,14 +256,14 @@ test('la cotización devuelve el total calculado por el servidor', async () => {
 
 // -------------------------------------------------------------------- pago
 
-test('un pedido completo con sandbox se confirma y se puede consultar', async () => {
-  const api = await startServer();
+test('un pedido completo se confirma y se puede consultar', async () => {
+  const api = await startServer(testConfig(), { gateways: pasarelaAprobada() });
   try {
     const { quoteToken, quote } = await cotizar(api);
 
     const created = await api.request('POST', '/api/commerce/orders', {
       headers: { 'Idempotency-Key': 'clave-de-prueba-0001' },
-      body: { quoteToken, paymentMethod: 'sandbox', paymentPayload: {}, ...datosCliente() },
+      body: { quoteToken, paymentMethod: 'test_pay', paymentPayload: {}, ...datosCliente() },
     });
 
     assert.equal(created.status, 201, created.text);
@@ -264,7 +285,7 @@ test('un pedido completo con sandbox se confirma y se puede consultar', async ()
 });
 
 test('ATAQUE: manipular el total del carrito no cambia lo que se cobra', async () => {
-  const api = await startServer();
+  const api = await startServer(testConfig(), { gateways: pasarelaAprobada() });
   try {
     const { quoteToken, quote } = await cotizar(api);
 
@@ -272,7 +293,7 @@ test('ATAQUE: manipular el total del carrito no cambia lo que se cobra', async (
     const created = await api.request('POST', '/api/commerce/orders', {
       body: {
         quoteToken,
-        paymentMethod: 'sandbox',
+        paymentMethod: 'test_pay',
         paymentPayload: {},
         total: 1,
         totalCents: 1,
@@ -296,7 +317,7 @@ test('ATAQUE: manipular el total del carrito no cambia lo que se cobra', async (
 });
 
 test('ATAQUE: una cotización con la firma alterada se rechaza', async () => {
-  const api = await startServer();
+  const api = await startServer(testConfig(), { gateways: pasarelaAprobada() });
   try {
     const { quoteToken } = await cotizar(api);
 
@@ -306,7 +327,7 @@ test('ATAQUE: una cotización con la firma alterada se rechaza', async () => {
     const forjada = `${Buffer.from(JSON.stringify(decoded)).toString('base64url')}.${signature}`;
 
     const response = await api.request('POST', '/api/commerce/orders', {
-      body: { quoteToken: forjada, paymentMethod: 'sandbox', ...datosCliente() },
+      body: { quoteToken: forjada, paymentMethod: 'test_pay', ...datosCliente() },
     });
 
     assert.equal(response.status, 400);
@@ -317,11 +338,11 @@ test('ATAQUE: una cotización con la firma alterada se rechaza', async () => {
 });
 
 test('IDEMPOTENCIA: dos envíos con la misma clave producen un solo pedido', async () => {
-  const api = await startServer();
+  const api = await startServer(testConfig(), { gateways: pasarelaAprobada() });
   try {
     const { quoteToken } = await cotizar(api);
     const payload = {
-      body: { quoteToken, paymentMethod: 'sandbox', paymentPayload: {}, ...datosCliente() },
+      body: { quoteToken, paymentMethod: 'test_pay', paymentPayload: {}, ...datosCliente() },
       headers: { 'Idempotency-Key': 'doble-clic-del-cliente' },
     };
 
@@ -342,7 +363,7 @@ test('IDEMPOTENCIA: dos envíos con la misma clave producen un solo pedido', asy
 test('un pago rechazado deja el pedido como fallido, nunca como confirmado', async () => {
   const api = await startServer(testConfig(), {
     gateways: registroConPasarela({
-      id: 'sandbox',
+      id: 'test_pay',
       async charge() {
         throw new CheckoutError(ERROR_CODES.CARD_DECLINED, 'Fondos insuficientes.', {
           httpStatus: 402,
@@ -354,7 +375,7 @@ test('un pago rechazado deja el pedido como fallido, nunca como confirmado', asy
     const { quoteToken } = await cotizar(api);
 
     const response = await api.request('POST', '/api/commerce/orders', {
-      body: { quoteToken, paymentMethod: 'sandbox', ...datosCliente() },
+      body: { quoteToken, paymentMethod: 'test_pay', ...datosCliente() },
     });
 
     assert.equal(response.status, 402);
@@ -377,7 +398,7 @@ test('un pago rechazado deja el pedido como fallido, nunca como confirmado', asy
 test('si la pasarela se cae, el fallo no se disfraza de pago aprobado', async () => {
   const api = await startServer(testConfig(), {
     gateways: registroConPasarela({
-      id: 'sandbox',
+      id: 'test_pay',
       async charge() {
         throw new Error('ECONNRESET contra el procesador');
       },
@@ -387,7 +408,7 @@ test('si la pasarela se cae, el fallo no se disfraza de pago aprobado', async ()
     const { quoteToken } = await cotizar(api);
 
     const response = await api.request('POST', '/api/commerce/orders', {
-      body: { quoteToken, paymentMethod: 'sandbox', ...datosCliente() },
+      body: { quoteToken, paymentMethod: 'test_pay', ...datosCliente() },
     });
 
     assert.equal(response.status, 500);
@@ -433,12 +454,12 @@ test('no se puede pagar con una pasarela deshabilitada', async () => {
   }
 });
 
-test('PayPal se ve en el checkout pero no cobra hasta que existan las credenciales', async () => {
+test('PayPal aparece en el checkout pero no cobra sin credenciales', async () => {
   const api = await startServer();
   try {
     const config = await api.request('GET', '/api/commerce/config');
     const paypal = config.body.paymentMethods.find((m) => m.id === 'paypal');
-    assert.ok(paypal, 'el botón debe existir ya');
+    assert.ok(paypal);
     assert.equal(paypal.ready, false);
 
     const { quoteToken } = await cotizar(api);
@@ -464,14 +485,14 @@ test('PayPal se ve en el checkout pero no cobra hasta que existan las credencial
 });
 
 test('cambiar el país después de cotizar invalida el pedido', async () => {
-  const api = await startServer();
+  const api = await startServer(testConfig(), { gateways: pasarelaAprobada() });
   try {
     const { quoteToken } = await cotizar(api, CARRITO, 'US');
 
     const response = await api.request('POST', '/api/commerce/orders', {
       body: {
         quoteToken,
-        paymentMethod: 'sandbox',
+        paymentMethod: 'test_pay',
         ...datosCliente({
           shipping: { address: 'Calle 1', city: 'Tokio', state: '', postalCode: '', country: 'JP' },
         }),
@@ -493,13 +514,13 @@ test('sin aceptar las políticas no hay pedido', async () => {
     const response = await api.request('POST', '/api/commerce/orders', {
       body: {
         quoteToken,
-        paymentMethod: 'sandbox',
+        paymentMethod: 'bank_transfer',
         ...datosCliente({ acceptances: { finalSale: true, customs: false } }),
       },
     });
 
     assert.equal(response.status, 400);
-    assert.match(response.body.error, /aduanera/i);
+    assert.match(response.body.error, /condiciones de venta/i);
   } finally {
     await api.close();
   }
@@ -508,11 +529,11 @@ test('sin aceptar las políticas no hay pedido', async () => {
 // -------------------------------------------------------------- seguridad
 
 test('un pedido no se puede consultar sin el token de acceso', async () => {
-  const api = await startServer();
+  const api = await startServer(testConfig(), { gateways: pasarelaAprobada() });
   try {
     const { quoteToken } = await cotizar(api);
     const created = await api.request('POST', '/api/commerce/orders', {
-      body: { quoteToken, paymentMethod: 'sandbox', ...datosCliente() },
+      body: { quoteToken, paymentMethod: 'test_pay', ...datosCliente() },
     });
 
     const sinToken = await api.request('GET', `/api/commerce/orders/${created.body.reference}`);
@@ -641,7 +662,7 @@ test('el límite de intentos de pago protege contra pruebas de tarjetas robadas'
   );
   try {
     const { quoteToken } = await cotizar(api);
-    const cuerpo = { quoteToken, paymentMethod: 'sandbox', ...datosCliente() };
+    const cuerpo = { quoteToken, paymentMethod: 'bank_transfer', ...datosCliente() };
 
     const codigos = [];
     for (let i = 0; i < 5; i += 1) {

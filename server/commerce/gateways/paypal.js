@@ -9,9 +9,11 @@
  * captura esa orden con la Orders API v2. Jamás viaja un PAN, CVV ni cuenta
  * bancaria por nuestro código, lo que nos mantiene en SAQ A-EP.
  *
- * Activación: basta con definir PAYPAL_CLIENT_ID y PAYPAL_CLIENT_SECRET (y
- * PAYPAL_ENABLED=true). Sin esas credenciales el checkout sigue mostrando el
- * botón estático, pero no se puede cobrar.
+ * Activación: con PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET (y
+ * PAYPAL_ENABLED distinto de false) el checkout monta los Smart Payment
+ * Buttons oficiales. Sin credenciales, PayPal no aparece como método.
+ *
+ * En producción el modo por defecto es `live` (USD reales).
  *
  * Documentación: https://developer.paypal.com/docs/checkout/standard/integrate/
  */
@@ -107,24 +109,26 @@ function createPaypalGateway(paypalConfig = {}) {
     isConfigured,
 
     /**
-     * Siempre available: el checkout pinta el botón aunque las credenciales
-     * aún no estén. `ready` es lo que decide si el SDK oficial sustituye al
-     * botón estático.
+     * PayPal siempre aparece en el checkout. `ready` indica si el servidor puede
+     * cobrar (Client ID + Secret). El Client ID público se expone en cuanto existe
+     * para que el SDK monte el botón real de inmediato.
      */
     describe() {
       const ready = isConfigured();
+      const clientId = paypalConfig.clientId || '';
+      const hasClient = Boolean(clientId);
       return {
         id,
         label: 'PayPal',
         available: true,
         ready,
         client: {
-          clientId: ready ? paypalConfig.clientId : '',
+          clientId: hasClient ? clientId : '',
           currency: paypalConfig.currency || 'USD',
           intent: 'capture',
           mode,
-          scriptUrl: ready
-            ? `${SDK_HOSTS[mode]}?client-id=${encodeURIComponent(paypalConfig.clientId)}&currency=${encodeURIComponent(paypalConfig.currency || 'USD')}&intent=capture&components=buttons`
+          scriptUrl: hasClient
+            ? `${SDK_HOSTS[mode]}?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(paypalConfig.currency || 'USD')}&intent=capture&components=buttons`
             : '',
         },
       };

@@ -40,8 +40,8 @@ body[data-page='confirmation'] {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.35rem 0 1.4rem;
-  margin-bottom: 2rem;
+  padding: 0.35rem 0 1rem;
+  margin-bottom: 1.25rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -147,29 +147,34 @@ body[data-page='confirmation'] {
 
 .co__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
-  gap: 2.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
   align-items: start;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.co__summary {
+  position: static;
+  order: -1;
 }
 
 .co__title {
   font-family: var(--font-display);
-  font-size: 2.35rem;
+  font-size: 1.85rem;
   font-weight: 400;
   letter-spacing: 0.03em;
-  margin: 0 0 0.4rem;
+  margin: 0 0 1.25rem;
 }
 
 .co__lede {
-  color: var(--text-muted);
-  margin: 0 0 2rem;
-  font-size: 0.95rem;
+  display: none;
 }
 
 /* --------------------------------------------------------------- bloques */
 
 .co-block {
-  padding: 1.75rem 0;
+  padding: 1.15rem 0;
   border-top: 1px solid var(--border);
 }
 
@@ -178,29 +183,24 @@ body[data-page='confirmation'] {
   padding-top: 0;
 }
 
+.co-block--compact {
+  padding: 1rem 0;
+}
+
 .co-block__title {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.15rem;
   font-weight: 400;
-  letter-spacing: 0.04em;
-  margin: 0 0 1.2rem;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.85rem;
+  color: var(--accent);
 }
 
 .co-step {
-  display: grid;
-  place-items: center;
-  width: 1.55rem;
-  height: 1.55rem;
-  border-radius: 50%;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  font-size: 0.7rem;
-  font-family: var(--font-ui);
-  font-weight: 400;
-  flex: 0 0 auto;
+  display: none;
 }
 
 /* --------------------------------------------------------------- campos */
@@ -208,14 +208,15 @@ body[data-page='confirmation'] {
 .co-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 0.7rem 0.85rem;
 }
 
 .co-field {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  font-size: 0.85rem;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
 }
 
@@ -232,13 +233,13 @@ body[data-page='confirmation'] {
 .co-field select,
 .co-field textarea {
   width: 100%;
-  padding: 0.85rem 0.95rem;
+  padding: 0.7rem 0.85rem;
   border-radius: 3px;
   border: 1px solid var(--border);
   background: rgba(7, 7, 7, 0.55);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 300;
   transition: border-color 0.15s ease;
 }
@@ -255,18 +256,27 @@ body[data-page='confirmation'] {
 }
 
 .co-optional {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .co-optional summary {
   cursor: pointer;
   color: var(--accent);
-  font-size: 0.87rem;
-  padding: 0.4rem 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  list-style: none;
+}
+
+.co-optional summary::-webkit-details-marker {
+  display: none;
 }
 
 .co-optional[open] summary {
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.65rem;
+}
+
+.co-optional .co-grid {
+  margin-top: 0.25rem;
 }
 
 /* ------------------------------------------------------- métodos de pago */
@@ -274,7 +284,7 @@ body[data-page='confirmation'] {
 .co-methods {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.55rem;
 }
 
 .co-methods__loading,
@@ -286,14 +296,14 @@ body[data-page='confirmation'] {
 
 .co-method {
   display: flex;
-  align-items: flex-start;
-  gap: 0.9rem;
-  padding: 1.15rem 1.2rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
   border: 1px solid var(--border);
   border-radius: 3px;
   background: rgba(18, 16, 14, 0.85);
   cursor: pointer;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 .co-method:hover {
@@ -307,27 +317,29 @@ body[data-page='confirmation'] {
 }
 
 .co-method input {
-  margin-top: 0.25rem;
+  margin: 0;
   accent-color: var(--accent);
 }
 
 .co-method__body {
   display: flex;
-  flex-direction: column;
-  gap: 0.28rem;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
 }
 
 .co-method__body strong {
-  font-size: 1.02rem;
+  font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.04em;
 }
 
 .co-method__body small {
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 300;
-  line-height: 1.5;
+  line-height: 1.3;
 }
 
 .co-method-detail {
@@ -422,24 +434,25 @@ body[data-page='confirmation'] {
   font-size: 1.45rem;
 }
 
-.co-paypal .co-note {
-  margin-bottom: 0.85rem;
+.co-paypal__loading {
+  margin: 0.5rem 0;
+  text-align: center;
 }
 
 /* --------------------------------------------------------------- banco */
 
 .co-bank__region {
-  margin: 0 0 1.25rem;
-  padding: 1.15rem 1.2rem 0.35rem;
+  margin: 0 0 0.85rem;
+  padding: 0.95rem 1rem;
   border: 1px solid var(--border);
   border-radius: 3px;
   background: rgba(10, 10, 10, 0.55);
 }
 
 .co-bank__region-title {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.65rem;
   font-family: var(--font-ui);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 400;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -447,15 +460,12 @@ body[data-page='confirmation'] {
 }
 
 .co-bank__region-note {
-  margin: 0 0 1rem;
-  font-size: 0.82rem;
-  line-height: 1.55;
-  color: var(--text-muted);
+  display: none;
 }
 
 .co-bank__account {
-  padding: 0.95rem 0 1.05rem;
-  margin-bottom: 0.15rem;
+  padding: 0.7rem 0;
+  margin: 0;
   border-top: 1px solid var(--border);
   background: transparent;
 }
@@ -467,17 +477,17 @@ body[data-page='confirmation'] {
 
 .co-bank__bank {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 400;
   color: var(--accent);
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.45rem;
 }
 
 .co-bank dl {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.28rem;
   margin: 0;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
 }
 
 .co-bank dl > div {
@@ -497,9 +507,16 @@ body[data-page='confirmation'] {
 }
 
 .co-bank code {
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
   color: var(--text);
+}
+
+.co-bank .co-note {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-muted);
 }
 
 /* --------------------------------------------------------------- legal */
@@ -507,21 +524,29 @@ body[data-page='confirmation'] {
 .co-block--legal {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0.5rem;
+  padding-top: 0.85rem;
 }
 
 .co-check {
   display: flex;
   align-items: flex-start;
-  gap: 0.7rem;
-  font-size: 0.83rem;
-  line-height: 1.55;
+  gap: 0.65rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
   color: var(--text-muted);
   cursor: pointer;
 }
 
+.co-check--single {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: rgba(10, 10, 10, 0.4);
+}
+
 .co-check input {
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
   accent-color: var(--accent);
   flex: 0 0 auto;
 }
@@ -566,6 +591,19 @@ body[data-page='confirmation'] {
   color: var(--accent);
 }
 
+.co-btn--whatsapp {
+  margin-top: 0.85rem;
+  background: linear-gradient(180deg, #1fad66 0%, #128c4f 100%);
+  color: #f4fff8;
+  border-color: transparent;
+  letter-spacing: 0.1em;
+}
+
+.co-btn--whatsapp:hover {
+  background: linear-gradient(180deg, #28c274 0%, #15a05a 100%);
+  color: #fff;
+}
+
 .co-btn--block {
   width: 100%;
 }
@@ -576,11 +614,20 @@ body[data-page='confirmation'] {
 }
 
 .co-submit {
-  padding-top: 1.75rem;
+  padding-top: 1.15rem;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+}
+
+.co-submit .co-btn--gold {
+  padding: 1rem 1.5rem;
+}
+
+.co-submit__note,
+.co-trust {
+  display: none;
 }
 
 .co-submit .co-btn--gold {
@@ -601,8 +648,8 @@ body[data-page='confirmation'] {
 /* --------------------------------------------------------------- resumen */
 
 .co__summary {
-  position: sticky;
-  top: 1.5rem;
+  position: static;
+  order: -1;
 }
 
 .co-summary-card {
@@ -744,20 +791,11 @@ body[data-page='confirmation'] {
 }
 
 .co-trust {
-  list-style: none;
-  padding: 1.1rem 0 0;
-  margin: 1.1rem 0 0;
-  border-top: 1px solid var(--border);
-  display: grid;
-  gap: 0.5rem;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  line-height: 1.5;
+  display: none;
 }
 
 .co-trust li::before {
-  content: '· ';
-  color: var(--accent);
+  content: none;
 }
 
 /* ------------------------------------------------ asistente de checkout */

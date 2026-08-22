@@ -62,14 +62,28 @@ else
   chmod 0640 "$ENV_FILE"
 fi
 
-# En este servidor el sandbox jamás debe quedar encendido: un fallo de CardNET
-# se registraría como pedido confirmado.
+# En este servidor el sandbox jamás debe quedar encendido.
 if grep -q '^COMMERCE_SANDBOX_ENABLED=' "$ENV_FILE"; then
   sed -i 's|^COMMERCE_SANDBOX_ENABLED=.*|COMMERCE_SANDBOX_ENABLED=false|' "$ENV_FILE"
 else
   printf '\nCOMMERCE_SANDBOX_ENABLED=false\n' >> "$ENV_FILE"
 fi
 
+# PayPal en vivo: modo live + enable si ya hay Client ID y Secret.
+if grep -q '^PAYPAL_MODE=' "$ENV_FILE"; then
+  sed -i 's|^PAYPAL_MODE=.*|PAYPAL_MODE=live|' "$ENV_FILE"
+else
+  printf '\nPAYPAL_MODE=live\n' >> "$ENV_FILE"
+fi
+
+if grep -qE '^PAYPAL_CLIENT_ID=.+' "$ENV_FILE" && grep -qE '^PAYPAL_CLIENT_SECRET=.+' "$ENV_FILE"; then
+  if grep -q '^PAYPAL_ENABLED=' "$ENV_FILE"; then
+    sed -i 's|^PAYPAL_ENABLED=.*|PAYPAL_ENABLED=true|' "$ENV_FILE"
+  else
+    printf '\nPAYPAL_ENABLED=true\n' >> "$ENV_FILE"
+  fi
+  echo "PayPal: credenciales detectadas → PAYPAL_ENABLED=true y PAYPAL_MODE=live."
+fi
 if ! grep -q '^COMMERCE_QUOTE_SECRET=.\+' "$ENV_FILE"; then
   QUOTE_SECRET="$(openssl rand -hex 32)"
   if grep -q '^COMMERCE_QUOTE_SECRET=' "$ENV_FILE"; then

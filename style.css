@@ -1187,6 +1187,10 @@ strong {
   display: flex;
   align-items: center;
   transition: opacity var(--transition);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 .nav__logo:hover {
@@ -1197,6 +1201,15 @@ strong {
 .footer__logo-img {
   display: block;
   width: auto;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  filter: none;
+}
+
+.nav__logo-img.site-logo {
+  filter: none;
+  background: transparent;
 }
 
 .logo-canvas {
@@ -1204,7 +1217,7 @@ strong {
   background: transparent;
   mix-blend-mode: screen;
   transition: opacity var(--transition);
-  filter: drop-shadow(0 0 12px rgba(201, 169, 98, 0.25));
+  filter: none;
 }
 
 .logo-canvas--ready {
@@ -2114,8 +2127,8 @@ strong {
   opacity: 1;
 }
 
-.vitola-page .nav__logo-img.logo-canvas--ready {
-  opacity: 1 !important;
+.vitola-page .nav__logo-img.site-logo {
+  opacity: 1;
   visibility: visible;
 }
 

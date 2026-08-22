@@ -66,10 +66,12 @@ function parseCheckoutInput(raw) {
     errors.push('Escribe un teléfono de contacto para la entrega.');
   }
 
+  // El checkout usa un solo checkbox; el cliente envía ambas flags en true.
   const acceptFinalSale = raw?.acceptances?.finalSale === true;
   const acceptCustoms = raw?.acceptances?.customs === true;
-  if (!acceptFinalSale) errors.push('Debes aceptar la política de venta final.');
-  if (!acceptCustoms) errors.push('Debes aceptar la responsabilidad aduanera.');
+  if (!acceptFinalSale || !acceptCustoms) {
+    errors.push('Debes aceptar las condiciones de venta.');
+  }
 
   if (errors.length) {
     throw new CheckoutError(ERROR_CODES.VALIDATION_FAILED, errors[0], {

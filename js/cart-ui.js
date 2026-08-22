@@ -70,6 +70,7 @@ function initCartDrawer() {
     drawer.classList.add('is-open');
     overlay?.classList.add('is-visible');
     document.body.classList.add('no-scroll');
+    toggle?.setAttribute('aria-expanded', 'true');
     updateCartUI();
   }
 
@@ -77,6 +78,7 @@ function initCartDrawer() {
     drawer.classList.remove('is-open');
     overlay?.classList.remove('is-visible');
     document.body.classList.remove('no-scroll');
+    toggle?.setAttribute('aria-expanded', 'false');
   }
 
   toggle?.addEventListener('click', open);

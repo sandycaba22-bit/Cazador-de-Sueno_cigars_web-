@@ -21,8 +21,14 @@
       <header class="co__bar">
         <a class="co__back" href="index.html">← Volver a la tienda</a>
         <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueños Cigar SRL">
-          <canvas class="logo-canvas cds-brand__mark" data-logo="images/logo.pdf" data-height="40"></canvas>
-          <span class="nav__logo-fallback">Cazador de Sueños</span>
+          <img
+            src="images/logo.png"
+            alt="Cazador de Sueños"
+            class="cds-brand__mark site-logo site-logo--compact"
+            width="339"
+            height="256"
+            decoding="async"
+          />
         </a>
         <div class="nav__tools">
           <div class="lang-selector">
@@ -44,8 +50,6 @@
       </div>
     </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
-    <script src="logo-render.js" defer></script>
     <script src="js/language-switcher.js" defer></script>
     <script src="js/config.js" defer></script>
     <script src="js/policies.js" defer></script>
@@ -114,15 +118,13 @@
         const bank = order.bankTransfer
           ? `
           <div class="co-bank">
-            <h2>Datos para tu transferencia</h2>
+            <h2>Transferencia</h2>
             <p class="co-note">
-              Pon la referencia <strong>${safe(order.reference)}</strong> en el concepto y envía el
-              comprobante a <strong>${safe(order.bankTransfer.email)}</strong> dentro de
-              ${safe(order.bankTransfer.proofDeadlineHours)} horas para que preparemos el envío.
+              Concepto: <strong>${safe(order.reference)}</strong>
+              · Monto: <strong>${money(order.totalCents, order.currency)}</strong>
             </p>
             <div class="co-bank__region">
-              <h3 class="co-bank__region-title">República Dominicana</h3>
-              <p class="co-bank__region-note">Transferencia local. Incluya la referencia en el concepto.</p>
+              <h3 class="co-bank__region-title">Cuentas</h3>
               ${(order.bankTransfer.accounts || [])
                 .map(
                   (account) => `
@@ -137,14 +139,13 @@
                 )
                 .join('')}
             </div>
-            <div class="co-bank__region">
-              <h3 class="co-bank__region-title">Estados Unidos</h3>
-              <p class="co-bank__region-note">
-                Si paga desde EE.UU. en USD, use PayPal o una transferencia internacional al mismo
-                beneficiario, con esta referencia en el concepto.
-              </p>
-            </div>
-            <p class="co-note"><strong>Monto exacto: ${money(order.totalCents, order.currency)}</strong></p>
+            <a
+              id="oc-bank-whatsapp"
+              class="co-btn co-btn--whatsapp co-btn--block"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Enviar comprobante por WhatsApp</a>
           </div>`
           : '';
 
@@ -176,25 +177,35 @@
           </div>
 
           <div class="co-submit">
-            <button type="button" id="oc-whatsapp" class="co-btn co-btn--gold co-btn--block">
-              ${isBank ? 'Enviar comprobante por WhatsApp' : 'Escribirnos por WhatsApp'}
-            </button>
+            ${
+              isBank
+                ? ''
+                : `<button type="button" id="oc-whatsapp" class="co-btn co-btn--gold co-btn--block">Escribirnos por WhatsApp</button>`
+            }
             <a href="index.html" class="co-btn co-btn--ghost co-btn--block">Seguir comprando</a>
           </div>`;
 
-        document.getElementById('oc-whatsapp').addEventListener('click', () => {
-          const phone =
-            (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.whatsapp && APP_CONFIG.whatsapp.phone) ||
-            '18094645016';
-          const text = [
-            `Pedido ${order.reference}`,
-            `Total: ${money(order.totalCents, order.currency)}`,
-            isBank ? 'Adjunto el comprobante de la transferencia.' : '',
-          ]
-            .filter(Boolean)
-            .join('\n');
-          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
-        });
+        const phone =
+          (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.whatsapp && APP_CONFIG.whatsapp.phone) ||
+          '18094645016';
+        const waText = [
+          `Pedido ${order.reference}`,
+          `Total: ${money(order.totalCents, order.currency)}`,
+          isBank ? 'Adjunto el comprobante de la transferencia bancaria.' : '',
+        ]
+          .filter(Boolean)
+          .join('\n');
+        const waUrl = `https://wa.me/${String(phone).replace(/\D/g, '')}?text=${encodeURIComponent(waText)}`;
+
+        const bankWa = document.getElementById('oc-bank-whatsapp');
+        if (bankWa) bankWa.href = waUrl;
+
+        const genericWa = document.getElementById('oc-whatsapp');
+        if (genericWa) {
+          genericWa.addEventListener('click', () => {
+            window.open(waUrl, '_blank', 'noopener');
+          });
+        }
       });
     </script>
   </body>

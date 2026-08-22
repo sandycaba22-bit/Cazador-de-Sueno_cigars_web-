@@ -9,7 +9,6 @@ const { CheckoutError, ERROR_CODES } = require('../errors');
 const { createCardnetGateway } = require('./cardnet');
 const { createBankTransferGateway } = require('./bank-transfer');
 const { createPaypalGateway } = require('./paypal');
-const { createSandboxGateway } = require('./sandbox');
 
 /**
  * @param {object} config    Configuración del servicio (server/commerce/config.js).
@@ -23,7 +22,7 @@ function createGatewayRegistry(config, appConfig) {
   register(createCardnetGateway(config.cardnet));
   register(createBankTransferGateway(appConfig, config.bankTransfer.enabled));
   register(createPaypalGateway(config.paypal));
-  register(createSandboxGateway(config.sandbox.enabled));
+  // Sandbox eliminado del checkout: nunca se registra ni se ofrece al comprador.
 
   return {
     /** @returns {import('./base').PaymentGateway} */

@@ -28,6 +28,8 @@
     method: null,
     idempotencyKey: null,
     submitting: false,
+    orderReference: null,
+    orderAccessToken: null,
   };
 
   const el = (id) => document.getElementById(id);
@@ -152,8 +154,15 @@
     const button = el('co-submit');
     if (!button) return;
     state.submitting = busy;
-    button.disabled = busy || !state.quoteToken;
+    // El botón se habilita en cuanto hay cotización: la validación de campos
+    // ocurre al confirmar, no bloquea la UI de pago.
+    button.disabled = Boolean(busy) || !state.quoteToken;
     button.textContent = busy ? 'Procesando…' : 'Confirmar pedido';
+  }
+
+  function syncPaymentUi() {
+    setBusy(state.submitting);
+    syncSubmitVisibility();
   }
 
   // ---------------------------------------------------------- cotización
@@ -210,11 +219,13 @@
 
   function renderPaymentMethods() {
     const container = el('co-methods');
-    const methods = (state.config && state.config.paymentMethods) || [];
+    const methods = ((state.config && state.config.paymentMethods) || []).filter(
+      (method) => method && method.id !== 'sandbox'
+    );
 
     if (!methods.length) {
       container.innerHTML =
-        '<p class="co-methods__empty">No hay métodos de pago disponibles ahora mismo. Escríbenos por WhatsApp y completamos tu pedido.</p>';
+        '<p class="co-methods__empty">No hay métodos de pago disponibles ahora mismo.</p>';
       return;
     }
 
@@ -225,7 +236,7 @@
           <input type="radio" name="paymentMethod" value="${safe(method.id)}" ${index === 0 ? 'checked' : ''} />
           <span class="co-method__body">
             <strong>${method.id === 'paypal' ? paypalWordmark() : safe(method.label)}</strong>
-            <small>${safe(methodHint(method.id, method.ready))}</small>
+            <small>${safe(methodHint(method.id))}</small>
           </span>
         </label>`
       )
@@ -247,15 +258,10 @@
     return `<span class="co-paypal-wordmark" aria-label="PayPal"><span>Pay</span><span>Pal</span></span>`;
   }
 
-  function methodHint(id, ready) {
-    if (id === 'cardnet') return 'Visa, Mastercard — procesado por CardNET con 3D Secure';
-    if (id === 'bank_transfer') return 'Cuentas en República Dominicana. Desde EE.UU.: transferencia internacional al mismo beneficiario, o PayPal en USD.';
-    if (id === 'paypal') {
-      return ready
-        ? 'USD desde Estados Unidos y el resto del mundo, sin compartir datos de tarjeta con este sitio'
-        : 'Paga con tu cuenta PayPal — disponible en breve';
-    }
-    if (id === 'sandbox') return 'Simula una compra completa sin cargo real';
+  function methodHint(id) {
+    if (id === 'cardnet') return 'Visa / Mastercard';
+    if (id === 'bank_transfer') return 'Banreservas · BHD';
+    if (id === 'paypal') return 'USD';
     return '';
   }
 
@@ -272,6 +278,7 @@
     if (method.id === 'bank_transfer') {
       panel.hidden = false;
       panel.innerHTML = renderBankDetails(method.client);
+      bindBankWhatsApp();
       syncSubmitVisibility();
       return;
     }
@@ -279,10 +286,7 @@
     if (method.id === 'cardnet') {
       panel.hidden = false;
       panel.innerHTML = `
-        <p class="co-note">
-          Al confirmar se abrirá la ventana segura de CardNET para introducir tu tarjeta.
-          Los datos viajan directamente al banco: este sitio nunca los recibe ni los guarda.
-        </p>
+        <p class="co-note">Ventana segura de CardNET al confirmar.</p>
         <button type="button" id="co-card-trigger" class="co-hidden-trigger" aria-hidden="true" tabindex="-1"></button>`;
       loadCardnet(method.client);
       syncSubmitVisibility();
@@ -297,8 +301,8 @@
       return;
     }
 
-    panel.hidden = false;
-    panel.innerHTML = '<p class="co-note">Modo de prueba: no se realizará ningún cargo real.</p>';
+    panel.hidden = true;
+    panel.innerHTML = '';
     syncSubmitVisibility();
   }
 
@@ -310,19 +314,11 @@
     button.setAttribute('aria-hidden', paypal ? 'true' : 'false');
   }
 
-  function renderPaypalDetail(method) {
-    const ready = Boolean(method.ready && method.client && method.client.clientId);
-    const hint = ready
-      ? 'Al pulsar el botón se abrirá la ventana segura de PayPal. Este sitio nunca recibe los datos de tu tarjeta ni de tu cuenta.'
-      : 'El botón de PayPal ya está en el checkout. El cobro se habilitará en breve; mientras tanto puede pagar con tarjeta o transferencia.';
-
+  function renderPaypalDetail(_method) {
     return `
       <div class="co-paypal">
-        <p class="co-note">${hint}</p>
-        <div id="co-paypal-buttons" class="co-paypal-buttons">
-          <button type="button" class="co-paypal-btn" id="co-paypal-static" ${ready ? '' : 'disabled'} aria-disabled="${ready ? 'false' : 'true'}">
-            ${paypalWordmark()}
-          </button>
+        <div id="co-paypal-buttons" class="co-paypal-buttons" aria-label="Pagar con PayPal en USD">
+          <p class="co-note co-paypal__loading">Cargando PayPal…</p>
         </div>
       </div>`;
   }
@@ -335,12 +331,6 @@
   }
 
   function renderAccountCard(account) {
-    const extra = account.note
-      ? `<div><dt>Nota</dt><dd>${safe(account.note)}</dd></div>`
-      : '';
-    const currency = account.currency
-      ? `<div><dt>Moneda</dt><dd>${safe(account.currency)}</dd></div>`
-      : '';
     return `
         <div class="co-bank__account">
           <p class="co-bank__bank">${safe(account.bankName)}</p>
@@ -348,10 +338,90 @@
             <div><dt>Titular</dt><dd>${safe(account.accountHolder)}</dd></div>
             <div><dt>Tipo</dt><dd>${safe(account.accountType)}</dd></div>
             <div><dt>Cuenta</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
-            ${currency}
-            ${extra}
+            ${account.currency ? `<div><dt>Moneda</dt><dd>${safe(account.currency)}</dd></div>` : ''}
           </dl>
         </div>`;
+  }
+
+  function houseWhatsApp() {
+    const fromConfig =
+      (state.config && state.config.contact && state.config.contact.whatsapp) ||
+      (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.whatsapp && APP_CONFIG.whatsapp.phone) ||
+      '18094645016';
+    return String(fromConfig).replace(/\D/g, '');
+  }
+
+  function orderRefLabel() {
+    return state.orderReference || '';
+  }
+
+  function bankWhatsAppMessage(reference) {
+    const q = state.quote;
+    const total = q ? money(q.totalCents, q.currency) : '';
+    const lines = q
+      ? q.lines.map((l) => `• ${l.name} — ${l.displayLabel}`).join('\n')
+      : '';
+    const name = (el('co-form') && el('co-form').fullName && el('co-form').fullName.value.trim()) || '';
+    const ref = reference || orderRefLabel();
+    return [
+      'Hola, envío el comprobante de mi transferencia bancaria.',
+      ref ? `Referencia del pedido: ${ref}` : '',
+      name ? `Nombre: ${name}` : '',
+      total ? `Total: ${total}` : '',
+      lines ? `Pedido:\n${lines}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  function openBankWhatsApp(reference) {
+    const phone = houseWhatsApp();
+    if (!phone) {
+      showAlert('No hay número de WhatsApp configurado.');
+      return;
+    }
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(bankWhatsAppMessage(reference))}`,
+      '_blank',
+      'noopener'
+    );
+  }
+
+  function bindBankWhatsApp() {
+    const link = el('co-bank-whatsapp');
+    if (!link) return;
+    const phone = houseWhatsApp();
+    link.href = `https://wa.me/${phone}?text=${encodeURIComponent(bankWhatsAppMessage(orderRefLabel()))}`;
+    link.onclick = async (event) => {
+      event.preventDefault();
+      if (state.submitting) return;
+
+      const data = readForm();
+      const basics = localErrors(data, { requireTerms: false });
+      if (basics.length) {
+        showAlert(basics[0]);
+        return;
+      }
+      if (!data.acceptances.finalSale) {
+        showAlert('Marca la casilla de condiciones de venta para generar la referencia.');
+        return;
+      }
+
+      try {
+        setBusy(true);
+        state.method = 'bank_transfer';
+        const result = await createOrderPayload({});
+        if (!result) {
+          setBusy(false);
+          return;
+        }
+        openBankWhatsApp(result.reference);
+        goToConfirmation(result);
+      } catch (error) {
+        setBusy(false);
+        showAlert(error.message || 'No pudimos preparar el pedido.');
+      }
+    };
   }
 
   function renderBankDetails(bank) {
@@ -360,51 +430,51 @@
     const dominican = accounts.filter((account) => accountRegion(account) === 'DO');
     const american = accounts.filter((account) => accountRegion(account) === 'US');
     const beneficiary = bank.beneficiary || {};
+    const email = bank.email || '';
+    const ref = orderRefLabel();
 
     const doBlock = dominican.length
       ? `
       <div class="co-bank__region">
         <h3 class="co-bank__region-title">República Dominicana</h3>
-        <p class="co-bank__region-note">Transferencia local en Banreservas o BHD. Incluya la referencia del pedido en el concepto.</p>
         ${dominican.map(renderAccountCard).join('')}
       </div>`
       : '';
 
-    const usAccounts = american.length
-      ? american.map(renderAccountCard).join('')
-      : '';
-
-    const usBlock = `
+    const usBlock =
+      american.length || beneficiary.name
+        ? `
       <div class="co-bank__region">
-        <h3 class="co-bank__region-title">Estados Unidos</h3>
-        <p class="co-bank__region-note">
-          Para liquidar en USD desde EE.UU. use PayPal más arriba. Si prefiere transferencia internacional,
-          envíe el importe exacto al beneficiario en República Dominicana e incluya la referencia del pedido.
-        </p>
-        ${usAccounts}
+        <h3 class="co-bank__region-title">Estados Unidos / internacional</h3>
+        ${american.map(renderAccountCard).join('')}
         ${
           beneficiary.name
             ? `<div class="co-bank__account">
-                <p class="co-bank__bank">Beneficiario internacional</p>
+                <p class="co-bank__bank">Beneficiario</p>
                 <dl>
                   <div><dt>Nombre</dt><dd>${safe(beneficiary.name)}</dd></div>
-                  ${beneficiary.address ? `<div><dt>Dirección</dt><dd>${safe(beneficiary.address)}</dd></div>` : ''}
                   ${beneficiary.taxId ? `<div><dt>RNC</dt><dd>${safe(beneficiary.taxId)}</dd></div>` : ''}
                 </dl>
               </div>`
             : ''
         }
-      </div>`;
+      </div>`
+        : '';
 
     return `
       <div class="co-bank">
         <p class="co-note">
-          Al confirmar recibirás una referencia única. Ponla en el concepto de la
-          transferencia y envía el comprobante a
-          <strong>${safe(bank.email)}</strong> dentro de ${safe(bank.proofDeadlineHours)} horas.
+          ${ref ? `Referencia: <strong>${safe(ref)}</strong> · ` : ''}Usa la referencia en el concepto${email ? ` y envía el comprobante a <strong>${safe(email)}</strong>` : ''}.
         </p>
         ${doBlock}
         ${usBlock}
+        <a
+          id="co-bank-whatsapp"
+          class="co-btn co-btn--whatsapp co-btn--block"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Enviar comprobante por WhatsApp</a>
       </div>`;
   }
 
@@ -471,17 +541,39 @@
   let paypalButtons = null;
 
   /**
-   * Si hay Client ID, sustituye el botón estático por los Smart Payment Buttons
-   * oficiales. Si no, el botón dorado permanece visible e inerte: el componente
-   * ya está en su sitio para cuando lleguen las credenciales.
+   * Monta los Smart Payment Buttons oficiales en cuanto hay Client ID del servidor.
+   * No bloquea la UI con mensajes de "no disponible".
    */
   function mountPaypal(method) {
-    const ready = Boolean(method && method.ready && method.client && method.client.clientId);
-    if (!ready) return;
+    const client = method && method.client;
+    const canLoad = Boolean(client && (client.scriptUrl || client.clientId));
+    if (!canLoad) {
+      // Reintenta con lo que venga de /config tras un refresh.
+      const fromConfig = ((state.config && state.config.paymentMethods) || []).find((m) => m.id === 'paypal');
+      if (fromConfig && fromConfig.client && (fromConfig.client.scriptUrl || fromConfig.client.clientId)) {
+        return mountPaypal(fromConfig);
+      }
+      const host = el('co-paypal-buttons');
+      if (host) {
+        host.innerHTML =
+          '<p class="co-note">Conectando con PayPal… Si tarda, recarga la página.</p>';
+      }
+      return;
+    }
 
-    loadPaypalSdk(method.client)
+    const sdkClient = {
+      ...client,
+      scriptUrl:
+        client.scriptUrl ||
+        `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(client.clientId)}&currency=${encodeURIComponent(client.currency || 'USD')}&intent=capture&components=buttons`,
+    };
+
+    loadPaypalSdk(sdkClient)
       .then(() => renderPaypalButtons())
-      .catch((error) => showAlert(error.message));
+      .catch((error) => {
+        const host = el('co-paypal-buttons');
+        if (host) host.innerHTML = `<p class="co-note">${safe(error.message)}</p>`;
+      });
   }
 
   function loadPaypalSdk(client) {
@@ -494,14 +586,14 @@
       script.async = true;
       script.onload = () => {
         if (!window.paypal) {
-          reject(new Error('No pudimos cargar PayPal. Use transferencia bancaria.'));
+          reject(new Error('No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.'));
           return;
         }
         resolve(window.paypal);
       };
       script.onerror = () => {
         paypalSdkReady = null;
-        reject(new Error('No pudimos cargar PayPal. Use transferencia bancaria.'));
+        reject(new Error('No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.'));
       };
       document.head.appendChild(script);
     });
@@ -526,8 +618,9 @@
       fundingSource: window.paypal.FUNDING.PAYPAL,
       style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
       createOrder: async () => {
+        // Solo datos de contacto/envío: las condiciones se piden al capturar.
         const data = readForm();
-        const errors = localErrors(data);
+        const errors = localErrors(data, { requireTerms: false });
         if (errors.length) {
           showAlert(errors[0]);
           throw new Error('validacion');
@@ -544,6 +637,12 @@
         return created.paypalOrderId;
       },
       onApprove: async (data) => {
+        const formData = readForm();
+        if (!formData.acceptances.finalSale) {
+          showAlert('Marca la casilla de condiciones de venta para completar el pago.');
+          setBusy(false);
+          return;
+        }
         await submitOrder({ paypalOrderId: data.orderID });
       },
       onCancel: () => {
@@ -578,14 +677,20 @@
       },
       notes: form.notes.value.trim(),
       acceptances: {
-        finalSale: form.acceptFinalSale.checked,
-        customs: form.acceptCustoms.checked,
+        // Un solo checkbox en UI → ambas aceptaciones para el contrato del servidor.
+        finalSale: form.acceptTerms.checked,
+        customs: form.acceptTerms.checked,
       },
     };
   }
 
-  /** Validación local: solo para dar respuesta inmediata. El servidor revalida. */
-  function localErrors(data) {
+  /**
+   * Validación local inmediata.
+   * @param {object} data
+   * @param {{ requireTerms?: boolean }} [opts]
+   */
+  function localErrors(data, opts = {}) {
+    const requireTerms = opts.requireTerms !== false;
     const errors = [];
     if (data.customer.fullName.length < 3) errors.push('Escribe tu nombre completo.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.customer.email)) {
@@ -597,46 +702,66 @@
     if (data.shipping.address.length < 5) errors.push('Escribe la dirección de entrega.');
     if (data.shipping.city.length < 2) errors.push('Escribe la ciudad de entrega.');
     if (!data.shipping.country) errors.push('Selecciona el país de destino.');
-    if (!data.acceptances.finalSale) errors.push('Debes aceptar la política de venta final.');
-    if (!data.acceptances.customs) errors.push('Debes aceptar la responsabilidad aduanera.');
+    if (requireTerms && !data.acceptances.finalSale) {
+      errors.push('Debes aceptar las condiciones de venta.');
+    }
     return errors;
   }
 
-  async function submitOrder(paymentPayload) {
+  function goToConfirmation(result) {
+    if (typeof clearCart === 'function') clearCart();
+    const url = new URL('order-confirmation.html', window.location.href);
+    url.searchParams.set('ref', result.reference);
+    url.searchParams.set('t', result.accessToken);
+    window.location.assign(url.toString());
+  }
+
+  /** Crea el pedido en el servidor. Devuelve el cuerpo o null si falló con alerta. */
+  async function createOrderPayload(paymentPayload) {
     if (!state.quoteToken) {
       showAlert('El precio del pedido caducó. Recargamos el resumen, revísalo y confirma otra vez.');
       refreshQuote();
-      return;
+      return null;
     }
 
+    if (state.orderReference && state.orderAccessToken && state.method === 'bank_transfer') {
+      return {
+        reference: state.orderReference,
+        accessToken: state.orderAccessToken,
+      };
+    }
+
+    const data = readForm();
+    const result = await apiFetch('/orders', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': state.idempotencyKey },
+      body: JSON.stringify({
+        quoteToken: state.quoteToken,
+        paymentMethod: state.method,
+        paymentPayload: paymentPayload || {},
+        ...data,
+      }),
+    });
+
+    state.orderReference = result.reference;
+    state.orderAccessToken = result.accessToken;
+    return result;
+  }
+
+  async function submitOrder(paymentPayload) {
     setBusy(true);
     clearAlert();
 
-    const data = readForm();
-
     try {
-      const result = await apiFetch('/orders', {
-        method: 'POST',
-        headers: { 'Idempotency-Key': state.idempotencyKey },
-        body: JSON.stringify({
-          quoteToken: state.quoteToken,
-          paymentMethod: state.method,
-          paymentPayload: paymentPayload || {},
-          ...data,
-        }),
-      });
-
-      if (typeof clearCart === 'function') clearCart();
-
-      const url = new URL('order-confirmation.html', window.location.href);
-      url.searchParams.set('ref', result.reference);
-      url.searchParams.set('t', result.accessToken);
-      window.location.assign(url.toString());
+      const result = await createOrderPayload(paymentPayload);
+      if (!result) {
+        setBusy(false);
+        return;
+      }
+      goToConfirmation(result);
     } catch (error) {
       setBusy(false);
 
-      // Una cotización caducada se puede rehacer sola; el resto necesita al
-      // comprador. En ningún caso reintentamos un cobro automáticamente.
       if (error.code === 'QUOTE_EXPIRED' || error.code === 'QUOTE_INVALID') {
         showAlert('El precio se actualizó mientras completabas el formulario. Revísalo y confirma otra vez.');
         refreshQuote();
@@ -692,16 +817,9 @@
   // ----------------------------------------------------------- arranque
 
   function renderStaticCopy() {
-    if (typeof SALES_POLICY !== 'undefined') {
-      el('co-policy-sale').textContent = SALES_POLICY.checkoutText;
-    }
-    if (typeof CUSTOMS_DISCLAIMER !== 'undefined') {
-      el('co-policy-customs').textContent = CUSTOMS_DISCLAIMER.checkoutText;
-    }
-    if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.trust) {
-      el('co-trust-1').textContent = APP_CONFIG.trust.authenticity;
-      el('co-trust-2').textContent = APP_CONFIG.trust.delivery;
-      el('co-trust-3').textContent = APP_CONFIG.trust.policy;
+    const terms = el('co-policy-terms');
+    if (terms && typeof SALES_POLICY !== 'undefined') {
+      terms.textContent = SALES_POLICY.checkoutText;
     }
   }
 
@@ -723,6 +841,10 @@
 
     form.addEventListener('submit', onSubmit);
     form.country.addEventListener('change', scheduleQuote);
+
+    // Al completar los datos básicos, el CTA de pago queda listo (con cotización).
+    form.addEventListener('input', () => syncPaymentUi());
+    form.addEventListener('change', () => syncPaymentUi());
 
     el('co-items').addEventListener('click', (event) => {
       const button = event.target.closest('[data-action]');
@@ -747,18 +869,21 @@
       refreshQuote();
     });
 
-    el('co-whatsapp').addEventListener('click', () => {
-      const phone = (state.config && state.config.contact && state.config.contact.whatsapp) || '';
-      const lines = state.quote
-        ? state.quote.lines.map((l) => `• ${l.name} — ${l.displayLabel}`).join('\n')
-        : '';
-      const total = state.quote ? money(state.quote.totalCents, state.quote.currency) : '';
-      const message = `Hola, quiero completar este pedido:\n${lines}\n\nTotal estimado: ${total}`;
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
-    });
-
     window.addEventListener('cart:updated', scheduleQuote);
     window.addEventListener('cds:cart-updated', scheduleQuote);
+  }
+
+  function prefetchPaypalSdk() {
+    const paypal = ((state.config && state.config.paymentMethods) || []).find((m) => m.id === 'paypal');
+    if (!paypal || !paypal.client) return;
+    if (!paypal.client.scriptUrl && !paypal.client.clientId) return;
+    loadPaypalSdk({
+      scriptUrl:
+        paypal.client.scriptUrl ||
+        `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypal.client.clientId)}&currency=${encodeURIComponent(paypal.client.currency || 'USD')}&intent=capture&components=buttons`,
+    }).catch(() => {
+      /* se reintenta al seleccionar PayPal */
+    });
   }
 
   async function init() {
@@ -783,8 +908,10 @@
 
     fillCountries(state.config.countries);
     renderPaymentMethods();
+    prefetchPaypalSdk();
     bindEvents();
     await refreshQuote();
+    syncPaymentUi();
   }
 
   document.addEventListener('DOMContentLoaded', () => {
