@@ -463,6 +463,15 @@ body.age-gate-open .age-gate--entry {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(24, 24, 24, 0.96);
   backdrop-filter: blur(18px);
+  z-index: 130;
+}
+
+/* En móvil el botón queda a la izquierda: abrir el menú hacia dentro del viewport */
+@media (max-width: 760px) {
+  .site-header__actions .lang-selector__dropdown {
+    left: 0;
+    right: auto;
+  }
 }
 
 .lang-selector__option {
