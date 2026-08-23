@@ -13,6 +13,7 @@ const DHL_SHIPPING = {
 };
 
 const SHIPPING_ZONES = {
+  DO: { name: 'República Dominicana', base: 12, perBox: 5, days: '2-4' },
   MX: { name: 'México', base: 18, perBox: 6, days: '3-5' },
   US: { name: 'Estados Unidos', base: 28, perBox: 9, days: '5-8' },
   CA: { name: 'Canadá', base: 32, perBox: 10, days: '6-10' },
@@ -31,6 +32,7 @@ const SHIPPING_ZONES = {
 
 /** Mapeo ISO alpha-2 → zona de envío */
 const COUNTRY_TO_ZONE = {
+  DO: 'DO',
   MX: 'MX',
   US: 'US',
   CA: 'CA',
@@ -66,6 +68,7 @@ const COUNTRY_TO_ZONE = {
 };
 
 const COUNTRIES = [
+  { code: 'DO', name: 'República Dominicana' },
   { code: 'MX', name: 'México' },
   { code: 'US', name: 'Estados Unidos' },
   { code: 'CA', name: 'Canadá' },

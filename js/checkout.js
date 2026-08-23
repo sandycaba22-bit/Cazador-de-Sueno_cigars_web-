@@ -407,17 +407,31 @@
         return;
       }
 
+      // Abrir la pestaña en el gesto del click: tras el await el navegador
+      // bloquea window.open() y el botón de WhatsApp parece “roto”.
+      const waWindow = window.open('about:blank', '_blank');
+
       try {
         setBusy(true);
         state.method = 'bank_transfer';
         const result = await createOrderPayload({});
         if (!result) {
+          if (waWindow && !waWindow.closed) waWindow.close();
           setBusy(false);
           return;
         }
-        openBankWhatsApp(result.reference);
+        const waUrl = `https://wa.me/${houseWhatsApp()}?text=${encodeURIComponent(
+          bankWhatsAppMessage(result.reference)
+        )}`;
+        if (waWindow && !waWindow.closed) {
+          waWindow.location.replace(waUrl);
+        } else {
+          // Si el popup sigue bloqueado, el enlace de confirmación abre WhatsApp.
+          window.open(waUrl, '_blank', 'noopener');
+        }
         goToConfirmation(result);
       } catch (error) {
+        if (waWindow && !waWindow.closed) waWindow.close();
         setBusy(false);
         showAlert(error.message || 'No pudimos preparar el pedido.');
       }
