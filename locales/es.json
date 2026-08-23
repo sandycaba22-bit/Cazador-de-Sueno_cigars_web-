@@ -370,6 +370,7 @@
         "concept_title": "El Concepto Único",
         "concept_text": "La máxima expresión del carácter dominicano concentrada en un formato clásico. Un cigarro diseñado para quienes buscan una fumada intensa, compacta y repleta de matices tradicionales, complejos y sumamente profundos. Poco espacio, todo el poder del Cibao.",
         "cibao_text": "Valle del Cibao · República Dominicana",
+        "cibao": "Valle del Cibao · República Dominicana",
         "specs": {
           "format_value": "Robusto 50 × 5″",
           "format_detail": "Un formato clásico, cómodo en mano pero con una concentración de cuerpo y potencia extraordinaria.",
@@ -390,6 +391,245 @@
         },
         "mystique": "El Sultán no pide tiempo: exige atención. Es la sexta vitola, la última palabra y la más dominicana de la casa — el Cibao convertido en humo, en poder, en tradición."
       }
+    },
+    "home": {
+      "age_gate": {
+        "eyebrow": "Acceso reservado",
+        "tagline": "Puros premium · Legado dominicano",
+        "description": "Este sitio presenta productos de tabaco de alta gama. Confirma que tienes 21 años o más, o la edad legal aplicable en tu jurisdicción, para continuar.",
+        "accept": "Sí, tengo 21 años o más",
+        "deny": "No",
+        "note": "La confirmación se guarda en una cookie para no volver a interrumpir tu visita.",
+        "exit": "Salir del sitio"
+      },
+      "nav": {
+        "aria": "Principal",
+        "welcome": "Bienvenida",
+        "history": "Historia",
+        "mastery": "Maestría",
+        "vitolas": "Las Vitolas",
+        "process": "El Proceso",
+        "contact": "Contacto",
+        "lang": "Seleccionar idioma",
+        "cart": "Carrito",
+        "cart_aria": "Abrir carrito"
+      },
+      "hero": {
+        "eyebrow": "Bienvenida",
+        "lead": "Santiago de los Caballeros • República Dominicana",
+        "subhead": "Tres generaciones dedicadas al oficio más noble del tabaco. Puros artesanales donde la tradición dominicana alcanza la precisión del lujo absoluto.",
+        "cta": "Descubrir la colección"
+      },
+      "story": {
+        "eyebrow": "La Historia",
+        "title": "Legado familiar, técnica ancestral y memoria viva."
+      },
+      "origen": {
+        "eyebrow": "Origen",
+        "title": "Origen, cultivo y carácter dominicano.",
+        "cta": "Seguir el recorrido",
+        "caption": "Semillero y comienzo del proceso tabacalero"
+      },
+      "maestria_hero": {
+        "eyebrow": "Exclusividad · Legado familiar",
+        "title": "Maestría tabacalera de autor",
+        "lead": "Santiago de los Caballeros · República Dominicana",
+        "subhead": "Tres generaciones dedicadas al oficio más noble del tabaco. Puros artesanales donde la tradición dominicana alcanza la precisión del lujo absoluto.",
+        "cta": "Conocer el oficio"
+      },
+      "vitolas": {
+        "eyebrow": "Las Vitolas",
+        "title": "La colección de la casa",
+        "intro": "Compra por caja o puro suelto. Totales firmados en checkout. Aquí conviven la casa, el origen y la firma sensorial de cada línea."
+      },
+      "process": {
+        "label": "El Proceso",
+        "title": "El Arte de la Paciencia"
+      },
+      "catalog": {
+        "box": "Caja",
+        "loose": "Puro suelto",
+        "qty": "Cantidad",
+        "qty_boxes": "Cajas",
+        "qty_loose": "Puros sueltos",
+        "add": "Añadir al carrito",
+        "added": "Añadido al carrito. Tu selección se mantiene al seguir navegando.",
+        "stock": "{units} puros disponibles ({boxes} cajas)",
+        "per_unit": "/ud.",
+        "units_per_box": "uds/caja"
+      },
+      "shipping": {
+        "international_title": "Envío internacional",
+        "international_text": "Tarifas DHL según destino. El costo se calcula en el checkout y forma parte del total que confirma el servidor.",
+        "packaging_title": "Empaque de casa",
+        "packaging_text": "Cajas de 20 puros, excepto El Rango (10). Fotografías reales de cada vitola.",
+        "final_sale_title": "Venta final",
+        "final_sale_text": "Todos los pedidos son venta final. No se admiten devoluciones ni reembolsos una vez confirmado el pago.",
+        "payments_title": "Pagos",
+        "payments_text": "Transferencia bancaria (República Dominicana y envíos desde EE.UU.) o PayPal. Este sitio no pide número de tarjeta."
+      },
+      "footer": {
+        "eyebrow": "Contacto",
+        "copy": "© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador."
+      },
+      "cart": {
+        "title": "Tu carrito",
+        "close": "Cerrar",
+        "aria": "Carrito de compras",
+        "subtotal": "Subtotal",
+        "lines_note": "línea(s) · El envío se calcula en checkout.",
+        "payments_label": "Pago en el checkout",
+        "payments_aria": "Métodos de pago en checkout",
+        "paypal_hint": "Botón oficial en la pasarela",
+        "bank_name": "Transferencia bancaria",
+        "bank_hint": "Cuentas RD y USA",
+        "checkout": "Ir al checkout",
+        "empty": "Tu carrito está vacío.",
+        "box_label": "caja(s)",
+        "loose_label": "sueltos",
+        "units": "uds.",
+        "units_per_box": "uds/caja",
+        "rango_badge": "Rango",
+        "removed": "Artículo eliminado.",
+        "decrease": "Reducir cantidad",
+        "increase": "Aumentar cantidad",
+        "remove": "Eliminar"
+      }
+    },
+    "checkout": {
+      "back": "← Seguir comprando",
+      "secure": "Pago seguro",
+      "lang": "Seleccionar idioma",
+      "empty_title": "Tu carrito está vacío",
+      "empty_cta": "Ver catálogo",
+      "title": "Checkout",
+      "data_title": "Datos",
+      "fields": {
+        "fullName": "Nombre",
+        "email": "Correo",
+        "phone": "Teléfono",
+        "country": "País",
+        "city": "Ciudad",
+        "address": "Dirección",
+        "optional": "Más (estado, C.P., notas)",
+        "state": "Estado",
+        "postal": "C.P.",
+        "notes": "Notas"
+      },
+      "payment_title": "Pago",
+      "payment_aria": "Método de pago",
+      "loading": "Cargando…",
+      "terms": "Acepto venta final (sin devoluciones) y la responsabilidad aduanera en destino.",
+      "submit": "Confirmar pedido",
+      "processing": "Procesando…",
+      "summary_aria": "Resumen del pedido",
+      "order_title": "Pedido",
+      "subtotal": "Subtotal",
+      "shipping": "Envío",
+      "total": "Total",
+      "meta": {
+        "units": "Puros",
+        "boxes": "Cajas",
+        "eta": "Entrega"
+      },
+      "days": "días",
+      "remove": "Eliminar",
+      "dec_aria": "Quitar uno",
+      "inc_aria": "Añadir uno",
+      "methods_empty": "No hay métodos de pago disponibles ahora mismo.",
+      "cardnet_note": "Ventana segura de CardNET al confirmar.",
+      "paypal_loading": "Cargando PayPal…",
+      "paypal_aria": "Pagar con PayPal en USD",
+      "paypal_connecting": "Conectando con PayPal… Si tarda, recarga la página.",
+      "bank": {
+        "holder": "Titular",
+        "type": "Tipo",
+        "account": "Cuenta",
+        "currency": "Moneda",
+        "do_title": "República Dominicana",
+        "us_title": "Estados Unidos / internacional",
+        "beneficiary": "Beneficiario",
+        "name": "Nombre",
+        "tax_id": "RNC",
+        "reference_prefix": "Referencia:",
+        "concept_use": "Usa la referencia en el concepto",
+        "concept_and_email": " y envía el comprobante a",
+        "whatsapp_cta": "Enviar comprobante por WhatsApp"
+      },
+      "hints": {
+        "cardnet": "Visa / Mastercard",
+        "bank_transfer": "Banreservas · BHD",
+        "paypal": "USD"
+      },
+      "errors": {
+        "service_down": "El servicio de pagos no está respondiendo. Escríbenos por WhatsApp y completamos tu pedido.",
+        "generic": "No pudimos completar la operación.",
+        "no_whatsapp": "No hay número de WhatsApp configurado.",
+        "accept_terms_ref": "Marca la casilla de condiciones de venta para generar la referencia.",
+        "prepare_order": "No pudimos preparar el pedido.",
+        "card_load": "No pudimos cargar el formulario de tarjeta. Usa transferencia bancaria.",
+        "card_token": "No recibimos los datos de la tarjeta. Inténtalo de nuevo.",
+        "paypal_load": "No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.",
+        "quote_expired_soft": "El precio del pedido caducó. Recargamos el resumen.",
+        "accept_terms_pay": "Marca la casilla de condiciones de venta para completar el pago.",
+        "paypal_cancel": "Cancelaste el pago en PayPal. Puedes intentarlo de nuevo o elegir otro método.",
+        "paypal_fail": "PayPal no pudo completar el pago. Prueba de nuevo o usa transferencia bancaria.",
+        "name": "Escribe tu nombre completo.",
+        "email": "Escribe un correo electrónico válido.",
+        "phone": "Escribe un teléfono de contacto para la entrega.",
+        "address": "Escribe la dirección de entrega.",
+        "city": "Escribe la ciudad de entrega.",
+        "country": "Selecciona el país de destino.",
+        "terms": "Debes aceptar las condiciones de venta.",
+        "quote_expired": "El precio del pedido caducó. Recargamos el resumen, revísalo y confirma otra vez.",
+        "quote_updated": "El precio se actualizó mientras completabas el formulario. Revísalo y confirma otra vez.",
+        "choose_method": "Elige un método de pago.",
+        "use_paypal_button": "Usa el botón de PayPal para completar el pago.",
+        "init_fail": "No pudimos iniciar el checkout. Recarga la página o escríbenos por WhatsApp."
+      },
+      "whatsapp": {
+        "bank_intro": "Hola, envío el comprobante de mi transferencia bancaria.",
+        "reference": "Referencia del pedido:",
+        "name": "Nombre:",
+        "total": "Total:",
+        "order": "Pedido:"
+      }
+    },
+    "confirmation": {
+      "back": "← Volver a la tienda",
+      "secure": "Pedido registrado",
+      "loading": "Cargando confirmación…",
+      "not_found_title": "No encontramos ese pedido",
+      "home_cta": "Volver al inicio",
+      "incomplete_link": "El enlace de confirmación está incompleto. Revisa el correo que te enviamos.",
+      "fetch_fail": "No pudimos recuperar los detalles ahora mismo. Si completaste el pago, revisa tu correo o escríbenos por WhatsApp con tu referencia.",
+      "paid_title": "Pago confirmado",
+      "bank_title": "Pedido reservado — falta la transferencia",
+      "registered_title": "Pedido registrado",
+      "reference": "Referencia:",
+      "status": "Estado",
+      "destination": "Destino",
+      "carrier": "Transportista",
+      "boxes": "Cajas",
+      "eta": "Entrega estimada",
+      "days": "días",
+      "subtotal": "Subtotal",
+      "shipping_dhl": "Envío DHL",
+      "total": "Total",
+      "transfer": "Transferencia",
+      "concept": "Concepto:",
+      "amount": "Monto:",
+      "accounts": "Cuentas",
+      "holder": "Titular",
+      "type": "Tipo",
+      "account": "Cuenta",
+      "whatsapp_receipt": "Enviar comprobante por WhatsApp",
+      "whatsapp_generic": "Escribirnos por WhatsApp",
+      "continue": "Seguir comprando",
+      "final_sale": "Venta final — sin devoluciones ni reembolsos.",
+      "wa_order": "Pedido",
+      "wa_total": "Total:",
+      "wa_bank_note": "Adjunto el comprobante de la transferencia bancaria."
     }
   }
 }

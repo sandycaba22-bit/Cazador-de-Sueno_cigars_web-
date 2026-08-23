@@ -13,6 +13,9 @@ const LanguageSwitcher = (function () {
   /** Idiomas con archivo en /locales (carga segura) */
   const availableLanguages = ['es', 'en', 'fr', 'zh', 'de', 'ar', 'ru'];
 
+  /** Traducciones del idioma activo (objeto `translations` del JSON). */
+  let currentTranslations = null;
+
   const languageNames = {
     es: 'Español',
     en: 'English',
@@ -22,6 +25,21 @@ const LanguageSwitcher = (function () {
     ar: 'العربية',
     ru: 'Русский',
   };
+
+  function getNested(obj, path) {
+    if (!obj || !path) return undefined;
+    return path.split('.').reduce((o, key) => (o && o[key] != null ? o[key] : undefined), obj);
+  }
+
+  function getTranslations() {
+    return currentTranslations;
+  }
+
+  /** Resuelve una clave i18n (p. ej. `checkout.errors.name`). */
+  function t(path) {
+    const value = getNested(currentTranslations, path);
+    return typeof value === 'string' ? value : value != null ? value : undefined;
+  }
 
   const ENGLISH_COUNTRIES = new Set([
     'US', 'CA', 'GB', 'UK', 'AU', 'NZ', 'IE', 'JM', 'TT', 'BB', 'BS', 'BZ', 'GY', 'AG', 'LC', 'VC', 'GD', 'KN',
@@ -112,20 +130,18 @@ const LanguageSwitcher = (function () {
   function translatePage(translations) {
     if (!translations) return;
 
-    function getTranslation(obj, path) {
-      return path.split('.').reduce((o, key) => o && o[key], obj);
-    }
+    currentTranslations = translations;
 
     document.querySelectorAll('[data-i18n]').forEach((element) => {
       const key = element.getAttribute('data-i18n');
-      const translation = getTranslation(translations, key);
-      if (translation) element.textContent = translation;
+      const translation = getNested(translations, key);
+      if (typeof translation === 'string') element.textContent = translation;
     });
 
     document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
       const key = element.getAttribute('data-i18n-placeholder');
-      const translation = getTranslation(translations, key);
-      if (translation) element.setAttribute('placeholder', translation);
+      const translation = getNested(translations, key);
+      if (typeof translation === 'string') element.setAttribute('placeholder', translation);
     });
 
     const html = document.documentElement;
@@ -246,7 +262,14 @@ const LanguageSwitcher = (function () {
     document.documentElement.setAttribute('lang', currentLang);
 
     const translations = await loadTranslations(currentLang);
-    if (translations) translatePage(translations);
+    if (translations) {
+      translatePage(translations);
+      window.dispatchEvent(
+        new CustomEvent('cds:language-changed', {
+          detail: { language: currentLang, translations, manual: false },
+        })
+      );
+    }
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initSelector);
@@ -259,6 +282,8 @@ const LanguageSwitcher = (function () {
     init,
     getCurrentLanguage,
     setLanguage,
+    getTranslations,
+    t,
     availableLanguages: menuLanguages,
   };
 })();

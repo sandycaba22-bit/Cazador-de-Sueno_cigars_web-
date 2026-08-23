@@ -2,12 +2,30 @@
  * UI compartida del carrito — persiste y sincroniza en todas las páginas.
  */
 
+function cartTt(path, fallback) {
+  try {
+    if (typeof LanguageSwitcher !== 'undefined' && typeof LanguageSwitcher.t === 'function') {
+      const value = LanguageSwitcher.t(path);
+      if (typeof value === 'string' && value) return value;
+    }
+  } catch (_) {
+    /* ignore */
+  }
+  return fallback;
+}
+
 function renderMiniCartItem(item) {
-  const typeLabel = item.unitType === UNIT_TYPES.BOX ? 'caja(s)' : 'sueltos';
+  const typeLabel =
+    item.unitType === UNIT_TYPES.BOX
+      ? cartTt('home.cart.box_label', 'caja(s)')
+      : cartTt('home.cart.loose_label', 'sueltos');
+  const unitsLabel = cartTt('home.cart.units', 'uds.');
+  const unitsPerBox = cartTt('home.cart.units_per_box', 'uds/caja');
+  const rangoBadge = cartTt('home.cart.rango_badge', 'Rango');
   const lineClass = isRangoLine(item.product.line) ? 'is-rango' : 'is-standard';
   const packagingBadge = isRangoLine(item.product.line)
-    ? `<span class="badge badge--rango badge--inline">Rango · ${PACKAGING.RANGO_UNITS} uds</span>`
-    : `<span class="badge badge--standard badge--inline">${PACKAGING.STANDARD_UNITS} uds/caja</span>`;
+    ? `<span class="badge badge--rango badge--inline">${rangoBadge} · ${PACKAGING.RANGO_UNITS} ${unitsLabel}</span>`
+    : `<span class="badge badge--standard badge--inline">${PACKAGING.STANDARD_UNITS} ${unitsPerBox}</span>`;
   const thumb = item.product.image
     ? `<img class="mini-cart__thumb" src="${escapeHtml(item.product.image)}" alt="" loading="lazy" />`
     : '';
@@ -18,16 +36,16 @@ function renderMiniCartItem(item) {
       <div class="mini-cart__item-info">
         <strong>${escapeHtml(item.product.name)}</strong>
         ${packagingBadge}
-        <span>${item.quantity} ${typeLabel} · ${item.totalUnits} uds.</span>
+        <span>${item.quantity} ${typeLabel} · ${item.totalUnits} ${unitsLabel}</span>
         <div class="mini-cart__qty-controls">
-          <button type="button" class="btn-qty" data-action="decrease" aria-label="Reducir cantidad">−</button>
+          <button type="button" class="btn-qty" data-action="decrease" aria-label="${escapeHtml(cartTt('home.cart.decrease', 'Reducir cantidad'))}">−</button>
           <span class="mini-cart__qty">${item.quantity}</span>
-          <button type="button" class="btn-qty" data-action="increase" aria-label="Aumentar cantidad">+</button>
+          <button type="button" class="btn-qty" data-action="increase" aria-label="${escapeHtml(cartTt('home.cart.increase', 'Aumentar cantidad'))}">+</button>
         </div>
       </div>
       <div class="mini-cart__item-actions">
         <span>${formatCurrency(item.lineTotal)}</span>
-        <button type="button" class="btn-icon remove-cart-item" aria-label="Eliminar">×</button>
+        <button type="button" class="btn-icon remove-cart-item" aria-label="${escapeHtml(cartTt('home.cart.remove', 'Eliminar'))}">×</button>
       </div>
     </li>
   `;
@@ -49,7 +67,7 @@ function updateCartUI() {
   if (itemsEl) {
     itemsEl.innerHTML = items.length
       ? items.map(renderMiniCartItem).join('')
-      : '<li class="mini-cart__empty">Tu carrito está vacío.</li>';
+      : `<li class="mini-cart__empty">${cartTt('home.cart.empty', 'Tu carrito está vacío.')}</li>`;
   }
   if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
   if (checkoutLink) {
@@ -91,7 +109,7 @@ function initCartDrawer() {
       const item = removeBtn.closest('.mini-cart__item');
       removeFromCart(item.dataset.lineId);
       updateCartUI();
-      showToast('Artículo eliminado.', 'info');
+      showToast(cartTt('home.cart.removed', 'Artículo eliminado.'), 'info');
       return;
     }
 
@@ -122,4 +140,5 @@ function initGlobalCart() {
   initCartDrawer();
   updateCartUI();
   window.addEventListener('cart:updated', updateCartUI);
+  window.addEventListener('cds:language-changed', updateCartUI);
 }

@@ -81,11 +81,25 @@ function createPaypalGateway(paypalConfig = {}) {
         status: response.status,
         elapsedMs,
         name: body.error,
+        description: body.error_description,
+        clientIdLength: String(paypalConfig.clientId || '').length,
+        mode,
+        apiBase,
       });
       throw new CheckoutError(
         ERROR_CODES.GATEWAY_UNREACHABLE,
         'No pudimos conectar con PayPal. Inténtalo en unos minutos o usa transferencia bancaria.',
-        { httpStatus: 502, retryable: true, diagnostics: { status: response.status, elapsedMs } }
+        {
+          httpStatus: 502,
+          retryable: true,
+          diagnostics: {
+            status: response.status,
+            elapsedMs,
+            name: body.error || null,
+            clientIdLength: String(paypalConfig.clientId || '').length,
+            mode,
+          },
+        }
       );
     }
 

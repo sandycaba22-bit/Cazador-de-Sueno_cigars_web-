@@ -32,7 +32,7 @@
   <body data-page="checkout">
     <main class="co" id="co-root">
       <header class="co__bar">
-        <a class="co__back" href="index.html">← Seguir comprando</a>
+        <a class="co__back" href="index.html" data-i18n="checkout.back">← Seguir comprando</a>
         <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueños Cigar SRL">
           <img
             src="images/logo.png"
@@ -54,62 +54,62 @@
               <span class="lang-selector__current">ES</span>
             </button>
           </div>
-          <span class="co__secure" aria-label="Conexión segura">Pago seguro</span>
+          <span class="co__secure" aria-label="Conexión segura" data-i18n="checkout.secure">Pago seguro</span>
         </div>
       </header>
 
       <div id="co-alert" class="co__alert" role="alert" hidden></div>
 
       <section id="co-empty" class="co__empty" hidden>
-        <h1>Tu carrito está vacío</h1>
-        <a class="co-btn co-btn--gold" href="index.html#catalogo">Ver catálogo</a>
+        <h1 data-i18n="checkout.empty_title">Tu carrito está vacío</h1>
+        <a class="co-btn co-btn--gold" href="index.html#catalogo" data-i18n="checkout.empty_cta">Ver catálogo</a>
       </section>
 
       <div id="co-layout" class="co__layout" hidden>
         <form id="co-form" class="co__form co__form--compact" novalidate autocomplete="on">
-          <h1 class="co__title">Checkout</h1>
+          <h1 class="co__title" data-i18n="checkout.title">Checkout</h1>
 
           <section class="co-block co-block--compact">
-            <h2 class="co-block__title">Datos</h2>
+            <h2 class="co-block__title" data-i18n="checkout.data_title">Datos</h2>
             <div class="co-grid">
               <label class="co-field co-field--wide">
-                <span>Nombre</span>
+                <span data-i18n="checkout.fields.fullName">Nombre</span>
                 <input type="text" name="fullName" autocomplete="name" required />
               </label>
               <label class="co-field">
-                <span>Correo</span>
+                <span data-i18n="checkout.fields.email">Correo</span>
                 <input type="email" name="email" autocomplete="email" inputmode="email" required />
               </label>
               <label class="co-field">
-                <span>Teléfono</span>
+                <span data-i18n="checkout.fields.phone">Teléfono</span>
                 <input type="tel" name="phone" autocomplete="tel" inputmode="tel" required />
               </label>
               <label class="co-field">
-                <span>País</span>
+                <span data-i18n="checkout.fields.country">País</span>
                 <select name="country" required></select>
               </label>
               <label class="co-field">
-                <span>Ciudad</span>
+                <span data-i18n="checkout.fields.city">Ciudad</span>
                 <input type="text" name="city" autocomplete="address-level2" required />
               </label>
               <label class="co-field co-field--wide">
-                <span>Dirección</span>
+                <span data-i18n="checkout.fields.address">Dirección</span>
                 <input type="text" name="address" autocomplete="street-address" required />
               </label>
             </div>
             <details class="co-optional">
-              <summary>Más (estado, C.P., notas)</summary>
+              <summary data-i18n="checkout.fields.optional">Más (estado, C.P., notas)</summary>
               <div class="co-grid">
                 <label class="co-field">
-                  <span>Estado</span>
+                  <span data-i18n="checkout.fields.state">Estado</span>
                   <input type="text" name="state" autocomplete="address-level1" />
                 </label>
                 <label class="co-field">
-                  <span>C.P.</span>
+                  <span data-i18n="checkout.fields.postal">C.P.</span>
                   <input type="text" name="postalCode" autocomplete="postal-code" />
                 </label>
                 <label class="co-field co-field--wide">
-                  <span>Notas</span>
+                  <span data-i18n="checkout.fields.notes">Notas</span>
                   <textarea name="notes" rows="2"></textarea>
                 </label>
               </div>
@@ -117,9 +117,9 @@
           </section>
 
           <section class="co-block co-block--compact">
-            <h2 class="co-block__title">Pago</h2>
+            <h2 class="co-block__title" data-i18n="checkout.payment_title">Pago</h2>
             <div id="co-methods" class="co-methods" role="radiogroup" aria-label="Método de pago">
-              <p class="co-methods__loading">Cargando…</p>
+              <p class="co-methods__loading" data-i18n="checkout.loading">Cargando…</p>
             </div>
             <div id="co-method-detail" class="co-method-detail" hidden></div>
           </section>
@@ -127,14 +127,14 @@
           <section class="co-block co-block--legal co-block--compact">
             <label class="co-check co-check--single">
               <input type="checkbox" name="acceptTerms" />
-              <span id="co-policy-terms">
+              <span id="co-policy-terms" data-i18n="checkout.terms">
                 Acepto venta final (sin devoluciones) y la responsabilidad aduanera en destino.
               </span>
             </label>
           </section>
 
           <div class="co-submit">
-            <button type="submit" id="co-submit" class="co-btn co-btn--gold co-btn--block" disabled>
+            <button type="submit" id="co-submit" class="co-btn co-btn--gold co-btn--block" disabled data-i18n="checkout.submit">
               Confirmar pedido
             </button>
           </div>
@@ -142,27 +142,27 @@
 
         <aside class="co__summary" aria-label="Resumen del pedido">
           <div class="co-summary-card">
-            <h2>Pedido</h2>
+            <h2 data-i18n="checkout.order_title">Pedido</h2>
             <div id="co-items" class="co-items"></div>
             <dl class="co-totals">
               <div>
-                <dt>Subtotal</dt>
+                <dt data-i18n="checkout.subtotal">Subtotal</dt>
                 <dd id="co-subtotal">—</dd>
               </div>
               <div>
-                <dt>Envío <span id="co-zone" class="co-totals__zone"></span></dt>
+                <dt><span data-i18n="checkout.shipping">Envío</span> <span id="co-zone" class="co-totals__zone"></span></dt>
                 <dd id="co-shipping">—</dd>
               </div>
               <div class="co-totals__grand">
-                <dt>Total</dt>
+                <dt data-i18n="checkout.total">Total</dt>
                 <dd id="co-total">—</dd>
               </div>
             </dl>
             <p id="co-boxes-warning" class="co-warn" role="alert" hidden></p>
             <ul class="co-meta">
-              <li><span>Puros</span><strong id="co-units">0</strong></li>
-              <li><span>Cajas</span><strong id="co-boxes">0</strong></li>
-              <li><span>Entrega</span><strong id="co-eta">—</strong></li>
+              <li><span data-i18n="checkout.meta.units">Puros</span><strong id="co-units">0</strong></li>
+              <li><span data-i18n="checkout.meta.boxes">Cajas</span><strong id="co-boxes">0</strong></li>
+              <li><span data-i18n="checkout.meta.eta">Entrega</span><strong id="co-eta">—</strong></li>
             </ul>
           </div>
         </aside>

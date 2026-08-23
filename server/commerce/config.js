@@ -74,15 +74,20 @@ const config = {
   host: process.env.COMMERCE_HOST || '127.0.0.1',
 
   /**
-   * Orígenes autorizados. En producción, solo el dominio canónico. En
-   * desarrollo se añade localhost para poder probar el checkout completo sin
-   * exportar variables a mano; nunca se añade si NODE_ENV es production.
+   * Orígenes autorizados. Dominio canónico en vivo: cazadordesuenocigar.com
+   * (sin "s"). El dominio histórico con "s" se mantiene por compatibilidad.
    */
   corsOrigins: list(process.env.COMMERCE_CORS_ORIGINS).length
     ? list(process.env.COMMERCE_CORS_ORIGINS)
     : IS_PRODUCTION
-      ? ['https://www.cazadordesuenocigars.com']
+      ? [
+          'https://cazadordesuenocigar.com',
+          'https://www.cazadordesuenocigar.com',
+          'https://www.cazadordesuenocigars.com',
+        ]
       : [
+          'https://cazadordesuenocigar.com',
+          'https://www.cazadordesuenocigar.com',
           'https://www.cazadordesuenocigars.com',
           'http://localhost:3000',
           'http://127.0.0.1:3000',
@@ -201,9 +206,22 @@ function collectConfigWarnings(cfg = config) {
   if (cfg.paypal.enabled) {
     if (!cfg.paypal.clientId) warnings.push('PAYPAL_CLIENT_ID vacía.');
     if (!cfg.paypal.clientSecret) warnings.push('PAYPAL_CLIENT_SECRET vacía.');
+    if (cfg.paypal.clientId && cfg.paypal.clientId.length < 40) {
+      warnings.push(
+        `PAYPAL_CLIENT_ID parece truncado (${cfg.paypal.clientId.length} chars; PayPal suele usar ~80). OAuth fallará con 502.`
+      );
+    }
     if (cfg.isProduction && cfg.paypal.mode !== 'live') {
       warnings.push('PAYPAL_MODE no es live en producción.');
     }
+  }
+  if (
+    cfg.corsOrigins?.length &&
+    !cfg.corsOrigins.includes('https://cazadordesuenocigar.com')
+  ) {
+    warnings.push(
+      'COMMERCE_CORS_ORIGINS no incluye https://cazadordesuenocigar.com (el checkout del dominio vivo recibirá CORS_DENIED).'
+    );
   }
   if (cfg.isProduction && cfg.corsOrigins?.some((o) => /localhost|127\.0\.0\.1/.test(o))) {
     warnings.push('COMMERCE_CORS_ORIGINS incluye localhost en producción.');

@@ -19,7 +19,7 @@
   <body data-page="confirmation">
     <main class="co">
       <header class="co__bar">
-        <a class="co__back" href="index.html">← Volver a la tienda</a>
+        <a class="co__back" href="index.html" data-i18n="confirmation.back">← Volver a la tienda</a>
         <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueños Cigar SRL">
           <img
             src="images/logo.png"
@@ -41,12 +41,12 @@
               <span class="lang-selector__current">ES</span>
             </button>
           </div>
-          <span class="co__secure">Pedido registrado</span>
+          <span class="co__secure" data-i18n="confirmation.secure">Pedido registrado</span>
         </div>
       </header>
 
       <div id="oc-content" class="co-summary-card">
-        <p>Cargando confirmación…</p>
+        <p data-i18n="confirmation.loading">Cargando confirmación…</p>
       </div>
     </main>
 
@@ -66,12 +66,30 @@
         const reference = params.get('ref');
         const accessToken = params.get('t');
 
-        const money = (cents, currency) =>
-          new Intl.NumberFormat('es-DO', {
+        function tt(path, fallback) {
+          try {
+            if (typeof LanguageSwitcher !== 'undefined' && typeof LanguageSwitcher.t === 'function') {
+              const value = LanguageSwitcher.t(path);
+              if (typeof value === 'string' && value) return value;
+            }
+          } catch (_) {
+            /* ignore */
+          }
+          return fallback;
+        }
+
+        const money = (cents, currency) => {
+          const lang =
+            typeof LanguageSwitcher !== 'undefined' && LanguageSwitcher.getCurrentLanguage
+              ? LanguageSwitcher.getCurrentLanguage()
+              : 'es';
+          const locale = lang === 'en' ? 'en-US' : 'es-DO';
+          return new Intl.NumberFormat(locale, {
             style: 'currency',
             currency: currency || 'USD',
             minimumFractionDigits: 2,
           }).format((Number(cents) || 0) / 100);
+        };
 
         const safe = (value) => {
           const div = document.createElement('div');
@@ -81,13 +99,20 @@
 
         function notFound(message) {
           container.innerHTML = `
-            <h1>No encontramos ese pedido</h1>
+            <h1>${safe(tt('confirmation.not_found_title', 'No encontramos ese pedido'))}</h1>
             <p>${safe(message)}</p>
-            <a href="index.html" class="co-btn co-btn--gold">Volver al inicio</a>`;
+            <a href="index.html" class="co-btn co-btn--gold">${safe(
+              tt('confirmation.home_cta', 'Volver al inicio')
+            )}</a>`;
         }
 
         if (!reference || !accessToken) {
-          notFound('El enlace de confirmación está incompleto. Revisa el correo que te enviamos.');
+          notFound(
+            tt(
+              'confirmation.incomplete_link',
+              'El enlace de confirmación está incompleto. Revisa el correo que te enviamos.'
+            )
+          );
           return;
         }
 
@@ -100,7 +125,10 @@
           order = await response.json();
         } catch {
           notFound(
-            'No pudimos recuperar los detalles ahora mismo. Si completaste el pago, revisa tu correo o escríbenos por WhatsApp con tu referencia.'
+            tt(
+              'confirmation.fetch_fail',
+              'No pudimos recuperar los detalles ahora mismo. Si completaste el pago, revisa tu correo o escríbenos por WhatsApp con tu referencia.'
+            )
           );
           return;
         }
@@ -108,32 +136,33 @@
         const isBank = order.paymentMethod === 'bank_transfer';
         const isPaid = order.paymentStatus === 'paid';
 
-        const items = order.items
-          .map(
-            (item) =>
-              `<li><strong>${safe(item.name)}</strong> — ${safe(item.displayLabel)} · ${money(item.lineTotalCents, order.currency)}</li>`
-          )
-          .join('');
+        function renderOrder() {
+          const items = order.items
+            .map(
+              (item) =>
+                `<li><strong>${safe(item.name)}</strong> — ${safe(item.displayLabel)} · ${money(item.lineTotalCents, order.currency)}</li>`
+            )
+            .join('');
 
-        const bank = order.bankTransfer
-          ? `
+          const bank = order.bankTransfer
+            ? `
           <div class="co-bank">
-            <h2>Transferencia</h2>
+            <h2>${safe(tt('confirmation.transfer', 'Transferencia'))}</h2>
             <p class="co-note">
-              Concepto: <strong>${safe(order.reference)}</strong>
-              · Monto: <strong>${money(order.totalCents, order.currency)}</strong>
+              ${safe(tt('confirmation.concept', 'Concepto:'))} <strong>${safe(order.reference)}</strong>
+              · ${safe(tt('confirmation.amount', 'Monto:'))} <strong>${money(order.totalCents, order.currency)}</strong>
             </p>
             <div class="co-bank__region">
-              <h3 class="co-bank__region-title">Cuentas</h3>
+              <h3 class="co-bank__region-title">${safe(tt('confirmation.accounts', 'Cuentas'))}</h3>
               ${(order.bankTransfer.accounts || [])
                 .map(
                   (account) => `
                 <div class="co-bank__account">
                   <p class="co-bank__bank">${safe(account.bankName)}</p>
                   <dl>
-                    <div><dt>Titular</dt><dd>${safe(account.accountHolder)}</dd></div>
-                    <div><dt>Tipo</dt><dd>${safe(account.accountType)}</dd></div>
-                    <div><dt>Cuenta</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
+                    <div><dt>${safe(tt('confirmation.holder', 'Titular'))}</dt><dd>${safe(account.accountHolder)}</dd></div>
+                    <div><dt>${safe(tt('confirmation.type', 'Tipo'))}</dt><dd>${safe(account.accountType)}</dd></div>
+                    <div><dt>${safe(tt('confirmation.account', 'Cuenta'))}</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
                   </dl>
                 </div>`
                 )
@@ -145,34 +174,40 @@
               href="#"
               target="_blank"
               rel="noopener noreferrer"
-            >Enviar comprobante por WhatsApp</a>
+            >${safe(tt('confirmation.whatsapp_receipt', 'Enviar comprobante por WhatsApp'))}</a>
           </div>`
-          : '';
+            : '';
 
-        container.innerHTML = `
-          <h1>${isPaid ? 'Pago confirmado' : isBank ? 'Pedido reservado — falta la transferencia' : 'Pedido registrado'}</h1>
-          <p class="co-note">Referencia: <strong>${safe(order.reference)}</strong></p>
+          const title = isPaid
+            ? tt('confirmation.paid_title', 'Pago confirmado')
+            : isBank
+              ? tt('confirmation.bank_title', 'Pedido reservado — falta la transferencia')
+              : tt('confirmation.registered_title', 'Pedido registrado');
+
+          container.innerHTML = `
+          <h1>${safe(title)}</h1>
+          <p class="co-note">${safe(tt('confirmation.reference', 'Referencia:'))} <strong>${safe(order.reference)}</strong></p>
 
           <ul class="co-meta">
-            <li><span>Estado</span><strong>${safe(order.status)}</strong></li>
-            <li><span>Destino</span><strong>${safe(order.shipping.countryName)} · ${safe(order.shipping.city)}</strong></li>
-            <li><span>Transportista</span><strong>${safe(order.shipping.carrier)}</strong></li>
-            <li><span>Cajas</span><strong>${safe(order.shipping.boxes)}</strong></li>
-            <li><span>Entrega estimada</span><strong>${safe(order.shipping.estimatedDays)} días</strong></li>
+            <li><span>${safe(tt('confirmation.status', 'Estado'))}</span><strong>${safe(order.status)}</strong></li>
+            <li><span>${safe(tt('confirmation.destination', 'Destino'))}</span><strong>${safe(order.shipping.countryName)} · ${safe(order.shipping.city)}</strong></li>
+            <li><span>${safe(tt('confirmation.carrier', 'Transportista'))}</span><strong>${safe(order.shipping.carrier)}</strong></li>
+            <li><span>${safe(tt('confirmation.boxes', 'Cajas'))}</span><strong>${safe(order.shipping.boxes)}</strong></li>
+            <li><span>${safe(tt('confirmation.eta', 'Entrega estimada'))}</span><strong>${safe(order.shipping.estimatedDays)} ${safe(tt('confirmation.days', 'días'))}</strong></li>
           </ul>
 
           <ul class="co-items">${items}</ul>
 
           <dl class="co-totals">
-            <div><dt>Subtotal</dt><dd>${money(order.subtotalCents, order.currency)}</dd></div>
-            <div><dt>Envío DHL</dt><dd>${money(order.shippingCents, order.currency)}</dd></div>
-            <div class="co-totals__grand"><dt>Total</dt><dd>${money(order.totalCents, order.currency)}</dd></div>
+            <div><dt>${safe(tt('confirmation.subtotal', 'Subtotal'))}</dt><dd>${money(order.subtotalCents, order.currency)}</dd></div>
+            <div><dt>${safe(tt('confirmation.shipping_dhl', 'Envío DHL'))}</dt><dd>${money(order.shippingCents, order.currency)}</dd></div>
+            <div class="co-totals__grand"><dt>${safe(tt('confirmation.total', 'Total'))}</dt><dd>${money(order.totalCents, order.currency)}</dd></div>
           </dl>
 
           ${bank}
 
           <div class="co-warn" role="note">
-            <strong>Venta final — sin devoluciones ni reembolsos.</strong>
+            <strong>${safe(tt('confirmation.final_sale', 'Venta final — sin devoluciones ni reembolsos.'))}</strong>
             <p>${safe(typeof SALES_POLICY !== 'undefined' ? SALES_POLICY.legalNotice : '')}</p>
           </div>
 
@@ -180,32 +215,42 @@
             ${
               isBank
                 ? ''
-                : `<button type="button" id="oc-whatsapp" class="co-btn co-btn--gold co-btn--block">Escribirnos por WhatsApp</button>`
+                : `<button type="button" id="oc-whatsapp" class="co-btn co-btn--gold co-btn--block">${safe(
+                    tt('confirmation.whatsapp_generic', 'Escribirnos por WhatsApp')
+                  )}</button>`
             }
-            <a href="index.html" class="co-btn co-btn--ghost co-btn--block">Seguir comprando</a>
+            <a href="index.html" class="co-btn co-btn--ghost co-btn--block">${safe(
+              tt('confirmation.continue', 'Seguir comprando')
+            )}</a>
           </div>`;
 
-        const phone =
-          (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.whatsapp && APP_CONFIG.whatsapp.phone) ||
-          '18094645016';
-        const waText = [
-          `Pedido ${order.reference}`,
-          `Total: ${money(order.totalCents, order.currency)}`,
-          isBank ? 'Adjunto el comprobante de la transferencia bancaria.' : '',
-        ]
-          .filter(Boolean)
-          .join('\n');
-        const waUrl = `https://wa.me/${String(phone).replace(/\D/g, '')}?text=${encodeURIComponent(waText)}`;
+          const phone =
+            (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.whatsapp && APP_CONFIG.whatsapp.phone) ||
+            '18094645016';
+          const waText = [
+            `${tt('confirmation.wa_order', 'Pedido')} ${order.reference}`,
+            `${tt('confirmation.wa_total', 'Total:')} ${money(order.totalCents, order.currency)}`,
+            isBank
+              ? tt('confirmation.wa_bank_note', 'Adjunto el comprobante de la transferencia bancaria.')
+              : '',
+          ]
+            .filter(Boolean)
+            .join('\n');
+          const waUrl = `https://wa.me/${String(phone).replace(/\D/g, '')}?text=${encodeURIComponent(waText)}`;
 
-        const bankWa = document.getElementById('oc-bank-whatsapp');
-        if (bankWa) bankWa.href = waUrl;
+          const bankWa = document.getElementById('oc-bank-whatsapp');
+          if (bankWa) bankWa.href = waUrl;
 
-        const genericWa = document.getElementById('oc-whatsapp');
-        if (genericWa) {
-          genericWa.addEventListener('click', () => {
-            window.open(waUrl, '_blank', 'noopener');
-          });
+          const genericWa = document.getElementById('oc-whatsapp');
+          if (genericWa) {
+            genericWa.addEventListener('click', () => {
+              window.open(waUrl, '_blank', 'noopener');
+            });
+          }
         }
+
+        renderOrder();
+        window.addEventListener('cds:language-changed', renderOrder);
       });
     </script>
   </body>

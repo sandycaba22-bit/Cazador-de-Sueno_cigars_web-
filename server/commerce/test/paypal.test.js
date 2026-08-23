@@ -76,7 +76,9 @@ test('solo está lista para cobrar si hay Client ID, secret y el interruptor', (
 });
 
 test('describe() siempre expone el botón, aunque las credenciales aún no existan', () => {
-  const preview = createPaypalGateway(baseConfig({ enabled: false })).describe();
+  const preview = createPaypalGateway(
+    baseConfig({ enabled: false, clientId: '', clientSecret: '' })
+  ).describe();
   assert.equal(preview.available, true, 'el checkout debe pintar PayPal ya');
   assert.equal(preview.ready, false);
   assert.equal(preview.client.clientId, '');

@@ -370,6 +370,7 @@
         "concept_title": "The Unique Concept",
         "concept_text": "The maximum expression of Dominican character concentrated in a classic format. A cigar designed for those seeking an intense, compact smoke replete with traditional, complex and deeply nuanced flavors. Little space, all the power of Cibao.",
         "cibao_text": "Cibao Valley · Dominican Republic",
+        "cibao": "Cibao Valley · Dominican Republic",
         "specs": {
           "format_value": "Robusto 50 × 5″",
           "format_detail": "A classic format, comfortable in hand but with an extraordinary concentration of body and power.",
@@ -390,6 +391,245 @@
         },
         "mystique": "The Sultan doesn't ask for time: it demands attention. It's the sixth vitola, the last word and the most Dominican of the house — Cibao converted into smoke, into power, into tradition."
       }
+    },
+    "home": {
+      "age_gate": {
+        "eyebrow": "Restricted access",
+        "tagline": "Premium cigars · Dominican legacy",
+        "description": "This site presents high-end tobacco products. Confirm that you are 21 or older, or the legal age in your jurisdiction, to continue.",
+        "accept": "Yes, I am 21 or older",
+        "deny": "No",
+        "note": "Confirmation is saved in a cookie so we do not interrupt your visit again.",
+        "exit": "Leave site"
+      },
+      "nav": {
+        "aria": "Main",
+        "welcome": "Welcome",
+        "history": "History",
+        "mastery": "Mastery",
+        "vitolas": "The Vitolas",
+        "process": "The Process",
+        "contact": "Contact",
+        "lang": "Select language",
+        "cart": "Cart",
+        "cart_aria": "Open cart"
+      },
+      "hero": {
+        "eyebrow": "Welcome",
+        "lead": "Santiago de los Caballeros • Dominican Republic",
+        "subhead": "Three generations devoted to the noblest craft of tobacco. Hand-rolled cigars where Dominican tradition meets absolute luxury precision.",
+        "cta": "Discover the collection"
+      },
+      "story": {
+        "eyebrow": "The Story",
+        "title": "Family legacy, ancestral technique, and living memory."
+      },
+      "origen": {
+        "eyebrow": "Origin",
+        "title": "Origin, cultivation, and Dominican character.",
+        "cta": "Continue the journey",
+        "caption": "Seedbed and the start of the tobacco process"
+      },
+      "maestria_hero": {
+        "eyebrow": "Exclusivity · Family legacy",
+        "title": "Authorial tobacco mastery",
+        "lead": "Santiago de los Caballeros · Dominican Republic",
+        "subhead": "Three generations devoted to the noblest craft of tobacco. Hand-rolled cigars where Dominican tradition meets absolute luxury precision.",
+        "cta": "Discover the craft"
+      },
+      "vitolas": {
+        "eyebrow": "The Vitolas",
+        "title": "The house collection",
+        "intro": "Buy by box or single stick. Totals are signed at checkout. Here the house, origin, and sensory signature of each line come together."
+      },
+      "process": {
+        "label": "The Process",
+        "title": "The Art of Patience"
+      },
+      "catalog": {
+        "box": "Box",
+        "loose": "Single stick",
+        "qty": "Quantity",
+        "qty_boxes": "Boxes",
+        "qty_loose": "Single sticks",
+        "add": "Add to cart",
+        "added": "Added to cart. Your selection is kept as you keep browsing.",
+        "stock": "{units} cigars available ({boxes} boxes)",
+        "per_unit": "/ea",
+        "units_per_box": "pcs/box"
+      },
+      "shipping": {
+        "international_title": "International shipping",
+        "international_text": "DHL rates by destination. Cost is calculated at checkout and forms part of the server-confirmed total.",
+        "packaging_title": "House packaging",
+        "packaging_text": "Boxes of 20 cigars, except El Rango (10). Real photographs of each vitola.",
+        "final_sale_title": "Final sale",
+        "final_sale_text": "All orders are final sale. No returns or refunds once payment is confirmed.",
+        "payments_title": "Payments",
+        "payments_text": "Bank transfer (Dominican Republic and shipments from the U.S.) or PayPal. This site never asks for a card number."
+      },
+      "footer": {
+        "eyebrow": "Contact",
+        "copy": "© 2026 Cazador de Sueños Cigar SRL. Sale subject to local importer regulations."
+      },
+      "cart": {
+        "title": "Your cart",
+        "close": "Close",
+        "aria": "Shopping cart",
+        "subtotal": "Subtotal",
+        "lines_note": "line(s) · Shipping is calculated at checkout.",
+        "payments_label": "Pay at checkout",
+        "payments_aria": "Payment methods at checkout",
+        "paypal_hint": "Official button on the gateway",
+        "bank_name": "Bank transfer",
+        "bank_hint": "RD and USA accounts",
+        "checkout": "Go to checkout",
+        "empty": "Your cart is empty.",
+        "box_label": "box(es)",
+        "loose_label": "singles",
+        "units": "pcs",
+        "units_per_box": "pcs/box",
+        "rango_badge": "Rango",
+        "removed": "Item removed.",
+        "decrease": "Decrease quantity",
+        "increase": "Increase quantity",
+        "remove": "Remove"
+      }
+    },
+    "checkout": {
+      "back": "← Continue shopping",
+      "secure": "Secure payment",
+      "lang": "Select language",
+      "empty_title": "Your cart is empty",
+      "empty_cta": "View catalog",
+      "title": "Checkout",
+      "data_title": "Details",
+      "fields": {
+        "fullName": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "country": "Country",
+        "city": "City",
+        "address": "Address",
+        "optional": "More (state, ZIP, notes)",
+        "state": "State",
+        "postal": "ZIP",
+        "notes": "Notes"
+      },
+      "payment_title": "Payment",
+      "payment_aria": "Payment method",
+      "loading": "Loading…",
+      "terms": "I accept final sale (no returns) and customs responsibility at destination.",
+      "submit": "Confirm order",
+      "processing": "Processing…",
+      "summary_aria": "Order summary",
+      "order_title": "Order",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "total": "Total",
+      "meta": {
+        "units": "Cigars",
+        "boxes": "Boxes",
+        "eta": "Delivery"
+      },
+      "days": "days",
+      "remove": "Remove",
+      "dec_aria": "Remove one",
+      "inc_aria": "Add one",
+      "methods_empty": "No payment methods are available right now.",
+      "cardnet_note": "Secure CardNET window on confirm.",
+      "paypal_loading": "Loading PayPal…",
+      "paypal_aria": "Pay with PayPal in USD",
+      "paypal_connecting": "Connecting to PayPal… If it takes too long, reload the page.",
+      "bank": {
+        "holder": "Account holder",
+        "type": "Type",
+        "account": "Account",
+        "currency": "Currency",
+        "do_title": "Dominican Republic",
+        "us_title": "United States / international",
+        "beneficiary": "Beneficiary",
+        "name": "Name",
+        "tax_id": "Tax ID",
+        "reference_prefix": "Reference:",
+        "concept_use": "Use the reference in the payment description",
+        "concept_and_email": " and send the receipt to",
+        "whatsapp_cta": "Send receipt via WhatsApp"
+      },
+      "hints": {
+        "cardnet": "Visa / Mastercard",
+        "bank_transfer": "Banreservas · BHD",
+        "paypal": "USD"
+      },
+      "errors": {
+        "service_down": "The payment service is not responding. Message us on WhatsApp and we will complete your order.",
+        "generic": "We could not complete the operation.",
+        "no_whatsapp": "No WhatsApp number is configured.",
+        "accept_terms_ref": "Check the sales terms box to generate the reference.",
+        "prepare_order": "We could not prepare the order.",
+        "card_load": "We could not load the card form. Please use bank transfer.",
+        "card_token": "We did not receive the card details. Please try again.",
+        "paypal_load": "We could not load PayPal. Try again or use bank transfer.",
+        "quote_expired_soft": "The order price expired. We are refreshing the summary.",
+        "accept_terms_pay": "Check the sales terms box to complete payment.",
+        "paypal_cancel": "You canceled the PayPal payment. You can try again or choose another method.",
+        "paypal_fail": "PayPal could not complete the payment. Try again or use bank transfer.",
+        "name": "Enter your full name.",
+        "email": "Enter a valid email address.",
+        "phone": "Enter a contact phone number for delivery.",
+        "address": "Enter the delivery address.",
+        "city": "Enter the delivery city.",
+        "country": "Select the destination country.",
+        "terms": "You must accept the sales terms.",
+        "quote_expired": "The order price expired. We refreshed the summary — review it and confirm again.",
+        "quote_updated": "The price updated while you were filling the form. Review it and confirm again.",
+        "choose_method": "Choose a payment method.",
+        "use_paypal_button": "Use the PayPal button to complete payment.",
+        "init_fail": "We could not start checkout. Reload the page or message us on WhatsApp."
+      },
+      "whatsapp": {
+        "bank_intro": "Hello, I am sending the receipt for my bank transfer.",
+        "reference": "Order reference:",
+        "name": "Name:",
+        "total": "Total:",
+        "order": "Order:"
+      }
+    },
+    "confirmation": {
+      "back": "← Back to store",
+      "secure": "Order recorded",
+      "loading": "Loading confirmation…",
+      "not_found_title": "We could not find that order",
+      "home_cta": "Back to home",
+      "incomplete_link": "The confirmation link is incomplete. Check the email we sent you.",
+      "fetch_fail": "We could not retrieve the details right now. If you completed payment, check your email or message us on WhatsApp with your reference.",
+      "paid_title": "Payment confirmed",
+      "bank_title": "Order reserved — transfer pending",
+      "registered_title": "Order recorded",
+      "reference": "Reference:",
+      "status": "Status",
+      "destination": "Destination",
+      "carrier": "Carrier",
+      "boxes": "Boxes",
+      "eta": "Estimated delivery",
+      "days": "days",
+      "subtotal": "Subtotal",
+      "shipping_dhl": "DHL shipping",
+      "total": "Total",
+      "transfer": "Bank transfer",
+      "concept": "Reference:",
+      "amount": "Amount:",
+      "accounts": "Accounts",
+      "holder": "Account holder",
+      "type": "Type",
+      "account": "Account",
+      "whatsapp_receipt": "Send receipt via WhatsApp",
+      "whatsapp_generic": "Message us on WhatsApp",
+      "continue": "Continue shopping",
+      "final_sale": "Final sale — no returns or refunds.",
+      "wa_order": "Order",
+      "wa_total": "Total:",
+      "wa_bank_note": "I am attaching the bank transfer receipt."
     }
   }
 }

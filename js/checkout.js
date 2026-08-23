@@ -34,8 +34,25 @@
 
   const el = (id) => document.getElementById(id);
 
+  function tt(path, fallback) {
+    try {
+      if (typeof LanguageSwitcher !== 'undefined' && typeof LanguageSwitcher.t === 'function') {
+        const value = LanguageSwitcher.t(path);
+        if (typeof value === 'string' && value) return value;
+      }
+    } catch (_) {
+      /* ignore */
+    }
+    return fallback;
+  }
+
   function money(cents, currency) {
-    return new Intl.NumberFormat('es-DO', {
+    const lang =
+      typeof LanguageSwitcher !== 'undefined' && LanguageSwitcher.getCurrentLanguage
+        ? LanguageSwitcher.getCurrentLanguage()
+        : 'es';
+    const locale = lang === 'en' ? 'en-US' : 'es-DO';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency || 'USD',
       minimumFractionDigits: 2,
@@ -96,12 +113,15 @@
       // Una respuesta que no es JSON casi siempre significa que Nginx no está
       // enrutando /api/commerce al servicio. Merece un mensaje explícito.
       throw new Error(
-        'El servicio de pagos no está respondiendo. Escríbenos por WhatsApp y completamos tu pedido.'
+        tt(
+          'checkout.errors.service_down',
+          'El servicio de pagos no está respondiendo. Escríbenos por WhatsApp y completamos tu pedido.'
+        )
       );
     }
 
     if (!response.ok) {
-      const error = new Error(body.error || 'No pudimos completar la operación.');
+      const error = new Error(body.error || tt('checkout.errors.generic', 'No pudimos completar la operación.'));
       error.code = body.code;
       error.retryable = body.retryable;
       error.status = response.status;
@@ -125,10 +145,10 @@
             <p class="co-item__name">${safe(line.name)}</p>
             <p class="co-item__meta">${safe(line.packagingLabel)} · ${safe(line.displayLabel)}</p>
             <div class="co-item__qty">
-              <button type="button" data-action="dec" aria-label="Quitar uno">−</button>
+              <button type="button" data-action="dec" aria-label="${safe(tt('checkout.dec_aria', 'Quitar uno'))}">−</button>
               <span>${line.quantity}</span>
-              <button type="button" data-action="inc" aria-label="Añadir uno">+</button>
-              <button type="button" class="co-item__remove" data-action="remove">Eliminar</button>
+              <button type="button" data-action="inc" aria-label="${safe(tt('checkout.inc_aria', 'Añadir uno'))}">+</button>
+              <button type="button" class="co-item__remove" data-action="remove">${safe(tt('checkout.remove', 'Eliminar'))}</button>
             </div>
           </div>
           <div class="co-item__price">${money(line.lineTotalCents, state.quote.currency)}</div>
@@ -147,7 +167,7 @@
     el('co-zone').textContent = q.shipping.zone ? `(${q.shipping.zone})` : '';
     el('co-units').textContent = String(q.totalUnits);
     el('co-boxes').textContent = `${q.shippingBoxes} / ${q.shipping.maxBoxes}`;
-    el('co-eta').textContent = `${q.shipping.estimatedDays} días`;
+    el('co-eta').textContent = `${q.shipping.estimatedDays} ${tt('checkout.days', 'días')}`;
   }
 
   function setBusy(busy) {
@@ -157,7 +177,9 @@
     // El botón se habilita en cuanto hay cotización: la validación de campos
     // ocurre al confirmar, no bloquea la UI de pago.
     button.disabled = Boolean(busy) || !state.quoteToken;
-    button.textContent = busy ? 'Procesando…' : 'Confirmar pedido';
+    button.textContent = busy
+      ? tt('checkout.processing', 'Procesando…')
+      : tt('checkout.submit', 'Confirmar pedido');
   }
 
   function syncPaymentUi() {
@@ -224,8 +246,9 @@
     );
 
     if (!methods.length) {
-      container.innerHTML =
-        '<p class="co-methods__empty">No hay métodos de pago disponibles ahora mismo.</p>';
+      container.innerHTML = `<p class="co-methods__empty">${safe(
+        tt('checkout.methods_empty', 'No hay métodos de pago disponibles ahora mismo.')
+      )}</p>`;
       return;
     }
 
@@ -259,9 +282,9 @@
   }
 
   function methodHint(id) {
-    if (id === 'cardnet') return 'Visa / Mastercard';
-    if (id === 'bank_transfer') return 'Banreservas · BHD';
-    if (id === 'paypal') return 'USD';
+    if (id === 'cardnet') return tt('checkout.hints.cardnet', 'Visa / Mastercard');
+    if (id === 'bank_transfer') return tt('checkout.hints.bank_transfer', 'Banreservas · BHD');
+    if (id === 'paypal') return tt('checkout.hints.paypal', 'USD');
     return '';
   }
 
@@ -286,7 +309,7 @@
     if (method.id === 'cardnet') {
       panel.hidden = false;
       panel.innerHTML = `
-        <p class="co-note">Ventana segura de CardNET al confirmar.</p>
+        <p class="co-note">${safe(tt('checkout.cardnet_note', 'Ventana segura de CardNET al confirmar.'))}</p>
         <button type="button" id="co-card-trigger" class="co-hidden-trigger" aria-hidden="true" tabindex="-1"></button>`;
       loadCardnet(method.client);
       syncSubmitVisibility();
@@ -317,8 +340,10 @@
   function renderPaypalDetail(_method) {
     return `
       <div class="co-paypal">
-        <div id="co-paypal-buttons" class="co-paypal-buttons" aria-label="Pagar con PayPal en USD">
-          <p class="co-note co-paypal__loading">Cargando PayPal…</p>
+        <div id="co-paypal-buttons" class="co-paypal-buttons" aria-label="${safe(
+          tt('checkout.paypal_aria', 'Pagar con PayPal en USD')
+        )}">
+          <p class="co-note co-paypal__loading">${safe(tt('checkout.paypal_loading', 'Cargando PayPal…'))}</p>
         </div>
       </div>`;
   }
@@ -335,10 +360,14 @@
         <div class="co-bank__account">
           <p class="co-bank__bank">${safe(account.bankName)}</p>
           <dl>
-            <div><dt>Titular</dt><dd>${safe(account.accountHolder)}</dd></div>
-            <div><dt>Tipo</dt><dd>${safe(account.accountType)}</dd></div>
-            <div><dt>Cuenta</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
-            ${account.currency ? `<div><dt>Moneda</dt><dd>${safe(account.currency)}</dd></div>` : ''}
+            <div><dt>${safe(tt('checkout.bank.holder', 'Titular'))}</dt><dd>${safe(account.accountHolder)}</dd></div>
+            <div><dt>${safe(tt('checkout.bank.type', 'Tipo'))}</dt><dd>${safe(account.accountType)}</dd></div>
+            <div><dt>${safe(tt('checkout.bank.account', 'Cuenta'))}</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
+            ${
+              account.currency
+                ? `<div><dt>${safe(tt('checkout.bank.currency', 'Moneda'))}</dt><dd>${safe(account.currency)}</dd></div>`
+                : ''
+            }
           </dl>
         </div>`;
   }
@@ -364,11 +393,11 @@
     const name = (el('co-form') && el('co-form').fullName && el('co-form').fullName.value.trim()) || '';
     const ref = reference || orderRefLabel();
     return [
-      'Hola, envío el comprobante de mi transferencia bancaria.',
-      ref ? `Referencia del pedido: ${ref}` : '',
-      name ? `Nombre: ${name}` : '',
-      total ? `Total: ${total}` : '',
-      lines ? `Pedido:\n${lines}` : '',
+      tt('checkout.whatsapp.bank_intro', 'Hola, envío el comprobante de mi transferencia bancaria.'),
+      ref ? `${tt('checkout.whatsapp.reference', 'Referencia del pedido:')} ${ref}` : '',
+      name ? `${tt('checkout.whatsapp.name', 'Nombre:')} ${name}` : '',
+      total ? `${tt('checkout.whatsapp.total', 'Total:')} ${total}` : '',
+      lines ? `${tt('checkout.whatsapp.order', 'Pedido:')}\n${lines}` : '',
     ]
       .filter(Boolean)
       .join('\n');
@@ -377,7 +406,7 @@
   function openBankWhatsApp(reference) {
     const phone = houseWhatsApp();
     if (!phone) {
-      showAlert('No hay número de WhatsApp configurado.');
+      showAlert(tt('checkout.errors.no_whatsapp', 'No hay número de WhatsApp configurado.'));
       return;
     }
     window.open(
@@ -403,7 +432,12 @@
         return;
       }
       if (!data.acceptances.finalSale) {
-        showAlert('Marca la casilla de condiciones de venta para generar la referencia.');
+        showAlert(
+          tt(
+            'checkout.errors.accept_terms_ref',
+            'Marca la casilla de condiciones de venta para generar la referencia.'
+          )
+        );
         return;
       }
 
@@ -433,7 +467,7 @@
       } catch (error) {
         if (waWindow && !waWindow.closed) waWindow.close();
         setBusy(false);
-        showAlert(error.message || 'No pudimos preparar el pedido.');
+        showAlert(error.message || tt('checkout.errors.prepare_order', 'No pudimos preparar el pedido.'));
       }
     };
   }
@@ -450,7 +484,7 @@
     const doBlock = dominican.length
       ? `
       <div class="co-bank__region">
-        <h3 class="co-bank__region-title">República Dominicana</h3>
+        <h3 class="co-bank__region-title">${safe(tt('checkout.bank.do_title', 'República Dominicana'))}</h3>
         ${dominican.map(renderAccountCard).join('')}
       </div>`
       : '';
@@ -459,15 +493,21 @@
       american.length || beneficiary.name
         ? `
       <div class="co-bank__region">
-        <h3 class="co-bank__region-title">Estados Unidos / internacional</h3>
+        <h3 class="co-bank__region-title">${safe(
+          tt('checkout.bank.us_title', 'Estados Unidos / internacional')
+        )}</h3>
         ${american.map(renderAccountCard).join('')}
         ${
           beneficiary.name
             ? `<div class="co-bank__account">
-                <p class="co-bank__bank">Beneficiario</p>
+                <p class="co-bank__bank">${safe(tt('checkout.bank.beneficiary', 'Beneficiario'))}</p>
                 <dl>
-                  <div><dt>Nombre</dt><dd>${safe(beneficiary.name)}</dd></div>
-                  ${beneficiary.taxId ? `<div><dt>RNC</dt><dd>${safe(beneficiary.taxId)}</dd></div>` : ''}
+                  <div><dt>${safe(tt('checkout.bank.name', 'Nombre'))}</dt><dd>${safe(beneficiary.name)}</dd></div>
+                  ${
+                    beneficiary.taxId
+                      ? `<div><dt>${safe(tt('checkout.bank.tax_id', 'RNC'))}</dt><dd>${safe(beneficiary.taxId)}</dd></div>`
+                      : ''
+                  }
                 </dl>
               </div>`
             : ''
@@ -475,10 +515,17 @@
       </div>`
         : '';
 
+    const refNote = ref
+      ? `${safe(tt('checkout.bank.reference_prefix', 'Referencia:'))} <strong>${safe(ref)}</strong> · `
+      : '';
+    const emailNote = email
+      ? `${safe(tt('checkout.bank.concept_and_email', ' y envía el comprobante a'))} <strong>${safe(email)}</strong>`
+      : '';
+
     return `
       <div class="co-bank">
         <p class="co-note">
-          ${ref ? `Referencia: <strong>${safe(ref)}</strong> · ` : ''}Usa la referencia en el concepto${email ? ` y envía el comprobante a <strong>${safe(email)}</strong>` : ''}.
+          ${refNote}${safe(tt('checkout.bank.concept_use', 'Usa la referencia en el concepto'))}${emailNote}.
         </p>
         ${doBlock}
         ${usBlock}
@@ -488,7 +535,7 @@
           href="#"
           target="_blank"
           rel="noopener noreferrer"
-        >Enviar comprobante por WhatsApp</a>
+        >${safe(tt('checkout.bank.whatsapp_cta', 'Enviar comprobante por WhatsApp'))}</a>
       </div>`;
   }
 
@@ -527,7 +574,14 @@
         }
       };
       script.onerror = () =>
-        reject(new Error('No pudimos cargar el formulario de tarjeta. Usa transferencia bancaria.'));
+        reject(
+          new Error(
+            tt(
+              'checkout.errors.card_load',
+              'No pudimos cargar el formulario de tarjeta. Usa transferencia bancaria.'
+            )
+          )
+        );
       document.head.appendChild(script);
     });
 
@@ -543,7 +597,7 @@
     const trxToken = token && (token.TokenId || token.tokenId || token);
     if (!trxToken) {
       setBusy(false);
-      showAlert('No recibimos los datos de la tarjeta. Inténtalo de nuevo.');
+      showAlert(tt('checkout.errors.card_token', 'No recibimos los datos de la tarjeta. Inténtalo de nuevo.'));
       return;
     }
     submitOrder({ trxToken });
@@ -569,8 +623,9 @@
       }
       const host = el('co-paypal-buttons');
       if (host) {
-        host.innerHTML =
-          '<p class="co-note">Conectando con PayPal… Si tarda, recarga la página.</p>';
+        host.innerHTML = `<p class="co-note">${safe(
+          tt('checkout.paypal_connecting', 'Conectando con PayPal… Si tarda, recarga la página.')
+        )}</p>`;
       }
       return;
     }
@@ -600,14 +655,22 @@
       script.async = true;
       script.onload = () => {
         if (!window.paypal) {
-          reject(new Error('No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.'));
+          reject(
+            new Error(
+              tt('checkout.errors.paypal_load', 'No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.')
+            )
+          );
           return;
         }
         resolve(window.paypal);
       };
       script.onerror = () => {
         paypalSdkReady = null;
-        reject(new Error('No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.'));
+        reject(
+          new Error(
+            tt('checkout.errors.paypal_load', 'No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.')
+          )
+        );
       };
       document.head.appendChild(script);
     });
@@ -640,7 +703,9 @@
           throw new Error('validacion');
         }
         if (!state.quoteToken) {
-          showAlert('El precio del pedido caducó. Recargamos el resumen.');
+          showAlert(
+            tt('checkout.errors.quote_expired_soft', 'El precio del pedido caducó. Recargamos el resumen.')
+          );
           refreshQuote();
           throw new Error('cotizacion');
         }
@@ -653,7 +718,12 @@
       onApprove: async (data) => {
         const formData = readForm();
         if (!formData.acceptances.finalSale) {
-          showAlert('Marca la casilla de condiciones de venta para completar el pago.');
+          showAlert(
+            tt(
+              'checkout.errors.accept_terms_pay',
+              'Marca la casilla de condiciones de venta para completar el pago.'
+            )
+          );
           setBusy(false);
           return;
         }
@@ -661,11 +731,22 @@
       },
       onCancel: () => {
         setBusy(false);
-        showAlert('Cancelaste el pago en PayPal. Puedes intentarlo de nuevo o elegir otro método.', 'info');
+        showAlert(
+          tt(
+            'checkout.errors.paypal_cancel',
+            'Cancelaste el pago en PayPal. Puedes intentarlo de nuevo o elegir otro método.'
+          ),
+          'info'
+        );
       },
       onError: () => {
         setBusy(false);
-        showAlert('PayPal no pudo completar el pago. Prueba de nuevo o usa transferencia bancaria.');
+        showAlert(
+          tt(
+            'checkout.errors.paypal_fail',
+            'PayPal no pudo completar el pago. Prueba de nuevo o usa transferencia bancaria.'
+          )
+        );
       },
     });
 
@@ -706,18 +787,26 @@
   function localErrors(data, opts = {}) {
     const requireTerms = opts.requireTerms !== false;
     const errors = [];
-    if (data.customer.fullName.length < 3) errors.push('Escribe tu nombre completo.');
+    if (data.customer.fullName.length < 3) {
+      errors.push(tt('checkout.errors.name', 'Escribe tu nombre completo.'));
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.customer.email)) {
-      errors.push('Escribe un correo electrónico válido.');
+      errors.push(tt('checkout.errors.email', 'Escribe un correo electrónico válido.'));
     }
     if (data.customer.phone.replace(/\D/g, '').length < 7) {
-      errors.push('Escribe un teléfono de contacto para la entrega.');
+      errors.push(tt('checkout.errors.phone', 'Escribe un teléfono de contacto para la entrega.'));
     }
-    if (data.shipping.address.length < 5) errors.push('Escribe la dirección de entrega.');
-    if (data.shipping.city.length < 2) errors.push('Escribe la ciudad de entrega.');
-    if (!data.shipping.country) errors.push('Selecciona el país de destino.');
+    if (data.shipping.address.length < 5) {
+      errors.push(tt('checkout.errors.address', 'Escribe la dirección de entrega.'));
+    }
+    if (data.shipping.city.length < 2) {
+      errors.push(tt('checkout.errors.city', 'Escribe la ciudad de entrega.'));
+    }
+    if (!data.shipping.country) {
+      errors.push(tt('checkout.errors.country', 'Selecciona el país de destino.'));
+    }
     if (requireTerms && !data.acceptances.finalSale) {
-      errors.push('Debes aceptar las condiciones de venta.');
+      errors.push(tt('checkout.errors.terms', 'Debes aceptar las condiciones de venta.'));
     }
     return errors;
   }
@@ -733,7 +822,12 @@
   /** Crea el pedido en el servidor. Devuelve el cuerpo o null si falló con alerta. */
   async function createOrderPayload(paymentPayload) {
     if (!state.quoteToken) {
-      showAlert('El precio del pedido caducó. Recargamos el resumen, revísalo y confirma otra vez.');
+      showAlert(
+        tt(
+          'checkout.errors.quote_expired',
+          'El precio del pedido caducó. Recargamos el resumen, revísalo y confirma otra vez.'
+        )
+      );
       refreshQuote();
       return null;
     }
@@ -777,7 +871,12 @@
       setBusy(false);
 
       if (error.code === 'QUOTE_EXPIRED' || error.code === 'QUOTE_INVALID') {
-        showAlert('El precio se actualizó mientras completabas el formulario. Revísalo y confirma otra vez.');
+        showAlert(
+          tt(
+            'checkout.errors.quote_updated',
+            'El precio se actualizó mientras completabas el formulario. Revísalo y confirma otra vez.'
+          )
+        );
         refreshQuote();
         return;
       }
@@ -803,7 +902,7 @@
     }
 
     if (!state.method) {
-      showAlert('Elige un método de pago.');
+      showAlert(tt('checkout.errors.choose_method', 'Elige un método de pago.'));
       return;
     }
 
@@ -821,7 +920,7 @@
     }
 
     if (state.method === 'paypal') {
-      showAlert('Usa el botón de PayPal para completar el pago.');
+      showAlert(tt('checkout.errors.use_paypal_button', 'Usa el botón de PayPal para completar el pago.'));
       return;
     }
 
@@ -832,9 +931,34 @@
 
   function renderStaticCopy() {
     const terms = el('co-policy-terms');
-    if (terms && typeof SALES_POLICY !== 'undefined') {
-      terms.textContent = SALES_POLICY.checkoutText;
+    if (!terms) return;
+    terms.textContent = tt(
+      'checkout.terms',
+      typeof SALES_POLICY !== 'undefined'
+        ? SALES_POLICY.checkoutText
+        : 'Acepto venta final (sin devoluciones) y la responsabilidad aduanera en destino.'
+    );
+  }
+
+  function reapplyLanguage() {
+    renderStaticCopy();
+    if (state.quote) {
+      renderItems();
+      renderTotals();
     }
+    if (state.config) {
+      const previous = state.method;
+      renderPaymentMethods();
+      if (previous) {
+        const input = document.querySelector(`input[name="paymentMethod"][value="${previous}"]`);
+        if (input) {
+          input.checked = true;
+          state.method = previous;
+          renderMethodDetail();
+        }
+      }
+    }
+    setBusy(state.submitting);
   }
 
   function fillCountries(countries) {
@@ -902,6 +1026,7 @@
 
   async function init() {
     renderStaticCopy();
+    window.addEventListener('cds:language-changed', reapplyLanguage);
 
     if (typeof initCartPersistence === 'function') initCartPersistence();
 
@@ -931,7 +1056,12 @@
   document.addEventListener('DOMContentLoaded', () => {
     init().catch((error) => {
       console.error('[checkout]', error);
-      showAlert('No pudimos iniciar el checkout. Recarga la página o escríbenos por WhatsApp.');
+      showAlert(
+        tt(
+          'checkout.errors.init_fail',
+          'No pudimos iniciar el checkout. Recarga la página o escríbenos por WhatsApp.'
+        )
+      );
     });
   });
 

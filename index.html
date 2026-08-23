@@ -45,20 +45,20 @@
         aria-labelledby="age-gate-brand"
         aria-describedby="age-gate-description"
       >
-        <p class="age-gate__eyebrow">Acceso reservado</p>
+        <p class="age-gate__eyebrow" data-i18n="home.age_gate.eyebrow">Acceso reservado</p>
         <h1 id="age-gate-brand" class="age-gate__brand">Cazador de Sueños</h1>
-        <p class="age-gate__tagline">Puros premium · Legado dominicano</p>
-        <p id="age-gate-description" class="age-gate__description">
+        <p class="age-gate__tagline" data-i18n="home.age_gate.tagline">Puros premium · Legado dominicano</p>
+        <p id="age-gate-description" class="age-gate__description" data-i18n="home.age_gate.description">
           Este sitio presenta productos de tabaco de alta gama. Confirma que tienes 21 años o más,
           o la edad legal aplicable en tu jurisdicción, para continuar.
         </p>
         <div class="age-gate__actions">
-          <button type="button" class="btn btn--primary cds-press" data-age-gate-accept>
+          <button type="button" class="btn btn--primary cds-press" data-age-gate-accept data-i18n="home.age_gate.accept">
             Sí, tengo 21 años o más
           </button>
-          <button type="button" class="btn btn--secondary cds-press" data-age-gate-deny>No</button>
+          <button type="button" class="btn btn--secondary cds-press" data-age-gate-deny data-i18n="home.age_gate.deny">No</button>
         </div>
-        <p class="age-gate__note" data-age-gate-feedback>
+        <p class="age-gate__note" data-age-gate-feedback data-i18n="home.age_gate.note">
           La confirmación se guarda en una cookie para no volver a interrumpir tu visita.
         </p>
         <a
@@ -67,6 +67,7 @@
           href="https://www.google.com"
           target="_self"
           hidden
+          data-i18n="home.age_gate.exit"
         >
           Salir del sitio
         </a>
@@ -87,12 +88,12 @@
             />
           </a>
           <nav class="site-nav" aria-label="Principal">
-            <a href="#bienvenida">Bienvenida</a>
-            <a href="#la-historia">Historia</a>
-            <a href="#maestria">Maestría</a>
-            <a href="#las-vitolas">Las Vitolas</a>
-            <a href="#el-proceso">El Proceso</a>
-            <a href="#contacto">Contacto</a>
+            <a href="#bienvenida" data-i18n="home.nav.welcome">Bienvenida</a>
+            <a href="#la-historia" data-i18n="home.nav.history">Historia</a>
+            <a href="#maestria" data-i18n="home.nav.mastery">Maestría</a>
+            <a href="#las-vitolas" data-i18n="home.nav.vitolas">Las Vitolas</a>
+            <a href="#el-proceso" data-i18n="home.nav.process">El Proceso</a>
+            <a href="#contacto" data-i18n="home.nav.contact">Contacto</a>
           </nav>
           <div class="site-header__actions">
             <div class="lang-selector">
@@ -106,7 +107,7 @@
               </button>
             </div>
             <button type="button" id="cart-toggle" class="cart-button" aria-label="Abrir carrito" aria-controls="cart-drawer" aria-expanded="false">
-              Carrito
+              <span data-i18n="home.nav.cart">Carrito</span>
               <span id="cart-count" class="cart-button__count">0</span>
             </button>
           </div>
@@ -121,7 +122,7 @@
           </div>
           <div class="container hero__inner hero-premium__inner">
             <div class="hero-premium__content">
-              <p class="hero__eyebrow">Bienvenida</p>
+              <p class="hero__eyebrow" data-i18n="home.hero.eyebrow">Bienvenida</p>
               <div class="hero-smoke-stage">
                 <div class="hero-smoke-stage__leaf" aria-hidden="true"></div>
                 <canvas class="hero-smoke-canvas" aria-hidden="true"></canvas>
@@ -129,13 +130,13 @@
                   Cazador de Sueños
                 </h1>
               </div>
-              <p class="hero-premium__lead">Santiago de los Caballeros • República Dominicana</p>
-              <p class="hero-premium__subhead">
+              <p class="hero-premium__lead" data-i18n="home.hero.lead">Santiago de los Caballeros • República Dominicana</p>
+              <p class="hero-premium__subhead" data-i18n="home.hero.subhead">
                 Tres generaciones dedicadas al oficio más noble del tabaco. Puros artesanales
                 donde la tradición dominicana alcanza la precisión del lujo absoluto.
               </p>
               <div class="hero-premium__actions">
-                <a href="#las-vitolas" class="btn btn--primary btn--lg cds-press">Descubrir la colección</a>
+                <a href="#las-vitolas" class="btn btn--primary btn--lg cds-press" data-i18n="home.hero.cta">Descubrir la colección</a>
               </div>
             </div>
           </div>
@@ -146,8 +147,8 @@
           <div id="raiz" class="section-anchor" aria-hidden="true"></div>
           <div class="container story-grid">
             <div class="story-copy">
-              <p class="section__eyebrow">La Historia</p>
-              <h2>Legado familiar, técnica ancestral y memoria viva.</h2>
+              <p class="section__eyebrow" data-i18n="home.story.eyebrow">La Historia</p>
+              <h2 data-i18n="home.story.title">Legado familiar, técnica ancestral y memoria viva.</h2>
               <p data-i18n="maestria.chapter7.text1">
                 Todo comenzó en la región norte de la República Dominicana, donde un antepasado de
                 nuestra familia dedicó su vida al cultivo y procesamiento del tabaco. Con el tiempo,
@@ -183,8 +184,8 @@
         <section id="el-tabaco" class="section premium-section premium-section--leaf">
           <div class="container leaf-grid">
             <div class="leaf-copy">
-              <p class="section__eyebrow">Origen</p>
-              <h2>Origen, cultivo y carácter dominicano.</h2>
+              <p class="section__eyebrow" data-i18n="home.origen.eyebrow">Origen</p>
+              <h2 data-i18n="home.origen.title">Origen, cultivo y carácter dominicano.</h2>
               <p data-i18n="maestria.intro">
                 Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen,
                 cultivo, fermentación, mano experta, reposo y legado.
@@ -193,11 +194,11 @@
                 El campo define la identidad. La hoja madura bajo el sol, acumula fuerza y revela su
                 destino en la textura, el color y la elasticidad.
               </p>
-              <a href="#maestria" class="btn btn--secondary">Seguir el recorrido</a>
+              <a href="#maestria" class="btn btn--secondary" data-i18n="home.origen.cta">Seguir el recorrido</a>
             </div>
             <figure class="leaf-media premium-media-frame">
               <img src="images/historia-semillero.jpg" alt="Semillero y comienzo del proceso tabacalero" />
-              <figcaption>Semillero y comienzo del proceso tabacalero</figcaption>
+              <figcaption data-i18n="home.origen.caption">Semillero y comienzo del proceso tabacalero</figcaption>
             </figure>
           </div>
         </section>
@@ -209,15 +210,15 @@
           </div>
           <div class="container hero__inner hero-premium__inner">
             <div class="hero-premium__content">
-              <p class="hero__eyebrow">Exclusividad · Legado familiar</p>
-              <h2 class="hero-premium__title">Maestría tabacalera de autor</h2>
-              <p class="hero-premium__lead">Santiago de los Caballeros · República Dominicana</p>
-              <p class="hero-premium__subhead">
+              <p class="hero__eyebrow" data-i18n="home.maestria_hero.eyebrow">Exclusividad · Legado familiar</p>
+              <h2 class="hero-premium__title" data-i18n="home.maestria_hero.title">Maestría tabacalera de autor</h2>
+              <p class="hero-premium__lead" data-i18n="home.maestria_hero.lead">Santiago de los Caballeros · República Dominicana</p>
+              <p class="hero-premium__subhead" data-i18n="home.maestria_hero.subhead">
                 Tres generaciones dedicadas al oficio más noble del tabaco. Puros artesanales
                 donde la tradición dominicana alcanza la precisión del lujo absoluto.
               </p>
               <div class="hero-premium__actions">
-                <a href="#el-proceso" class="btn btn--primary btn--lg cds-press">Conocer el oficio</a>
+                <a href="#el-proceso" class="btn btn--primary btn--lg cds-press" data-i18n="home.maestria_hero.cta">Conocer el oficio</a>
               </div>
             </div>
           </div>
@@ -228,9 +229,9 @@
           <div id="catalogo" class="section-anchor" aria-hidden="true"></div>
           <div class="container">
             <header class="section__header section__header--centered">
-              <p class="section__eyebrow">Las Vitolas</p>
-              <h2>La colección de la casa</h2>
-              <p>
+              <p class="section__eyebrow" data-i18n="home.vitolas.eyebrow">Las Vitolas</p>
+              <h2 data-i18n="home.vitolas.title">La colección de la casa</h2>
+              <p data-i18n="home.vitolas.intro">
                 Compra por caja o puro suelto. Totales firmados en checkout. Aquí conviven la casa, el
                 origen y la firma sensorial de cada línea.
               </p>
@@ -243,8 +244,8 @@
         <section id="el-proceso" class="section premium-section premium-section--mastery">
           <div class="container">
             <header class="section__header section__header--centered">
-              <p class="section__eyebrow" data-i18n="maestria.label">El Proceso</p>
-              <h2 data-i18n="maestria.title">El Arte de la Paciencia</h2>
+              <p class="section__eyebrow" data-i18n="home.process.label">El Proceso</p>
+              <h2 data-i18n="home.process.title">El Arte de la Paciencia</h2>
               <p data-i18n="maestria.intro">
                 Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen,
                 cultivo, fermentación, mano experta, reposo y legado.
@@ -302,28 +303,28 @@
         <section id="envios" class="section section--alt premium-section premium-section--info">
           <div class="container info-grid">
             <article>
-              <h3>Envío internacional</h3>
-              <p>
+              <h3 data-i18n="home.shipping.international_title">Envío internacional</h3>
+              <p data-i18n="home.shipping.international_text">
                 Tarifas DHL según destino. El costo se calcula en el checkout y forma parte del total
                 que confirma el servidor.
               </p>
             </article>
             <article>
-              <h3>Empaque de casa</h3>
-              <p>
+              <h3 data-i18n="home.shipping.packaging_title">Empaque de casa</h3>
+              <p data-i18n="home.shipping.packaging_text">
                 Cajas de 20 puros, excepto El Rango (10). Fotografías reales de cada vitola.
               </p>
             </article>
             <article>
-              <h3>Venta final</h3>
-              <p>
+              <h3 data-i18n="home.shipping.final_sale_title">Venta final</h3>
+              <p data-i18n="home.shipping.final_sale_text">
                 Todos los pedidos son venta final. No se admiten devoluciones ni reembolsos una vez
                 confirmado el pago.
               </p>
             </article>
             <article id="pagos">
-              <h3>Pagos</h3>
-              <p>
+              <h3 data-i18n="home.shipping.payments_title">Pagos</h3>
+              <p data-i18n="home.shipping.payments_text">
                 Transferencia bancaria (República Dominicana y envíos desde EE.UU.) o PayPal.
                 Este sitio no pide número de tarjeta.
               </p>
@@ -336,9 +337,9 @@
       <footer id="contacto" class="site-footer">
         <div class="container site-footer__inner">
           <div class="site-footer__brand">
-            <p class="site-footer__eyebrow">Contacto</p>
+            <p class="site-footer__eyebrow" data-i18n="home.footer.eyebrow">Contacto</p>
             <p class="site-footer__title">Cazador de Sueños Cigar SRL</p>
-            <p>© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
+            <p data-i18n="home.footer.copy">© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
           </div>
           <p class="site-footer__contact">
             <a href="mailto:ventas@cazadordesuenocigars.com">ventas@cazadordesuenocigars.com</a>
@@ -350,17 +351,17 @@
     <div id="cart-overlay" class="overlay" aria-hidden="true"></div>
     <aside id="cart-drawer" class="cart-drawer" aria-label="Carrito de compras">
       <header class="cart-drawer__header">
-        <h2>Tu carrito</h2>
+        <h2 data-i18n="home.cart.title">Tu carrito</h2>
         <button type="button" id="cart-close" class="btn-icon" aria-label="Cerrar">×</button>
       </header>
       <ul id="mini-cart-items" class="mini-cart"></ul>
       <footer class="cart-drawer__footer">
         <div class="cart-drawer__subtotal">
-          <span>Subtotal</span>
+          <span data-i18n="home.cart.subtotal">Subtotal</span>
           <strong id="mini-cart-subtotal">$0.00</strong>
         </div>
         <p class="cart-drawer__note">
-          <span id="cart-line-count">0</span> línea(s) · El envío se calcula en checkout.
+          <span id="cart-line-count">0</span> <span data-i18n="home.cart.lines_note">línea(s) · El envío se calcula en checkout.</span>
         </p>
 
         <!-- Zona de conversión: lista para PayPal + transferencia -->
@@ -369,15 +370,15 @@
           id="cart-payments-preview"
           aria-label="Métodos de pago en checkout"
         >
-          <p class="cart-drawer__payments-label">Pago en el checkout</p>
+          <p class="cart-drawer__payments-label" data-i18n="home.cart.payments_label">Pago en el checkout</p>
           <ul class="cart-drawer__payments-list">
             <li class="cart-drawer__payments-item" data-payment-method="paypal">
               <span class="cart-drawer__payments-name">PayPal</span>
-              <span class="cart-drawer__payments-hint">Botón oficial en la pasarela</span>
+              <span class="cart-drawer__payments-hint" data-i18n="home.cart.paypal_hint">Botón oficial en la pasarela</span>
             </li>
             <li class="cart-drawer__payments-item" data-payment-method="bank_transfer">
-              <span class="cart-drawer__payments-name">Transferencia bancaria</span>
-              <span class="cart-drawer__payments-hint">Cuentas RD y USA</span>
+              <span class="cart-drawer__payments-name" data-i18n="home.cart.bank_name">Transferencia bancaria</span>
+              <span class="cart-drawer__payments-hint" data-i18n="home.cart.bank_hint">Cuentas RD y USA</span>
             </li>
           </ul>
           <div id="cart-payment-slots" class="cart-drawer__payment-slots" hidden>
@@ -386,7 +387,7 @@
           </div>
         </section>
 
-        <a id="go-checkout" href="checkout.html" class="btn btn--primary btn--block">
+        <a id="go-checkout" href="checkout.html" class="btn btn--primary btn--block" data-i18n="home.cart.checkout">
           Ir al checkout
         </a>
       </footer>

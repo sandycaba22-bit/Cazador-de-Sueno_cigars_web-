@@ -20,8 +20,11 @@ BRANCH="${BRANCH:-main}"
 DOMAIN="${DOMAIN:-cazadordesuenocigar.com}"
 
 # Capa de comercio: lo que vive en git y lo que el checkout necesita.
+# IMPORTANTE: js/shipping.js alimenta /api/commerce/config (lista de países).
+# Hay que copiar también server/ para que Node en /var/www/html lea el mismo árbol.
 FILES=(checkout.html order-confirmation.html style.css)
 DIRS=(css js config locales assets vitolas)
+SERVER_DIRS=(server/commerce server/ai-sommelier)
 
 azul()  { printf '\033[1;36m%s\033[0m\n' "$1"; }
 verde() { printf '\033[1;32m%s\033[0m\n' "$1"; }
@@ -76,15 +79,37 @@ for d in "${DIRS[@]}"; do
   sudo cp -a "$REPO_DIR/$d/." "$SITE_ROOT/$d/"
 done
 
+for d in "${SERVER_DIRS[@]}"; do
+  echo "    -> $d/"
+  sudo mkdir -p "$SITE_ROOT/$d"
+  sudo cp -a "$REPO_DIR/$d/." "$SITE_ROOT/$d/"
+  # Nunca publicar secretos versionados por error.
+  sudo rm -f "$SITE_ROOT/$d/.env" "$SITE_ROOT/$d/.env.local" 2>/dev/null || true
+done
+
+# Unit files apuntan a /var/www/html (SITE_ROOT).
+if [[ -f "$REPO_DIR/server/commerce/cds-commerce.service" ]]; then
+  sudo cp -a "$REPO_DIR/server/commerce/cds-commerce.service" /etc/systemd/system/cds-commerce.service
+fi
+if [[ -f "$REPO_DIR/server/ai-sommelier/cds-ai-sommelier.service" ]]; then
+  sudo cp -a "$REPO_DIR/server/ai-sommelier/cds-ai-sommelier.service" /etc/systemd/system/cds-ai-sommelier.service
+fi
+
 azul "==> Ajustando permisos..."
 sudo chown -R www-data:www-data "$SITE_ROOT"
 sudo find "$SITE_ROOT" -type f -exec chmod 644 {} \;
 sudo find "$SITE_ROOT" -type d -exec chmod 755 {} \;
 
-# Los archivos estaticos no necesitan recarga, pero no cuesta nada y cubre el caso
-# de que se haya tocado la configuracion de Nginx.
-azul "==> Recargando Nginx..."
+azul "==> Recargando Nginx y reiniciando APIs..."
 sudo nginx -t && sudo systemctl reload nginx
+sudo systemctl daemon-reload
+# Comercio (países/PayPal) y sommelier: reinicia lo que exista en esta VM.
+if systemctl list-unit-files | grep -q '^cds-commerce.service'; then
+  sudo systemctl restart cds-commerce || true
+fi
+if systemctl list-unit-files | grep -q '^cds-ai-sommelier.service'; then
+  sudo systemctl restart cds-ai-sommelier || true
+fi
 
 # --- 4. Verificacion ------------------------------------------------------------
 azul "==> Verificando el sitio publicado..."
@@ -107,12 +132,13 @@ comprobar() {
 }
 
 comprobar "/"
-comprobar "/checkout.html" "bank-transfer-always"
+comprobar "/checkout.html" "co-form"
 comprobar "/order-confirmation.html"
+comprobar "/js/shipping.js" "República Dominicana"
 comprobar "/js/commerce-urls.js" "getCheckoutUrl"
-comprobar "/css/checkout-commerce.css"
 comprobar "/config/products.json"
 comprobar "/vitolas/puro-habano.html" "commerce-urls.js"
+comprobar "/api/commerce/health" '"ok":true'
 rm -f /tmp/deploy-check
 
 echo
