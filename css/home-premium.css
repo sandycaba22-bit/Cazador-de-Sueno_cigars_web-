@@ -501,22 +501,37 @@ body.age-gate-open .age-gate--entry {
 }
 
 .hero-premium__atmosphere--welcome {
-  background-color: #120c08;
-  background-image:
-    linear-gradient(180deg, rgba(8, 6, 4, 0.35) 0%, transparent 28%, transparent 62%, rgba(8, 6, 4, 0.45) 100%),
-    url('../images/maestria-hoja.jpg');
-  background-size: cover, cover;
-  background-position: center 35%, center 42%;
+  background-color: #1c140a;
+  background-image: url('../images/hero-nicaragua-galera.png');
+  background-size: cover;
+  background-position: center 52%;
   background-repeat: no-repeat;
-  transform: scale(1.04);
-  filter: saturate(1.05) contrast(1.06);
+  transform: scale(1.02);
+  filter: saturate(1.14) contrast(1.04) brightness(1.08);
 }
 
 .hero-premium--welcome .hero-premium__veil {
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 42%, rgba(8, 6, 4, 0.22) 0%, rgba(8, 6, 4, 0.58) 100%),
-    linear-gradient(180deg, rgba(5, 5, 5, 0.42) 0%, rgba(5, 5, 5, 0.18) 38%, rgba(5, 5, 5, 0.28) 72%, rgba(5, 5, 5, 0.55) 100%),
-    linear-gradient(135deg, rgba(138, 106, 60, 0.1) 0%, transparent 50%);
+  /* Gradiente lineal uniforme: no forma mancha; oscurece solo la zona de texto inferior */
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 42%,
+    rgba(8, 6, 4, 0.16) 55%,
+    rgba(6, 5, 3, 0.38) 68%,
+    rgba(5, 4, 3, 0.52) 82%,
+    rgba(4, 3, 2, 0.6) 100%
+  );
+}
+
+/* Sin humo ni manchas en primer plano — solo el paisaje limpio */
+.hero-premium__atmosphere--welcome::before,
+.hero-premium__atmosphere--welcome::after {
+  content: none;
+  display: none;
+}
+
+.hero-premium--welcome .hero-smoke-canvas {
+  display: none !important;
 }
 
 .hero-premium--welcome .hero-premium__title {
@@ -533,8 +548,7 @@ body.age-gate-open .age-gate--entry {
   color: #f3ead5;
   text-shadow:
     0 1px 0 rgba(255, 248, 232, 0.22),
-    0 2px 14px rgba(0, 0, 0, 0.55),
-    0 4px 28px rgba(212, 175, 55, 0.18);
+    0 2px 8px rgba(0, 0, 0, 0.55);
   position: relative;
   z-index: 3;
 }
@@ -550,21 +564,9 @@ body.age-gate-open .age-gate--entry {
   padding: clamp(1.25rem, 3vw, 2rem) 0.5rem;
 }
 
+/* Ya no usamos el óvalo de hoja: el paisaje full-bleed es el fondo */
 .hero-smoke-stage__leaf {
-  position: absolute;
-  inset: -18% -8% -8%;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse 55% 48% at 50% 46%, rgba(18, 12, 8, 0.15) 0%, rgba(8, 6, 4, 0.55) 100%),
-    url('../images/maestria-hoja.jpg');
-  background-size: cover;
-  background-position: center 48%;
-  background-repeat: no-repeat;
-  filter: saturate(1.08) contrast(1.08) brightness(0.92);
-  border-radius: 40% 40% 36% 36% / 28% 28% 42% 42%;
-  opacity: 0.92;
-  pointer-events: none;
-  transform: scale(1.06);
+  display: none;
 }
 
 .hero-smoke-stage__leaf::after {
@@ -620,13 +622,13 @@ body.age-gate-open .age-gate--entry {
 }
 
 .hero-premium--welcome .hero-premium__lead {
-  color: #c5a059;
+  color: #e8d4a8;
   font-family: var(--cds-font-body);
   font-weight: 500;
   font-size: clamp(0.7rem, 1.5vw, 0.8rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  text-shadow: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
 }
 
 .hero-premium--welcome .hero-premium__lead::after {
@@ -653,6 +655,7 @@ body.age-gate-open .age-gate--entry {
 .hero-premium__veil {
   position: absolute;
   inset: 0;
+  z-index: 2;
   background:
     radial-gradient(ellipse 62% 52% at 50% 46%, rgba(7, 7, 7, 0.18) 0%, rgba(7, 7, 7, 0.52) 72%, rgba(7, 7, 7, 0.68) 100%),
     linear-gradient(180deg, rgba(7, 7, 7, 0.58) 0%, rgba(7, 7, 7, 0.22) 34%, rgba(7, 7, 7, 0.28) 68%, rgba(7, 7, 7, 0.62) 100%),
@@ -690,6 +693,8 @@ body.age-gate-open .age-gate--entry {
 
 .hero-premium--welcome .hero-premium__content {
   animation: heroFade 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  background: none;
+  border-radius: 0;
 }
 
 .hero__eyebrow,
@@ -737,6 +742,11 @@ body.age-gate-open .age-gate--entry {
   font-size: clamp(1rem, 2vw, 1.12rem);
   line-height: 1.85;
   text-wrap: balance;
+}
+
+.hero-premium--welcome .hero-premium__subhead {
+  color: rgba(252, 248, 240, 0.96);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .hero-premium__actions {
