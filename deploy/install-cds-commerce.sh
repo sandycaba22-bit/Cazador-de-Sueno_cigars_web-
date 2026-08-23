@@ -69,11 +69,10 @@ else
   printf '\nCOMMERCE_SANDBOX_ENABLED=false\n' >> "$ENV_FILE"
 fi
 
-# PayPal en vivo: modo live + enable si ya hay Client ID y Secret.
-if grep -q '^PAYPAL_MODE=' "$ENV_FILE"; then
-  sed -i 's|^PAYPAL_MODE=.*|PAYPAL_MODE=live|' "$ENV_FILE"
-else
-  printf '\nPAYPAL_MODE=live\n' >> "$ENV_FILE"
+# PayPal: no pisar PAYPAL_MODE. En pruebas de compra usamos sandbox; live se
+# fija a mano en commerce.env cuando toque cobrar en producción.
+if ! grep -q '^PAYPAL_MODE=' "$ENV_FILE"; then
+  printf '\nPAYPAL_MODE=sandbox\n' >> "$ENV_FILE"
 fi
 
 if grep -qE '^PAYPAL_CLIENT_ID=.+' "$ENV_FILE" && grep -qE '^PAYPAL_CLIENT_SECRET=.+' "$ENV_FILE"; then
@@ -82,7 +81,8 @@ if grep -qE '^PAYPAL_CLIENT_ID=.+' "$ENV_FILE" && grep -qE '^PAYPAL_CLIENT_SECRE
   else
     printf '\nPAYPAL_ENABLED=true\n' >> "$ENV_FILE"
   fi
-  echo "PayPal: credenciales detectadas → PAYPAL_ENABLED=true y PAYPAL_MODE=live."
+  MODE_NOW="$(grep -E '^PAYPAL_MODE=' "$ENV_FILE" | head -n1 | cut -d= -f2-)"
+  echo "PayPal: credenciales detectadas → PAYPAL_ENABLED=true (PAYPAL_MODE=${MODE_NOW:-sandbox})."
 fi
 if ! grep -q '^COMMERCE_QUOTE_SECRET=.\+' "$ENV_FILE"; then
   QUOTE_SECRET="$(openssl rand -hex 32)"
