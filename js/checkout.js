@@ -300,7 +300,13 @@
 
     if (method.id === 'bank_transfer') {
       panel.hidden = false;
-      panel.innerHTML = renderBankDetails(method.client);
+      // Usar datos del servidor o fallback a configuración local
+      const bankData = method.client || {
+        accounts: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.accounts) || [],
+        beneficiary: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.beneficiary) || {},
+        email: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.email) || ''
+      };
+      panel.innerHTML = renderBankDetails(bankData);
       bindBankWhatsApp();
       syncSubmitVisibility();
       return;
@@ -448,12 +454,28 @@
       try {
         setBusy(true);
         state.method = 'bank_transfer';
-        const result = await createOrderPayload({});
+        
+        // Intentar crear pedido con servidor, fallback a local
+        let result = null;
+        try {
+          result = await createOrderPayload({});
+        } catch (serverError) {
+          console.log('Server unavailable, using local order creation:', serverError);
+          // Fallback: generar referencia local
+          const localRef = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.referencePrefix) 
+            ? APP_CONFIG.bankTransfer.referencePrefix 
+            : 'CS-';
+          const timestamp = Date.now().toString(36).toUpperCase();
+          const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+          result = { reference: `${localRef}${timestamp}-${random}` };
+        }
+        
         if (!result) {
           if (waWindow && !waWindow.closed) waWindow.close();
           setBusy(false);
           return;
         }
+        
         const waUrl = `https://wa.me/${houseWhatsApp()}?text=${encodeURIComponent(
           bankWhatsAppMessage(result.reference)
         )}`;
@@ -463,7 +485,7 @@
           // Si el popup sigue bloqueado, el enlace de confirmación abre WhatsApp.
           window.open(waUrl, '_blank', 'noopener');
         }
-        goToConfirmation(result);
+        setBusy(false);
       } catch (error) {
         if (waWindow && !waWindow.closed) waWindow.close();
         setBusy(false);
@@ -473,13 +495,17 @@
   }
 
   function renderBankDetails(bank) {
-    if (!bank) return '';
-    const accounts = bank.accounts || [];
+    // Usar configuración local si no hay datos del servidor
+    const accounts = (bank && bank.accounts) || 
+      (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.accounts) || [];
+    const beneficiary = (bank && bank.beneficiary) || 
+      (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.beneficiary) || {};
+    const email = (bank && bank.email) || 
+      (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.email) || '';
+    const ref = orderRefLabel();
+
     const dominican = accounts.filter((account) => accountRegion(account) === 'DO');
     const american = accounts.filter((account) => accountRegion(account) === 'US');
-    const beneficiary = bank.beneficiary || {};
-    const email = bank.email || '';
-    const ref = orderRefLabel();
 
     const doBlock = dominican.length
       ? `
