@@ -81,9 +81,9 @@
       "name": "El Sultán",
       "name_en": "The Sultan",
       "price_usd": 5.50,
-      "price_box_usd": 145.00,
-      "description": "Robusto 5×50 - Valle del Cibao",
-      "description_en": "Robusto 5×50 - Cibao Valley",
+      "price_box_usd": 148.00,
+      "description": "Robusto 50×5 - Valle del Cibao",
+      "description_en": "Robusto 50×5 - Cibao Valley",
       "image": "img/el-sultan-cigarro.jpg",
       "category": "premium",
       "stock": 100,
@@ -94,5 +94,5 @@
   ],
   "currency": "USD",
   "pricing_type": "retail",
-  "last_updated": "2026-07-30"
+  "last_updated": "2026-08-20"
 }

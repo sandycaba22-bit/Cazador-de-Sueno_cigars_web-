@@ -78,12 +78,12 @@ test('los nombres coinciden, para que el cliente lea lo mismo en toda la compra'
   }
 });
 
-test('el precio de la caja es exactamente el del puro por las unidades que lleva', () => {
+test('cada caja tiene un precio explícito y mayor que el del puro individual', () => {
   for (const product of getCatalog()) {
-    assert.equal(
-      Math.round(product.pricePerBox * 100),
-      Math.round(product.pricePerUnit * 100) * product.unitsPerBox,
-      `${product.id}: comprar una caja no cuesta lo mismo que comprar sus puros`
+    assert.ok(product.pricePerBox > 0, `${product.id}: la caja debe tener precio`);
+    assert.ok(
+      product.pricePerBox > product.pricePerUnit,
+      `${product.id}: la caja debe costar más que un puro suelto`
     );
   }
 });

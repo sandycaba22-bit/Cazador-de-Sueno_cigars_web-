@@ -52,6 +52,7 @@ const CATALOG = [
     line: PRODUCT_LINES.CLASSIC,
     description: 'Gran Toro 58×6 — El Primer Sueño',
     pricePerUnit: 12.0,
+    pricePerBox: 240.0,
     unitsPerBox: PACKAGING.STANDARD_UNITS,
     stockUnits: 100,
     image: 'img/el-emperador-cigarro.jpg',
@@ -66,6 +67,7 @@ const CATALOG = [
     line: PRODUCT_LINES.CLASSIC,
     description: 'Churchill 48×7 — Raíces Cubanas',
     pricePerUnit: 14.0,
+    pricePerBox: 280.0,
     unitsPerBox: PACKAGING.STANDARD_UNITS,
     stockUnits: 100,
     image: 'img/puro-habano-cigarro.jpg',
@@ -80,6 +82,7 @@ const CATALOG = [
     line: PRODUCT_LINES.RESERVA,
     description: 'Gran Toro 58×6 — Edición de Autor',
     pricePerUnit: 13.5,
+    pricePerBox: 270.0,
     unitsPerBox: PACKAGING.STANDARD_UNITS,
     stockUnits: 50,
     image: 'img/el-exquisito-cigarro.jpg',
@@ -94,6 +97,7 @@ const CATALOG = [
     line: PRODUCT_LINES.RANGO,
     description: 'Doble Perfecto 60×4½ — Formato Figurado',
     pricePerUnit: 16.0,
+    pricePerBox: 160.0,
     unitsPerBox: PACKAGING.RANGO_UNITS,
     stockUnits: 100,
     image: 'img/el-rango-cigarro.jpg',
@@ -106,8 +110,9 @@ const CATALOG = [
     name: 'Ligero 007',
     nameEn: 'Ligero 007',
     line: PRODUCT_LINES.RESERVA,
-    description: 'Robusto 5×50 — Obra Maestra',
+    description: 'Toro 58×5 — Obra Maestra',
     pricePerUnit: 11.0,
+    pricePerBox: 220.0,
     unitsPerBox: PACKAGING.STANDARD_UNITS,
     stockUnits: 50,
     image: 'images/ligero-007/cigarro.jpg',
@@ -120,8 +125,9 @@ const CATALOG = [
     name: 'El Sultán',
     nameEn: 'The Sultan',
     line: PRODUCT_LINES.CLASSIC,
-    description: 'Robusto 5×50 — Valle del Cibao',
-    pricePerUnit: 15.0,
+    description: 'Robusto 50×5 — Valle del Cibao',
+    pricePerUnit: 5.5,
+    pricePerBox: 148.0,
     unitsPerBox: PACKAGING.STANDARD_UNITS,
     stockUnits: 100,
     image: 'img/el-sultan-cigarro.jpg',
@@ -132,13 +138,17 @@ const CATALOG = [
 ];
 
 /**
- * El precio por caja se deriva del precio unitario, nunca al revés: así una
- * caja siempre cuesta exactamente lo que cuestan sus puros y no hay redondeos
- * que hagan divergir el total del cliente y el del servidor.
+ * El precio por caja se declara de forma explícita cuando la presentación
+ * incluye extras (por ejemplo, caja de madera y anillado). Si no viene
+ * declarado, se calcula a partir del precio unitario y el empaque.
  */
 function enrichProduct(product) {
   const unitsPerBox = product.unitsPerBox || getUnitsPerBox(product.line);
   const stockUnits = product.stockUnits;
+  const pricePerBox =
+    typeof product.pricePerBox === 'number'
+      ? product.pricePerBox
+      : Math.round(product.pricePerUnit * unitsPerBox * 100) / 100;
   return {
     ...product,
     unitsPerBox,
@@ -148,7 +158,7 @@ function enrichProduct(product) {
       unitsPerBox === PACKAGING.RANGO_UNITS
         ? `Caja Rango (${PACKAGING.RANGO_UNITS} uds.)`
         : `Caja estándar (${PACKAGING.STANDARD_UNITS} uds.)`,
-    pricePerBox: Math.round(product.pricePerUnit * unitsPerBox * 100) / 100,
+    pricePerBox,
     inStock: stockUnits > 0,
   };
 }
