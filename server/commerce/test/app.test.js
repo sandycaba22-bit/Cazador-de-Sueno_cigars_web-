@@ -61,6 +61,72 @@ function pasarelaAprobada(id = 'test_pay') {
   });
 }
 
+/** Registro de PayPal de prueba para cubrir setup, cancelación lógica y captura. */
+function registroPaypalPrueba() {
+  const gateway = {
+    id: 'paypal',
+    label: 'PayPal',
+    requiresCardData: false,
+    isConfigured: () => true,
+    describe: () => ({
+      id: 'paypal',
+      label: 'PayPal',
+      available: true,
+      ready: true,
+      client: {
+        clientId: 'PAYPAL-SANDBOX-ID',
+        currency: 'USD',
+        intent: 'capture',
+        mode: 'sandbox',
+        scriptUrl: 'https://www.sandbox.paypal.com/sdk/js?client-id=PAYPAL-SANDBOX-ID',
+      },
+    }),
+    validatePayload(payload) {
+      if (!payload || !payload.paypalOrderId) {
+        throw new CheckoutError(
+          ERROR_CODES.PAYPAL_ORDER_MISSING,
+          'Confirma el pago en la ventana de PayPal antes de continuar.'
+        );
+      }
+    },
+    async createCheckoutOrder({ amountCents, currency, quoteId }) {
+      return {
+        paypalOrderId: `PAYPAL-ORDER-${quoteId}`,
+        status: 'CREATED',
+        amountCents,
+        currency,
+      };
+    },
+    async charge(ctx) {
+      return {
+        status: 'paid',
+        gateway: 'paypal',
+        transactionId: `CAP-${ctx.payload.paypalOrderId}`,
+        authorizationCode: `CAP-${ctx.payload.paypalOrderId}`,
+        customerMessage: 'Pago con PayPal confirmado.',
+        diagnostics: {
+          paypalOrderId: ctx.payload.paypalOrderId,
+          captureStatus: 'COMPLETED',
+          mode: 'sandbox',
+        },
+      };
+    },
+  };
+
+  return {
+    get(id) {
+      if (id !== 'paypal') {
+        throw new CheckoutError(ERROR_CODES.GATEWAY_NOT_CONFIGURED, 'No disponible.', {
+          httpStatus: 503,
+        });
+      }
+      return gateway;
+    },
+    list: () => [gateway],
+    describeAvailable: () => [gateway.describe()],
+  };
+}
+
 function testConfig(overrides = {}) {
   return {
     nodeEnv: 'test',
@@ -479,6 +545,91 @@ test('PayPal aparece en el checkout pero no cobra sin credenciales', async () =>
     });
     assert.equal(cobro.status, 503);
     assert.equal(cobro.body.code, 'GATEWAY_NOT_CONFIGURED');
+  } finally {
+    await api.close();
+  }
+});
+
+test('PayPal configurado crea una orden de checkout sin registrar todavía el pedido', async () => {
+  const api = await startServer(testConfig(), { gateways: registroPaypalPrueba() });
+  try {
+    const { quoteToken, quote } = await cotizar(api);
+
+    const setup = await api.request('POST', '/api/commerce/paypal/orders', {
+      body: { quoteToken },
+    });
+
+    assert.equal(setup.status, 200, setup.text);
+    assert.match(setup.body.paypalOrderId, /^PAYPAL-ORDER-/);
+    assert.equal(setup.body.status, 'CREATED');
+
+    const ficheros = fs.readdirSync(path.join(api.config.dataDir, 'orders'));
+    assert.equal(
+      ficheros.length,
+      0,
+      'crear la orden PayPal no debe registrar un pedido si el comprador cancela'
+    );
+
+    assert.equal(quote.totalCents > 0, true);
+  } finally {
+    await api.close();
+  }
+});
+
+test('PayPal configurado captura el pago y confirma el pedido', async () => {
+  const api = await startServer(testConfig(), { gateways: registroPaypalPrueba() });
+  try {
+    const { quoteToken, quote } = await cotizar(api, [
+      { productId: 'emperador', unitType: 'box', quantity: 1 },
+      { productId: 'sultan', unitType: 'unit', quantity: 3 },
+    ]);
+
+    const setup = await api.request('POST', '/api/commerce/paypal/orders', {
+      body: { quoteToken },
+    });
+    assert.equal(setup.status, 200, setup.text);
+
+    const created = await api.request('POST', '/api/commerce/orders', {
+      headers: { 'Idempotency-Key': 'paypal-prueba-0001' },
+      body: {
+        quoteToken,
+        paymentMethod: 'paypal',
+        paymentPayload: { paypalOrderId: setup.body.paypalOrderId },
+        ...datosCliente(),
+      },
+    });
+
+    assert.equal(created.status, 201, created.text);
+    assert.equal(created.body.paymentStatus, 'paid');
+    assert.equal(created.body.status, 'confirmed');
+    assert.ok(created.body.accessToken);
+
+    const order = await api.store.get(created.body.reference);
+    assert.equal(order.totalCents, quote.totalCents);
+    assert.equal(order.payment.gateway, 'paypal');
+    assert.equal(order.payment.transactionId, `CAP-${setup.body.paypalOrderId}`);
+    assert.equal(order.payment.diagnostics.paypalOrderId, setup.body.paypalOrderId);
+  } finally {
+    await api.close();
+  }
+});
+
+test('PayPal configurado rechaza confirmar el pedido si falta paypalOrderId', async () => {
+  const api = await startServer(testConfig(), { gateways: registroPaypalPrueba() });
+  try {
+    const { quoteToken } = await cotizar(api);
+
+    const response = await api.request('POST', '/api/commerce/orders', {
+      body: {
+        quoteToken,
+        paymentMethod: 'paypal',
+        paymentPayload: {},
+        ...datosCliente(),
+      },
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.code, ERROR_CODES.PAYPAL_ORDER_MISSING);
   } finally {
     await api.close();
   }

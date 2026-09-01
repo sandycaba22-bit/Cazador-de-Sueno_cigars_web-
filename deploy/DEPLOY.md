@@ -233,10 +233,36 @@ sudo nano /etc/cazador-de-suenos/commerce.env
 # Obligatorio: COMMERCE_QUOTE_SECRET (el instalador la genera si el fichero es nuevo)
 # Sandbox: COMMERCE_SANDBOX_ENABLED=false (retirado del checkout; no ofrecerlo)
 # CardNET: CARDNET_ENABLED=true + PUBLIC/PRIVATE_ACCOUNT_KEY + CARDNET_USD_DOP_RATE si liquidas en DOP
-# PayPal:  PAYPAL_ENABLED=true + PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET + PAYPAL_MODE=live
+# PayPal Sandbox: PAYPAL_ENABLED=true + PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET + PAYPAL_MODE=sandbox
+# PayPal Live:    PAYPAL_ENABLED=true + PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET + PAYPAL_MODE=live
 sudo systemctl restart cds-commerce
 sudo journalctl -u cds-commerce -f
 ```
+
+### Activación local de PayPal Sandbox
+
+Para probar el checkout en tu PC, coloca las claves en uno de estos dos archivos:
+
+- `C:\Users\sandy\cazador-de-suenos-cigars\.env`
+- `C:\Users\sandy\cazador-de-suenos-cigars\server\commerce\.env`
+
+Variables mínimas:
+
+```env
+PAYPAL_ENABLED=true
+PAYPAL_CLIENT_ID=TU_CLIENT_ID_SANDBOX
+PAYPAL_CLIENT_SECRET=TU_CLIENT_SECRET_SANDBOX
+PAYPAL_MODE=sandbox
+PAYPAL_CURRENCY=USD
+```
+
+### Cambio de Sandbox a Live
+
+1. Crea la app Live en PayPal Developer.
+2. Sustituye `PAYPAL_CLIENT_ID` y `PAYPAL_CLIENT_SECRET` por las credenciales Live.
+3. Cambia `PAYPAL_MODE=live`.
+4. Reinicia `cds-commerce`.
+5. Verifica `https://www.cazadordesuenocigars.com/api/commerce/health`.
 
 Comprueba que Nginx **no** sirve el código ni los pedidos:
 
