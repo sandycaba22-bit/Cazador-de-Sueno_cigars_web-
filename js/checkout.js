@@ -19,9 +19,11 @@
 
   const API = '/api/commerce';
   const QUOTE_DEBOUNCE_MS = 350;
-  const PAYPAL_SDK_HOST = 'https://www.paypal.com/sdk/js';
+  const PAYPAL_SDK_HOST_LIVE = 'https://www.paypal.com/sdk/js';
+  const PAYPAL_SDK_HOST_SANDBOX = 'https://www.sandbox.paypal.com/sdk/js';
   const PAYPAL_BLOCKED_ERROR = 'PAYPAL_CHECKOUT_BLOCKED';
   const BANK_TRANSFER_WHATSAPP = '18096764090';
+  const PAYPAL_CONTAINER_ID = 'paypal-button-container';
 
   /** @type {{ config: object|null, quote: object|null, quoteToken: string|null, method: string|null, idempotencyKey: string|null, submitting: boolean }} */
   const state = {
@@ -296,9 +298,20 @@
     return methods.find((m) => m.id === state.method) || null;
   }
 
+  function paypalHostEl() {
+    return el(PAYPAL_CONTAINER_ID) || el('co-paypal-buttons');
+  }
+
+  function setPaypalHostVisible(visible) {
+    const host = paypalHostEl();
+    if (!host) return;
+    host.hidden = !visible;
+  }
+
   function renderMethodDetail() {
     const panel = el('co-method-detail');
     const method = currentMethod();
+    if (!method || method.id !== 'paypal') setPaypalHostVisible(false);
     if (!panel || !method) return;
 
     if (method.id === 'bank_transfer') {
@@ -326,8 +339,20 @@
     }
 
     if (method.id === 'paypal') {
-      panel.hidden = false;
-      panel.innerHTML = renderPaypalDetail(method);
+      const host = paypalHostEl();
+      if (host) {
+        panel.hidden = true;
+        panel.innerHTML = '';
+        host.hidden = false;
+        if (!host.querySelector('iframe, .paypal-buttons')) {
+          host.innerHTML = `<p class="co-note co-paypal__loading">${safe(
+            tt('checkout.paypal_loading', 'Cargando PayPal…')
+          )}</p>`;
+        }
+      } else {
+        panel.hidden = false;
+        panel.innerHTML = renderPaypalDetail(method);
+      }
       mountPaypal(method);
       syncSubmitVisibility();
       return;
@@ -349,7 +374,7 @@
   function renderPaypalDetail(_method) {
     return `
       <div class="co-paypal">
-        <div id="co-paypal-buttons" class="co-paypal-buttons" aria-label="${safe(
+        <div id="${PAYPAL_CONTAINER_ID}" class="co-paypal-buttons" aria-label="${safe(
           tt('checkout.paypal_aria', 'Pagar con PayPal en USD')
         )}">
           <p class="co-note co-paypal__loading">${safe(tt('checkout.paypal_loading', 'Cargando PayPal…'))}</p>
@@ -390,7 +415,7 @@
   }
 
   function bankWhatsAppMessage(reference) {
-    const ref = reference || orderRefLabel();
+    const ref = String(reference || orderRefLabel() || '').trim();
     return `¡Hola! He realizado mi pedido #${ref}. Adjunto comprobante.`;
   }
 
@@ -406,10 +431,14 @@
     }
     const url = bankWhatsAppUrl(reference);
     if (waWindow && !waWindow.closed) {
-      waWindow.location.replace(url);
-      return true;
+      try {
+        waWindow.location.replace(url);
+        return true;
+      } catch (_) {
+        /* el navegador a veces bloquea replace; abrimos otra pestaña */
+      }
     }
-    window.open(url, '_blank', 'noopener');
+    window.open(url, '_blank', 'noopener,noreferrer');
     return true;
   }
 
@@ -435,7 +464,7 @@
     try {
       state.method = 'bank_transfer';
       const result = await createOrderPayload({});
-      if (!result) {
+      if (!result || !result.reference) {
         if (waWindow && !waWindow.closed) waWindow.close();
         setBusy(false);
         return;
@@ -602,16 +631,65 @@
   let paypalButtons = null;
   let paypalSdkSource = '';
 
+  /**
+   * Client ID limpio: sin comillas de .env, sin URL pegada y sin caracteres
+   * que PayPal rechaza (eso es lo que dispara el HTTP 400 del SDK).
+   */
+  function sanitizePaypalClientId(raw) {
+    let value = String(raw == null ? '' : raw).trim();
+    if (!value) return '';
+    if (
+      (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') ||
+      (value.charAt(0) === "'" && value.charAt(value.length - 1) === "'")
+    ) {
+      value = value.slice(1, -1).trim();
+    }
+    if (/^https?:\/\//i.test(value)) {
+      try {
+        value = new URL(value).searchParams.get('client-id') || '';
+      } catch (_) {
+        return '';
+      }
+    }
+    return value.replace(/[^A-Za-z0-9_-]/g, '');
+  }
+
+  function resolvePaypalClient(client) {
+    const source = client || {};
+    let clientId = sanitizePaypalClientId(source.clientId);
+    let mode = String(source.mode || '').toLowerCase();
+
+    if (source.scriptUrl) {
+      try {
+        const url = new URL(source.scriptUrl);
+        if (!clientId) clientId = sanitizePaypalClientId(url.searchParams.get('client-id'));
+        if (!mode) mode = /sandbox/i.test(url.hostname) ? 'sandbox' : 'live';
+      } catch (_) {
+        /* scriptUrl malformada: se ignora */
+      }
+    }
+
+    if (mode !== 'sandbox') mode = 'live';
+    const currencyRaw = String(source.currency || 'USD').toUpperCase();
+    const currency = /^[A-Z]{3}$/.test(currencyRaw) ? currencyRaw : 'USD';
+    return { clientId, currency, mode, intent: 'capture' };
+  }
+
+  function paypalSdkHost(client) {
+    return resolvePaypalClient(client).mode === 'sandbox'
+      ? PAYPAL_SDK_HOST_SANDBOX
+      : PAYPAL_SDK_HOST_LIVE;
+  }
+
+  /** Solo client-id + currency + intent. Ningún flag extra (components, buyer-country, …). */
   function buildPaypalSdkUrl(client) {
-    const clientId = String((client && client.clientId) || '').trim();
-    if (!clientId) return '';
-    const params = new URLSearchParams({
-      'client-id': clientId,
-      currency: String((client && client.currency) || 'USD').toUpperCase(),
-      intent: 'capture',
-      components: 'buttons',
-    });
-    return `${PAYPAL_SDK_HOST}?${params.toString()}`;
+    const resolved = resolvePaypalClient(client);
+    if (!resolved.clientId) return '';
+    return (
+      `${paypalSdkHost(resolved)}?client-id=${encodeURIComponent(resolved.clientId)}` +
+      `&currency=${encodeURIComponent(resolved.currency)}` +
+      `&intent=capture`
+    );
   }
 
   function resetPaypalSdk() {
@@ -652,33 +730,17 @@
     const sdkUrl = buildPaypalSdkUrl(client);
     const canLoad = Boolean(client && sdkUrl);
     if (!canLoad) {
-      // Reintenta con lo que venga de /config tras un refresh.
       const fromConfig = ((state.config && state.config.paymentMethods) || []).find((m) => m.id === 'paypal');
       if (fromConfig && fromConfig.client && buildPaypalSdkUrl(fromConfig.client)) {
         return mountPaypal(fromConfig);
       }
-      const host = el('co-paypal-buttons');
-      if (host) {
-        host.innerHTML = `<p class="co-note">${safe(
-          tt(
-            'checkout.paypal_connecting',
-            'PayPal no está configurado todavía. Verifica el Client ID Live e intenta otra vez.'
-          )
-        )}</p>`;
-      }
       return;
     }
 
-    const sdkClient = {
-      ...client,
-      scriptUrl: sdkUrl,
-    };
-
-    loadPaypalSdk(sdkClient)
+    loadPaypalSdk(client)
       .then(() => renderPaypalButtons())
-      .catch((error) => {
-        const host = el('co-paypal-buttons');
-        if (host) host.innerHTML = `<p class="co-note">${safe(error.message)}</p>`;
+      .catch(() => {
+        /* No bloquear la UI ni mostrar "No pudimos cargar PayPal". */
       });
   }
 
@@ -737,9 +799,10 @@
   }
 
   function renderPaypalButtons() {
-    const host = el('co-paypal-buttons');
-    if (!host || !window.paypal) return;
+    const host = paypalHostEl();
+    if (!host || !window.paypal || typeof window.paypal.Buttons !== 'function') return;
 
+    host.hidden = false;
     host.innerHTML = '';
     if (paypalButtons && typeof paypalButtons.close === 'function') {
       try {
@@ -750,10 +813,8 @@
     }
 
     paypalButtons = window.paypal.Buttons({
-      fundingSource: window.paypal.FUNDING.PAYPAL,
       style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
       createOrder: async () => {
-        // Solo datos de contacto/envío: las condiciones se piden al capturar.
         const data = readForm();
         const errors = localErrors(data, { requireTerms: false });
         if (errors.length) {
@@ -794,7 +855,17 @@
           setBusy(false);
           return;
         }
-        await submitOrder({ paypalOrderId: data.orderID });
+        const orderId = data && (data.orderID || data.orderId);
+        if (!orderId) {
+          showAlert(
+            tt(
+              'checkout.errors.paypal_create',
+              'No pudimos iniciar la orden de PayPal. Intenta de nuevo en unos segundos.'
+            )
+          );
+          return;
+        }
+        await submitOrder({ paypalOrderId: orderId });
       },
       onCancel: () => {
         setBusy(false);
@@ -818,7 +889,10 @@
       },
     });
 
-    return paypalButtons.render(host);
+    return paypalButtons.render(`#${PAYPAL_CONTAINER_ID}`).catch((error) => {
+      if (isPaypalAbort(error)) return;
+      /* El contenedor permanece visible; no bloqueamos el resto del checkout. */
+    });
   }
 
   // ------------------------------------------------------------- envío
@@ -962,6 +1036,9 @@
     event.preventDefault();
     if (state.submitting) return;
 
+    const selected = document.querySelector('input[name="paymentMethod"]:checked');
+    if (selected) state.method = selected.value;
+
     const data = readForm();
     const errors = localErrors(data);
     if (errors.length) {
@@ -993,6 +1070,8 @@
     }
 
     if (state.method === 'bank_transfer') {
+      // Abrir la pestaña en el click (síncrono) para que el popup no lo bloquee
+      // después del POST. Tras el 200 se navega a WhatsApp y esta pestaña a confirmación.
       const waWindow = window.open('about:blank', '_blank');
       await submitBankTransferOrder(waWindow);
       return;
@@ -1089,10 +1168,7 @@
     const paypal = ((state.config && state.config.paymentMethods) || []).find((m) => m.id === 'paypal');
     if (!paypal || !paypal.client) return;
     if (!buildPaypalSdkUrl(paypal.client)) return;
-    loadPaypalSdk({
-      clientId: paypal.client.clientId,
-      currency: paypal.client.currency,
-    }).catch(() => {
+    loadPaypalSdk(paypal.client).catch(() => {
       /* se reintenta al seleccionar PayPal */
     });
   }
