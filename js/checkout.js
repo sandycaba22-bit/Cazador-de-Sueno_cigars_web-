@@ -19,6 +19,9 @@
 
   const API = '/api/commerce';
   const QUOTE_DEBOUNCE_MS = 350;
+  const PAYPAL_SDK_HOST = 'https://www.paypal.com/sdk/js';
+  const PAYPAL_BLOCKED_ERROR = 'PAYPAL_CHECKOUT_BLOCKED';
+  const BANK_TRANSFER_WHATSAPP = '18096764090';
 
   /** @type {{ config: object|null, quote: object|null, quoteToken: string|null, method: string|null, idempotencyKey: string|null, submitting: boolean }} */
   const state = {
@@ -379,11 +382,7 @@
   }
 
   function houseWhatsApp() {
-    const fromConfig =
-      (state.config && state.config.contact && state.config.contact.whatsapp) ||
-      (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.whatsapp && APP_CONFIG.whatsapp.phone) ||
-      '18094645016';
-    return String(fromConfig).replace(/\D/g, '');
+    return BANK_TRANSFER_WHATSAPP;
   }
 
   function orderRefLabel() {
@@ -391,106 +390,74 @@
   }
 
   function bankWhatsAppMessage(reference) {
-    const q = state.quote;
-    const total = q ? money(q.totalCents, q.currency) : '';
-    const lines = q
-      ? q.lines.map((l) => `• ${l.name} — ${l.displayLabel}`).join('\n')
-      : '';
-    const name = (el('co-form') && el('co-form').fullName && el('co-form').fullName.value.trim()) || '';
     const ref = reference || orderRefLabel();
-    return [
-      tt('checkout.whatsapp.bank_intro', 'Hola, envío el comprobante de mi transferencia bancaria.'),
-      ref ? `${tt('checkout.whatsapp.reference', 'Referencia del pedido:')} ${ref}` : '',
-      name ? `${tt('checkout.whatsapp.name', 'Nombre:')} ${name}` : '',
-      total ? `${tt('checkout.whatsapp.total', 'Total:')} ${total}` : '',
-      lines ? `${tt('checkout.whatsapp.order', 'Pedido:')}\n${lines}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
+    return `¡Hola! He realizado mi pedido #${ref}. Adjunto comprobante.`;
   }
 
-  function openBankWhatsApp(reference) {
+  function bankWhatsAppUrl(reference) {
+    return `https://wa.me/${houseWhatsApp()}?text=${encodeURIComponent(bankWhatsAppMessage(reference))}`;
+  }
+
+  function openBankWhatsApp(reference, waWindow) {
     const phone = houseWhatsApp();
     if (!phone) {
       showAlert(tt('checkout.errors.no_whatsapp', 'No hay número de WhatsApp configurado.'));
+      return false;
+    }
+    const url = bankWhatsAppUrl(reference);
+    if (waWindow && !waWindow.closed) {
+      waWindow.location.replace(url);
+      return true;
+    }
+    window.open(url, '_blank', 'noopener');
+    return true;
+  }
+
+  function validateForBankTransfer() {
+    const data = readForm();
+    const errors = localErrors(data);
+    if (errors.length) {
+      showAlert(errors[0]);
+      return false;
+    }
+    return true;
+  }
+
+  async function submitBankTransferOrder(waWindow) {
+    if (!validateForBankTransfer()) {
+      if (waWindow && !waWindow.closed) waWindow.close();
       return;
     }
-    window.open(
-      `https://wa.me/${phone}?text=${encodeURIComponent(bankWhatsAppMessage(reference))}`,
-      '_blank',
-      'noopener'
-    );
+
+    setBusy(true);
+    clearAlert();
+
+    try {
+      state.method = 'bank_transfer';
+      const result = await createOrderPayload({});
+      if (!result) {
+        if (waWindow && !waWindow.closed) waWindow.close();
+        setBusy(false);
+        return;
+      }
+      openBankWhatsApp(result.reference, waWindow);
+      goToConfirmation(result);
+    } catch (error) {
+      if (waWindow && !waWindow.closed) waWindow.close();
+      setBusy(false);
+      showAlert(error.message || tt('checkout.errors.prepare_order', 'No pudimos preparar el pedido.'));
+    }
   }
 
   function bindBankWhatsApp() {
     const link = el('co-bank-whatsapp');
     if (!link) return;
-    const phone = houseWhatsApp();
-    link.href = `https://wa.me/${phone}?text=${encodeURIComponent(bankWhatsAppMessage(orderRefLabel()))}`;
+    link.href = bankWhatsAppUrl(orderRefLabel() || 'CS-REFERENCIA');
     link.onclick = async (event) => {
       event.preventDefault();
       if (state.submitting) return;
-
-      const data = readForm();
-      const basics = localErrors(data, { requireTerms: false });
-      if (basics.length) {
-        showAlert(basics[0]);
-        return;
-      }
-      if (!data.acceptances.finalSale) {
-        showAlert(
-          tt(
-            'checkout.errors.accept_terms_ref',
-            'Marca la casilla de condiciones de venta para generar la referencia.'
-          )
-        );
-        return;
-      }
-
-      // Abrir la pestaña en el gesto del click: tras el await el navegador
-      // bloquea window.open() y el botón de WhatsApp parece “roto”.
       const waWindow = window.open('about:blank', '_blank');
-
-      try {
-        setBusy(true);
-        state.method = 'bank_transfer';
-        
-        // Intentar crear pedido con servidor, fallback a local
-        let result = null;
-        try {
-          result = await createOrderPayload({});
-        } catch (serverError) {
-          console.log('Server unavailable, using local order creation:', serverError);
-          // Fallback: generar referencia local
-          const localRef = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.referencePrefix) 
-            ? APP_CONFIG.bankTransfer.referencePrefix 
-            : 'CS-';
-          const timestamp = Date.now().toString(36).toUpperCase();
-          const random = Math.random().toString(36).slice(2, 6).toUpperCase();
-          result = { reference: `${localRef}${timestamp}-${random}` };
-        }
-        
-        if (!result) {
-          if (waWindow && !waWindow.closed) waWindow.close();
-          setBusy(false);
-          return;
-        }
-        
-        const waUrl = `https://wa.me/${houseWhatsApp()}?text=${encodeURIComponent(
-          bankWhatsAppMessage(result.reference)
-        )}`;
-        if (waWindow && !waWindow.closed) {
-          waWindow.location.replace(waUrl);
-        } else {
-          // Si el popup sigue bloqueado, el enlace de confirmación abre WhatsApp.
-          window.open(waUrl, '_blank', 'noopener');
-        }
-        setBusy(false);
-      } catch (error) {
-        if (waWindow && !waWindow.closed) waWindow.close();
-        setBusy(false);
-        showAlert(error.message || tt('checkout.errors.prepare_order', 'No pudimos preparar el pedido.'));
-      }
+      await submitBankTransferOrder(waWindow);
     };
   }
 
@@ -633,6 +600,48 @@
 
   let paypalSdkReady = null;
   let paypalButtons = null;
+  let paypalSdkSource = '';
+
+  function buildPaypalSdkUrl(client) {
+    const clientId = String((client && client.clientId) || '').trim();
+    if (!clientId) return '';
+    const params = new URLSearchParams({
+      'client-id': clientId,
+      currency: String((client && client.currency) || 'USD').toUpperCase(),
+      intent: 'capture',
+      components: 'buttons',
+    });
+    return `${PAYPAL_SDK_HOST}?${params.toString()}`;
+  }
+
+  function resetPaypalSdk() {
+    paypalSdkReady = null;
+    paypalSdkSource = '';
+    document.querySelectorAll('script[data-paypal-sdk="true"], script[src*="paypal.com/sdk/js"]').forEach((script) => {
+      script.remove();
+    });
+    try {
+      delete window.paypal;
+    } catch (_) {
+      window.paypal = undefined;
+    }
+  }
+
+  function paypalAbort(message) {
+    showAlert(message);
+    const error = new Error(PAYPAL_BLOCKED_ERROR);
+    error.code = PAYPAL_BLOCKED_ERROR;
+    return error;
+  }
+
+  function isPaypalAbort(error) {
+    return Boolean(
+      error &&
+        (error.code === PAYPAL_BLOCKED_ERROR ||
+          error.message === PAYPAL_BLOCKED_ERROR ||
+          String(error).includes(PAYPAL_BLOCKED_ERROR))
+    );
+  }
 
   /**
    * Monta los Smart Payment Buttons oficiales en cuanto hay Client ID del servidor.
@@ -640,17 +649,21 @@
    */
   function mountPaypal(method) {
     const client = method && method.client;
-    const canLoad = Boolean(client && (client.scriptUrl || client.clientId));
+    const sdkUrl = buildPaypalSdkUrl(client);
+    const canLoad = Boolean(client && sdkUrl);
     if (!canLoad) {
       // Reintenta con lo que venga de /config tras un refresh.
       const fromConfig = ((state.config && state.config.paymentMethods) || []).find((m) => m.id === 'paypal');
-      if (fromConfig && fromConfig.client && (fromConfig.client.scriptUrl || fromConfig.client.clientId)) {
+      if (fromConfig && fromConfig.client && buildPaypalSdkUrl(fromConfig.client)) {
         return mountPaypal(fromConfig);
       }
       const host = el('co-paypal-buttons');
       if (host) {
         host.innerHTML = `<p class="co-note">${safe(
-          tt('checkout.paypal_connecting', 'Conectando con PayPal… Si tarda, recarga la página.')
+          tt(
+            'checkout.paypal_connecting',
+            'PayPal no está configurado todavía. Verifica el Client ID Live e intenta otra vez.'
+          )
         )}</p>`;
       }
       return;
@@ -658,9 +671,7 @@
 
     const sdkClient = {
       ...client,
-      scriptUrl:
-        client.scriptUrl ||
-        `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(client.clientId)}&currency=${encodeURIComponent(client.currency || 'USD')}&intent=capture&components=buttons`,
+      scriptUrl: sdkUrl,
     };
 
     loadPaypalSdk(sdkClient)
@@ -672,15 +683,36 @@
   }
 
   function loadPaypalSdk(client) {
-    if (window.paypal) return Promise.resolve(window.paypal);
-    if (paypalSdkReady) return paypalSdkReady;
+    const scriptUrl = buildPaypalSdkUrl(client);
+    const existingScript = document.querySelector('script[data-paypal-sdk="true"], script[src*="paypal.com/sdk/js"]');
+    if (!paypalSdkSource && existingScript && existingScript.src) {
+      paypalSdkSource = existingScript.src;
+    }
+    if (!scriptUrl) {
+      return Promise.reject(
+        new Error(
+          tt('checkout.errors.paypal_load', 'No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.')
+        )
+      );
+    }
+    if (window.paypal && paypalSdkSource === scriptUrl) return Promise.resolve(window.paypal);
+    if (paypalSdkReady && paypalSdkSource === scriptUrl) return paypalSdkReady;
+    if (window.paypal && paypalSdkSource && paypalSdkSource !== scriptUrl) {
+      resetPaypalSdk();
+    }
+    if (paypalSdkSource && paypalSdkSource !== scriptUrl) {
+      resetPaypalSdk();
+    }
 
     paypalSdkReady = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = client.scriptUrl;
+      script.src = scriptUrl;
       script.async = true;
+      script.dataset.paypalSdk = 'true';
+      paypalSdkSource = scriptUrl;
       script.onload = () => {
         if (!window.paypal) {
+          paypalSdkReady = null;
           reject(
             new Error(
               tt('checkout.errors.paypal_load', 'No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.')
@@ -691,7 +723,7 @@
         resolve(window.paypal);
       };
       script.onerror = () => {
-        paypalSdkReady = null;
+        resetPaypalSdk();
         reject(
           new Error(
             tt('checkout.errors.paypal_load', 'No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.')
@@ -725,20 +757,29 @@
         const data = readForm();
         const errors = localErrors(data, { requireTerms: false });
         if (errors.length) {
-          showAlert(errors[0]);
-          throw new Error('validacion');
+          throw paypalAbort(errors[0]);
         }
         if (!state.quoteToken) {
-          showAlert(
-            tt('checkout.errors.quote_expired_soft', 'El precio del pedido caducó. Recargamos el resumen.')
+          const message = tt(
+            'checkout.errors.quote_expired_soft',
+            'El precio del pedido caducó. Recargamos el resumen.'
           );
           refreshQuote();
-          throw new Error('cotizacion');
+          throw paypalAbort(message);
         }
+        clearAlert();
         const created = await apiFetch('/paypal/orders', {
           method: 'POST',
           body: JSON.stringify({ quoteToken: state.quoteToken }),
         });
+        if (!created || !created.paypalOrderId) {
+          throw new Error(
+            tt(
+              'checkout.errors.paypal_create',
+              'No pudimos iniciar la orden de PayPal. Intenta de nuevo en unos segundos.'
+            )
+          );
+        }
         return created.paypalOrderId;
       },
       onApprove: async (data) => {
@@ -765,7 +806,8 @@
           'info'
         );
       },
-      onError: () => {
+      onError: (error) => {
+        if (isPaypalAbort(error)) return;
         setBusy(false);
         showAlert(
           tt(
@@ -950,6 +992,12 @@
       return;
     }
 
+    if (state.method === 'bank_transfer') {
+      const waWindow = window.open('about:blank', '_blank');
+      await submitBankTransferOrder(waWindow);
+      return;
+    }
+
     submitOrder({});
   }
 
@@ -1040,11 +1088,10 @@
   function prefetchPaypalSdk() {
     const paypal = ((state.config && state.config.paymentMethods) || []).find((m) => m.id === 'paypal');
     if (!paypal || !paypal.client) return;
-    if (!paypal.client.scriptUrl && !paypal.client.clientId) return;
+    if (!buildPaypalSdkUrl(paypal.client)) return;
     loadPaypalSdk({
-      scriptUrl:
-        paypal.client.scriptUrl ||
-        `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypal.client.clientId)}&currency=${encodeURIComponent(paypal.client.currency || 'USD')}&intent=capture&components=buttons`,
+      clientId: paypal.client.clientId,
+      currency: paypal.client.currency,
     }).catch(() => {
       /* se reintenta al seleccionar PayPal */
     });
