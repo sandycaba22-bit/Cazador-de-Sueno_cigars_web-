@@ -3,7 +3,7 @@
  *
  * El navegador nunca decide cuánto se cobra. Envía qué quiere comprar y a
  * dónde; el importe sale siempre de aquí, del mismo catálogo y las mismas
- * tarifas DHL que usa la web (js/catalog.js y js/shipping.js), de modo que
+ * tarifas de envío que usa la web (js/catalog.js y js/shipping.js), de modo que
  * cliente y servidor no puedan divergir.
  */
 
@@ -128,7 +128,7 @@ function buildQuote({ items, country }) {
     });
   }
 
-  const shipping = calculateShipping(destination, shippingBoxes);
+  const shipping = calculateShipping(destination, shippingBoxes, totalUnits);
   const shippingCents = toCents(shipping.cost);
   const totalCents = subtotalCents + shippingCents;
 

@@ -211,6 +211,9 @@
       return;
     }
 
+    const shippingEl = el('co-shipping');
+    if (shippingEl) shippingEl.textContent = '…';
+
     try {
       const data = await apiFetch('/quote', {
         method: 'POST',
@@ -1117,7 +1120,11 @@
   function fillCountries(countries) {
     const select = el('co-form').country;
     const preferred =
-      typeof getPreferredShippingCountry === 'function' ? getPreferredShippingCountry() : 'US';
+      typeof getPreferredShippingCountry === 'function'
+        ? getPreferredShippingCountry()
+        : typeof detectPreferredShippingCountry === 'function'
+          ? detectPreferredShippingCountry()
+          : 'DO';
 
     select.innerHTML = countries
       .map(
@@ -1131,7 +1138,9 @@
     const form = el('co-form');
 
     form.addEventListener('submit', onSubmit);
-    form.country.addEventListener('change', scheduleQuote);
+    form.country.addEventListener('change', () => {
+      refreshQuote();
+    });
 
     // Al completar los datos básicos, el CTA de pago queda listo (con cotización).
     form.addEventListener('input', () => syncPaymentUi());

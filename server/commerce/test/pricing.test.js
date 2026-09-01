@@ -16,7 +16,7 @@ function expectCheckoutError(fn, code) {
   assert.fail(`se esperaba un error ${code}`);
 }
 
-test('calcula el total como subtotal más flete DHL, en centavos enteros', () => {
+test('calcula el total como subtotal más flete, en centavos enteros', () => {
   const quote = buildQuote({
     items: [{ productId: 'emperador', unitType: 'box', quantity: 2 }],
     country: 'US',
@@ -24,7 +24,7 @@ test('calcula el total como subtotal más flete DHL, en centavos enteros', () =>
 
   const product = getProductById('emperador');
   const expectedSubtotal = Math.round(product.pricePerBox * 100) * 2;
-  const expectedShipping = Math.round(calculateShipping('US', 2).cost * 100);
+  const expectedShipping = Math.round(calculateShipping('US', 2, 40).cost * 100);
 
   assert.equal(quote.subtotalCents, expectedSubtotal);
   assert.equal(quote.shippingCents, expectedShipping);
@@ -156,13 +156,45 @@ test('rechaza líneas duplicadas del mismo producto y formato', () => {
   );
 });
 
-test('un país desconocido cae en la zona más cara, no en envío gratis', () => {
+test('un país desconocido cae en la zona internacional, no en envío gratis', () => {
   const quote = buildQuote({
     items: [{ productId: 'emperador', unitType: 'box', quantity: 1 }],
     country: 'XX',
   });
   assert.ok(quote.shippingCents > 0);
   assert.equal(quote.shipping.zoneKey, 'OTHER');
+});
+
+test('República Dominicana cobra la tarifa local de 5 USD, no la de EE.UU.', () => {
+  const quote = buildQuote({
+    items: [{ productId: 'emperador', unitType: 'unit', quantity: 1 }],
+    country: 'DO',
+  });
+  assert.equal(quote.shippingCents, 500);
+  assert.equal(quote.shipping.zoneKey, 'DO');
+  assert.match(quote.shipping.carrier, /mensajer/i);
+});
+
+test('un solo puro a EE.UU. cobra la base internacional, no 37 USD', () => {
+  const quote = buildQuote({
+    items: [{ productId: 'emperador', unitType: 'unit', quantity: 1 }],
+    country: 'US',
+  });
+  assert.equal(quote.shippingCents, 1600);
+  assert.ok(quote.shippingCents < 3700);
+  assert.equal(quote.shipping.zoneKey, 'US');
+});
+
+test('el flete de EE.UU. es mayor que el local y crece con más cajas', () => {
+  const items = [{ productId: 'emperador', unitType: 'box', quantity: 1 }];
+  const local = buildQuote({ items, country: 'DO' });
+  const uno = buildQuote({ items, country: 'US' });
+  const dos = buildQuote({
+    items: [{ productId: 'emperador', unitType: 'box', quantity: 2 }],
+    country: 'US',
+  });
+  assert.ok(uno.shippingCents > local.shippingCents);
+  assert.ok(dos.shippingCents > uno.shippingCents);
 });
 
 test('no permite superar el stock disponible', () => {

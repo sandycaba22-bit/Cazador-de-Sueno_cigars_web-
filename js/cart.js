@@ -206,10 +206,13 @@ function getPreferredShippingCountry() {
   const legacyCountry =
     typeof getLegacyShippingCountry === 'function' ? getLegacyShippingCountry() : null;
   if (legacyCountry) return legacyCountry;
-  return 'US';
+  if (typeof detectPreferredShippingCountry === 'function') {
+    return detectPreferredShippingCountry();
+  }
+  return 'DO';
 }
 
-function getCartSummary(countryCode = 'MX') {
+function getCartSummary(countryCode = 'DO') {
   const items = getCartItems();
   const subtotal = items.reduce((sum, i) => sum + i.lineTotal, 0);
   const totalUnits = items.reduce((sum, i) => sum + i.totalUnits, 0);
