@@ -1425,6 +1425,33 @@ strong {
   border-color: var(--gold) !important;
 }
 
+.b2b-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d4af37 !important;
+  padding: 8px 16px !important;
+  border-radius: 4px;
+  color: #d4af37 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.nav__links a.b2b-nav-btn::after {
+  display: none !important;
+}
+
+.b2b-nav-btn:hover,
+.b2b-nav-btn:focus-visible {
+  background: #d4af37;
+  border-color: #d4af37 !important;
+  color: #111 !important;
+}
+
 .nav__toggle {
   display: none;
   flex-direction: column;
