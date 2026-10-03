@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Wholesale and Distributors - Cazador de Sueños Cigar SRL. Dominican premium cigars for international export."
+    />
+    <title>Wholesale & Distributors — Cazador de Sueños</title>
+    
+    <script>
+      (function() {
+        // Age gate check (reuse existing)
+        var accepted = document.cookie.indexOf('cds_age_gate=accepted') !== -1;
+        if (!accepted) {
+          document.documentElement.classList.add('age-gate-pending');
+        }
+
+        // Auto-detect language seamlessly (Requirement 1)
+        var lang = navigator.language || navigator.userLanguage;
+        var isEs = lang.toLowerCase().indexOf('es') === 0;
+        var root = document.getElementById('html-root');
+        root.lang = isEs ? 'es' : 'en';
+        root.className = isEs ? 'lang-es' : 'lang-en';
+      })();
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/luxury-tokens.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/home-premium.css" />
+    
+    <style>
+      /* Language Switcher Styles */
+      .lang-es .only-en { display: none !important; }
+      .lang-en .only-es { display: none !important; }
+
+      /* B2B Layout Adjustments */
+      .b2b-hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        padding-top: 80px; /* Offset for header */
+      }
+      
+      .b2b-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .b2b-title {
+        font-family: var(--font-cinzel);
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        color: var(--color-gold-400);
+        margin-bottom: 0.5rem;
+      }
+
+      .b2b-subtitle {
+        font-family: var(--font-playfair);
+        font-size: clamp(1.2rem, 3vw, 1.8rem);
+        font-style: italic;
+        color: var(--color-gold-200);
+        margin-bottom: 2.5rem;
+      }
+
+      .b2b-text {
+        font-size: 1.125rem;
+        line-height: 1.8;
+        color: var(--color-neutral-300);
+        margin-bottom: 3rem;
+      }
+
+      .b2b-actions {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 4rem;
+      }
+
+      .b2b-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        border-top: 1px solid var(--color-gold-900);
+        padding-top: 3rem;
+      }
+
+      .b2b-feature h3 {
+        font-family: var(--font-cinzel);
+        color: var(--color-gold-300);
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .b2b-feature p {
+        color: var(--color-neutral-400);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body data-page="wholesale">
+    <!-- Reusing existing Age Gate -->
+    <div class="age-gate" data-age-gate aria-hidden="true">
+      <div class="age-gate__backdrop" aria-hidden="true"></div>
+      <section class="age-gate__dialog" role="dialog" aria-modal="true">
+        <p class="age-gate__eyebrow">Bienvenido / Welcome</p>
+        <h2 id="age-gate-title">Acceso exclusivo / Exclusive access</h2>
+        <p id="age-gate-description" class="age-gate__description">
+          <span class="only-es">Este sitio presenta productos de tabaco premium. Confirma que eres mayor de edad.</span>
+          <span class="only-en">This site features premium tobacco products. Please confirm you are of legal age.</span>
+        </p>
+        <div class="age-gate__actions">
+          <button type="button" class="btn btn--primary" data-age-gate-accept>
+            <span class="only-es">Sí, soy mayor de edad</span>
+            <span class="only-en">Yes, I am of legal age</span>
+          </button>
+          <button type="button" class="btn btn--secondary" data-age-gate-deny>No</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Header (Simplified for B2B) -->
+    <header class="site-header">
+      <div class="container site-header__inner" style="justify-content: center;">
+        <a href="index.html" class="logo cds-brand" aria-label="Cazador de Sueños">
+          <span class="cds-brand__lockup">
+            <span class="nav__logo-fallback">Cazador de Sueños</span>
+            <span class="cds-brand__wordmark">Cigar SRL · Republica Dominicana</span>
+          </span>
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero hero-premium b2b-hero">
+        <!-- Background smoke effects from home -->
+        <div class="hero__smoke hero__smoke--one" aria-hidden="true"></div>
+        <div class="hero__smoke hero__smoke--two" aria-hidden="true"></div>
+        
+        <div class="container">
+          <div class="b2b-content">
+            
+            <h1 class="b2b-title">
+              <span class="only-en">Wholesale & Distributors</span>
+              <span class="only-es">Mayoristas y Distribuidores</span>
+            </h1>
+            
+            <p class="b2b-subtitle">Cazador de Sueños Cigar SRL</p>
+            
+            <p class="b2b-text only-en">
+              Welcome to our exclusive B2B portal. We are a Dominican Republic based cigar factory 
+              offering premium handcrafted cigars for international export. We provide full commercial 
+              facilities and a valid RNC for seamless global distribution.
+            </p>
+            
+            <p class="b2b-text only-es">
+              Bienvenido a nuestro portal exclusivo B2B. Somos una fábrica de puros premium en la 
+              República Dominicana con capacidad de exportación internacional. Contamos con RNC al día 
+              y brindamos todas las facilidades comerciales para una distribución global sin fricciones.
+            </p>
+
+            <div class="b2b-actions">
+              <!-- English Actions -->
+              <a href="/catalogo/CazadorDeSuenos_Wholesale_EN.pdf" target="_blank" download class="btn btn--secondary btn--lg only-en">
+                Download Catalog (PDF)
+              </a>
+              <a href="https://wa.me/18094645016?text=Hello,%20I'm%20interested%20in%20wholesale%20opportunities%20with%20Cazador%20de%20Sue%C3%B1os." target="_blank" class="btn btn--primary btn--lg only-en">
+                Wholesale Inquiries
+              </a>
+
+              <!-- Spanish Actions -->
+              <a href="/catalogo/CazadorDeSuenos_Wholesale_ES.pdf" target="_blank" download class="btn btn--secondary btn--lg only-es">
+                Descargar Catálogo (PDF)
+              </a>
+              <a href="https://wa.me/18094645016?text=Hola,%20estoy%20interesado%20en%20oportunidades%20para%20mayoristas%20con%20Cazador%20de%20Sue%C3%B1os." target="_blank" class="btn btn--primary btn--lg only-es">
+                Consultas de Mayoristas
+              </a>
+            </div>
+
+            <div class="b2b-features">
+              <div class="b2b-feature">
+                <h3 class="only-en">Direct from Factory</h3>
+                <h3 class="only-es">Directo de Fábrica</h3>
+                <p class="only-en">Handcrafted in the Dominican Republic with generations of expertise.</p>
+                <p class="only-es">Hechos a mano en República Dominicana con generaciones de maestría.</p>
+              </div>
+              <div class="b2b-feature">
+                <h3 class="only-en">Global Export</h3>
+                <h3 class="only-es">Exportación Global</h3>
+                <p class="only-en">Logistics ready for international shipping. Valid RNC and certifications.</p>
+                <p class="only-es">Logística lista para envíos internacionales. RNC al día y certificaciones.</p>
+              </div>
+              <div class="b2b-feature">
+                <h3 class="only-en">Premium Quality</h3>
+                <h3 class="only-es">Calidad Premium</h3>
+                <p class="only-en">Strict quality control on every single vitola before packaging.</p>
+                <p class="only-es">Estricto control de calidad en cada vitola antes de su empaque.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Load essential scripts -->
+    <script src="js/age-gate.js"></script>
+  </body>
+</html>

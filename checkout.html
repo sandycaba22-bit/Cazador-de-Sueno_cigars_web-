@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYRS7MGYXK"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-BYRS7MGYXK');
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Checkout seguro — Cazador de Sueños Cigars" />
@@ -130,12 +122,6 @@
               <p class="co-methods__loading" data-i18n="checkout.loading">Cargando…</p>
             </div>
             <div id="co-method-detail" class="co-method-detail" hidden></div>
-            <div
-              id="paypal-button-container"
-              class="co-paypal-buttons co-method-detail"
-              hidden
-              aria-label="Pagar con PayPal en USD"
-            ></div>
           </section>
 
           <section class="co-block co-block--legal co-block--compact">
@@ -182,6 +168,26 @@
         </aside>
       </div>
     </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <div class="site-footer__brand">
+          <p class="site-footer__eyebrow">Contacto</p>
+          <p class="site-footer__title">Cazador de Sueños Cigar SRL</p>
+          <p>© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
+        </div>
+        <div class="site-footer__links" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+          <p class="site-footer__contact">
+            <a href="mailto:ventas@cazadordesuenocigars.com">ventas@cazadordesuenocigars.com</a>
+          </p>
+          <p class="site-footer__b2b" style="margin:0;">
+            <a href="wholesale.html" style="color: var(--color-gold-400); text-decoration: none; font-size: 0.9rem; font-family: var(--font-inter); letter-spacing: 0.05em; transition: color 0.3s ease;">
+              <span data-i18n="footer.wholesale">Wholesale / Distribuidores</span>
+            </a>
+          </p>
+        </div>
+      </div>
+    </footer>
 
     <script src="js/page-visibility.js" defer></script>
     <script src="js/language-switcher.js" defer></script>

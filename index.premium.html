@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Cazador de Sueños Cigar SRL — puros premium dominicanos. El Emperador, Puro Habano, El Exquisito, El Rango, Ligero 007 y El Sultán."
+    />
+    <title>Cazador de Sueños Cigar SRL — Puros premium</title>
+    <script>
+      (function () {
+        var accepted = document.cookie.indexOf('cds_age_gate=accepted') !== -1;
+        if (!accepted) {
+          document.documentElement.classList.add('age-gate-pending');
+        }
+      })();
+    </script>
+    <script src="js/language-detect-early.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/luxury-tokens.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/home-premium.css" />
+    <link rel="stylesheet" href="css/ai-sommelier.css" />
+  </head>
+  <body data-page="home">
+    <div class="age-gate" data-age-gate aria-hidden="true">
+      <div class="age-gate__backdrop" aria-hidden="true"></div>
+      <section
+        class="age-gate__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="age-gate-title"
+        aria-describedby="age-gate-description"
+      >
+        <p class="age-gate__eyebrow">Bienvenido</p>
+        <h2 id="age-gate-title">Acceso exclusivo para mayores de edad.</h2>
+        <p id="age-gate-description" class="age-gate__description">
+          Este sitio presenta productos de tabaco premium. Confirma que eres mayor de 18 años o
+          de la edad legal aplicable en tu jurisdicción para continuar.
+        </p>
+        <div class="age-gate__actions">
+          <button type="button" class="btn btn--primary" data-age-gate-accept>
+            Sí, soy mayor de edad
+          </button>
+          <button type="button" class="btn btn--secondary" data-age-gate-deny>No</button>
+        </div>
+        <p class="age-gate__note" data-age-gate-feedback>
+          La confirmación se guarda en una cookie para no volver a interrumpir tu visita.
+        </p>
+        <a
+          class="age-gate__exit"
+          data-age-gate-exit
+          href="https://www.google.com"
+          target="_self"
+          hidden
+        >
+          Salir del sitio
+        </a>
+      </section>
+    </div>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a href="index.html" class="logo cds-brand" aria-label="Cazador de Sueños Cigar SRL">
+          <span class="cds-brand__lockup">
+            <span class="nav__logo-fallback">Cazador de Sueños</span>
+            <span class="cds-brand__wordmark">Cigar SRL · Republica Dominicana</span>
+          </span>
+        </a>
+        <nav class="site-nav" aria-label="Principal">
+          <a href="#la-casa">La Casa</a>
+          <a href="#las-vitolas">Las Vitolas</a>
+          <a href="#el-tabaco">El Tabaco</a>
+          <a href="#el-proceso">El Proceso</a>
+          <a href="#la-historia">La Historia</a>
+          <a href="#contacto">Contacto</a>
+        </nav>
+        <div class="site-header__actions">
+          <div class="lang-selector">
+            <button type="button" class="lang-selector__button" aria-label="Seleccionar idioma">
+              <svg class="lang-selector__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              <span class="lang-selector__current">ES</span>
+            </button>
+          </div>
+          <button type="button" id="cart-toggle" class="cart-button" aria-label="Abrir carrito">
+            Carrito
+            <span id="cart-count" class="cart-button__count">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="la-casa" class="hero hero-premium">
+        <div class="hero__smoke hero__smoke--one" aria-hidden="true"></div>
+        <div class="hero__smoke hero__smoke--two" aria-hidden="true"></div>
+        <div class="hero__smoke hero__smoke--three" aria-hidden="true"></div>
+        <div class="container hero__inner hero-premium__inner">
+          <div class="hero-premium__content">
+            <p class="hero__eyebrow">Casa tabacalera dominicana · legado familiar</p>
+            <div class="hero-wordmark" aria-label="Cazador de Sueños">
+              <h1>
+                <span>Cazador de</span>
+                <span>Sueños</span>
+              </h1>
+              <span class="hero-premium__divider" aria-hidden="true"></span>
+              <p class="hero-wordmark__signature">Cigar SRL · Republica Dominicana</p>
+            </div>
+            <p class="hero-premium__subhead">
+              Una casa de tabaco nacida del legado familiar, la fermentación ancestral y la paciencia
+              convertida en arte.
+            </p>
+            <div class="hero-premium__actions">
+              <a href="#las-vitolas" class="btn btn--primary btn--lg">Ver vitolas</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="el-tabaco" class="section premium-section premium-section--leaf">
+        <div class="container leaf-grid">
+          <div class="leaf-copy">
+            <p class="section__eyebrow">El Tabaco</p>
+            <h2>Origen, cultivo y carácter dominicano.</h2>
+            <p data-i18n="maestria.intro">
+              Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen,
+              cultivo, fermentación, mano experta, reposo y legado.
+            </p>
+            <p data-i18n="maestria.chapter3.text">
+              El campo define la identidad. La hoja madura bajo el sol, acumula fuerza y revela su
+              destino en la textura, el color y la elasticidad.
+            </p>
+            <a href="#el-proceso" class="btn btn--secondary">Seguir el recorrido</a>
+          </div>
+          <figure class="leaf-media premium-media-frame">
+            <img src="images/historia-semillero.jpg" alt="Semillero y comienzo del proceso tabacalero" />
+            <figcaption>Semillero y comienzo del proceso tabacalero</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="la-historia" class="section premium-section premium-section--story">
+        <div id="raiz" class="section-anchor" aria-hidden="true"></div>
+        <div class="container story-grid">
+          <div class="story-copy">
+            <p class="section__eyebrow">La Historia</p>
+            <h2>Legado familiar, técnica ancestral y memoria viva.</h2>
+            <p data-i18n="maestria.chapter7.text1">
+              Todo comenzó en la región norte de la República Dominicana, donde un antepasado de
+              nuestra familia dedicó su vida al cultivo y procesamiento del tabaco. Con el tiempo,
+              logró dominar los secretos de la fermentación, un conocimiento valioso que transmitió a
+              las siguientes generaciones como parte de un legado construido con esfuerzo, paciencia y
+              pasión.
+            </p>
+            <p data-i18n="maestria.chapter7.text2">
+              A través de los años, cada generación aportó su experiencia, preservando las tradiciones
+              y el amor por este noble oficio. Lo que comenzó como una enseñanza familiar se convirtió
+              en una herencia que fortaleció nuestra identidad y nuestro compromiso con la calidad.
+            </p>
+            <p data-i18n="maestria.chapter7.text3">
+              Inspirados por ese legado y guiados por el sueño de compartir nuestra pasión con el
+              mundo, nació Cazador de Sueños Cigars.
+            </p>
+            <p data-i18n="maestria.chapter7.text4">
+              Hoy, cada cigarro que elaboramos es un homenaje a nuestros antepasados, a nuestra tierra
+              y a los sueños que hicieron posible este camino.
+            </p>
+          </div>
+          <div class="story-visual">
+            <figure class="story-photo story-photo--primary premium-media-frame">
+              <img src="images/historia-montana.jpg" alt="Origen montañoso de Cazador de Sueños" />
+            </figure>
+            <figure class="story-photo story-photo--secondary premium-media-frame">
+              <img src="images/historia-semillero.jpg" alt="Semillero y comienzo del proceso tabacalero" />
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="el-proceso" class="section premium-section premium-section--mastery">
+        <div id="maestria" class="section-anchor" aria-hidden="true"></div>
+        <div class="container">
+          <header class="section__header section__header--centered">
+            <p class="section__eyebrow" data-i18n="maestria.label">El Proceso</p>
+            <h2 data-i18n="maestria.title">El Arte de la Paciencia</h2>
+            <p data-i18n="maestria.intro">
+              Una travesía visual desde la montaña dominicana hasta el cigarro terminado: origen,
+              cultivo, fermentación, mano experta, reposo y legado.
+            </p>
+          </header>
+          <div class="mastery-grid">
+            <article class="mastery-card premium-media-frame">
+              <img src="images/maestria-hoja.jpg" alt="Selección de hoja para la elaboración" />
+              <div class="mastery-card__body">
+                <span data-i18n="maestria.chapter3.kicker">La Hoja</span>
+                <h3 data-i18n="maestria.chapter3.title">Origen que se puede tocar.</h3>
+                <p data-i18n="maestria.chapter3.text">
+                  El campo define la identidad. La hoja madura bajo el sol, acumula fuerza y revela su
+                  destino en la textura, el color y la elasticidad.
+                </p>
+              </div>
+            </article>
+            <article class="mastery-card premium-media-frame">
+              <img src="images/maestria-pilon.jpg" alt="Pilón y fermentación del tabaco" />
+              <div class="mastery-card__body">
+                <span data-i18n="maestria.chapter4.kicker">El Pilón</span>
+                <h3 data-i18n="maestria.chapter4.title">La ciencia dominada por el tiempo.</h3>
+                <p data-i18n="maestria.chapter4.text">
+                  Bajo presión y calor natural, el tabaco respira. La crudeza se afina, el aroma se
+                  ordena y la hoja encuentra equilibrio.
+                </p>
+              </div>
+            </article>
+            <article class="mastery-card premium-media-frame">
+              <img src="images/maestria-manos.jpg" alt="Manos expertas en el torcido del cigarro" />
+              <div class="mastery-card__body">
+                <span data-i18n="maestria.chapter5.kicker">El Maestro Torcedor</span>
+                <h3 data-i18n="maestria.chapter5.title">La mano que convierte hoja en obra.</h3>
+                <p data-i18n="maestria.chapter5.text">
+                  Cada cigarro es una pieza única. La tensión, el ritmo y el corte pertenecen a manos
+                  que conocen el punto exacto entre firmeza y respiración.
+                </p>
+              </div>
+            </article>
+            <article class="mastery-card premium-media-frame">
+              <img src="images/maestria-cava.jpg" alt="Añejamiento y reposo en cava" />
+              <div class="mastery-card__body">
+                <span data-i18n="maestria.chapter6.kicker">El Añejamiento</span>
+                <h3 data-i18n="maestria.chapter6.title">El silencio como ingrediente.</h3>
+                <p data-i18n="maestria.chapter6.text">
+                  El reposo pule lo que la mano construyó. En madera, sombra y tiempo, el aroma se
+                  vuelve memoria y el carácter alcanza profundidad.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="las-vitolas" class="section premium-section">
+        <div id="catalogo" class="section-anchor" aria-hidden="true"></div>
+        <div class="container">
+          <header class="section__header section__header--centered">
+            <p class="section__eyebrow">Las Vitolas</p>
+            <h2>La colección de la casa</h2>
+            <p>
+              Compra por caja o puro suelto. Totales firmados en checkout. Aquí conviven la casa, el
+              origen y la firma sensorial de cada línea.
+            </p>
+          </header>
+          <div id="catalog-grid" class="catalog-grid"></div>
+        </div>
+      </section>
+
+      <section id="envios" class="section section--alt premium-section premium-section--info">
+        <div class="container info-grid">
+          <article>
+            <h3>Envío internacional</h3>
+            <p>
+              Tarifas DHL según destino. El costo se calcula en el checkout y forma parte del total
+              que confirma el servidor.
+            </p>
+          </article>
+          <article>
+            <h3>Empaque de casa</h3>
+            <p>
+              Cajas de 20 puros, excepto El Rango (10). Fotografías reales de cada vitola.
+            </p>
+          </article>
+          <article>
+            <h3>Venta final</h3>
+            <p>
+              Todos los pedidos son venta final. No se admiten devoluciones ni reembolsos una vez
+              confirmado el pago.
+            </p>
+          </article>
+          <article id="pagos">
+            <h3>Pagos</h3>
+            <p>
+              Transferencia bancaria (República Dominicana y envíos desde EE.UU.) o PayPal.
+              Este sitio no pide número de tarjeta.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer id="contacto" class="site-footer">
+      <div class="container site-footer__inner">
+        <div class="site-footer__brand">
+          <p class="site-footer__eyebrow">Contacto</p>
+          <p class="site-footer__title">Cazador de Sueños Cigar SRL</p>
+          <p>© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
+        </div>
+        <div class="site-footer__links" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+          <p class="site-footer__contact">
+            <a href="mailto:ventas@cazadordesuenocigars.com">ventas@cazadordesuenocigars.com</a>
+          </p>
+          <p class="site-footer__b2b" style="margin:0;">
+            <a href="wholesale.html" style="color: var(--color-gold-400); text-decoration: none; font-size: 0.9rem; font-family: var(--font-inter); letter-spacing: 0.05em; transition: color 0.3s ease;">
+              <span data-i18n="footer.wholesale">Wholesale / Distribuidores</span>
+            </a>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <div id="cart-overlay" class="overlay" aria-hidden="true"></div>
+    <aside id="cart-drawer" class="cart-drawer" aria-label="Carrito de compras">
+      <header class="cart-drawer__header">
+        <h2>Tu carrito</h2>
+        <button type="button" id="cart-close" class="btn-icon" aria-label="Cerrar">×</button>
+      </header>
+      <ul id="mini-cart-items" class="mini-cart"></ul>
+      <footer class="cart-drawer__footer">
+        <div class="cart-drawer__subtotal">
+          <span>Subtotal</span>
+          <strong id="mini-cart-subtotal">$0.00</strong>
+        </div>
+        <p class="cart-drawer__note">
+          <span id="cart-line-count">0</span> línea(s) · El envío se calcula en checkout.
+        </p>
+        <a id="go-checkout" href="checkout.html" class="btn btn--primary btn--block">Ir al checkout</a>
+      </footer>
+    </aside>
+
+    <script src="js/language-switcher.js" defer></script>
+    <script src="js/commerce-urls.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/policies.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/shipping.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/cart-legacy-bridge.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/whatsapp-commerce.js"></script>
+    <script src="js/cart-ui.js"></script>
+    <script src="js/age-gate.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        if (typeof initFloatingCommerceWidgets === 'function') initFloatingCommerceWidgets();
+      });
+    </script>
+    <script src="/js/ai-sommelier.js" defer></script>
+  </body>
+</html>
