@@ -1,7 +1,12 @@
-"""Genera los catálogos mayoristas ES y EN con notas de cata condensadas."""
+"""Genera los catálogos mayoristas ES y EN.
 
+Cada ficha, de arriba abajo: fotos reales, especificaciones, nota de cata.
+"""
+
+import tempfile
 from pathlib import Path
 
+from PIL import Image, ImageOps
 from reportlab.lib.colors import HexColor, white
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -12,6 +17,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     BaseDocTemplate,
     Frame,
+    Image as FlowImage,
     NextPageTemplate,
     PageBreak,
     PageTemplate,
@@ -22,12 +28,15 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parent
+REPO = ROOT.parent
 FONT_DIR = Path(r"C:\Windows\Fonts")
 
-IVORY = HexColor("#F6F1E7")
+NAVY = HexColor("#0C1424")
+CREAM = HexColor("#F7F4EE")
 INK = HexColor("#1C1612")
 MUTED = HexColor("#5C5348")
-GOLD = HexColor("#8C6A2F")
+GOLD = HexColor("#C4A35A")
+GOLD_DEEP = HexColor("#8C6A2F")
 LINE = HexColor("#C4A574")
 
 WELCOME = {
@@ -45,10 +54,11 @@ WELCOME = {
 
 COPY = {
     "es": {
-        "catalog": "Catálogo mayorista",
-        "house": "Colección de la casa",
+        "catalog": "Catálogo de Vitolas",
+        "house": "Colección de la Casa",
         "adult": "Solo para compradores adultos.",
         "headers": ["Vitola", "Formato", "Fortaleza"],
+        "captions": ["Caja abierta", "Presentación", "Puro suelto"],
         "tasting": "Notas de cata",
         "format": "Formato",
         "wrapper": "Capa",
@@ -61,10 +71,11 @@ COPY = {
         "web": "Más detalles en www.cazadordesuenocigars.com",
     },
     "en": {
-        "catalog": "Wholesale catalog",
-        "house": "The house collection",
+        "catalog": "Vitola Catalog",
+        "house": "The House Collection",
         "adult": "For adult buyers only.",
         "headers": ["Vitola", "Format", "Strength"],
+        "captions": ["Open box", "Presentation", "Single cigar"],
         "tasting": "Tasting notes",
         "format": "Format",
         "wrapper": "Wrapper",
@@ -81,6 +92,11 @@ COPY = {
 VITOLAS = [
     {
         "name": {"es": "El Emperador", "en": "The Emperor"},
+        "photos": [
+            "img/el-emperador-caja-abierta.jpg",
+            "img/el-emperador-caja-cerrada.jpg",
+            "img/el-emperador-cigarro.jpg",
+        ],
         "format": {"es": "Gran Toro 58 × 6″", "en": "Gran Toro 58 × 6″"},
         "wrapper": {"es": "San Andrés Madura (México)", "en": "San Andrés Maduro (Mexico)"},
         "binder": {"es": "Olor Dominicano", "en": "Olor Dominicano"},
@@ -96,6 +112,11 @@ VITOLAS = [
     },
     {
         "name": {"es": "Puro Habano", "en": "Puro Habano"},
+        "photos": [
+            "img/puro-habano-caja-abierta.jpg",
+            "img/puro-habano-caja-cerrada.jpg",
+            "img/puro-habano-cigarro.jpg",
+        ],
         "format": {"es": "Churchill 48 × 7″", "en": "Churchill 48 × 7″"},
         "wrapper": {"es": "Habana", "en": "Habana"},
         "binder": {"es": "Olor Dominicano", "en": "Olor Dominicano"},
@@ -108,6 +129,11 @@ VITOLAS = [
     },
     {
         "name": {"es": "El Exquisito", "en": "The Exquisite"},
+        "photos": [
+            "img/el-exquisito-caja-abierta.jpg",
+            "img/el-exquisito-caja-cerrada.jpg",
+            "img/el-exquisito-cigarro.jpg",
+        ],
         "format": {"es": "Gran Toro 58 × 6″", "en": "Gran Toro 58 × 6″"},
         "wrapper": {"es": "San Andrés Madura (México)", "en": "San Andrés Maduro (Mexico)"},
         "binder": {
@@ -126,6 +152,11 @@ VITOLAS = [
     },
     {
         "name": {"es": "El Rango", "en": "The Range"},
+        "photos": [
+            "img/el-rango-caja-abierta.jpg",
+            "img/el-rango-caja-cerrada.jpg",
+            "img/el-rango-cigarro.jpg",
+        ],
         "format": {"es": "Doble Perfecto 60 × 4½″", "en": "Double Perfecto 60 × 4½″"},
         "wrapper": {"es": "San Andrés", "en": "San Andrés"},
         "binder": {"es": "Selección Premium (Nicaragua)", "en": "Premium Selection (Nicaragua)"},
@@ -138,6 +169,11 @@ VITOLAS = [
     },
     {
         "name": {"es": "Ligero 007", "en": "Ligero 007"},
+        "photos": [
+            "images/ligero-007/caja-abierta.jpg",
+            "images/ligero-007/caja-cerrada.jpg",
+            "images/ligero-007/cigarro.jpg",
+        ],
         "format": {"es": "Toro 58 × 5″", "en": "Toro 58 × 5″"},
         "wrapper": {"es": "San Andrés Madura (México)", "en": "San Andrés Maduro (Mexico)"},
         "binder": {"es": "Camerún", "en": "Cameroon"},
@@ -153,6 +189,11 @@ VITOLAS = [
     },
     {
         "name": {"es": "El Sultán", "en": "The Sultan"},
+        "photos": [
+            "img/el-sultan-caja-abierta.jpg",
+            "img/el-sultan-caja-cerrada.jpg",
+            "img/el-sultan-cigarro.jpg",
+        ],
         "format": {"es": "Robusto 50 × 5″", "en": "Robusto 50 × 5″"},
         "wrapper": {"es": "San Andrés", "en": "San Andrés"},
         "binder": {"es": "Olor Dominicano", "en": "Olor Dominicano"},
@@ -170,34 +211,39 @@ def register_fonts():
     pdfmetrics.registerFont(TTFont("Catalog", str(FONT_DIR / "georgia.ttf")))
     pdfmetrics.registerFont(TTFont("Catalog-Bold", str(FONT_DIR / "georgiab.ttf")))
     pdfmetrics.registerFont(TTFont("Catalog-Italic", str(FONT_DIR / "georgiai.ttf")))
+    pdfmetrics.registerFontFamily(
+        "Catalog",
+        normal="Catalog",
+        bold="Catalog-Bold",
+        italic="Catalog-Italic",
+        boldItalic="Catalog-Bold",
+    )
 
 
 def styles():
     return {
-        "brand": ParagraphStyle(
-            "brand",
+        "coverTitle": ParagraphStyle(
+            "coverTitle",
             fontName="Catalog",
-            fontSize=28,
-            leading=34,
-            textColor=INK,
-            alignment=TA_CENTER,
-            spaceAfter=4,
-        ),
-        "kicker": ParagraphStyle(
-            "kicker",
-            fontName="Catalog",
-            fontSize=11,
-            leading=15,
+            fontSize=26,
+            leading=32,
             textColor=GOLD,
             alignment=TA_CENTER,
-            tracking=1.2,
+        ),
+        "coverSub": ParagraphStyle(
+            "coverSub",
+            fontName="Catalog",
+            fontSize=12,
+            leading=16,
+            textColor=HexColor("#E7D7B0"),
+            alignment=TA_CENTER,
         ),
         "welcome": ParagraphStyle(
             "welcome",
             fontName="Catalog-Italic",
-            fontSize=12,
-            leading=18,
-            textColor=INK,
+            fontSize=11,
+            leading=16,
+            textColor=HexColor("#F4EFE4"),
             alignment=TA_CENTER,
         ),
         "section": ParagraphStyle(
@@ -205,47 +251,50 @@ def styles():
             fontName="Catalog",
             fontSize=18,
             leading=22,
-            textColor=INK,
-            alignment=TA_LEFT,
-            spaceAfter=8,
-        ),
-        "coverTitle": ParagraphStyle(
-            "coverTitle",
-            fontName="Catalog",
-            fontSize=18,
-            leading=22,
-            textColor=INK,
+            textColor=GOLD_DEEP,
             alignment=TA_CENTER,
             spaceAfter=8,
         ),
         "vitola": ParagraphStyle(
             "vitola",
             fontName="Catalog",
-            fontSize=26,
-            leading=30,
+            fontSize=22,
+            leading=26,
+            textColor=GOLD_DEEP,
+            alignment=TA_CENTER,
+            spaceAfter=4,
+        ),
+        "caption": ParagraphStyle(
+            "caption",
+            fontName="Catalog",
+            fontSize=8,
+            leading=10,
+            textColor=MUTED,
+            alignment=TA_CENTER,
+        ),
+        "spec": ParagraphStyle(
+            "spec",
+            fontName="Catalog",
+            fontSize=11,
+            leading=16,
             textColor=INK,
-            spaceAfter=6,
+            alignment=TA_LEFT,
         ),
         "label": ParagraphStyle(
             "label",
-            fontName="Catalog-Bold",
-            fontSize=11,
-            leading=16,
-            textColor=GOLD,
-        ),
-        "body": ParagraphStyle(
-            "body",
             fontName="Catalog",
             fontSize=12,
-            leading=18,
-            textColor=INK,
+            leading=16,
+            textColor=GOLD_DEEP,
+            alignment=TA_LEFT,
         ),
         "note": ParagraphStyle(
             "note",
             fontName="Catalog",
-            fontSize=12.5,
-            leading=19,
+            fontSize=11.5,
+            leading=17,
             textColor=INK,
+            alignment=TA_LEFT,
         ),
         "cell": ParagraphStyle(
             "cell",
@@ -259,42 +308,106 @@ def styles():
             fontName="Catalog-Bold",
             fontSize=10,
             leading=13,
-            textColor=white,
+            textColor=GOLD,
         ),
-        "center": ParagraphStyle(
-            "center",
+        "contactTitle": ParagraphStyle(
+            "contactTitle",
+            fontName="Catalog",
+            fontSize=22,
+            leading=28,
+            textColor=GOLD,
+            alignment=TA_CENTER,
+        ),
+        "contactBody": ParagraphStyle(
+            "contactBody",
             fontName="Catalog",
             fontSize=12,
             leading=18,
-            textColor=INK,
+            textColor=HexColor("#F4EFE4"),
             alignment=TA_CENTER,
         ),
     }
 
 
-def paint_page(canvas, doc, lang):
+def paint_dark(canvas, doc, lang):
     canvas.saveState()
-    canvas.setFillColor(IVORY)
+    canvas.setFillColor(NAVY)
     canvas.rect(0, 0, A4[0], A4[1], fill=1, stroke=0)
-    canvas.setFillColor(GOLD)
-    canvas.rect(0, A4[1] - 8, A4[0], 8, fill=1, stroke=0)
+    canvas.setFillColor(HexColor("#8A93A3"))
+    canvas.setFont("Catalog", 8)
+    canvas.drawCentredString(A4[0] / 2, 14 * mm, COPY[lang]["adult"])
+    canvas.restoreState()
+
+
+def paint_light(canvas, doc, lang):
+    canvas.saveState()
+    canvas.setFillColor(CREAM)
+    canvas.rect(0, 0, A4[0], A4[1], fill=1, stroke=0)
+    canvas.setStrokeColor(GOLD)
+    canvas.setLineWidth(0.9)
+    inset = 9 * mm
+    canvas.rect(inset, inset, A4[0] - 2 * inset, A4[1] - 2 * inset, fill=0, stroke=1)
     canvas.setFillColor(MUTED)
     canvas.setFont("Catalog", 8)
-    copy = COPY[lang]
-    canvas.drawString(18 * mm, 12 * mm, copy["adult"])
-    canvas.drawRightString(A4[0] - 18 * mm, 12 * mm, f"{doc.page}")
+    canvas.drawCentredString(A4[0] / 2, 12 * mm, COPY[lang]["adult"])
     canvas.restoreState()
+
+
+def prepare_photo(src, dest, max_px=900):
+    image = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
+    image.thumbnail((max_px, max_px), Image.Resampling.LANCZOS)
+    image.save(dest, format="JPEG", quality=84, optimize=True)
+
+
+def photo_block(vitola, lang, styles_map, tmp_dir, width):
+    column = width / 3
+    pad = 1.5 * mm
+    box_width = column - 2 * pad
+    box_height = box_width * 2 / 3
+    images = []
+    captions = []
+    for index, relative in enumerate(vitola["photos"]):
+        source = REPO / relative
+        if not source.is_file():
+            raise FileNotFoundError(source)
+        dest = Path(tmp_dir) / f"{lang}-{vitola['name']['en'].replace(' ', '-')}-{index}.jpg"
+        prepare_photo(source, dest)
+        with Image.open(dest) as prepared:
+            ratio = prepared.width / prepared.height
+        if ratio >= 1.5:
+            draw_width = box_width
+            draw_height = box_width / ratio
+        else:
+            draw_height = box_height
+            draw_width = box_height * ratio
+        images.append(FlowImage(str(dest), width=draw_width, height=draw_height))
+        captions.append(Paragraph(COPY[lang]["captions"][index], styles_map["caption"]))
+    table = Table([images, captions], colWidths=[column, column, column])
+    table.setStyle(
+        TableStyle(
+            [
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, 0), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), pad),
+                ("RIGHTPADDING", (0, 0), (-1, -1), pad),
+                ("TOPPADDING", (0, 0), (-1, -1), 1),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 2),
+                ("TOPPADDING", (0, 1), (-1, 1), 3),
+            ]
+        )
+    )
+    return table
 
 
 def build(lang):
     copy = COPY[lang]
-    s = styles()
+    sheet = styles()
     out = ROOT / f"CazadorDeSuenos_Wholesale_{lang.upper()}.pdf"
     doc = BaseDocTemplate(
         str(out),
         pagesize=A4,
-        leftMargin=18 * mm,
-        rightMargin=18 * mm,
+        leftMargin=16 * mm,
+        rightMargin=16 * mm,
         topMargin=18 * mm,
         bottomMargin=18 * mm,
         title=f"Cazador de Sueños — {copy['catalog']}",
@@ -302,57 +415,54 @@ def build(lang):
     )
     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="main")
     doc.addPageTemplates(
-        [PageTemplate(id="main", frames=[frame], onPage=lambda c, d: paint_page(c, d, lang))]
+        [
+            PageTemplate(id="dark", frames=[frame], onPage=lambda c, d: paint_dark(c, d, lang)),
+            PageTemplate(id="light", frames=[frame], onPage=lambda c, d: paint_light(c, d, lang)),
+        ]
     )
 
     story = [
-        Spacer(1, 42 * mm),
-        Paragraph("Cazador de Sueños", s["brand"]),
-        Paragraph("Cigar SRL · República Dominicana", s["kicker"]),
-        Spacer(1, 8 * mm),
-        Paragraph(copy["catalog"], s["coverTitle"]),
-        Spacer(1, 6 * mm),
-        Paragraph(WELCOME[lang], s["welcome"]),
-        Spacer(1, 10 * mm),
-        Paragraph(copy["adult"], s["center"]),
-        NextPageTemplate("main"),
+        Spacer(1, 48 * mm),
+        Paragraph(copy["catalog"], sheet["coverTitle"]),
+        Spacer(1, 3 * mm),
+        Paragraph("Cazador de Sueños Cigar SRL", sheet["coverSub"]),
+        Spacer(1, 12 * mm),
+        Paragraph(WELCOME[lang], sheet["welcome"]),
+        NextPageTemplate("light"),
         PageBreak(),
-        Paragraph(copy["house"], s["section"]),
-        Spacer(1, 4 * mm),
+        Paragraph(copy["house"], sheet["section"]),
+        Spacer(1, 6 * mm),
     ]
 
-    header = [Paragraph(text, s["head"]) for text in copy["headers"]]
+    header = [Paragraph(text, sheet["head"]) for text in copy["headers"]]
     rows = [header]
     for vitola in VITOLAS:
         rows.append(
             [
-                Paragraph(vitola["name"][lang], s["cell"]),
-                Paragraph(vitola["format"][lang], s["cell"]),
-                Paragraph(vitola["strength"][lang], s["cell"]),
+                Paragraph(vitola["name"][lang], sheet["cell"]),
+                Paragraph(vitola["format"][lang], sheet["cell"]),
+                Paragraph(vitola["strength"][lang], sheet["cell"]),
             ]
         )
-    table = Table(rows, colWidths=[58 * mm, 72 * mm, 44 * mm])
+    table = Table(rows, colWidths=[58 * mm, 78 * mm, 42 * mm])
     table.setStyle(
         TableStyle(
             [
-                ("BACKGROUND", (0, 0), (-1, 0), INK),
-                ("TEXTCOLOR", (0, 0), (-1, 0), white),
+                ("BACKGROUND", (0, 0), (-1, 0), NAVY),
+                ("TEXTCOLOR", (0, 0), (-1, 0), GOLD),
                 ("BACKGROUND", (0, 1), (-1, -1), white),
-                ("FONTNAME", (0, 0), (-1, 0), "Catalog-Bold"),
-                ("ALIGN", (0, 0), (-1, 0), "LEFT"),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("ALIGN", (0, 0), (-1, 0), "CENTER"),
                 ("LEFTPADDING", (0, 0), (-1, -1), 8),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 8),
                 ("TOPPADDING", (0, 0), (-1, -1), 7),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-                ("LINEBELOW", (0, 1), (-1, -2), 0.3, LINE),
-                ("BOX", (0, 0), (-1, -1), 0.6, GOLD),
+                ("GRID", (0, 0), (-1, -1), 0.4, GOLD),
             ]
         )
     )
     story.append(table)
 
-    fields = ("format", "wrapper", "binder", "filler", "strength")
     labels = {
         "format": copy["format"],
         "wrapper": copy["wrapper"],
@@ -360,29 +470,35 @@ def build(lang):
         "filler": copy["filler"],
         "strength": copy["strength"],
     }
-    for vitola in VITOLAS:
-        story.append(PageBreak())
-        story.append(Paragraph(vitola["name"][lang], s["vitola"]))
-        for key in fields:
-            story.append(Paragraph(f"{labels[key]}: {vitola[key][lang]}", s["body"]))
-        story.append(Spacer(1, 8 * mm))
-        story.append(Paragraph(copy["tasting"], s["label"]))
-        story.append(Spacer(1, 2 * mm))
-        story.append(Paragraph(vitola["note"][lang], s["note"]))
 
-    story.extend(
-        [
-            PageBreak(),
-            Paragraph(copy["contact"], s["vitola"]),
-            Paragraph(copy["whatsapp"], s["body"]),
-            Spacer(1, 3 * mm),
-            Paragraph(copy["pricing"], s["body"]),
-            Paragraph(copy["web"], s["body"]),
-            Spacer(1, 8 * mm),
-            Paragraph(copy["adult"], s["body"]),
-        ]
-    )
-    doc.build(story)
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        for vitola in VITOLAS:
+            story.append(PageBreak())
+            story.append(Paragraph(vitola["name"][lang], sheet["vitola"]))
+            story.append(Spacer(1, 3 * mm))
+            story.append(photo_block(vitola, lang, sheet, tmp_dir, doc.width))
+            story.append(Spacer(1, 6 * mm))
+            for key in ("format", "wrapper", "binder", "filler", "strength"):
+                story.append(Paragraph(f"<b>{labels[key]}:</b>  {vitola[key][lang]}", sheet["spec"]))
+            story.append(Spacer(1, 5 * mm))
+            story.append(Paragraph(copy["tasting"], sheet["label"]))
+            story.append(Spacer(1, 1.5 * mm))
+            story.append(Paragraph(vitola["note"][lang], sheet["note"]))
+
+        story.extend(
+            [
+                NextPageTemplate("dark"),
+                PageBreak(),
+                Spacer(1, 58 * mm),
+                Paragraph(copy["contact"], sheet["contactTitle"]),
+                Spacer(1, 6 * mm),
+                Paragraph(copy["whatsapp"], sheet["contactBody"]),
+                Paragraph(copy["pricing"], sheet["contactBody"]),
+                Spacer(1, 4 * mm),
+                Paragraph(copy["web"], sheet["contactBody"]),
+            ]
+        )
+        doc.build(story)
     return out
 
 
