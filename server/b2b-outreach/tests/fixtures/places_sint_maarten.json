@@ -1,0 +1,34 @@
+{
+  "places": [
+    {
+      "nombre": "Philipsburg Cigar & Tobacco (fixture)",
+      "pais": "Sint Maarten",
+      "web": "https://example-sx.test",
+      "telefono": "+1-721-555-0101",
+      "direccion": "Front Street, Philipsburg, Sint Maarten",
+      "place_id": "fixture-sx-shop-1",
+      "tipo_negocio": "tienda",
+      "fuente": "google_places_fixture"
+    },
+    {
+      "nombre": "Caribbean Tobacco Distributors SX (fixture)",
+      "pais": "Sint Maarten",
+      "web": "https://example-sx-wholesale.test",
+      "telefono": "+1-721-555-0102",
+      "direccion": "Cole Bay, Sint Maarten",
+      "place_id": "fixture-sx-dist-1",
+      "tipo_negocio": "distribuidor",
+      "fuente": "google_places_fixture"
+    },
+    {
+      "nombre": "Sunset Cigar Lounge SX (fixture)",
+      "pais": "Sint Maarten",
+      "web": "https://maps.google.com/?q=fixture-sx-lounge",
+      "telefono": "",
+      "direccion": "Simpson Bay, Sint Maarten",
+      "place_id": "fixture-sx-lounge-1",
+      "tipo_negocio": "lounge",
+      "fuente": "google_places_fixture"
+    }
+  ]
+}

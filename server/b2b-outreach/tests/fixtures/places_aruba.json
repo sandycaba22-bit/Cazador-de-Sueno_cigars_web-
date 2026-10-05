@@ -1,0 +1,24 @@
+{
+  "places": [
+    {
+      "nombre": "Oranjestad Cigar House (fixture)",
+      "pais": "Aruba",
+      "web": "https://example-aw.test",
+      "telefono": "+297-555-0101",
+      "direccion": "Oranjestad, Aruba",
+      "place_id": "fixture-aw-shop-1",
+      "tipo_negocio": "tienda",
+      "fuente": "google_places_fixture"
+    },
+    {
+      "nombre": "Aruba Premium Tobacco Import (fixture)",
+      "pais": "Aruba",
+      "web": "https://example-aw-import.test",
+      "telefono": "+297-555-0102",
+      "direccion": "Santa Cruz, Aruba",
+      "place_id": "fixture-aw-dist-1",
+      "tipo_negocio": "distribuidor",
+      "fuente": "google_places_fixture"
+    }
+  ]
+}
