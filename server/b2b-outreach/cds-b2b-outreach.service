@@ -1,0 +1,40 @@
+[Unit]
+Description=Cazador de Sueños — aviso B2B a Telegram (cola de prospectos)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/html/server/b2b-outreach
+EnvironmentFile=/etc/cazador-de-suenos/b2b-outreach.env
+Environment=B2B_QUEUE_DIR=/var/lib/cazador-de-suenos/b2b-outreach
+Environment=B2B_POLL_SECONDS=15
+ExecStart=/usr/bin/python3 /var/www/html/server/b2b-outreach/telegram_bot.py --vigilar
+Restart=on-failure
+RestartSec=15
+
+# La cola vive fuera del webroot. systemd crea el directorio y se lo entrega
+# solo a este servicio.
+StateDirectory=cazador-de-suenos/b2b-outreach
+StateDirectoryMode=0750
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+MemoryMax=128M
+ReadWritePaths=/var/lib/cazador-de-suenos/b2b-outreach
+
+[Install]
+WantedBy=multi-user.target

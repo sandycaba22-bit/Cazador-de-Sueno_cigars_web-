@@ -39,6 +39,11 @@ node_modules/
 server/ai-sommelier/data/*.jsonl
 server/ai-sommelier/data/*.json
 
+# Cola local del aviso B2B y bytecode
+server/b2b-outreach/cola/
+__pycache__/
+*.py[cod]
+
 # Build local
 dist/
 *.zip
