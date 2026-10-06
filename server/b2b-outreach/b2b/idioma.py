@@ -3,6 +3,23 @@ from __future__ import annotations
 from b2b.country_rules import buscar_pais
 
 PAPIAMENTO_PAISES = {"aruba", "curacao", "curaçao"}
+IDIOMAS_BORRADOR = frozenset({"es", "en", "fr", "pt", "nl", "de", "it"})
+
+
+def idioma_para_lead(
+    pais: str,
+    *,
+    idioma_web: str = "",
+    preferido: str = "",
+) -> str:
+    """Prioridad: preferido explícito → idioma detectado en la web → reglas por país."""
+    pref = (preferido or "").strip().lower()
+    if pref in IDIOMAS_BORRADOR:
+        return pref
+    web = (idioma_web or "").strip().lower().split("-")[0]
+    if web in IDIOMAS_BORRADOR:
+        return web
+    return idioma_para_pais(pais, preferido)
 
 
 def idioma_para_pais(pais: str, preferido: str = "") -> str:

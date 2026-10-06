@@ -46,23 +46,47 @@ VITOLA_PROHIBIDO_POR_IDIOMA: dict[str, tuple[str, ...]] = {
 }
 
 
+def _L_catalogo(es: str, en: str, fr: str, pt: str) -> dict[str, str]:
+    return {"es": es, "en": en, "fr": fr, "pt": pt}
+
+
+CAMPOS_VITOLA_IDIOMA = ("name", "format", "wrapper", "binder", "filler", "strength", "note")
+IDIOMAS_CATALOGO = ("es", "en", "fr", "pt")
+
+
+def _validar_vitolas_catalogo(vitolas: list) -> tuple[dict, ...]:
+    if not isinstance(vitolas, list):
+        raise ValueError("VITOLAS no es una lista.")
+    if len(vitolas) != 6:
+        raise ValueError(f"Se esperaban 6 vitolas en el catálogo; hay {len(vitolas)}.")
+    for vitola in vitolas:
+        for campo in CAMPOS_VITOLA_IDIOMA:
+            bloque = vitola.get(campo)
+            if not isinstance(bloque, dict):
+                raise ValueError(f"Campo «{campo}» debe ser dict por idioma.")
+            for lang in IDIOMAS_CATALOGO:
+                texto = (bloque.get(lang) or "").strip()
+                if not texto:
+                    raise ValueError(f"Vitola «{vitola.get('name', {}).get('es', '?')}» "
+                                     f"sin texto «{lang}» en «{campo}».")
+    return tuple(vitolas)
+
+
 @lru_cache(maxsize=1)
 def cargar_vitolas_catalogo() -> tuple[dict, ...]:
     """Lee VITOLAS del generador PDF sin importar Pillow/reportlab."""
     if not CATALOG_SCRIPT.is_file():
         raise FileNotFoundError(f"No se encontró el catálogo: {CATALOG_SCRIPT}")
     tree = ast.parse(CATALOG_SCRIPT.read_text(encoding="utf-8"))
+    sandbox = {"_L": _L_catalogo}
     for node in tree.body:
         if not isinstance(node, ast.Assign):
             continue
         for target in node.targets:
             if isinstance(target, ast.Name) and target.id == "VITOLAS":
-                vitolas = ast.literal_eval(node.value)
-                if not isinstance(vitolas, list):
-                    raise ValueError("VITOLAS no es una lista.")
-                if len(vitolas) != 6:
-                    raise ValueError(f"Se esperaban 6 vitolas en el catálogo; hay {len(vitolas)}.")
-                return tuple(vitolas)
+                expr = ast.Expression(body=node.value)
+                vitolas = eval(compile(expr, str(CATALOG_SCRIPT), "eval"), {"__builtins__": {}}, sandbox)
+                return _validar_vitolas_catalogo(vitolas)
     raise ValueError("No se encontró VITOLAS en build_wholesale_catalog.py")
 
 
@@ -79,36 +103,31 @@ def vitolas_ordenadas() -> list[dict]:
 
 
 def _lang_key(idioma: str) -> str:
-    return "es" if idioma == "es" else "en"
+    if idioma in IDIOMAS_CATALOGO:
+        return idioma
+    return "en"
 
 
 def _fortaleza(vitola: dict, idioma: str) -> str:
     lk = _lang_key(idioma)
-    raw = vitola["strength"][lk]
+    if lk in vitola["strength"]:
+        return vitola["strength"][lk]
+    raw = vitola["strength"]["en"]
     if idioma == "es":
         return FORTALEZA_ES.get(raw, raw)
     if idioma == "fr":
-        return FORTALEZA_FR.get(vitola["strength"]["en"], vitola["strength"]["en"])
+        return FORTALEZA_FR.get(raw, raw)
     if idioma == "nl":
-        return FORTALEZA_NL.get(vitola["strength"]["en"], vitola["strength"]["en"])
+        return FORTALEZA_NL.get(raw, raw)
     if idioma == "pt":
-        return FORTALEZA_PT.get(vitola["strength"]["en"], FORTALEZA_EN.get(raw, raw))
+        return FORTALEZA_PT.get(raw, raw)
     return FORTALEZA_EN.get(raw, raw)
 
 
 def _capa(vitola: dict, idioma: str) -> str:
-    """Texto de capa del catálogo (es/en), adaptado al idioma del borrador."""
+    """Texto de capa del catálogo en el idioma del borrador."""
     lk = _lang_key(idioma)
-    raw = vitola["wrapper"][lk]
-    if idioma == "pt":
-        capa = raw.replace("(Mexico)", "(México)").replace("Maduro", "Maduro")
-        return capa
-    if idioma == "fr":
-        return (
-            raw.replace("(Mexico)", "(Mexique)")
-            .replace("Maduro", "Maduro")
-        )
-    return raw
+    return vitola["wrapper"].get(lk) or vitola["wrapper"]["en"]
 
 
 def linea_vitola(vitola: dict, idioma: str) -> str:

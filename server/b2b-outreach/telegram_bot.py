@@ -652,6 +652,8 @@ def normalizar_lead_cola(data):
         "tipo_negocio": (data.get("tipo_negocio") or data.get("tipo") or "tienda").strip(),
         "tipo": (data.get("tipo") or data.get("tipo_negocio") or "tienda").strip(),
         "idioma": (data.get("idioma") or "").strip(),
+        "idioma_web": (data.get("idioma_web") or "").strip(),
+        "idioma_fuente": (data.get("idioma_fuente") or "").strip(),
         "fuente_correo": (data.get("fuente_correo") or "").strip(),
         "sin_correo_publico": bool(data.get("sin_correo_publico")),
         "dificultad_pais": data.get("dificultad_aduana", data.get("dificultad_pais")),

@@ -12,12 +12,12 @@ if str(HERE) not in sys.path:
 
 from b2b.budget import puede_llamar
 from b2b.country_rules import buscar_pais, cargar_reglas, paises_ordenados_por_dificultad, paises_prioridad_inicial
-from b2b.idioma import idioma_para_pais
+from b2b.idioma import idioma_para_lead
 from b2b.lead_score import califica_lead, puntuar_lead
 from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
 from b2b.logging_ops import registrar_busqueda, registrar_presupuesto_agotado
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
-from b2b.website import extraer_correo_publico
+from b2b.website import analizar_sitio_prospecto
 
 SLUG_RE = __import__("re").compile(r"[^a-z0-9]+")
 
@@ -42,13 +42,27 @@ def enriquecer_lead(lead: dict, reglas: dict) -> dict:
     web = lead.get("web") or ""
     correo = (lead.get("correo") or "").strip()
     fuente_correo = lead.get("fuente_correo") or ""
-    if web.startswith(("http://", "https://")) and not correo:
-        correo, fuente_correo = extraer_correo_publico(web)
+    idioma_web = (lead.get("idioma_web") or "").strip()
+    idioma_fuente = (lead.get("idioma_fuente") or "").strip()
+    if web.startswith(("http://", "https://")):
+        info = analizar_sitio_prospecto(web)
+        if not correo:
+            correo = info["correo"]
+            fuente_correo = info["fuente_correo"]
+        if not idioma_web:
+            idioma_web = info["idioma_web"]
+            idioma_fuente = info["idioma_fuente"]
     lead["correo"] = correo
     lead["fuente_correo"] = fuente_correo
+    lead["idioma_web"] = idioma_web
+    lead["idioma_fuente"] = idioma_fuente
     if not correo:
         lead["sin_correo_publico"] = True
-    lead["idioma"] = idioma_para_pais(reglas["pais"])
+    lead["idioma"] = idioma_para_lead(
+        reglas["pais"],
+        idioma_web=idioma_web,
+        preferido=(lead.get("idioma") or "").strip(),
+    )
     lead["dificultad_aduana"] = reglas.get("dificultad")
     lead["estado_reglas"] = reglas.get("estado")
     lead["tipo"] = lead.get("tipo_negocio") or lead.get("tipo") or "tienda"
@@ -68,6 +82,8 @@ def lead_a_inbox(lead: dict) -> dict:
         "telefono": lead.get("telefono") or "",
         "direccion": lead.get("direccion") or "",
         "idioma": lead.get("idioma") or "en",
+        "idioma_web": lead.get("idioma_web") or "",
+        "idioma_fuente": lead.get("idioma_fuente") or "",
         "dificultad_aduana": lead.get("dificultad_aduana"),
         "estado_reglas": lead.get("estado_reglas"),
         "fuente_correo": lead.get("fuente_correo") or "",

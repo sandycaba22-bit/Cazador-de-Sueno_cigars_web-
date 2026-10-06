@@ -4,6 +4,17 @@ El script recibe un prospecto que ya tienes y te deja en Telegram el borrador li
 
 Con `--buscar`, el bot **sí** puede localizar negocios B2B públicos vía **Google Places** (API oficial), respetar `robots.txt` al leer webs, encolar JSON en `inbox/` y avisarte por Telegram. **Nunca** escribe al prospecto: el mensaje lo envías tú.
 
+Al leer la web del prospecto, el idioma del borrador se elige así: **1)** idioma guardado en el lead, **2)** señales del sitio (`html lang`, meta, texto visible), **3)** reglas por país en `country_rules.json`. El catálogo PDF sigue el idioma del borrador (ES/EN/FR/PT).
+
+Los textos del PDF mayorista y de las vitolas en el borrador salen de `catalogo/build_wholesale_catalog.py` (traducciones fijas, no API). Para regenerar los cuatro PDF y subirlos al sitio:
+
+```bash
+cd catalogo
+python build_wholesale_catalog.py
+```
+
+Sube `CazadorDeSuenos_Wholesale_{ES,EN,FR,PT}.pdf` a `www.cazadordesuenocigars.com/catalogo/`.
+
 Un prospecto del Caribe queda marcado como prioridad alta (ruta corta desde Santiago). El resto entra como mercado internacional. En los dos casos la importación la confirma el comprador en su país. El script no tramita aduana ni salta controles.
 
 ## Dependencias

@@ -1,7 +1,14 @@
-"""Genera los catálogos mayoristas ES y EN.
+"""Genera los catálogos mayoristas ES, EN, FR y PT.
 
 Cada ficha, de arriba abajo: fotos reales, especificaciones, nota de cata.
+Textos revisados por idioma (sin traducción automática en runtime).
 """
+
+IDIOMAS_CATALOGO = ("es", "en", "fr", "pt")
+
+
+def _L(es: str, en: str, fr: str, pt: str) -> dict[str, str]:
+    return {"es": es, "en": en, "fr": fr, "pt": pt}
 
 import tempfile
 from pathlib import Path
@@ -47,8 +54,19 @@ WELCOME = {
     ),
     "en": (
         "Welcome to our exclusive B2B portal. At Cazador de Sueños, we craft 100% handmade "
-        "premium cigars by master torcedores in the Dominican Republic, fully equipped for "
-        "global export with complete commercial facilities."
+        "premium cigars by master torcedores in the Dominican Republic, ready for global "
+        "export with full commercial support and a valid RNC."
+    ),
+    "fr": (
+        "Bienvenue sur notre portail B2B réservé aux professionnels. Chez Cazador de Sueños, "
+        "nous fabriquons des cigares premium 100 % faits main par des maîtres torcedores en "
+        "République dominicaine, prêts pour l'exportation internationale avec accompagnement "
+        "commercial et RNC en règle."
+    ),
+    "pt": (
+        "Bem-vindo ao nosso portal B2B exclusivo. Na Cazador de Sueños elaboramos charutos "
+        "premium 100 % artesanais, feitos por mestres torcedores na República Dominicana, "
+        "prontos para exportação global com apoio comercial e RNC válido."
     ),
 }
 
@@ -87,122 +105,206 @@ COPY = {
         "pricing": "Wholesale pricing upon request.",
         "web": "More details at www.cazadordesuenocigars.com",
     },
+    "fr": {
+        "catalog": "Catalogue grossiste",
+        "house": "Collection de la maison",
+        "adult": "Réservé aux acheteurs majeurs.",
+        "headers": ["Vitola", "Format", "Force"],
+        "captions": ["Boîte ouverte", "Présentation", "Cigare individuel"],
+        "tasting": "Notes de dégustation",
+        "format": "Format",
+        "wrapper": "Cape",
+        "binder": "Sous-cape",
+        "filler": "Tripe / Ligne",
+        "strength": "Force",
+        "contact": "Contact",
+        "whatsapp": "WhatsApp : +1 809-464-5016",
+        "pricing": "Tarifs grossiste sur demande.",
+        "web": "Plus d'informations sur www.cazadordesuenocigars.com",
+    },
+    "pt": {
+        "catalog": "Catálogo grossista",
+        "house": "Coleção da casa",
+        "adult": "Destinado apenas a compradores adultos.",
+        "headers": ["Vitola", "Formato", "Força"],
+        "captions": ["Caixa aberta", "Apresentação", "Charuto avulso"],
+        "tasting": "Notas de prova",
+        "format": "Formato",
+        "wrapper": "Capa",
+        "binder": "Capote",
+        "filler": "Miolo / Tripa",
+        "strength": "Força",
+        "contact": "Contacto",
+        "whatsapp": "WhatsApp: +1 809-464-5016",
+        "pricing": "Preços grossista mediante pedido.",
+        "web": "Mais informações em www.cazadordesuenocigars.com",
+    },
 }
 
 VITOLAS = [
     {
-        "name": {"es": "El Emperador", "en": "The Emperor"},
+        "name": _L("El Emperador", "The Emperor", "L'Empereur", "O Imperador"),
         "photos": [
             "img/el-emperador-caja-abierta.jpg",
             "img/el-emperador-caja-cerrada.jpg",
             "img/el-emperador-cigarro.jpg",
         ],
-        "format": {"es": "Gran Toro 58 × 6″", "en": "Gran Toro 58 × 6″"},
-        "wrapper": {"es": "San Andrés Madura (México)", "en": "San Andrés Maduro (Mexico)"},
-        "binder": {"es": "Olor Dominicano", "en": "Olor Dominicano"},
-        "filler": {
-            "es": "Selección Premium (República Dominicana y otros)",
-            "en": "Premium Selection (Dominican Republic and others)",
-        },
-        "strength": {"es": "Medio-fuerte", "en": "Medium-full"},
-        "note": {
-            "es": "Fortaleza medio-fuerte. Cacao cremoso, cedro y roble, especias suaves de canela y nuez moscada, café tostado y un final de cuero con almendra e higo.",
-            "en": "Medium-full. Creamy cocoa, cedar and oak, soft spices of cinnamon and nutmeg, roasted coffee, and a finish of leather with almond and fig.",
-        },
+        "format": _L("Gran Toro 58 × 6″", "Gran Toro 58 × 6″", "Gran Toro 58 × 6″", "Gran Toro 58 × 6″"),
+        "wrapper": _L(
+            "San Andrés Madura (México)",
+            "San Andrés Maduro (Mexico)",
+            "San Andrés Maduro (Mexique)",
+            "San Andrés Maduro (México)",
+        ),
+        "binder": _L("Olor Dominicano", "Olor Dominicano", "Olor Dominicano", "Olor Dominicano"),
+        "filler": _L(
+            "Selección Premium (República Dominicana y otros)",
+            "Premium Selection (Dominican Republic and others)",
+            "Sélection Premium (République dominicaine et autres)",
+            "Seleção Premium (República Dominicana e outros)",
+        ),
+        "strength": _L("Medio-fuerte", "Medium-full", "Moyen-cors", "Médio-cheio"),
+        "note": _L(
+            "Fortaleza medio-fuerte. Cacao cremoso, cedro y roble, especias suaves de canela y nuez moscada, café tostado y un final de cuero con almendra e higo.",
+            "Medium-full. Creamy cocoa, cedar and oak, soft spices of cinnamon and nutmeg, roasted coffee, and a finish of leather with almond and fig.",
+            "Moyen-cors. Cacao crémeux, cèdre et chêne, épices douces de cannelle et muscade, café torréfié, final cuir, amande et figue.",
+            "Força médio-cheia. Cacau cremoso, cedro e carvalho, especiarias suaves de canela e noz-moscada, café torrado e final de couro com amêndoa e figo.",
+        ),
     },
     {
-        "name": {"es": "Puro Habano", "en": "Puro Habano"},
+        "name": _L("Puro Habano", "Puro Habano", "Puro Habano", "Puro Habano"),
         "photos": [
             "img/puro-habano-caja-abierta.jpg",
             "img/puro-habano-caja-cerrada.jpg",
             "img/puro-habano-cigarro.jpg",
         ],
-        "format": {"es": "Churchill 48 × 7″", "en": "Churchill 48 × 7″"},
-        "wrapper": {"es": "Habana", "en": "Habana"},
-        "binder": {"es": "Olor Dominicano", "en": "Olor Dominicano"},
-        "filler": {"es": "Tripa Yamazá (Criollo 98)", "en": "Yamazá filler (Criollo 98)"},
-        "strength": {"es": "Fuerte", "en": "Full"},
-        "note": {
-            "es": "Fortaleza fuerte. Madera tostada y especias de capa Habana, cuero y cacao, con el dulzor meloso de la tripa Yamazá.",
-            "en": "Full. Toasted wood and Habana-wrapper spice, leather and cocoa, with the molasses sweetness of the Yamazá filler.",
-        },
+        "format": _L("Churchill 48 × 7″", "Churchill 48 × 7″", "Churchill 48 × 7″", "Churchill 48 × 7″"),
+        "wrapper": _L("Habana", "Habana", "Habana", "Habana"),
+        "binder": _L("Olor Dominicano", "Olor Dominicano", "Olor Dominicano", "Olor Dominicano"),
+        "filler": _L(
+            "Tripa Yamazá (Criollo 98)",
+            "Yamazá filler (Criollo 98)",
+            "Tripe Yamazá (Criollo 98)",
+            "Miolo Yamazá (Criollo 98)",
+        ),
+        "strength": _L("Fuerte", "Full", "Fort", "Forte"),
+        "note": _L(
+            "Fortaleza fuerte. Madera tostada y especias de capa Habana, cuero y cacao, con el dulzor meloso de la tripa Yamazá.",
+            "Full. Toasted wood and Habana-wrapper spice, leather and cocoa, with the molasses sweetness of the Yamazá filler.",
+            "Fort. Bois toasté et épices de cape Habana, cuir et cacao, douceur de mélasse de la tripe Yamazá.",
+            "Forte. Madeira torrada e especiarias da capa Habana, couro e cacau, com doçura melada do miolo Yamazá.",
+        ),
     },
     {
-        "name": {"es": "El Exquisito", "en": "The Exquisite"},
+        "name": _L("El Exquisito", "The Exquisite", "L'Exquis", "O Exquisito"),
         "photos": [
             "img/el-exquisito-caja-abierta.jpg",
             "img/el-exquisito-caja-cerrada.jpg",
             "img/el-exquisito-cigarro.jpg",
         ],
-        "format": {"es": "Gran Toro 58 × 6″", "en": "Gran Toro 58 × 6″"},
-        "wrapper": {"es": "San Andrés Madura (México)", "en": "San Andrés Maduro (Mexico)"},
-        "binder": {
-            "es": "Doble capote (Nicaragua y Camerún)",
-            "en": "Double binder (Nicaragua and Cameroon)",
-        },
-        "filler": {
-            "es": "Selección Premium (San José de las Matas)",
-            "en": "Premium Selection (San José de las Matas)",
-        },
-        "strength": {"es": "Fuerte", "en": "Full"},
-        "note": {
-            "es": "Fortaleza fuerte. Tierra húmeda y madera ahumada, cuero, café y especia de Camerún, con cierre de cacao amargo y frutos secos tostados.",
-            "en": "Full. Damp earth and smoked wood, leather, coffee and Cameroon spice, closing on bitter cocoa and toasted dried fruit.",
-        },
+        "format": _L("Gran Toro 58 × 6″", "Gran Toro 58 × 6″", "Gran Toro 58 × 6″", "Gran Toro 58 × 6″"),
+        "wrapper": _L(
+            "San Andrés Madura (México)",
+            "San Andrés Maduro (Mexico)",
+            "San Andrés Maduro (Mexique)",
+            "San Andrés Maduro (México)",
+        ),
+        "binder": _L(
+            "Doble capote (Nicaragua y Camerún)",
+            "Double binder (Nicaragua and Cameroon)",
+            "Double sous-cape (Nicaragua et Cameroun)",
+            "Duplo capote (Nicaragua e Camarões)",
+        ),
+        "filler": _L(
+            "Selección Premium (San José de las Matas)",
+            "Premium Selection (San José de las Matas)",
+            "Sélection Premium (San José de las Matas)",
+            "Seleção Premium (San José de las Matas)",
+        ),
+        "strength": _L("Fuerte", "Full", "Fort", "Forte"),
+        "note": _L(
+            "Fortaleza fuerte. Tierra húmeda y madera ahumada, cuero, café y especia de Camerún, con cierre de cacao amargo y frutos secos tostados.",
+            "Full. Damp earth and smoked wood, leather, coffee and Cameroon spice, closing on bitter cocoa and toasted dried fruit.",
+            "Fort. Terre humide et bois fumé, cuir, café et épice du Cameroun, final cacao amer et fruits secs torréfiés.",
+            "Forte. Terra húmida e madeira fumada, couro, café e especiaria de Camarões, com final de cacau amargo e frutos secos torrados.",
+        ),
     },
     {
-        "name": {"es": "El Rango", "en": "The Range"},
+        "name": _L("El Rango", "The Range", "The Range", "The Range"),
         "photos": [
             "img/el-rango-caja-abierta.jpg",
             "img/el-rango-caja-cerrada.jpg",
             "img/el-rango-cigarro.jpg",
         ],
-        "format": {"es": "Doble Perfecto 60 × 4½″", "en": "Double Perfecto 60 × 4½″"},
-        "wrapper": {"es": "San Andrés", "en": "San Andrés"},
-        "binder": {"es": "Selección Premium (Nicaragua)", "en": "Premium Selection (Nicaragua)"},
-        "filler": {"es": "100% Nicaragua", "en": "100% Nicaragua"},
-        "strength": {"es": "Medio-fuerte", "en": "Medium-full"},
-        "note": {
-            "es": "Fortaleza medio-fuerte. Pimienta rica y suave, madera ligera, tierra y frutos secos, con retrogusto de especias dulces y maderas tostadas.",
-            "en": "Medium-full. Rich, smooth pepper, light wood, earth and dried fruit, with a finish of sweet spice and toasted wood.",
-        },
+        "format": _L("Doble Perfecto 60 × 4½″", "Double Perfecto 60 × 4½″", "Double Perfecto 60 × 4½″", "Double Perfecto 60 × 4½″"),
+        "wrapper": _L("San Andrés", "San Andrés", "San Andrés", "San Andrés"),
+        "binder": _L(
+            "Selección Premium (Nicaragua)",
+            "Premium Selection (Nicaragua)",
+            "Sélection Premium (Nicaragua)",
+            "Seleção Premium (Nicaragua)",
+        ),
+        "filler": _L("100% Nicaragua", "100% Nicaragua", "100 % Nicaragua", "100% Nicarágua"),
+        "strength": _L("Medio-fuerte", "Medium-full", "Moyen-cors", "Médio-cheio"),
+        "note": _L(
+            "Fortaleza medio-fuerte. Pimienta rica y suave, madera ligera, tierra y frutos secos, con retrogusto de especias dulces y maderas tostadas.",
+            "Medium-full. Rich, smooth pepper, light wood, earth and dried fruit, with a finish of sweet spice and toasted wood.",
+            "Moyen-cors. Poivre riche et doux, bois léger, terre et fruits secs, rétrogoût d'épices douces et bois toasté.",
+            "Força médio-cheia. Pimenta rica e suave, madeira leve, terra e frutos secos, retrogosto de especiarias doces e madeiras torradas.",
+        ),
     },
     {
-        "name": {"es": "Ligero 007", "en": "Ligero 007"},
+        "name": _L("Ligero 007", "Ligero 007", "Ligero 007", "Ligero 007"),
         "photos": [
             "images/ligero-007/caja-abierta.jpg",
             "images/ligero-007/caja-cerrada.jpg",
             "images/ligero-007/cigarro.jpg",
         ],
-        "format": {"es": "Toro 58 × 5″", "en": "Toro 58 × 5″"},
-        "wrapper": {"es": "San Andrés Madura (México)", "en": "San Andrés Maduro (Mexico)"},
-        "binder": {"es": "Camerún", "en": "Cameroon"},
-        "filler": {
-            "es": "Selección Premium (Nicaragua y otros 4 países)",
-            "en": "Premium Selection (Nicaragua and 4 other countries)",
-        },
-        "strength": {"es": "Alta y sofisticada", "en": "High and sophisticated"},
-        "note": {
-            "es": "Fortaleza alta y sofisticada. Pimienta fina, roble y cedro, cacao amargo, café y avellana, con final de cuero y especias exóticas.",
-            "en": "High and sophisticated. Fine pepper, oak and cedar, bitter cocoa, coffee and hazelnut, finishing on leather and exotic spice.",
-        },
+        "format": _L("Toro 58 × 5″", "Toro 58 × 5″", "Toro 58 × 5″", "Toro 58 × 5″"),
+        "wrapper": _L(
+            "San Andrés Madura (México)",
+            "San Andrés Maduro (Mexico)",
+            "San Andrés Maduro (Mexique)",
+            "San Andrés Maduro (México)",
+        ),
+        "binder": _L("Camerún", "Cameroon", "Cameroun", "Camarões"),
+        "filler": _L(
+            "Selección Premium (Nicaragua y otros 4 países)",
+            "Premium Selection (Nicaragua and 4 other countries)",
+            "Sélection Premium (Nicaragua et 4 autres pays)",
+            "Seleção Premium (Nicarágua e outros 4 países)",
+        ),
+        "strength": _L("Alta y sofisticada", "High and sophisticated", "Haute et sophistiquée", "Alta e sofisticada"),
+        "note": _L(
+            "Fortaleza alta y sofisticada. Pimienta fina, roble y cedro, cacao amargo, café y avellana, con final de cuero y especias exóticas.",
+            "High and sophisticated. Fine pepper, oak and cedar, bitter cocoa, coffee and hazelnut, finishing on leather and exotic spice.",
+            "Haute et sophistiquée. Poivre fin, chêne et cèdre, cacao amer, café et noisette, final cuir et épices exotiques.",
+            "Força alta e sofisticada. Pimenta fina, carvalho e cedro, cacau amargo, café e avelã, final de couro e especiarias exóticas.",
+        ),
     },
     {
-        "name": {"es": "El Sultán", "en": "The Sultan"},
+        "name": _L("El Sultán", "The Sultan", "Le Sultan", "O Sultan"),
         "photos": [
             "img/el-sultan-caja-abierta.jpg",
             "img/el-sultan-caja-cerrada.jpg",
             "img/el-sultan-cigarro.jpg",
         ],
-        "format": {"es": "Robusto 50 × 5″", "en": "Robusto 50 × 5″"},
-        "wrapper": {"es": "San Andrés", "en": "San Andrés"},
-        "binder": {"es": "Olor Dominicano", "en": "Olor Dominicano"},
-        "filler": {"es": "Selección Premium (Valle del Cibao)", "en": "Premium Selection (Cibao Valley)"},
-        "strength": {"es": "Fuerte", "en": "Full"},
-        "note": {
-            "es": "Fortaleza fuerte. Pimienta negra, roble y cedro, café expreso y cuero, con cierre de cacao oscuro y tierra seca.",
-            "en": "Full. Black pepper, oak and cedar, espresso and leather, closing on dark cocoa and dry earth.",
-        },
+        "format": _L("Robusto 50 × 5″", "Robusto 50 × 5″", "Robusto 50 × 5″", "Robusto 50 × 5″"),
+        "wrapper": _L("San Andrés", "San Andrés", "San Andrés", "San Andrés"),
+        "binder": _L("Olor Dominicano", "Olor Dominicano", "Olor Dominicano", "Olor Dominicano"),
+        "filler": _L(
+            "Selección Premium (Valle del Cibao)",
+            "Premium Selection (Cibao Valley)",
+            "Sélection Premium (vallée du Cibao)",
+            "Seleção Premium (Vale do Cibao)",
+        ),
+        "strength": _L("Fuerte", "Full", "Fort", "Forte"),
+        "note": _L(
+            "Fortaleza fuerte. Pimienta negra, roble y cedro, café expreso y cuero, con cierre de cacao oscuro y tierra seca.",
+            "Full. Black pepper, oak and cedar, espresso and leather, closing on dark cocoa and dry earth.",
+            "Fort. Poivre noir, chêne et cèdre, espresso et cuir, final cacao noir et terre sèche.",
+            "Forte. Pimenta preta, carvalho e cedro, café expresso e couro, com final de cacau escuro e terra seca.",
+        ),
     },
 ]
 
@@ -504,7 +606,7 @@ def build(lang):
 
 def main():
     register_fonts()
-    for lang in ("es", "en"):
+    for lang in IDIOMAS_CATALOGO:
         path = build(lang)
         print(path)
 

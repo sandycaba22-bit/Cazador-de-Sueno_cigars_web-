@@ -6,7 +6,8 @@ import re
 from b2b.catalogo_check import WHOLESALE_URL, resolver_catalogo_pdf, verificar_vitolas
 from b2b.catalogo_vitolas import intro_vitolas, lineas_vitolas, vitolas_ordenadas
 from b2b.country_rules import buscar_pais
-from b2b.idioma import idioma_para_pais
+from b2b.idioma import idioma_para_lead
+from b2b.website import detectar_idioma_desde_web
 from b2b.paths import KNOWLEDGE
 
 PROHIBIDO_RE = re.compile(
@@ -304,6 +305,7 @@ def borrador_prospecto(
             "en": "\n(Note: no generic business email published; contact via phone or website.)\n",
             "fr": "\n(Note : pas d'e-mail générique public ; contact par téléphone ou site.)\n",
             "nl": "\n(Let op: geen publiek generiek e-mailadres; contact via telefoon of website.)\n",
+            "pt": "\n(Nota: sem e-mail genérico publicado; contactar por telefone ou site.)\n",
         }
         cuerpo += notas.get(idioma, notas["en"])
 
@@ -331,7 +333,16 @@ def generar_tarjeta_telegram(
 ) -> dict:
     meta = meta or {}
     entry = buscar_pais(pais)
-    idioma = meta.get("idioma") or idioma_para_pais(pais)
+    idioma_web = (meta.get("idioma_web") or "").strip()
+    idioma_fuente = (meta.get("idioma_fuente") or "").strip()
+    preferido = (meta.get("idioma") or "").strip()
+    if not idioma_web and web.startswith(("http://", "https://")):
+        idioma_web, idioma_fuente = detectar_idioma_desde_web(web)
+    idioma = idioma_para_lead(
+        pais,
+        idioma_web=idioma_web,
+        preferido=preferido,
+    )
     if idioma == "pap":
         meta["nota_idioma"] = "Papiamento: revisar borrador con hablante nativo."
         idioma = "en"
@@ -359,7 +370,9 @@ def generar_tarjeta_telegram(
         f"Nombre: {nombre_local.strip()}\n"
         f"Tipo: {tipo}\n"
         f"País: {pais.strip()}\n"
-        f"Idioma borrador: {idioma}\n"
+        f"Idioma borrador: {idioma}"
+        + (f" ({idioma_fuente})" if idioma_fuente else "")
+        + "\n"
         f"Aduana: {sem_etiqueta} ({meta.get('estado_reglas') or (entry or {}).get('estado', 'preliminar')})\n"
         f"Teléfono: {telefono}\n"
         f"Correo: {correo_txt}\n"
@@ -377,7 +390,9 @@ def generar_tarjeta_telegram(
         f"*Nombre:* {md_escape(nombre_local.strip())}\n"
         f"*Tipo:* {md_escape(tipo)}\n"
         f"*País:* {md_escape(pais.strip())}\n"
-        f"*Idioma:* {md_escape(idioma)}\n"
+        f"*Idioma:* {md_escape(idioma)}"
+        + (f" _({md_escape(idioma_fuente)})_" if idioma_fuente else "")
+        + "\n"
         f"*Aduana:* {md_escape(sem_etiqueta)}\n"
         f"*Teléfono:* {md_escape(telefono)}\n"
         f"*Correo:* {md_escape(correo_txt)}\n"
