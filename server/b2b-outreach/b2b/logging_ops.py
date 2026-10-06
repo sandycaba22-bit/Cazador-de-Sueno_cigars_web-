@@ -34,6 +34,16 @@ def registrar_presupuesto_agotado() -> Path:
     )
 
 
+def registrar_osm_fallo(pais: str, mensaje: str) -> Path:
+    return registrar_evento(
+        {
+            "evento": "osm_fallo",
+            "pais": _sanitizar(pais),
+            "mensaje": _sanitizar(mensaje),
+        }
+    )
+
+
 def registrar_busqueda(
     pais: str,
     llamadas_api: int,

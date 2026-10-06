@@ -165,6 +165,19 @@ def prospectar_un_pais(
             "presupuesto_agotado": True,
             "fuente": fuente,
         }
+    except (RuntimeError, ValueError) as error:
+        from b2b.logging_ops import registrar_osm_fallo
+
+        if fuente == "osm":
+            registrar_osm_fallo(pais, str(error))
+        return {
+            "pais": pais,
+            "encolados": 0,
+            "leads": 0,
+            "llamadas": 0,
+            "fuente": fuente,
+            "error": str(error)[:200],
+        }
     if solo_listar:
         for lead in leads:
             print(json.dumps(enriquecer_lead(dict(lead), reglas), ensure_ascii=False))

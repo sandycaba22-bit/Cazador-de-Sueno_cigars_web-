@@ -3,22 +3,43 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any
 
 from b2b.country_rules import buscar_pais
+from b2b.logging_ops import registrar_osm_fallo
 from b2b.paths import data_file
 
+_DEFAULT_MIRRORS = "|".join(
+    (
+        "https://overpass.private.coffee/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.nchc.org.tw/api/interpreter",
+    )
+)
 OVERPASS_URLS = [
-    u.strip()
-    for u in (
-        os.getenv("OSM_OVERPASS_URL", "")
-        or "https://overpass-api.de/api/interpreter|https://overpass.kumi.systems/api/interpreter"
-    ).split("|")
-    if u.strip()
+    u.strip() for u in (os.getenv("OSM_OVERPASS_URL", "") or _DEFAULT_MIRRORS).split("|") if u.strip()
 ]
+
+
+def _overpass_timeout() -> int:
+    try:
+        return max(30, int(os.getenv("OSM_OVERPASS_TIMEOUT", "180") or "180"))
+    except ValueError:
+        return 180
+
+
+def _pausa_entre_consultas() -> None:
+    try:
+        sec = float(os.getenv("OSM_OVERPASS_PAUSE_SEC", "2") or "2")
+    except ValueError:
+        sec = 2.0
+    if sec > 0:
+        time.sleep(sec)
 USER_AGENT = os.getenv(
     "OSM_USER_AGENT",
     "CazadorDeSuenosB2B/1.0 (B2B wholesale outreach; contact: ventas@cazadordesuenocigars.com)",
@@ -116,31 +137,26 @@ def _elemento_a_lead(el: dict, pais: str) -> dict | None:
 
 def _query_tobacco(iso: str) -> str:
     return f"""
-[out:json][timeout:55];
+[out:json][timeout:25];
 area["ISO3166-1"="{iso}"][admin_level=2]->.country;
 (
   node["shop"="tobacco"](area.country);
   way["shop"="tobacco"](area.country);
 );
-out center tags 80;
+out center 50 tags;
 """.strip()
 
 
 def _query_nombre_comercial(iso: str) -> str:
-    name_re = (
-        "cigar|Cigar|tabac|Tabac|tobacco|Tobacco|charuto|Charuto|puro|Puro|"
-        "humidor|Humidor|tabaquer|Tabaquer|sigar|Sigar|Cigare"
-    )
+    name_re = "cigar|Cigar|tabac|Tabac|tobacco|Tobacco|charuto|puro|humidor|Humidor"
     return f"""
-[out:json][timeout:55];
+[out:json][timeout:25];
 area["ISO3166-1"="{iso}"][admin_level=2]->.country;
 (
-  node["shop"~"kiosk|convenience"]["name"~"{name_re}"](area.country);
-  way["shop"~"kiosk|convenience"]["name"~"{name_re}"](area.country);
   node["amenity"="bar"]["name"~"{name_re}"](area.country);
   way["amenity"="bar"]["name"~"{name_re}"](area.country);
 );
-out center tags 40;
+out center 25 tags;
 """.strip()
 
 
@@ -148,20 +164,27 @@ def _fetch_overpass(query: str) -> list[dict]:
     body = urllib.parse.urlencode({"data": query}).encode("utf-8")
     headers = {"User-Agent": USER_AGENT, "Content-Type": "application/x-www-form-urlencoded"}
     errors: list[str] = []
+    timeout = _overpass_timeout()
     for base_url in OVERPASS_URLS:
-        request = urllib.request.Request(base_url, data=body, headers=headers, method="POST")
-        try:
-            with urllib.request.urlopen(request, timeout=120) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-            return payload.get("elements") or []
-        except urllib.error.HTTPError as error:
-            detail = error.read().decode("utf-8", errors="replace")[:200]
-            errors.append(f"{base_url} → HTTP {error.code}: {detail}")
-        except urllib.error.URLError as error:
-            errors.append(f"{base_url} → {error}")
-        except TimeoutError as error:
-            errors.append(f"{base_url} → timeout: {error}")
-    raise RuntimeError("Overpass no respondió: " + " | ".join(errors))
+        for intento in (1, 2):
+            request = urllib.request.Request(base_url, data=body, headers=headers, method="POST")
+            try:
+                with urllib.request.urlopen(request, timeout=timeout) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+                return payload.get("elements") or []
+            except urllib.error.HTTPError as error:
+                detail = error.read().decode("utf-8", errors="replace")[:120]
+                errors.append(f"{base_url}#{intento} HTTP {error.code}")
+                if error.code in (429, 502, 503, 504) and intento == 1:
+                    time.sleep(3)
+                    continue
+            except (urllib.error.URLError, TimeoutError) as error:
+                errors.append(f"{base_url}#{intento} {error}")
+                if intento == 1:
+                    time.sleep(2)
+                    continue
+            break
+    raise RuntimeError("Overpass no respondió: " + " | ".join(errors[-6:]))
 
 
 def _dedupe_elementos(elementos: list[dict]) -> list[dict]:
@@ -185,15 +208,29 @@ def buscar_en_pais_osm(
     if tipo_filtro:
         tipos = [tipo_filtro]
     iso = _iso_para_pais(pais)
-    elementos = _dedupe_elementos(_fetch_overpass(_query_tobacco(iso)))
-    llamadas = 1
-    if len(elementos) < limite:
+    llamadas = 0
+    elementos: list[dict] = []
+    try:
+        _pausa_entre_consultas()
+        elementos = _dedupe_elementos(_fetch_overpass(_query_tobacco(iso)))
+        llamadas = 1
+    except RuntimeError as error:
+        registrar_osm_fallo(pais, str(error))
+        return [], llamadas
+
+    segunda = (os.getenv("OSM_SEGUNDA_PASADA", "1") or "1").strip().lower() not in (
+        "0",
+        "false",
+        "no",
+    )
+    if segunda and len(elementos) < limite:
         try:
+            _pausa_entre_consultas()
             extra = _fetch_overpass(_query_nombre_comercial(iso))
             llamadas += 1
             elementos = _dedupe_elementos(elementos + extra)
-        except RuntimeError:
-            pass
+        except RuntimeError as error:
+            registrar_osm_fallo(pais, f"pasada2: {error}")
     orden_tipo = {t: i for i, t in enumerate(tipos)}
     candidatos: list[dict] = []
     vistos: set[str] = set()

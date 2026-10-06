@@ -929,6 +929,13 @@ def main(argv=None):
                 "Tope diario MAX_PLACES_CALLS_DIA alcanzado; búsqueda detenida (ver logs/).",
                 file=sys.stderr,
             )
+        if not args.solo_listar and stats.get("encolados", 0) == 0 and stats.get("fuente") == "osm":
+            print(
+                "OSM: 0 encolados (Overpass lento o sin tiendas en esos países). "
+                "Reintenta más tarde o prueba: --buscar Aruba --limite 9. "
+                "Fallos en cola/logs/ o logs/ del repo.",
+                file=sys.stderr,
+            )
         return 0
 
     if args.vigilar:
