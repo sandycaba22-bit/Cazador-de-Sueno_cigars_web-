@@ -86,7 +86,7 @@ COPY = {
         "contact": "Contacto",
         "whatsapp": "WhatsApp: +1 809-464-5016",
         "pricing": "Precios mayorista bajo solicitud.",
-        "web": "Más detalles en www.cazadordesuenocigars.com",
+        "web": "Más detalles en www.cazadordesuenocigar.com",
     },
     "en": {
         "catalog": "Vitola Catalog",
@@ -103,7 +103,7 @@ COPY = {
         "contact": "Contact",
         "whatsapp": "WhatsApp: +1 809-464-5016",
         "pricing": "Wholesale pricing upon request.",
-        "web": "More details at www.cazadordesuenocigars.com",
+        "web": "More details at www.cazadordesuenocigar.com",
     },
     "fr": {
         "catalog": "Catalogue grossiste",
@@ -120,7 +120,7 @@ COPY = {
         "contact": "Contact",
         "whatsapp": "WhatsApp : +1 809-464-5016",
         "pricing": "Tarifs grossiste sur demande.",
-        "web": "Plus d'informations sur www.cazadordesuenocigars.com",
+        "web": "Plus d'informations sur www.cazadordesuenocigar.com",
     },
     "pt": {
         "catalog": "Catálogo grossista",
@@ -137,7 +137,7 @@ COPY = {
         "contact": "Contacto",
         "whatsapp": "WhatsApp: +1 809-464-5016",
         "pricing": "Preços grossista mediante pedido.",
-        "web": "Mais informações em www.cazadordesuenocigars.com",
+        "web": "Mais informações em www.cazadordesuenocigar.com",
     },
 }
 

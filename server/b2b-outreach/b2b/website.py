@@ -9,7 +9,7 @@ from html import unescape
 
 USER_AGENT = (
     "CazadorDeSuenos-B2B-Research/1.0 "
-    "(+https://www.cazadordesuenocigars.com/wholesale.html; contacto mayorista)"
+    "(+https://www.cazadordesuenocigar.com/wholesale.html; contacto mayorista)"
 )
 FETCH_DELAY = float(__import__("os").getenv("B2B_WEB_DELAY_SECONDS", "2") or "2")
 TIMEOUT = 15

@@ -24,7 +24,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-WHOLESALE_URL = "https://www.cazadordesuenocigars.com/wholesale.html"
+from b2b.paths import WHOLESALE_URL  # noqa: E402 — dominio canónico único
 VITOLAS = "El Sultán y Ligero 007"
 VITOLA_PAR = {
     "es": "El Sultán y Ligero 007",

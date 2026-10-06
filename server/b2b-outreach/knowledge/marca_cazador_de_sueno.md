@@ -7,7 +7,7 @@
 - **Razón social comercial:** Cazador de Sueños Cigar SRL.
 - **Origen fabril:** Santiago de los Caballeros, República Dominicana.
 - **Oficio:** puros premium 100% hechos a mano por maestros torcedores (maestros tabaqueros).
-- **Portal mayorista (sin precios públicos):** https://www.cazadordesuenocigars.com/wholesale.html
+- **Portal mayorista (sin precios públicos):** https://www.cazadordesuenocigar.com/wholesale.html
 - **Posicionamiento honesto:** respuesta propia en el mostrador donde el cliente ya reconoce marcas de referencia internacional; no afirmamos ser el mismo blend ni superar a terceros.
 
 ## Vitolas activas en catálogo mayorista (datos técnicos del repo)

@@ -7,9 +7,9 @@ from dataclasses import dataclass
 from functools import lru_cache
 
 from b2b.catalogo_vitolas import CATALOG_SCRIPT, vitolas_ordenadas
+from b2b.paths import CATALOGO_PDF_BASE, WHOLESALE_URL
 
-WHOLESALE_URL = "https://www.cazadordesuenocigars.com/wholesale.html"
-PDF_DOMINIO = "https://www.cazadordesuenocigars.com/catalogo"
+PDF_DOMINIO = CATALOGO_PDF_BASE
 PDF_NOMBRE = "CazadorDeSuenos_Wholesale_{suffix}.pdf"
 
 IDIOMA_A_SUFIJO = {

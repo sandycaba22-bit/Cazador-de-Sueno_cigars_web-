@@ -13,7 +13,9 @@ cd catalogo
 python build_wholesale_catalog.py
 ```
 
-Sube `CazadorDeSuenos_Wholesale_{ES,EN,FR,PT}.pdf` a `www.cazadordesuenocigars.com/catalogo/`.
+Sube `CazadorDeSuenos_Wholesale_{ES,EN,FR,PT}.pdf` a `https://www.cazadordesuenocigar.com/catalogo/`.
+
+**Google Places:** opcional. Sin `GOOGLE_PLACES_API_KEY` el bot usa fixtures locales (gratis) para probar cola y Telegram; no hace falta pagar API para operar borradores manuales o leads que tú encolas.
 
 Un prospecto del Caribe queda marcado como prioridad alta (ruta corta desde Santiago). El resto entra como mercado internacional. En los dos casos la importación la confirma el comprador en su país. El script no tramita aduana ni salta controles.
 
