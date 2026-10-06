@@ -7,7 +7,7 @@ from b2b.catalogo_check import WHOLESALE_URL, resolver_catalogo_pdf, verificar_v
 from b2b.catalogo_vitolas import intro_vitolas, lineas_vitolas, vitolas_ordenadas
 from b2b.country_rules import buscar_pais
 from b2b.idioma import idioma_para_lead
-from b2b.website import detectar_idioma_desde_web
+from b2b.website import detectar_idioma_desde_web, web_confiable_para_idioma
 from b2b.paths import KNOWLEDGE
 
 PROHIBIDO_RE = re.compile(
@@ -336,12 +336,17 @@ def generar_tarjeta_telegram(
     idioma_web = (meta.get("idioma_web") or "").strip()
     idioma_fuente = (meta.get("idioma_fuente") or "").strip()
     preferido = (meta.get("idioma") or "").strip()
-    if not idioma_web and web.startswith(("http://", "https://")):
-        idioma_web, idioma_fuente = detectar_idioma_desde_web(web)
+    if web.startswith(("http://", "https://")) and web_confiable_para_idioma(web):
+        if not idioma_web:
+            idioma_web, idioma_fuente = detectar_idioma_desde_web(web)
+    else:
+        idioma_web = ""
+        idioma_fuente = ""
     idioma = idioma_para_lead(
         pais,
         idioma_web=idioma_web,
         preferido=preferido,
+        web=web,
     )
     if idioma == "pap":
         meta["nota_idioma"] = "Papiamento: revisar borrador con hablante nativo."

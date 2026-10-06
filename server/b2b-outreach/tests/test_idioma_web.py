@@ -29,12 +29,30 @@ class TestIdiomaWeb(unittest.TestCase):
 
     def test_web_prioriza_sobre_pais(self):
         self.assertEqual(
-            idioma_para_lead("Angola", idioma_web="en"),
+            idioma_para_lead(
+                "Angola",
+                idioma_web="en",
+                web="https://loja-exemplo.ao/contact",
+            ),
             "en",
         )
         self.assertEqual(
-            idioma_para_lead("Aruba", idioma_web="es"),
+            idioma_para_lead(
+                "Aruba",
+                idioma_web="es",
+                web="https://cigar-shop.aw/",
+            ),
             "es",
+        )
+
+    def test_maps_no_pisa_idioma_del_pais(self):
+        self.assertEqual(
+            idioma_para_lead(
+                "Senegal",
+                idioma_web="en",
+                web="https://maps.google.com/?q=fixture-lounge",
+            ),
+            "fr",
         )
 
     def test_preferido_explicito_gana(self):

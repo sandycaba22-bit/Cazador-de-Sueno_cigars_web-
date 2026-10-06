@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from b2b.country_rules import buscar_pais
+from b2b.website import web_confiable_para_idioma
 
 PAPIAMENTO_PAISES = {"aruba", "curacao", "curaçao"}
 IDIOMAS_BORRADOR = frozenset({"es", "en", "fr", "pt", "nl", "de", "it"})
@@ -11,14 +12,23 @@ def idioma_para_lead(
     *,
     idioma_web: str = "",
     preferido: str = "",
+    web: str = "",
 ) -> str:
-    """Prioridad: preferido explícito → idioma detectado en la web → reglas por país."""
+    """Preferido → web del negocio (si es fiable) → reglas por país."""
     pref = (preferido or "").strip().lower()
     if pref in IDIOMAS_BORRADOR:
         return pref
-    web = (idioma_web or "").strip().lower().split("-")[0]
-    if web in IDIOMAS_BORRADOR:
-        return web
+    url = (web or "").strip()
+    codigo_web = (idioma_web or "").strip().lower().split("-")[0]
+    if url and not web_confiable_para_idioma(url):
+        codigo_web = ""
+    if codigo_web in IDIOMAS_BORRADOR:
+        entry = buscar_pais(pais)
+        idiomas_pais = list((entry or {}).get("idiomas") or ["en"])
+        if codigo_web in idiomas_pais:
+            return codigo_web
+        if url and web_confiable_para_idioma(url):
+            return codigo_web
     return idioma_para_pais(pais, preferido)
 
 

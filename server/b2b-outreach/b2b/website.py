@@ -99,6 +99,26 @@ CONTACT_PATHS = (
 )
 
 
+def web_confiable_para_idioma(web: str) -> bool:
+    """False para Maps, placeholders y dominios que no son la web del negocio."""
+    if not web.startswith(("http://", "https://")):
+        return False
+    parsed = urllib.parse.urlparse(web)
+    host = (parsed.netloc or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+    path_q = ((parsed.path or "") + "?" + (parsed.query or "")).lower()
+    if "fixture" in path_q or host == "example.com":
+        return False
+    if host in ("maps.google.com", "g.page", "goo.gl", "maps.app.goo.gl"):
+        return False
+    if host == "google.com" and "/maps" in (parsed.path or "").lower():
+        return False
+    if host.endswith("googleusercontent.com"):
+        return False
+    return bool(host)
+
+
 def _fetch(url: str) -> str:
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(request, timeout=TIMEOUT) as response:

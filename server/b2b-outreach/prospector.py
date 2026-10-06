@@ -17,7 +17,7 @@ from b2b.lead_score import califica_lead, puntuar_lead
 from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
 from b2b.logging_ops import registrar_busqueda, registrar_presupuesto_agotado
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
-from b2b.website import analizar_sitio_prospecto
+from b2b.website import analizar_sitio_prospecto, web_confiable_para_idioma
 
 SLUG_RE = __import__("re").compile(r"[^a-z0-9]+")
 
@@ -52,6 +52,9 @@ def enriquecer_lead(lead: dict, reglas: dict) -> dict:
         if not idioma_web:
             idioma_web = info["idioma_web"]
             idioma_fuente = info["idioma_fuente"]
+    if web and not web_confiable_para_idioma(web):
+        idioma_web = ""
+        idioma_fuente = ""
     lead["correo"] = correo
     lead["fuente_correo"] = fuente_correo
     lead["idioma_web"] = idioma_web
@@ -62,6 +65,7 @@ def enriquecer_lead(lead: dict, reglas: dict) -> dict:
         reglas["pais"],
         idioma_web=idioma_web,
         preferido=(lead.get("idioma") or "").strip(),
+        web=web,
     )
     lead["dificultad_aduana"] = reglas.get("dificultad")
     lead["estado_reglas"] = reglas.get("estado")
