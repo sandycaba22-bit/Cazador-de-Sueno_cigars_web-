@@ -33,6 +33,7 @@ from b2b.descartes import (
 )
 from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
 from b2b.calidad_lead import StatsCalidad, clasificar_lote
+from b2b.telegram_gestion import tiene_medio_contacto
 from b2b.website import analizar_sitio_prospecto, web_confiable_para_idioma
 
 SLUG_RE = __import__("re").compile(r"[^a-z0-9]+")
@@ -144,7 +145,7 @@ def lead_a_inbox(lead: dict) -> dict:
 
 
 def _payload_tiene_contacto(payload: dict) -> bool:
-    return bool((payload.get("telefono") or "").strip() or (payload.get("correo") or "").strip())
+    return tiene_medio_contacto(payload)
 
 
 def _escribir_lead_cola(carpeta: Path, payload: dict) -> Path:
@@ -162,8 +163,10 @@ def encolar(
     cola_dir: Path | None = None,
     simulado: bool = False,
     pais: str = "",
-    notificar_telegram_buscar: bool = False,
+    notificar_telegram_buscar: bool | None = None,
 ) -> tuple[list[Path], int, int, StatsCalidad, list[dict]]:
+    if notificar_telegram_buscar is None:
+        notificar_telegram_buscar = True
     inbox.mkdir(parents=True, exist_ok=True)
     cola = cola_dir or inbox.parent
     dudoso_dir = cola / "dudoso"
@@ -199,9 +202,9 @@ def encolar(
             if marcar:
                 marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
                 escritos.append(path)
-                if notificar_telegram_buscar and carpeta == inbox:
+                if notificar_telegram_buscar and carpeta == inbox and tiene_medio_contacto(payload):
                     from b2b.telegram_control import procesar_comandos_chat, esta_pausado
-                    from b2b.telegram_prospecto import enviar_prospecto_dos_mensajes
+                    from b2b.telegram_prospecto import enviar_prospecto_telegram
 
                     try:
                         import os
@@ -218,8 +221,11 @@ def encolar(
                     except Exception:
                         pass
                     if not esta_pausado():
-                        ok = enviar_prospecto_dos_mensajes(
-                            payload, reglas["pais"], simulado=simulado
+                        ok = enviar_prospecto_telegram(
+                            payload,
+                            reglas["pais"],
+                            simulado=simulado,
+                            inbox_path=str(path),
                         )
                         if ok:
                             payload["telegram_notificado"] = True
@@ -261,7 +267,7 @@ def prospectar_un_pais(
     tipo_filtro: str = "",
     fuente: str = "",
     modo_global: bool = False,
-    notificar_telegram_buscar: bool = False,
+    notificar_telegram_buscar: bool | None = None,
 ) -> dict:
     pais = reglas["pais"]
     tipos = _tipos_busqueda()
@@ -496,7 +502,7 @@ def prospectar_turno_global(
         tipo_filtro,
         fuente=fuente,
         modo_global=not simulado,
-        notificar_telegram_buscar=not simulado and not solo_listar,
+        notificar_telegram_buscar=not solo_listar,
     )
     out["modo"] = "buscar_global"
     out["fuente"] = fuente

@@ -324,6 +324,66 @@ def code_escape(value):
     return str(value).replace("\\", "\\\\").replace("`", "\\`").replace("```", "'''")
 
 
+EMAIL_VP_VENTAS = "cazadordesueno1@gmail.com"
+
+
+def presentacion_prospecto_telegram(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
+    """Texto listo para copiar al cliente (firma VP + catálogo). Solo flujo buscar/Telegram."""
+    nombre = (nombre_local or "").strip() or "there"
+    cat = resolver_catalogo_pdf(idioma)
+    catalogo = cat.url or WHOLESALE_URL
+    opt = OPT_OUT.get(idioma, OPT_OUT["en"])
+    cargo = CARGO_VP.get(idioma, CARGO_VP["en"])
+    tipo_txt = tipo.replace("_", " ")
+    cuerpos = {
+        "es": (
+            f"Hola, equipo de {nombre}:\n\n"
+            "Somos Cazador de Sueños Cigar SRL, fábrica de puros en Santiago de los Caballeros, "
+            "República Dominicana. Queremos explorar colocar nuestra línea en su "
+            f"{tipo_txt}.\n\n"
+            f"Catálogo mayorista: {catalogo}\n\n"
+            "¿Les parece una llamada breve o el envío de muestras comerciales esta semana?\n\n"
+            f"{NOMBRE_VP}\n{cargo}\n{EMAIL_VP_VENTAS}\n\n{opt}"
+        ),
+        "en": (
+            f"Hello {nombre} team,\n\n"
+            "We are Cazador de Sueños Cigar SRL, a cigar factory in Santiago de los Caballeros, "
+            f"Dominican Republic. We would like to explore placing our line in your {tipo_txt}.\n\n"
+            f"Wholesale catalog: {catalogo}\n\n"
+            "Would a short call or commercial samples this week work for you?\n\n"
+            f"{NOMBRE_VP}\n{cargo}\n{EMAIL_VP_VENTAS}\n\n{opt}"
+        ),
+        "fr": (
+            f"Bonjour, équipe {nombre},\n\n"
+            "Nous sommes Cazador de Sueños Cigar SRL, manufacture à Santiago de los Caballeros, "
+            f"République dominicaine. Nous souhaitons proposer nos cigares pour votre {tipo_txt}.\n\n"
+            f"Catalogue grossiste : {catalogo}\n\n"
+            "Un court appel ou des échantillons cette semaine vous conviendraient-ils ?\n\n"
+            f"{NOMBRE_VP}\n{cargo}\n{EMAIL_VP_VENTAS}\n\n{opt}"
+        ),
+        "nl": (
+            f"Hallo team {nombre},\n\n"
+            "Wij zijn Cazador de Sueños Cigar SRL, fabriek in Santiago de los Caballeros, "
+            f"Dominicaanse Republiek. We willen graag onze lijn in uw {tipo_txt} aanbieden.\n\n"
+            f"Groothandelscatalogus: {catalogo}\n\n"
+            "Past een kort gesprek of stalen deze week?\n\n"
+            f"{NOMBRE_VP}\n{cargo}\n{EMAIL_VP_VENTAS}\n\n{opt}"
+        ),
+        "pt": (
+            f"Olá, equipa {nombre},\n\n"
+            "Somos a Cazador de Sueños Cigar SRL, fábrica em Santiago de los Caballeros, "
+            f"República Dominicana. Queremos colocar a nossa linha na sua {tipo_txt}.\n\n"
+            f"Catálogo grossista: {catalogo}\n\n"
+            "Uma chamada breve ou amostras comerciais esta semana funcionam para si?\n\n"
+            f"{NOMBRE_VP}\n{cargo}\n{EMAIL_VP_VENTAS}\n\n{opt}"
+        ),
+    }
+    texto = cuerpos.get(idioma, cuerpos["en"])
+    if PROHIBIDO_RE.search(texto):
+        raise ValueError("Presentación contiene términos prohibidos.")
+    return texto
+
+
 def texto_corto_prospecto_buscar(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """Mensaje 2 del flujo --buscar (≤6 líneas). No reemplaza borrador_prospecto."""
     nombre = (nombre_local or "").strip() or "there"

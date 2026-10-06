@@ -39,9 +39,18 @@ def set_pausado(valor: bool) -> None:
 
 def _limite_por_hora() -> int:
     try:
-        return max(1, int(os.getenv("B2B_TELEGRAM_MAX_POR_HORA", "6") or "6"))
+        return max(1, int(os.getenv("B2B_TELEGRAM_MAX_POR_HORA", "30") or "30"))
     except ValueError:
-        return 6
+        return 30
+
+
+def pausa_entre_mensajes() -> None:
+    try:
+        sec = float(os.getenv("B2B_TELEGRAM_PAUSE_SEC", "4") or "4")
+    except ValueError:
+        sec = 4.0
+    if sec > 0:
+        time.sleep(sec)
 
 
 def _podar_envios(data: dict) -> dict:
@@ -65,16 +74,86 @@ def registrar_envio_telegram() -> None:
     _save(data)
 
 
+def _telegram_post(token: str, method: str, payload: dict) -> dict | None:
+    url = f"https://api.telegram.org/bot{token}/{method}"
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=data,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError):
+        return None
+
+
+def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
+    from b2b.telegram_gestion import (
+        agregar_no_contactar,
+        marcar_gestionado_telegram,
+        quitar_pendiente,
+        resolver_pendiente,
+    )
+
+    data = (cb.get("data") or "").strip()
+    if not data.startswith("b2b"):
+        return None
+    cid = str((cb.get("message") or {}).get("chat", {}).get("id", ""))
+    if cid != str(chat_id):
+        return None
+    accion = "enviado" if data.startswith("b2be:") else "descartado" if data.startswith("b2bd:") else ""
+    tok = data.split(":", 1)[-1] if ":" in data else ""
+    if not accion or not tok:
+        return None
+    pend = resolver_pendiente(tok) or {}
+    lead = {
+        "nombre": pend.get("nombre") or "",
+        "web": pend.get("web") or "",
+        "pais": pend.get("pais") or "",
+    }
+    marcar_gestionado_telegram(lead, accion)
+    if accion == "descartado":
+        agregar_no_contactar(lead["nombre"], lead["web"], motivo="telegram_descartar")
+    quitar_pendiente(tok)
+    cb_id = cb.get("id")
+    if cb_id:
+        _telegram_post(token, "answerCallbackQuery", {"callback_query_id": cb_id})
+    msg_id = (cb.get("message") or {}).get("message_id")
+    if msg_id:
+        etiqueta = "✅ Enviado" if accion == "enviado" else "🗑 Descartado"
+        _telegram_post(
+            token,
+            "editMessageReplyMarkup",
+            {"chat_id": chat_id, "message_id": msg_id, "reply_markup": {"inline_keyboard": []}},
+        )
+    nombre = lead.get("nombre") or "—"
+    return f"{etiqueta}: {nombre}"
+
+
 def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
-    """Lee updates y aplica /pausa /seguir. Devuelve acks enviados."""
-    url = f"https://api.telegram.org/bot{token}/getUpdates?timeout=1&limit=5"
+    """Lee updates: /pausa, /seguir y botones Enviado/Descartar."""
+    data = _load()
+    offset = int(data.get("update_offset") or 0)
+    url = f"https://api.telegram.org/bot{token}/getUpdates?timeout=1&limit=10&offset={offset}"
     acks: list[str] = []
     try:
-        with urllib.request.urlopen(url, timeout=5) as resp:
+        with urllib.request.urlopen(url, timeout=8) as resp:
             body = json.loads(resp.read().decode("utf-8"))
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError):
         return acks
     for upd in body.get("result") or []:
+        uid = int(upd.get("update_id") or 0)
+        if uid >= offset:
+            data["update_offset"] = uid + 1
+        cb = upd.get("callback_query")
+        if cb:
+            ack = _manejar_callback(token, chat_id, cb)
+            if ack:
+                acks.append(ack)
+            continue
         msg = upd.get("message") or {}
         text = (msg.get("text") or "").strip().lower()
         cid = str(msg.get("chat", {}).get("id", ""))
@@ -86,4 +165,5 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
         elif text in ("/seguir", "seguir", "/resume"):
             set_pausado(False)
             acks.append("▶️ Envíos Telegram reanudados.")
+    _save(data)
     return acks

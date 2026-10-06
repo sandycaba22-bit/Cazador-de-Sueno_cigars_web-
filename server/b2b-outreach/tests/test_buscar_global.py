@@ -11,7 +11,9 @@ from b2b.osm_cuadricula import celdas_desde_bbox, preparar_celdas_pais
 from b2b.paises_cola import cargar_paises_cola, entry_por_pais
 from b2b.redactor import texto_corto_prospecto_buscar
 from b2b.telegram_control import puede_enviar_telegram, set_pausado
-from b2b.telegram_prospecto import linea_whatsapp, mensaje_ficha_prospecto
+from b2b.redactor import EMAIL_VP_VENTAS, presentacion_prospecto_telegram
+from b2b.telegram_gestion import tiene_medio_contacto, token_callback
+from b2b.telegram_prospecto import mensaje_prospecto_completo
 
 
 class TestPaisesCola(unittest.TestCase):
@@ -40,32 +42,34 @@ class TestCuadricula(unittest.TestCase):
 
 
 class TestTelegramProspecto(unittest.TestCase):
-    def test_ficha_maps_y_whatsapp(self):
+    def test_mensaje_completo_contacto_y_firma(self):
         lead = {
             "nombre": "Test Shop",
-            "tipo": "tienda",
+            "tipo": "lounge",
             "telefono": "+297 123 4567",
-            "whatsapp": "+2977654321",
             "web": "https://example.com",
-            "web_estado": "ok",
-            "correo": "",
+            "correo": "info@example.com",
             "direccion": "Main St",
-            "lat": 12.5,
-            "lon": -70.0,
+            "pais": "Aruba",
         }
-        msg = mensaje_ficha_prospecto(lead, "Aruba")
-        self.assertIn("NUEVO PROSPECTO", msg)
-        self.assertIn("wa.me/2977654321", msg)
-        self.assertIn("12.5,-70.0", msg)
+        msg = mensaje_prospecto_completo(lead, "Aruba")
+        self.assertIn("PROSPECTO", msg)
+        self.assertIn("wa.me/", msg)
+        self.assertIn(EMAIL_VP_VENTAS, msg)
+        self.assertIn("Mensaje para copiar", msg)
 
-    def test_posible_whatsapp_sin_tag(self):
-        lead = {"telefono": "+1 305 555 0100"}
-        self.assertIn("wa.me/", linea_whatsapp(lead))
+    def test_tiene_medio_web(self):
+        self.assertTrue(tiene_medio_contacto({"web": "https://shop.example"}))
 
-    def test_texto_corto_seis_lineas(self):
-        t = texto_corto_prospecto_buscar("Cigar House", "en", "lounge")
-        self.assertLessEqual(len(t.splitlines()), 6)
-        self.assertIn("STOP", t)
+    def test_presentacion_firma_vp(self):
+        t = presentacion_prospecto_telegram("Cigar House", "en", "tienda")
+        self.assertIn("Yaniris", t)
+        self.assertIn("Vice President", t)
+        self.assertIn(EMAIL_VP_VENTAS, t)
+
+    def test_token_callback_estable(self):
+        lead = {"nombre": "A", "web": "https://a.com", "pais": "Aruba"}
+        self.assertEqual(token_callback(lead), token_callback(lead))
 
 
 class TestTelegramControl(unittest.TestCase):

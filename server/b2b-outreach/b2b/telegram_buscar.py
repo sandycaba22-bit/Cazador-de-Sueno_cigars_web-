@@ -65,11 +65,9 @@ def avisar_isla_encontradas(
         lineas.extend(extra_desc)
         notificar_buscar("\n".join(lineas), simulado=simulado)
         return
-    lineas = [
-        f"📍 {isla}: {encontrados} encontrados · {resumen_cal} · "
-        f"{nuevos} nuevos · {repetidos} repetidos · {con_contacto} con contacto",
-    ]
-    lineas.extend(extra_desc)
+    lineas = [f"📍 {isla}: {nuevos} nuevos encolados · {con_contacto} con contacto · {resumen_cal}"]
+    if repetidos:
+        lineas.append(f"↩️ {repetidos} repetidos (no reenviados)")
     notificar_buscar("\n".join(lineas), simulado=simulado)
 
 
@@ -86,24 +84,12 @@ def avisar_resumen_barrido(
     simulado: bool = False,
     detalle_islas: dict[str, dict] | None = None,
 ) -> None:
-    lineas = [f"📊 Barrido ({zona}) — {total} prospecto(s) nuevo(s) encolado(s)"]
-    detalle = detalle_islas or {}
+    lineas = [f"📊 Resumen ({zona}): {total} encolado(s)"]
     for isla, cantidad in por_isla.items():
         c = contacto_por_isla.get(isla, 0)
-        extra = detalle.get(isla) or {}
-        if extra:
-            osm = int(extra.get("osm", 0))
-            dealers = int(extra.get("dealers", 0))
-            web = int(extra.get("directorio", 0)) + int(extra.get("web_enriquecidos", 0))
-            lineas.append(
-                f"• {isla}: {cantidad} encolados ({c} con tel/correo) — "
-                f"encontrados {extra.get('encontrados', '?')} "
-                f"(OSM {osm}, dealers {dealers}, web {web})"
-            )
-        elif cantidad > 0:
-            lineas.append(f"• {isla}: {cantidad} ({c} con tel/correo)")
+        lineas.append(f"• {isla}: {cantidad} ({c} con contacto)")
     if islas_fallidas:
-        lineas.append("Islas fallidas: " + ", ".join(islas_fallidas))
+        lineas.append("⚠️ " + ", ".join(islas_fallidas))
     notificar_buscar("\n".join(lineas), simulado=simulado)
 
 

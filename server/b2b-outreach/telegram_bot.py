@@ -575,12 +575,18 @@ def _enviar_payload(payload):
 
 def enviar_texto_telegram(texto: str) -> None:
     """Mensaje de texto plano al chat B2B (p. ej. resumen de --buscar)."""
+    enviar_mensaje_telegram(texto)
+
+
+def enviar_mensaje_telegram(texto: str, reply_markup: dict | None = None) -> None:
     _, chat_id = telegram_credentials()
     payload = {
         "chat_id": chat_id,
         "text": (texto or "")[:4096],
         "disable_web_page_preview": True,
     }
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
     _enviar_payload(payload)
 
 
