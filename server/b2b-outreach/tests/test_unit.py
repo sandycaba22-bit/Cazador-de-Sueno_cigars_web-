@@ -112,7 +112,7 @@ class TestRedactor(unittest.TestCase):
             {"sin_correo_publico": True, "tipo": "tienda", "dificultad_aduana": 2},
         )
         self.assertIn("sin correo publicado", paquete["texto"])
-        self.assertIn("falta firma", paquete["texto"])
+        self.assertIn("Yaniris Agustina Ureña", paquete["texto"])
 
 
 class TestProspectarSimulado(unittest.TestCase):

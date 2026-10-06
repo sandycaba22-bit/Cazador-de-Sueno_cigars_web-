@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import re
 
-from b2b.catalogo_check import WHOLESALE_URL, pdf_para_idioma, verificar_catalogo
+from b2b.catalogo_check import WHOLESALE_URL, resolver_catalogo_pdf, verificar_vitolas
 from b2b.catalogo_vitolas import intro_vitolas, lineas_vitolas, vitolas_ordenadas
 from b2b.country_rules import buscar_pais
 from b2b.idioma import idioma_para_pais
@@ -35,22 +35,47 @@ def _resumen_entrenamiento() -> str:
     return ""
 
 
+CARGO_VP = {
+    "es": "Vicepresidenta de Ventas",
+    "en": "Vice President, Sales",
+    "fr": "Vice-présidente, Ventes",
+    "pt": "Vice-presidente, Vendas",
+    "nl": "Vice President, Sales",
+    "de": "Vice President, Sales",
+    "it": "Vice President, Sales",
+}
+EMPRESA_FIRMA = "Cazador de Sueños Cigar SRL"
+NOMBRE_VP = "Yaniris Agustina Ureña"
+
+
 def _firma(idioma: str) -> tuple[str, bool]:
-    """Devuelve bloque de firma y si está completa."""
-    nombre = os.getenv("SENDER_NAME", "").strip()
-    contacto = os.getenv("SENDER_CONTACT", "").strip()
-    if not nombre or not contacto:
-        return "", False
-    cierres = {
-        "es": "Atentamente,",
-        "en": "Best regards,",
-        "fr": "Cordialement,",
-        "nl": "Met vriendelijke groet,",
-        "de": "Mit freundlichen Grüßen,",
-        "it": "Cordiali saluti,",
-        "pt": "Com os melhores cumprimentos,",
+    """Firma fija de la vicepresidenta; contacto opcional vía FIRMA_*."""
+    lineas = [
+        NOMBRE_VP,
+        CARGO_VP.get(idioma, CARGO_VP["en"]),
+        EMPRESA_FIRMA,
+    ]
+    email = os.getenv("FIRMA_EMAIL", "").strip()
+    telefono = os.getenv("FIRMA_TELEFONO", "").strip()
+    if email:
+        lineas.append(email)
+    if telefono:
+        lineas.append(telefono)
+    return "\n".join(lineas), True
+
+
+def _linea_pdf(idioma: str, pdf: str, aviso: str) -> str:
+    prefijos = {
+        "es": "Catálogo mayorista en PDF (sin tarifas publicadas en línea)",
+        "fr": "Catalogue grossiste PDF (sans tarifs publiés en ligne)",
+        "pt": "Catálogo grossista PDF (sem preços publicados online)",
+        "nl": "Groothandelscatalogus PDF (zonder gepubliceerde tarieven online)",
+        "en": "Wholesale catalog PDF (without listed prices)",
     }
-    return f"{cierres.get(idioma, cierres['en'])}\n{nombre}\n{contacto}", True
+    pref = prefijos.get(idioma, prefijos["en"])
+    if aviso:
+        return f"{aviso}\n{pref}: {pdf}"
+    return f"{pref}: {pdf}"
 
 
 def _angulo_tipo(idioma: str, tipo: str) -> str:
@@ -75,6 +100,10 @@ def _angulo_tipo(idioma: str, tipo: str) -> str:
                 "We bespreken graag territoriale exclusiviteit, minimumvolumes, sampleplanning en "
                 "ondersteuning op het verkooppunt."
             ),
+            "pt": (
+                "Estamos abertos a discutir exclusividade territorial, volumes mínimos, calendário de amostras "
+                "e apoio no ponto de venda."
+            ),
         },
         "tienda": {
             "es": (
@@ -92,6 +121,10 @@ def _angulo_tipo(idioma: str, tipo: str) -> str:
             "nl": (
                 "Voor uw winkel presenteren we de volledige lijn met stabiele rotatie en een consistente "
                 "rookervaring voor vaste klanten."
+            ),
+            "pt": (
+                "Para a sua loja, apresentamos a linha completa com rotação estável e uma experiência de fumo "
+                "consistente para os seus clientes habituais."
             ),
         },
         "lounge": {
@@ -111,6 +144,10 @@ def _angulo_tipo(idioma: str, tipo: str) -> str:
                 "Voor uw lounge benadrukken we uiteenlopende krachtprofielen en dominicaanse ambacht voor "
                 "advies aan tafel."
             ),
+            "pt": (
+                "Para o seu lounge, destacamos perfis de fortaleza variados e origem dominicana artesanal para "
+                "recomendações à mesa."
+            ),
         },
         "hotel": {
             "es": (
@@ -128,6 +165,10 @@ def _angulo_tipo(idioma: str, tipo: str) -> str:
             "nl": (
                 "Voor de humidor van uw hotel of resort stellen we een compact premium assortiment uit "
                 "onze zes vitolas voor, geschikt voor gasten en lounge-service."
+            ),
+            "pt": (
+                "Para o humidor do seu hotel ou resort, propomos uma seleção premium compacta das seis vitolas, "
+                "adequada a hóspedes e serviço de lounge."
             ),
         },
         "duty_free": {
@@ -187,13 +228,22 @@ def borrador_prospecto(
     tipo_negocio: str = "tienda",
     sin_correo_publico: bool = False,
 ) -> str:
-    verificar_catalogo(idioma)
-    pdf = pdf_para_idioma(idioma)
+    verificar_vitolas()
+    cat = resolver_catalogo_pdf(idioma)
+    pdf = cat.url
+    linea_pdf = _linea_pdf(idioma, pdf, cat.aviso_cliente)
     baja = OPT_OUT.get(idioma, OPT_OUT["en"])
     angulo = _angulo_tipo(idioma, tipo_negocio)
     bloque_cat = intro_vitolas(idioma) + "\n" + lineas_vitolas(idioma)
-    firma, firma_ok = _firma(idioma)
+    firma, _firma_ok = _firma(idioma)
     cierre = _cierre_contacto(idioma)
+    portal = {
+        "es": f"Portal B2B: {WHOLESALE_URL}",
+        "fr": f"Portail B2B : {WHOLESALE_URL}",
+        "pt": f"Portal B2B: {WHOLESALE_URL}",
+        "nl": f"B2B-portaal: {WHOLESALE_URL}",
+        "en": f"B2B portal: {WHOLESALE_URL}",
+    }.get(idioma, f"B2B portal: {WHOLESALE_URL}")
 
     if idioma == "es":
         cuerpo = (
@@ -201,8 +251,8 @@ def borrador_prospecto(
             "Somos Cazador de Sueños Cigar SRL, fábrica en Santiago de los Caballeros, "
             "República Dominicana. Elaboramos puros premium 100% hechos a mano.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
-            f"Catálogo mayorista en PDF (sin tarifas publicadas en línea): {pdf}\n"
-            f"Portal B2B: {WHOLESALE_URL}\n\n"
+            f"{linea_pdf}\n"
+            f"{portal}\n\n"
             f"{cierre}\n\n{baja}\n\n"
         )
     elif idioma == "fr":
@@ -211,8 +261,8 @@ def borrador_prospecto(
             "Nous sommes Cazador de Sueños Cigar SRL, manufacture à Santiago de los Caballeros, "
             "République dominicaine. Cigares premium 100% faits main.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
-            f"Catalogue grossiste PDF (sans tarifs publiés en ligne) : {pdf}\n"
-            f"Portail B2B : {WHOLESALE_URL}\n\n"
+            f"{linea_pdf}\n"
+            f"{portal}\n\n"
             f"{cierre}\n\n{baja}\n\n"
         )
     elif idioma == "nl":
@@ -221,8 +271,8 @@ def borrador_prospecto(
             "Wij zijn Cazador de Sueños Cigar SRL, fabriek in Santiago de los Caballeros, "
             "Dominicaanse Republiek. Premium sigaren, 100% handgemaakt.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
-            f"Groothandelscatalogus PDF (zonder gepubliceerde tarieven online): {pdf}\n"
-            f"B2B-portaal: {WHOLESALE_URL}\n\n"
+            f"{linea_pdf}\n"
+            f"{portal}\n\n"
             f"{cierre}\n\n{baja}\n\n"
         )
     elif idioma == "pt":
@@ -231,8 +281,8 @@ def borrador_prospecto(
             "Somos a Cazador de Sueños Cigar SRL, fábrica em Santiago de los Caballeros, "
             "República Dominicana. Charutos premium 100% feitos à mão.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
-            f"Catálogo grossista PDF (sem preços publicados online): {pdf}\n"
-            f"Portal B2B: {WHOLESALE_URL}\n\n"
+            f"{linea_pdf}\n"
+            f"{portal}\n\n"
             f"{cierre}\n\n{baja}\n\n"
         )
     else:
@@ -241,15 +291,12 @@ def borrador_prospecto(
             "We are Cazador de Sueños Cigar SRL, a factory in Santiago de los Caballeros, "
             "Dominican Republic. Premium cigars, 100% handmade.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
-            f"Wholesale catalog PDF (without listed prices): {pdf}\n"
-            f"B2B portal: {WHOLESALE_URL}\n\n"
+            f"{linea_pdf}\n"
+            f"{portal}\n\n"
             f"{cierre}\n\n{baja}\n\n"
         )
 
-    if firma_ok:
-        cuerpo += firma
-    else:
-        cuerpo += "Cazador de Sueños Cigar SRL"
+    cuerpo += firma
 
     if sin_correo_publico:
         notas = {
@@ -285,7 +332,6 @@ def generar_tarjeta_telegram(
     meta = meta or {}
     entry = buscar_pais(pais)
     idioma = meta.get("idioma") or idioma_para_pais(pais)
-    verificar_catalogo(idioma)
     if idioma == "pap":
         meta["nota_idioma"] = "Papiamento: revisar borrador con hablante nativo."
         idioma = "en"
@@ -295,6 +341,7 @@ def generar_tarjeta_telegram(
     sem_nombre, sem_etiqueta = semaforo_aduana(dificultad)
     tipo = meta.get("tipo") or meta.get("tipo_negocio") or "tienda"
     sin_correo = bool(meta.get("sin_correo_publico")) or not (correo or "").strip()
+    cat = resolver_catalogo_pdf(idioma)
     draft = borrador_prospecto(idioma, nombre_local, tipo, sin_correo)
     correo_txt = (correo or "").strip() or "sin correo publicado, contactar por teléfono o web"
     telefono = (meta.get("telefono") or "").strip() or "—"
@@ -303,9 +350,8 @@ def generar_tarjeta_telegram(
     aduana = _nota_interna_aduana(entry)
     if aduana:
         notas_internas.append(aduana)
-    _, firma_ok = _firma(idioma)
-    if not firma_ok:
-        notas_internas.append("falta firma")
+    if cat.nota_interna:
+        notas_internas.append(cat.nota_interna)
     nota_interna = " · ".join(dict.fromkeys(notas_internas))
 
     texto = (
