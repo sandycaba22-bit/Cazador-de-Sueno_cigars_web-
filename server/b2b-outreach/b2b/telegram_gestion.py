@@ -89,8 +89,9 @@ def quitar_pendiente(token: str) -> None:
 
 
 def agregar_no_contactar(nombre: str, web: str = "", motivo: str = "") -> None:
-    from b2b.leads_store import NO_CONTACT_PATH
+    from b2b.leads_store import NO_CONTACT_STATE_PATH as NO_CONTACT_PATH
 
+    NO_CONTACT_PATH.parent.mkdir(parents=True, exist_ok=True)
     if not NO_CONTACT_PATH.is_file():
         data = {"negocios": []}
     else:

@@ -121,9 +121,9 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
     cb_id = cb.get("id")
     if cb_id:
         _telegram_post(token, "answerCallbackQuery", {"callback_query_id": cb_id})
+    etiqueta = "✅ Enviado" if accion == "enviado" else "🗑 Descartado"
     msg_id = (cb.get("message") or {}).get("message_id")
     if msg_id:
-        etiqueta = "✅ Enviado" if accion == "enviado" else "🗑 Descartado"
         _telegram_post(
             token,
             "editMessageReplyMarkup",

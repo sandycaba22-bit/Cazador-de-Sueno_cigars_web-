@@ -8,6 +8,7 @@ from b2b.paths import data_file, state_file
 
 SEEN_PATH = state_file("registro_leads.json")
 NO_CONTACT_PATH = data_file("no_contactar.json")
+NO_CONTACT_STATE_PATH = state_file("no_contactar_telegram.json")
 
 
 def _load_seen() -> dict:
@@ -30,16 +31,20 @@ def _dominio(web: str) -> str:
 
 
 def en_lista_no_contactar(nombre: str, web: str = "") -> bool:
-    if not NO_CONTACT_PATH.is_file():
-        return False
-    data = json.loads(NO_CONTACT_PATH.read_text(encoding="utf-8"))
     nombre_l = nombre.strip().lower()
     dom = _dominio(web)
-    for item in data.get("negocios", []):
-        if item.get("nombre", "").strip().lower() == nombre_l:
-            return True
-        if dom and _dominio(item.get("web", "")) == dom:
-            return True
+    for path in (NO_CONTACT_PATH, NO_CONTACT_STATE_PATH):
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for item in data.get("negocios", []):
+            if item.get("nombre", "").strip().lower() == nombre_l:
+                return True
+            if dom and _dominio(item.get("web", "")) == dom:
+                return True
     return False
 
 

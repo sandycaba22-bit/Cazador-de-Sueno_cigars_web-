@@ -72,6 +72,36 @@ class TestTelegramProspecto(unittest.TestCase):
         self.assertEqual(token_callback(lead), token_callback(lead))
 
 
+class TestCallbackDescartar(unittest.TestCase):
+    def test_descartar_marca_y_bloquea(self):
+        import tempfile
+        from unittest.mock import patch
+
+        import b2b.leads_store as ls
+        import b2b.telegram_control as tc
+        import b2b.telegram_gestion as tg
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_p = Path(tmp)
+            with patch.object(ls, "NO_CONTACT_STATE_PATH", tmp_p / "nc.json"), patch.object(
+                tg, "GESTION_PATH", tmp_p / "gest.json"
+            ), patch.object(tg, "PENDIENTES_PATH", tmp_p / "pend.json"), patch.object(
+                tc, "_telegram_post", return_value={"ok": True}
+            ):
+                lead = {"nombre": "Shop X", "web": "https://shopx.test", "pais": "Aruba"}
+                tok = tg.token_callback(lead)
+                tg.registrar_pendiente(tok, lead)
+                cb = {
+                    "id": "1",
+                    "data": f"b2bd:{tok}",
+                    "message": {"chat": {"id": 42}},
+                }
+                ack = tc._manejar_callback("t", "42", cb)
+                self.assertIn("Descartado", ack)
+                self.assertTrue(tg.ya_gestionado_telegram(lead))
+                self.assertTrue(ls.en_lista_no_contactar("Shop X", "https://shopx.test"))
+
+
 class TestTelegramControl(unittest.TestCase):
     def test_pausa_bloquea(self):
         set_pausado(True)
