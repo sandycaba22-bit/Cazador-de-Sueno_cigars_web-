@@ -20,7 +20,7 @@ PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
 MemoryMax=128M
-ReadWritePaths=/var/lib/cazador-de-suenos/b2b-outreach
+ReadWritePaths=/var/lib/cazador-de-suenos/b2b-outreach /var/lib/cazador-de-suenos/b2b-outreach/logs /var/lib/cazador-de-suenos/b2b-outreach/data
 
 [Install]
 WantedBy=multi-user.target

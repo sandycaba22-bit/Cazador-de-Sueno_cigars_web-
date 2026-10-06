@@ -5,9 +5,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from b2b.paths import ROOT
-
-LOG_DIR = ROOT / "logs"
+from b2b.paths import log_dir
 TOKEN_RE = re.compile(r"\d{6,}:[A-Za-z0-9_-]{20,}")
 
 
@@ -16,9 +14,10 @@ def _sanitizar(texto: str) -> str:
 
 
 def registrar_evento(evento: dict) -> Path:
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    dest = log_dir()
+    dest.mkdir(parents=True, exist_ok=True)
     dia = datetime.now().strftime("%Y%m%d")
-    path = LOG_DIR / f"busqueda-{dia}.jsonl"
+    path = dest / f"busqueda-{dia}.jsonl"
     if "ts" not in evento:
         evento = {**evento, "ts": datetime.now().isoformat(timespec="seconds")}
     with path.open("a", encoding="utf-8") as handle:

@@ -35,7 +35,7 @@ RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 RestrictNamespaces=true
 LockPersonality=true
 MemoryMax=128M
-ReadWritePaths=/var/lib/cazador-de-suenos/b2b-outreach
+ReadWritePaths=/var/lib/cazador-de-suenos/b2b-outreach /var/lib/cazador-de-suenos/b2b-outreach/logs /var/lib/cazador-de-suenos/b2b-outreach/data
 
 [Install]
 WantedBy=multi-user.target

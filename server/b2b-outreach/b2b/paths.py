@@ -15,5 +15,27 @@ DATA = ROOT / "data"
 FIXTURES = ROOT / "tests" / "fixtures"
 
 
+def queue_dir() -> Path | None:
+    raw = os.getenv("B2B_QUEUE_DIR", "").strip()
+    return Path(raw) if raw else None
+
+
 def data_file(name: str) -> Path:
+    """Datos mutables (registro leads, presupuesto). Fuera de /var/www en producción."""
+    explicit = os.getenv("B2B_DATA_DIR", "").strip()
+    if explicit:
+        return Path(explicit) / name
+    cola = queue_dir()
+    if cola:
+        return cola / "data" / name
     return DATA / name
+
+
+def log_dir() -> Path:
+    explicit = os.getenv("B2B_LOG_DIR", "").strip()
+    if explicit:
+        return Path(explicit)
+    cola = queue_dir()
+    if cola:
+        return cola / "logs"
+    return ROOT / "logs"
