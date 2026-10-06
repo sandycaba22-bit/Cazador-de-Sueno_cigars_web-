@@ -3,14 +3,11 @@ from __future__ import annotations
 import os
 import re
 
+from b2b.catalogo_check import WHOLESALE_URL, pdf_para_idioma, verificar_catalogo
 from b2b.catalogo_vitolas import intro_vitolas, lineas_vitolas, vitolas_ordenadas
 from b2b.country_rules import buscar_pais
 from b2b.idioma import idioma_para_pais
 from b2b.paths import KNOWLEDGE
-
-WHOLESALE_URL = "https://www.cazadordesuenocigars.com/wholesale.html"
-PDF_ES = "https://www.cazadordesuenocigars.com/catalogo/CazadorDeSuenos_Wholesale_ES.pdf"
-PDF_EN = "https://www.cazadordesuenocigars.com/catalogo/CazadorDeSuenos_Wholesale_EN.pdf"
 
 PROHIBIDO_RE = re.compile(
     r"\$\s?\d|USD\s?\d|\bprecio[s]?\b|\bprice list\b|\bpricing\b|autorizado por aduana|"
@@ -25,13 +22,10 @@ OPT_OUT = {
     "nl": "Als u geen berichten meer wilt ontvangen, antwoord met STOP.",
     "de": "Wenn Sie keine weiteren Nachrichten wünschen, antworten Sie STOP.",
     "it": "Per non ricevere altri messaggi, risponda STOP.",
+    "pt": "Se preferir não receber mais mensagens, responda STOP.",
 }
 
 MD_V2_SPECIAL = set(r"_*[]()~`>#+-=|{}.")
-
-
-def _pdf(idioma: str) -> str:
-    return PDF_ES if idioma == "es" else PDF_EN
 
 
 def _resumen_entrenamiento() -> str:
@@ -54,6 +48,7 @@ def _firma(idioma: str) -> tuple[str, bool]:
         "nl": "Met vriendelijke groet,",
         "de": "Mit freundlichen Grüßen,",
         "it": "Cordiali saluti,",
+        "pt": "Com os melhores cumprimentos,",
     }
     return f"{cierres.get(idioma, cierres['en'])}\n{nombre}\n{contacto}", True
 
@@ -140,6 +135,14 @@ def _angulo_tipo(idioma: str, tipo: str) -> str:
             "en": "For duty free, mix and volumes are agreed with your local importer.",
             "fr": "Pour le duty free, assortiment et volumes avec votre importateur local.",
             "nl": "Voor duty free worden mix en volumes met uw lokale importeur afgestemd.",
+            "pt": "Para duty free, mix e volumes acordam-se com o importador local.",
+        },
+        "casino": {
+            "es": "Para su casino o área premium, proponemos un surtido compacto de vitolas de rotación estable para humidor de piso.",
+            "en": "For your casino or premium floor, we propose a compact rotation of vitolas suited to on-floor humidor service.",
+            "fr": "Pour votre casino ou espace premium, nous proposons un assortiment compact pour humidor de salle.",
+            "nl": "Voor uw casino of premiumruimte stellen we een compact assortiment voor voor humidor-service.",
+            "pt": "Para o seu casino ou área premium, propomos um sortido compacto para humidor de piso.",
         },
     }
     bloque = tabla.get(tipo) or tabla["tienda"]
@@ -154,17 +157,18 @@ def _cierre_contacto(idioma: str) -> str:
         "nl": "We plannen graag een call of sturen commerciële samples.",
         "de": "Gern vereinbaren wir ein Gespräch oder senden Handelsmuster.",
         "it": "Saremo lieti di fissare una call o inviare campioni commerciali.",
+        "pt": "Teremos prazer em agendar uma chamada ou enviar amostras comerciais.",
     }
     return textos.get(idioma, textos["en"])
 
 
 def _nota_interna_aduana(entry: dict | None) -> str:
+    """Solo informativa; no bloquea envío del borrador."""
     if not entry:
-        return "Confirmar requisitos de importación con agente aduanal antes de ofertar."
-    dif = int(entry.get("dificultad", 5))
-    estado = entry.get("estado", "sin_verificar")
-    if dif >= 4 or estado in ("sin_verificar", "preliminar"):
-        return "Confirmar requisitos de importación con agente aduanal antes de ofertar."
+        return ""
+    lic = (entry.get("licencia_comprador") or "").strip()
+    if lic.upper().startswith("BORRADOR"):
+        return "Reglas aduaneras en borrador en country_rules; confirmar con importador."
     return ""
 
 
@@ -183,7 +187,8 @@ def borrador_prospecto(
     tipo_negocio: str = "tienda",
     sin_correo_publico: bool = False,
 ) -> str:
-    pdf = _pdf(idioma)
+    verificar_catalogo(idioma)
+    pdf = pdf_para_idioma(idioma)
     baja = OPT_OUT.get(idioma, OPT_OUT["en"])
     angulo = _angulo_tipo(idioma, tipo_negocio)
     bloque_cat = intro_vitolas(idioma) + "\n" + lineas_vitolas(idioma)
@@ -218,6 +223,16 @@ def borrador_prospecto(
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"Groothandelscatalogus PDF (zonder gepubliceerde tarieven online): {pdf}\n"
             f"B2B-portaal: {WHOLESALE_URL}\n\n"
+            f"{cierre}\n\n{baja}\n\n"
+        )
+    elif idioma == "pt":
+        cuerpo = (
+            f"Olá, equipa da {nombre_local},\n\n"
+            "Somos a Cazador de Sueños Cigar SRL, fábrica em Santiago de los Caballeros, "
+            "República Dominicana. Charutos premium 100% feitos à mão.\n\n"
+            f"{bloque_cat}\n\n{angulo}\n\n"
+            f"Catálogo grossista PDF (sem preços publicados online): {pdf}\n"
+            f"Portal B2B: {WHOLESALE_URL}\n\n"
             f"{cierre}\n\n{baja}\n\n"
         )
     else:
@@ -270,6 +285,7 @@ def generar_tarjeta_telegram(
     meta = meta or {}
     entry = buscar_pais(pais)
     idioma = meta.get("idioma") or idioma_para_pais(pais)
+    verificar_catalogo(idioma)
     if idioma == "pap":
         meta["nota_idioma"] = "Papiamento: revisar borrador con hablante nativo."
         idioma = "en"
@@ -290,8 +306,6 @@ def generar_tarjeta_telegram(
     _, firma_ok = _firma(idioma)
     if not firma_ok:
         notas_internas.append("falta firma")
-    if meta.get("estado_reglas") in ("sin_verificar", "preliminar") and not aduana:
-        notas_internas.append("Confirmar requisitos de importación con agente aduanal antes de ofertar.")
     nota_interna = " · ".join(dict.fromkeys(notas_internas))
 
     texto = (

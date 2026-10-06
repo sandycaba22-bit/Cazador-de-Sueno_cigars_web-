@@ -1,0 +1,678 @@
+{
+  "meta": {
+    "actualizado": "2026-10-06",
+    "nota": "dificultad y licencia_comprador son informativos; no bloquean prospección ni borradores. Revisar con agente aduanal antes de marcar verificado."
+  },
+  "prioridad_inicial": [
+    "Aruba",
+    "Curacao",
+    "Bahamas",
+    "Cayman Islands",
+    "Jamaica",
+    "Barbados",
+    "Trinidad and Tobago",
+    "Mauritius",
+    "Seychelles",
+    "Malta",
+    "Cyprus",
+    "Nigeria",
+    "Ghana",
+    "South Africa",
+    "Kenya",
+    "Senegal",
+    "Côte d'Ivoire",
+    "Morocco",
+    "Cape Verde",
+    "Angola"
+  ],
+  "orden_tipos_negocio": [
+    "distribuidor",
+    "tienda",
+    "lounge",
+    "hotel",
+    "casino",
+    "duty_free"
+  ],
+  "paises": [
+    {
+      "pais": "Martinique",
+      "territorio": "Francia (DOM)",
+      "idiomas": ["fr"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador / détaillant debe cumplir normativa tabaco UE y local (confirmar con asesor).",
+      "puntos_clave": [
+        "Mercado insular con retail especializado limitado; priorizar tiendas y lounges con web.",
+        "Ruta desde RD vía exportador; burocracia del comprador en Francia/UE."
+      ],
+      "fuentes": [
+        {
+          "url": "https://www.douane.gouv.fr/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04",
+          "nota": "Portal aduanero francés; requiere revisión formal antes de marcar verificado."
+        }
+      ]
+    },
+    {
+      "pais": "Guadeloupe",
+      "territorio": "Francia (DOM)",
+      "idiomas": ["fr"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Licencia tabaco del importador en Guadalupe / UE.",
+      "puntos_clave": ["Perfil similar a Martinica.", "Priorizar Saint-Martin y Basse-Terre retail."],
+      "fuentes": [
+        {
+          "url": "https://www.douane.gouv.fr/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Sint Maarten",
+      "territorio": "Países Bajos (Reino)",
+      "idiomas": ["nl", "en", "es"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador con licencia local (lado holandés); confirmar con comprador.",
+      "puntos_clave": ["Turismo, duty free y retail en Philipsburg.", "Idioma comercial: nl/en."],
+      "fuentes": [
+        {
+          "url": "https://www.sintmaartengov.org/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Saint Martin",
+      "territorio": "Francia / Países Bajos (isla dividida)",
+      "idiomas": ["fr", "en", "nl"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Depende del lado francés o holandés; confirmar con comprador.",
+      "puntos_clave": ["Turismo y duty free; mezcla de idiomas."],
+      "fuentes": [
+        {
+          "url": "https://www.douane.gouv.fr/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Aruba",
+      "territorio": "Países Bajos (Reino)",
+      "idiomas": ["en", "nl", "es"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Licencia importador local.",
+      "puntos_clave": ["Turismo alto; hoteles con humidor."],
+      "fuentes": [
+        {
+          "url": "https://www.government.aw/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Curacao",
+      "territorio": "Países Bajos (Reino)",
+      "idiomas": ["en", "nl", "es"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador autorizado.",
+      "puntos_clave": ["Hub caribeño; retail y cruise."],
+      "fuentes": [
+        {
+          "url": "https://www.government.cw/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Bahamas",
+      "territorio": "Independiente",
+      "idiomas": ["en"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Licencia importador bahamense.",
+      "puntos_clave": ["Turismo; lounges en Nassau."],
+      "fuentes": [
+        {
+          "url": "https://www.bahamas.gov.bs/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Barbados",
+      "territorio": "Independiente",
+      "idiomas": ["en"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador con permiso local.",
+      "puntos_clave": ["Retail compacto; resorts."],
+      "fuentes": [
+        {
+          "url": "https://www.gov.bb/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Puerto Rico",
+      "territorio": "Estados Unidos",
+      "idiomas": ["es", "en"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador debe cumplir FDA y normativa tabaco US (confirmar con asesor).",
+      "puntos_clave": [
+        "Mercado grande; barrera regulatoria mayor que islas pequeñas.",
+        "No prometer aprobación FDA en borradores."
+      ],
+      "fuentes": [
+        {
+          "url": "https://www.fda.gov/tobacco-products",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Jamaica",
+      "territorio": "Independiente",
+      "idiomas": ["en"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador registrado.",
+      "puntos_clave": ["Turismo; tiendas en Kingston y Montego Bay."],
+      "fuentes": [
+        {
+          "url": "https://www.jca.gov.jm/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Trinidad and Tobago",
+      "territorio": "Independiente",
+      "idiomas": ["en"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Permiso importación tabaco.",
+      "puntos_clave": ["Cultura puro fuerte; distribuidores locales."],
+      "fuentes": [
+        {
+          "url": "https://www.customs.gov.tt/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Cayman Islands",
+      "territorio": "Reino Unido",
+      "idiomas": ["en"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador con licencia local.",
+      "puntos_clave": ["Alto poder adquisitivo; retail premium."],
+      "fuentes": [
+        {
+          "url": "https://www.gov.ky/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "US Virgin Islands",
+      "territorio": "Estados Unidos",
+      "idiomas": ["en"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Normativa US + local.",
+      "puntos_clave": ["Similar a Puerto Rico en cautela regulatoria."],
+      "fuentes": [
+        {
+          "url": "https://www.fda.gov/tobacco-products",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "French Guiana",
+      "territorio": "Francia (DOM)",
+      "idiomas": ["fr"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "UE / Francia.",
+      "puntos_clave": ["Mercado menor; retail en Cayena."],
+      "fuentes": [
+        {
+          "url": "https://www.douane.gouv.fr/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Dominican Republic",
+      "territorio": "Local",
+      "idiomas": ["es"],
+      "dificultad": 1,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "RNC y facturación local del comprador.",
+      "puntos_clave": ["Mercado doméstico; no competir con canal export principal en primer contacto B2B export."],
+      "fuentes": [
+        {
+          "url": "https://www.dgii.gov.do/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Panama",
+      "territorio": "Independiente",
+      "idiomas": ["es", "en"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador autorizado.",
+      "puntos_clave": ["Hub logístico; duty free."],
+      "fuentes": [
+        {
+          "url": "https://www.arca.gob.pa/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Costa Rica",
+      "territorio": "Independiente",
+      "idiomas": ["es"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Permiso sanitario / aduanal del importador.",
+      "puntos_clave": ["Retail San José; turismo."],
+      "fuentes": [
+        {
+          "url": "https://www.hacienda.go.cr/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Germany",
+      "territorio": "Unión Europea",
+      "idiomas": ["de", "en"],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "verificado_el": null,
+      "licencia_comprador": "Steuer / Tabakhandlung según Bundesland.",
+      "puntos_clave": ["Mercado grande; burocracia UE."],
+      "fuentes": [
+        {
+          "url": "https://www.zoll.de/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "France",
+      "territorio": "Unión Europea",
+      "idiomas": ["fr"],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "verificado_el": null,
+      "licencia_comprador": "Débit de tabac / importador.",
+      "puntos_clave": ["Canal regulado; no prometer facilidad."],
+      "fuentes": [
+        {
+          "url": "https://www.douane.gouv.fr/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "United Kingdom",
+      "territorio": "Post-Brexit",
+      "idiomas": ["en"],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "verificado_el": null,
+      "licencia_comprador": "HMRC tobacco import rules.",
+      "puntos_clave": ["Retail Londres; importador obligatorio."],
+      "fuentes": [
+        {
+          "url": "https://www.gov.uk/guidance/tobacco-products-duty",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "United Arab Emirates",
+      "territorio": "Golfo",
+      "idiomas": ["en", "ar"],
+      "dificultad": 3,
+      "estado": "sin_verificar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador con licencia emirati.",
+      "puntos_clave": ["Hospitality premium; distribuidores Dubai."],
+      "fuentes": [
+        {
+          "url": "https://u.ae/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Mauritius",
+      "territorio": "Isla Índico",
+      "idiomas": ["en", "fr"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: licencia del importador local; confirmar con asesor del comprador.",
+      "puntos_clave": ["Turismo premium; retail en Port Louis."],
+      "fuentes": [
+        {
+          "url": "https://www.govmu.org/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06",
+          "nota": "Pendiente revisión formal."
+        }
+      ]
+    },
+    {
+      "pais": "Seychelles",
+      "territorio": "Islas Seychelles",
+      "idiomas": ["en", "fr"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: permisos del importador; confirmar con asesor.",
+      "puntos_clave": ["Resorts y duty free."],
+      "fuentes": [
+        {
+          "url": "https://www.egov.sc/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Malta",
+      "territorio": "Unión Europea",
+      "idiomas": ["en"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: normativa UE/tabaco del importador.",
+      "puntos_clave": ["Hub mediterráneo; turismo y casino."],
+      "fuentes": [
+        {
+          "url": "https://gov.mt/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Cyprus",
+      "territorio": "Unión Europea",
+      "idiomas": ["en"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: licencias UE del importador.",
+      "puntos_clave": ["Retail y turismo."],
+      "fuentes": [
+        {
+          "url": "https://www.gov.cy/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Nigeria",
+      "territorio": "África occidental",
+      "idiomas": ["en"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: registro importador nigeriano; confirmar con asesor.",
+      "puntos_clave": ["Mercado grande; distribuidores en Lagos."],
+      "fuentes": [
+        {
+          "url": "https://www.nigeria.gov.ng/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Ghana",
+      "territorio": "África occidental",
+      "idiomas": ["en"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: permisos del importador en Ghana.",
+      "puntos_clave": ["Accra retail y hospitality."],
+      "fuentes": [
+        {
+          "url": "https://www.ghana.gov.gh/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "South Africa",
+      "territorio": "África austral",
+      "idiomas": ["en"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: licencias SARS/importador tabaco.",
+      "puntos_clave": ["Cape Town y Johannesburg; lounges premium."],
+      "fuentes": [
+        {
+          "url": "https://www.gov.za/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Kenya",
+      "territorio": "África oriental",
+      "idiomas": ["en"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: importador registrado en Kenia.",
+      "puntos_clave": ["Nairobi retail; turismo safari."],
+      "fuentes": [
+        {
+          "url": "https://www.mygov.go.ke/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Senegal",
+      "territorio": "África occidental",
+      "idiomas": ["fr"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: importateur agréé; confirmer avec conseiller local.",
+      "puntos_clave": ["Dakar; canal francófono."],
+      "fuentes": [
+        {
+          "url": "https://www.sec.gouv.sn/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Côte d'Ivoire",
+      "territorio": "África occidental",
+      "idiomas": ["fr"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: importateur tabac; confirmer avec conseiller.",
+      "puntos_clave": ["Abidjan distribución y retail."],
+      "fuentes": [
+        {
+          "url": "https://www.gouv.ci/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Morocco",
+      "territorio": "Magreb",
+      "idiomas": ["fr", "ar"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: importateur agréé; confirmer réglementation locale.",
+      "puntos_clave": ["Casablanca y Marrakech; turismo."],
+      "fuentes": [
+        {
+          "url": "https://www.gov.ma/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Cape Verde",
+      "territorio": "África atlántica",
+      "idiomas": ["pt"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: licença do importador; confirmar com assessor.",
+      "puntos_clave": ["Islas; turismo y duty free."],
+      "fuentes": [
+        {
+          "url": "https://gov.cv/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "Angola",
+      "territorio": "África austral",
+      "idiomas": ["pt"],
+      "dificultad": 3,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: licença importador; confirmar com assessor local.",
+      "puntos_clave": ["Luanda; canal lusófono."],
+      "fuentes": [
+        {
+          "url": "https://www.governo.gov.ao/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "pais": "United States",
+      "territorio": "Estados Unidos (continental y territorios)",
+      "idiomas": ["en"],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: importador/distribuidor debe cumplir normativa tabaco federal y estatal (FDA, licencias estatales). Confirmar con asesor del comprador; no prometer aprobación en borradores.",
+      "puntos_clave": [
+        "Mercado grande; barrera regulatoria alta.",
+        "Separar de Puerto Rico / USVI en trámite del importador."
+      ],
+      "fuentes": [
+        {
+          "url": "https://www.fda.gov/tobacco-products",
+          "tipo": "secundaria",
+          "consulta": "2026-10-05",
+          "nota": "Referencia orientativa; revisar requisitos vigentes con agente aduanal antes de marcar verificado."
+        },
+        {
+          "url": "https://www.cbp.gov/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-05",
+          "nota": "Portal aduanero US; pendiente revisión formal."
+        }
+      ]
+    },
+    {
+      "pais": "Canada",
+      "territorio": "Canadá (provincias y territorios)",
+      "idiomas": ["en", "fr"],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "verificado_el": null,
+      "licencia_comprador": "BORRADOR: importador con licencias federales/provinciales de tabaco. Confirmar con asesor del comprador.",
+      "puntos_clave": [
+        "Regulación federal/provincial; Quebec francés útil en borradores.",
+        "No afirmar aranceles ni tiempos de despacho sin documentación oficial."
+      ],
+      "fuentes": [
+        {
+          "url": "https://www.canada.ca/en/health-canada/services/health-concerns/tobacco.html",
+          "tipo": "secundaria",
+          "consulta": "2026-10-05",
+          "nota": "Referencia orientativa; pendiente revisión con agente aduanal."
+        },
+        {
+          "url": "https://www.cbsa-asfc.gc.ca/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-05",
+          "nota": "Aduana canadiense; pendiente revisión formal."
+        }
+      ]
+    }
+  ]
+}

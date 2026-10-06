@@ -839,7 +839,7 @@ def construir_parser():
     )
     parser.add_argument(
         "--tipo",
-        choices=["distribuidor", "tienda", "lounge", "hotel", "duty_free"],
+        choices=["distribuidor", "tienda", "lounge", "hotel", "casino", "duty_free"],
         default="",
         help="Filtra un solo tipo de negocio en --buscar",
     )
@@ -909,6 +909,11 @@ def main(argv=None):
             print(
                 f"Encolados {stats['encolados']} prospecto(s) en {inbox} "
                 f"({stats['pais']}, llamadas API: {stats['llamadas']})"
+            )
+        if stats.get("presupuesto_agotado"):
+            print(
+                "Tope diario MAX_PLACES_CALLS_DIA alcanzado; búsqueda detenida (ver logs/).",
+                file=sys.stderr,
             )
         return 0
 

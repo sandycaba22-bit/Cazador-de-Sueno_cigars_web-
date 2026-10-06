@@ -111,6 +111,7 @@ def intro_vitolas(idioma: str) -> str:
         "nl": "We presenteren onze groothandelslijn—zes vitolas, geleid door onze instapreferenties:",
         "de": "Gern stellen wir unsere Großhandelslinie vor—sechs Vitolas, angeführt von unseren Einstiegsreferenzen:",
         "it": "Presentiamo la nostra linea wholesale—sei vitole, con le nostre referenze di apertura:",
+        "pt": "Apresentamos a nossa linha grossista—seis vitolas, lideradas pelas nossas referências de abertura:",
     }
     return textos.get(idioma, textos["en"])
 

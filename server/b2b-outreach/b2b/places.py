@@ -10,12 +10,14 @@ from typing import Any
 
 from b2b.budget import puede_llamar, registrar_llamada
 from b2b.country_rules import buscar_pais
+from b2b.logging_ops import registrar_presupuesto_agotado
 from b2b.paths import FIXTURES
 
 PLACES_URL = "https://places.googleapis.com/v1/places:searchText"
 FIELD_MASK = (
     "places.id,places.displayName,places.formattedAddress,places.websiteUri,"
-    "places.nationalPhoneNumber,places.types,places.googleMapsUri"
+    "places.nationalPhoneNumber,places.types,places.googleMapsUri,"
+    "places.rating,places.userRatingCount"
 )
 
 QUERIES_BASE = {
@@ -33,10 +35,15 @@ QUERIES_BASE = {
     ],
     "lounge": ["cigar lounge {pais}", "cigar bar {pais}"],
     "hotel": ["humidor hotel resort {pais}", "luxury hotel cigar {pais}"],
+    "casino": ["casino cigar lounge {pais}", "casino tobacco shop {pais}"],
     "duty_free": ["duty free tobacco {pais}", "duty free cigars {pais}"],
 }
 
 SOCIAL_PERSONAL = ("instagram.com", "facebook.com/profile", "linkedin.com/in/")
+
+
+class PresupuestoPlacesAgotado(RuntimeError):
+    """Tope diario de llamadas a Google Places alcanzado."""
 
 
 def _slug(pais: str) -> str:
@@ -68,6 +75,8 @@ def _clasificar_tipos(types: list[str], nombre: str) -> str:
         return "duty_free"
     if "distributor" in nombre_l or "wholesale" in nombre_l or "import" in nombre_l:
         return "distribuidor"
+    if "casino" in nombre_l or "casino" in joined:
+        return "casino"
     if "lounge" in nombre_l or "bar" in joined or "night_club" in joined:
         return "lounge"
     if "hotel" in joined or "lodging" in joined or "resort" in nombre_l:
@@ -90,12 +99,17 @@ def _normalizar_place(raw: dict, pais: str) -> dict[str, Any]:
         "place_id": raw.get("id") or raw.get("place_id") or "",
         "tipo_negocio": raw.get("tipo_negocio") or _clasificar_tipos(types, nombre),
         "fuente": raw.get("fuente") or "google_places",
+        "rating": raw.get("rating"),
+        "user_rating_count": raw.get("userRatingCount") or raw.get("user_rating_count"),
     }
 
 
 def _post_search(text_query: str) -> list[dict]:
     if not puede_llamar():
-        raise RuntimeError("Tope diario MAX_PLACES_CALLS_DIA alcanzado. Detén el buscador hasta mañana.")
+        registrar_presupuesto_agotado()
+        raise PresupuestoPlacesAgotado(
+            "Tope diario MAX_PLACES_CALLS_DIA alcanzado. Detén el buscador hasta mañana."
+        )
     payload = json.dumps({"textQuery": text_query, "pageSize": 10}).encode("utf-8")
     request = urllib.request.Request(
         PLACES_URL,
@@ -144,6 +158,8 @@ def _consultas_para_pais(pais: str, tipo: str) -> list[str]:
         plantillas.extend([f"sigarenwinkel {pais}", f"sigaar lounge {pais}"])
     if "es" in idiomas:
         plantillas.extend([f"tabaquería {pais}", f"importador puros {pais}"])
+    if "pt" in idiomas:
+        plantillas.extend([f"loja charutos {pais}", f"importador tabaco {pais}"])
     return plantillas
 
 
@@ -172,8 +188,14 @@ def buscar_en_pais(
         for plantilla in _consultas_para_pais(pais, tipo):
             if len(resultados) >= limite:
                 break
+            if not puede_llamar():
+                registrar_presupuesto_agotado()
+                return resultados[:limite], llamadas
             consulta = plantilla.format(pais=pais)
-            raw_list = _post_search(consulta)
+            try:
+                raw_list = _post_search(consulta)
+            except PresupuestoPlacesAgotado:
+                return resultados[:limite], llamadas
             llamadas += 1
             for raw in raw_list:
                 place = _normalizar_place(raw, pais)

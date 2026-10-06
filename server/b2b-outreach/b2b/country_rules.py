@@ -64,8 +64,40 @@ ALIASES = {
     "st. maarten": "Sint Maarten",
     "curaçao": "Curacao",
     "curacao": "Curacao",
+    "curazao": "Curacao",
     "república dominicana": "Dominican Republic",
     "republica dominicana": "Dominican Republic",
+    "usa": "United States",
+    "u.s.": "United States",
+    "u.s.a.": "United States",
+    "u.s.a": "United States",
+    "estados unidos": "United States",
+    "ee.uu.": "United States",
+    "eeuu": "United States",
+    "canadá": "Canada",
+    "canada": "Canada",
+    "islas caimán": "Cayman Islands",
+    "islas caiman": "Cayman Islands",
+    "cayman": "Cayman Islands",
+    "mauricio": "Mauritius",
+    "seychelles": "Seychelles",
+    "malta": "Malta",
+    "chipre": "Cyprus",
+    "costa de marfil": "Côte d'Ivoire",
+    "cote d'ivoire": "Côte d'Ivoire",
+    "ivory coast": "Côte d'Ivoire",
+    "cabo verde": "Cape Verde",
+    "senegal": "Senegal",
+    "nigeria": "Nigeria",
+    "ghana": "Ghana",
+    "sudáfrica": "South Africa",
+    "sudafrica": "South Africa",
+    "south africa": "South Africa",
+    "kenia": "Kenya",
+    "kenya": "Kenya",
+    "marruecos": "Morocco",
+    "morocco": "Morocco",
+    "angola": "Angola",
 }
 
 
@@ -82,6 +114,16 @@ def buscar_pais(nombre: str) -> dict | None:
     return None
 
 
+def paises_prioridad_inicial() -> list[dict]:
+    """Orden de prospección automática (--buscar sin --pais)."""
+    out: list[dict] = []
+    for nombre in cargar_reglas().get("prioridad_inicial", []):
+        entry = buscar_pais(nombre)
+        if entry:
+            out.append(entry)
+    return out
+
+
 def paises_ordenados_por_dificultad() -> list[dict]:
     data = cargar_reglas()
     prioridad = {p: i for i, p in enumerate(data.get("prioridad_inicial", []))}
@@ -89,7 +131,7 @@ def paises_ordenados_por_dificultad() -> list[dict]:
 
     def key(entry):
         pais = entry.get("pais", "")
-        return (entry.get("dificultad", 5), prioridad.get(pais, 999), pais)
+        return (prioridad.get(pais, 999), pais)
 
     return sorted(paises, key=key)
 
@@ -101,8 +143,9 @@ def revisar_reglas_propuesta(pais_nombre: str) -> str:
     if entry is None:
         raise ValueError(f"País no encontrado en country_rules.json: {pais_nombre}")
     propuesto = json.loads(json.dumps(actual))
+    canon = entry.get("pais", pais_nombre)
     for item in propuesto["paises"]:
-        if item.get("pais", "").lower() == pais_nombre.strip().lower():
+        if item.get("pais", "").lower() == canon.lower():
             item["nota_revision"] = (
                 f"Revisión sugerida {date.today().isoformat()}: confirmar con agente aduanal "
                 f"y fuente oficial antes de pasar a verificado."

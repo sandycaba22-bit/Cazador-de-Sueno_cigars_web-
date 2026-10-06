@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from b2b.country_rules import buscar_pais
 
-# Papiamento: solo bajo revisión explícita (no auto en producción).
 PAPIAMENTO_PAISES = {"aruba", "curacao", "curaçao"}
 
 
@@ -20,8 +19,16 @@ def idioma_para_pais(pais: str, preferido: str = "") -> str:
             return "en"
         if "es" in idiomas:
             return "es"
-    if "fr" in idiomas and pais_l in {"martinique", "guadeloupe", "french guiana"}:
+    if "pt" in idiomas:
+        return "pt"
+    if "fr" in idiomas:
         return "fr"
-    if "nl" in idiomas and any(x in pais_l for x in ("sint maarten", "saint martin", "aruba", "curacao")):
+    if "nl" in idiomas and any(
+        x in pais_l for x in ("sint maarten", "saint martin", "aruba", "curacao")
+    ):
         return "nl"
+    if "fr" in idiomas:
+        return "fr"
+    if "es" in idiomas:
+        return "es"
     return idiomas[0] if idiomas else "en"
