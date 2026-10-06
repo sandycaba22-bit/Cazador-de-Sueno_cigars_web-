@@ -54,7 +54,11 @@ def recolectar_leads_pais(
     stats["directorios_saltadas"] = dir_skip
     todos.extend(dir_leads)
 
-    fusionados = dedupe_y_fusionar(todos)
+    descartes: list[dict] = list(osm_meta.get("descartes") or [])
+    descartes_fusion: list[dict] = []
+    fusionados = dedupe_y_fusionar(todos, descartes_fusion)
+    descartes.extend(descartes_fusion)
+    stats["descartes"] = descartes
     registrar_evento(
         {
             "evento": "buscar_pais_fuentes",
@@ -64,6 +68,7 @@ def recolectar_leads_pais(
             "directorio": stats["directorio"],
             "fusionados": len(fusionados),
             "osm_raw": osm_meta,
+            "descartes": descartes,
         }
     )
     return fusionados[:limite], llamadas, stats

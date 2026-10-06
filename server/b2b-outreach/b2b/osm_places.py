@@ -11,7 +11,7 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
-from b2b.buscar_filtros import NAME_BUSCAR_RE, descartar_lead_osm
+from b2b.buscar_filtros import NAME_BUSCAR_RE, descartar_lead_osm, motivo_descarte_osm
 from b2b.country_rules import buscar_pais
 from b2b.logging_ops import registrar_evento, registrar_osm_fallo
 from b2b.paths import data_file
@@ -122,6 +122,40 @@ def _tag(tags: dict, *keys: str) -> str:
         if val:
             return str(val).strip()
     return ""
+
+
+def _nombre_log_osm(el: dict, tags: dict) -> str:
+    nombre = _tag(tags, "name", "brand", "operator")
+    if nombre:
+        return nombre
+    osm_type = el.get("type") or "node"
+    osm_id = el.get("id")
+    if osm_id is not None:
+        return f"{osm_type}/{osm_id}"
+    return "—"
+
+
+def _motivo_si_sin_lead(el: dict, pais: str) -> str:
+    tags = el.get("tags") or {}
+    nombre = _tag(tags, "name", "brand", "operator")
+    if not nombre and tags.get("shop") in ("tobacco", "cigar"):
+        calle = _tag(tags, "addr:street", "addr:place", "addr:city")
+        nombre = f"Tobacco shop {calle}".strip() if calle else "Tobacco shop"
+    if not nombre:
+        return "sin nombre"
+    etiqueta = motivo_descarte_osm(nombre, tags)
+    if etiqueta:
+        return etiqueta
+    shop = tags.get("shop") or ""
+    if shop == "e-cigarette":
+        return "vape/smoke shop"
+    if not NAME_HINT.search(nombre) and shop not in ("tobacco", "cigar", "duty_free", "alcohol"):
+        if tags.get("cigar") != "yes" and tags.get("smoking") != "yes":
+            amenity = (tags.get("amenity") or "").lower()
+            if amenity in ("cafe", "bar", "pub", "restaurant"):
+                return "bar/café sin humidor"
+            return "sin señal tabaco/cigarro"
+    return "filtro OSM"
 
 
 def _elemento_a_lead(el: dict, pais: str) -> dict | None:
@@ -352,16 +386,42 @@ def _buscar_en_pais_osm_cuerpo(
 
     orden_tipo = {t: i for i, t in enumerate(tipos)}
     candidatos: list[dict] = []
+    descartes_osm: list[dict] = []
     vistos: set[str] = set()
     for el in elementos:
+        tags = el.get("tags") or {}
         lead = _elemento_a_lead(el, pais)
         if not lead:
+            descartes_osm.append(
+                {
+                    "nombre": _nombre_log_osm(el, tags),
+                    "motivo": _motivo_si_sin_lead(el, pais),
+                    "etapa": "osm",
+                    "fuente": "openstreetmap",
+                }
+            )
             continue
         clave = lead.get("place_id") or lead["nombre"].lower()
         if clave in vistos:
+            descartes_osm.append(
+                {
+                    "nombre": lead["nombre"],
+                    "motivo": "duplicado OSM (misma pasada)",
+                    "etapa": "osm",
+                    "fuente": "openstreetmap",
+                }
+            )
             continue
         vistos.add(clave)
         if tipo_filtro and lead.get("tipo_negocio") != tipo_filtro:
+            descartes_osm.append(
+                {
+                    "nombre": lead["nombre"],
+                    "motivo": f"tipo filtrado ({tipo_filtro})",
+                    "etapa": "osm",
+                    "fuente": "openstreetmap",
+                }
+            )
             continue
         candidatos.append(lead)
     candidatos.sort(key=lambda p: orden_tipo.get(p.get("tipo_negocio", "tienda"), 99))
@@ -373,12 +433,14 @@ def _buscar_en_pais_osm_cuerpo(
         "ways": conteo["way"],
         "relations": conteo["relation"],
         "filtrados_ok": len(candidatos),
+        "descartes": descartes_osm,
     }
     import sys
 
     print(
         f"OSM {pais}: {meta['raw']} elementos (n/w/r={conteo['node']}/{conteo['way']}/"
-        f"{conteo['relation']}, vía {modo}) → {meta['filtrados_ok']} leads",
+        f"{conteo['relation']}, vía {modo}) → {meta['filtrados_ok']} leads, "
+        f"{len(descartes_osm)} descartes",
         file=sys.stderr,
     )
     registrar_evento({"evento": "osm_conteo_isla", "pais": pais, **meta})

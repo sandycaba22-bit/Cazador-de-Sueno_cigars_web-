@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import sys
 
+from b2b.descartes import lineas_resumen_descartes
 from b2b.logging_ops import registrar_evento
 
 
@@ -38,24 +39,30 @@ def avisar_isla_encontradas(
     repetidos: int,
     con_contacto: int,
     simulado: bool = False,
+    descartes: list | None = None,
+    repetidos_detalle: list | None = None,
 ) -> None:
     osm = int(fuente_stats.get("osm", 0))
     dealers = int(fuente_stats.get("dealers", 0))
     web = int(fuente_stats.get("directorio", 0)) + int(fuente_stats.get("web_enriquecidos", 0))
-    if encontrados <= 0 and nuevos <= 0 and not _aviso_cero_habilitado():
+    extra_desc = lineas_resumen_descartes(descartes or [], repetidos_detalle or [])
+    tiene_detalle = bool(extra_desc)
+    if encontrados <= 0 and nuevos <= 0 and not _aviso_cero_habilitado() and not tiene_detalle:
         return
     if encontrados <= 0 and nuevos <= 0 and _aviso_cero_habilitado():
-        notificar_buscar(
+        lineas = [
             f"📍 {isla}: 0 encontrados (OSM {osm}, dealers {dealers}, web {web}) · "
             f"0 nuevos · 0 repetidos · 0 con contacto",
-            simulado=simulado,
-        )
+        ]
+        lineas.extend(extra_desc)
+        notificar_buscar("\n".join(lineas), simulado=simulado)
         return
-    notificar_buscar(
+    lineas = [
         f"📍 {isla}: {encontrados} encontrados (OSM {osm}, dealers {dealers}, web {web}) · "
         f"{nuevos} nuevos · {repetidos} repetidos · {con_contacto} con contacto",
-        simulado=simulado,
-    )
+    ]
+    lineas.extend(extra_desc)
+    notificar_buscar("\n".join(lineas), simulado=simulado)
 
 
 def avisar_isla_fallida(isla: str, simulado: bool = False) -> None:

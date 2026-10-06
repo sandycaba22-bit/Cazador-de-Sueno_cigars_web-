@@ -24,7 +24,12 @@ from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
 from b2b.logging_ops import registrar_busqueda, registrar_presupuesto_agotado
 from b2b.fuente_leads import resolver_fuente_leads
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
-from b2b.buscar_filtros import clasificar_novedad
+from b2b.buscar_filtros import clasificar_novedad_detalle
+from b2b.descartes import (
+    append_isla_en_archivo_diario,
+    lineas_resumen_descartes,
+    registrar_log_descartes_isla,
+)
 from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
 from b2b.website import analizar_sitio_prospecto, web_confiable_para_idioma
 
@@ -243,13 +248,18 @@ def prospectar_un_pais(
         }
 
     cola_dir = inbox.parent
-    nuevos, repetidos = clasificar_novedad(leads, cola_dir)
+    nuevos, repetidos, repetidos_detalle = clasificar_novedad_detalle(leads, cola_dir)
+    descartes = list((fuente_stats or {}).get("descartes") or [])
+    if not simulado:
+        append_isla_en_archivo_diario(pais, descartes, repetidos_detalle)
+        registrar_log_descartes_isla(pais, descartes, repetidos_detalle)
     con_contacto_encontrados = sum(
         1 for lead in leads if (lead.get("telefono") or lead.get("correo") or "").strip()
     )
     paths, con_contacto, web_enriquecidos = encolar(nuevos, inbox, reglas)
     fuente_stats = dict(fuente_stats or {})
     fuente_stats["web_enriquecidos"] = web_enriquecidos
+    fuente_stats["descartes"] = descartes
     registrar_busqueda(pais, llamadas, len(paths), simulado, fuente=fuente)
     return {
         "pais": pais,
@@ -259,6 +269,8 @@ def prospectar_un_pais(
         "encontrados": len(leads),
         "nuevos": len(nuevos),
         "repetidos": len(repetidos),
+        "descartes": descartes,
+        "repetidos_detalle": repetidos_detalle,
         "fuente_stats": fuente_stats,
         "leads": len(leads),
         "llamadas": llamadas,
@@ -281,6 +293,8 @@ def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
         int(stats.get("repetidos", 0)),
         int(stats.get("con_contacto_encontrados", stats.get("con_contacto", 0))),
         simulado=simulado,
+        descartes=stats.get("descartes") or [],
+        repetidos_detalle=stats.get("repetidos_detalle") or [],
     )
 
 

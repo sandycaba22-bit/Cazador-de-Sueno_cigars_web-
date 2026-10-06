@@ -46,6 +46,44 @@ def clave_dedupe(lead: dict) -> str:
     return f"nom:{nom}|{lead.get('pais','')}"
 
 
+def motivo_descarte_osm(nombre: str, tags: dict) -> str | None:
+    """Etiqueta de motivo si descartar_lead_osm descartaría; None si pasa."""
+    if not descartar_lead_osm(nombre, tags):
+        return None
+    shop = (tags.get("shop") or "").lower()
+    if shop == "e-cigarette":
+        return "vape/smoke shop"
+    if tags.get("amenity") == "fuel":
+        return "gasolinera"
+    joined = f"{nombre} {' '.join(tags.values())}".lower()
+    if VAPE_DESCARTAR_RE.search(joined) and not NAME_BUSCAR_RE.search(nombre):
+        return "vape/smoke shop"
+    if GASOLINERA_RE.search(joined) and shop not in ("tobacco", "cigar"):
+        return "gasolinera"
+    if shop == "convenience" and not NAME_BUSCAR_RE.search(nombre):
+        return "colmado/convenience sin nombre cigarro"
+    amenity = (tags.get("amenity") or "").lower()
+    if amenity in ("cafe", "bar", "pub", "restaurant"):
+        return "bar/café sin humidor"
+    return "filtro OSM"
+
+
+def motivo_rechazo_generico(lead: dict) -> str | None:
+    """Motivo si aceptar_lead_generico rechazaría; None si acepta."""
+    if aceptar_lead_generico(lead):
+        return None
+    nombre = lead.get("nombre") or ""
+    fuente = (lead.get("fuente") or "").lower()
+    if fuente.startswith("dealer:") or fuente == "directorio":
+        return "sin nombre"
+    tags = lead.get("_osm_tags") or {}
+    if tags:
+        return motivo_descarte_osm(nombre, tags) or "filtro OSM"
+    if VAPE_DESCARTAR_RE.search(nombre.lower()) and not NAME_BUSCAR_RE.search(nombre):
+        return "vape/smoke shop"
+    return "sin señal tabaco/cigarro"
+
+
 def descartar_lead_osm(nombre: str, tags: dict) -> bool:
     shop = (tags.get("shop") or "").lower()
     if shop == "e-cigarette":
@@ -95,11 +133,23 @@ def fusionar_leads(base: dict, otro: dict) -> dict:
     return out
 
 
-def dedupe_y_fusionar(leads: list[dict]) -> list[dict]:
+def dedupe_y_fusionar(
+    leads: list[dict], auditoria: list[dict] | None = None
+) -> list[dict]:
     por_clave: dict[str, dict] = {}
     orden: list[str] = []
     for lead in leads:
-        if not aceptar_lead_generico(lead):
+        motivo = motivo_rechazo_generico(lead)
+        if motivo:
+            if auditoria is not None:
+                auditoria.append(
+                    {
+                        "nombre": lead.get("nombre") or "—",
+                        "motivo": motivo,
+                        "etapa": "fusion_fuentes",
+                        "fuente": lead.get("fuente") or "",
+                    }
+                )
             continue
         clave = clave_dedupe(lead)
         if clave in por_clave:
@@ -110,8 +160,8 @@ def dedupe_y_fusionar(leads: list[dict]) -> list[dict]:
     return [por_clave[k] for k in orden]
 
 
-def cargar_claves_cola(cola_dir: Path) -> set[str]:
-    claves: set[str] = set()
+def indice_cola_por_clave(cola_dir: Path) -> dict[str, tuple[str, Path]]:
+    idx: dict[str, tuple[str, Path]] = {}
     for sub in ("inbox", "sent", "failed"):
         carpeta = cola_dir / sub
         if not carpeta.is_dir():
@@ -121,29 +171,84 @@ def cargar_claves_cola(cola_dir: Path) -> set[str]:
                 data = json.loads(path.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError):
                 continue
-            if isinstance(data, dict):
-                claves.add(clave_dedupe(data))
-    return claves
+            if not isinstance(data, dict):
+                continue
+            cl = clave_dedupe(data)
+            if cl not in idx:
+                idx[cl] = (sub, path)
+    return idx
+
+
+def cargar_claves_cola(cola_dir: Path) -> set[str]:
+    return set(indice_cola_por_clave(cola_dir).keys())
+
+
+def duplicado_contra(lead: dict, cola_dir: Path | None) -> tuple[str, str] | None:
+    """Ubicación (inbox/sent/failed/registro_leads) y fecha legible si ya existe."""
+    from b2b.descartes import _iso_desde_mtime
+    from b2b.leads_store import SEEN_PATH, ya_visto
+
+    if cola_dir and cola_dir.is_dir():
+        clave = clave_dedupe(lead)
+        hit = indice_cola_por_clave(cola_dir).get(clave)
+        if hit:
+            sub, path = hit
+            return sub, _iso_desde_mtime(path)
+        pid = (lead.get("place_id") or "").strip()
+        dom = dominio_web(lead.get("web") or "")
+        for sub in ("inbox", "sent", "failed"):
+            carpeta = cola_dir / sub
+            if not carpeta.is_dir():
+                continue
+            for path in carpeta.glob("*.json"):
+                try:
+                    data = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    continue
+                if not isinstance(data, dict):
+                    continue
+                if pid and (data.get("place_id") or "").strip() == pid:
+                    return sub, _iso_desde_mtime(path)
+                if dom and dominio_web(data.get("web") or "") == dom:
+                    return sub, _iso_desde_mtime(path)
+    if ya_visto(lead.get("place_id", ""), lead.get("web", "")):
+        fecha = _iso_desde_mtime(SEEN_PATH) if SEEN_PATH.is_file() else ""
+        return "registro_leads", fecha
+    return None
+
+
+def clasificar_novedad_detalle(
+    leads: list[dict], cola_dir: Path | None, vistos_registro: set[str] | None = None
+) -> tuple[list[dict], list[dict], list[dict]]:
+    vistos = vistos_registro or set()
+    nuevos: list[dict] = []
+    repetidos: list[dict] = []
+    repetidos_detalle: list[dict] = []
+    for lead in leads:
+        clave = clave_dedupe(lead)
+        dup = duplicado_contra(lead, cola_dir)
+        if clave in vistos or dup:
+            repetidos.append(lead)
+            if dup:
+                contra, fecha = dup
+            else:
+                contra, fecha = "registro_leads", ""
+            repetidos_detalle.append(
+                {
+                    "nombre": lead.get("nombre") or "—",
+                    "motivo": "repetido",
+                    "contra": contra,
+                    "fecha": fecha,
+                }
+            )
+        else:
+            nuevos.append(lead)
+    return nuevos, repetidos, repetidos_detalle
 
 
 def clasificar_novedad(
     leads: list[dict], cola_dir: Path | None, vistos_registro: set[str] | None = None
 ) -> tuple[list[dict], list[dict]]:
     """Separa nuevos vs repetidos (cola + registro_leads vía ya_visto)."""
-    from b2b.leads_store import ya_visto
-
-    en_cola = cargar_claves_cola(cola_dir) if cola_dir else set()
-    vistos = vistos_registro or set()
-    nuevos: list[dict] = []
-    repetidos: list[dict] = []
-    for lead in leads:
-        clave = clave_dedupe(lead)
-        if (
-            clave in en_cola
-            or clave in vistos
-            or ya_visto(lead.get("place_id", ""), lead.get("web", ""))
-        ):
-            repetidos.append(lead)
-        else:
-            nuevos.append(lead)
+    nuevos, repetidos, _det = clasificar_novedad_detalle(leads, cola_dir, vistos_registro)
     return nuevos, repetidos
