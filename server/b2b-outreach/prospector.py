@@ -24,6 +24,7 @@ from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
 from b2b.logging_ops import registrar_busqueda, registrar_presupuesto_agotado
 from b2b.fuente_leads import resolver_fuente_leads
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
+from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
 from b2b.website import analizar_sitio_prospecto, web_confiable_para_idioma
 
 SLUG_RE = __import__("re").compile(r"[^a-z0-9]+")
@@ -108,9 +109,14 @@ def lead_a_inbox(lead: dict) -> dict:
     }
 
 
-def encolar(leads: list[dict], inbox: Path, reglas: dict) -> list[Path]:
+def _payload_tiene_contacto(payload: dict) -> bool:
+    return bool((payload.get("telefono") or "").strip() or (payload.get("correo") or "").strip())
+
+
+def encolar(leads: list[dict], inbox: Path, reglas: dict) -> tuple[list[Path], int]:
     inbox.mkdir(parents=True, exist_ok=True)
     escritos: list[Path] = []
+    con_contacto = 0
     for lead in leads:
         if en_lista_no_contactar(lead.get("nombre", ""), lead.get("web", "")):
             continue
@@ -124,8 +130,10 @@ def encolar(leads: list[dict], inbox: Path, reglas: dict) -> list[Path]:
         path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
         escritos.append(path)
+        if _payload_tiene_contacto(payload):
+            con_contacto += 1
         time.sleep(0.05)
-    return escritos
+    return escritos, con_contacto
 
 
 def _tipos_busqueda() -> list[str]:
@@ -212,15 +220,32 @@ def prospectar_un_pais(
             "fuente": fuente,
         }
 
-    paths = encolar(leads, inbox, reglas)
+    paths, con_contacto = encolar(leads, inbox, reglas)
     registrar_busqueda(pais, llamadas, len(paths), simulado, fuente=fuente)
     return {
         "pais": pais,
         "encolados": len(paths),
+        "con_contacto": con_contacto,
         "leads": len(leads),
         "llamadas": llamadas,
         "fuente": fuente,
     }
+
+
+def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
+    if solo_listar:
+        return
+    pais = str(stats.get("pais", ""))
+    if stats.get("isla_fallida"):
+        avisar_isla_fallida(pais, simulado=simulado)
+        return
+    encolados = int(stats.get("encolados", 0))
+    avisar_isla_encontradas(
+        pais,
+        encolados,
+        int(stats.get("con_contacto", 0)),
+        simulado=simulado,
+    )
 
 
 def prospectar(
@@ -232,6 +257,9 @@ def prospectar(
     tipo_filtro: str = "",
 ) -> dict:
     fuente = "simulado" if simulado else resolver_fuente_leads()
+    import os
+
+    zona = os.getenv("B2B_ZONA_BUSQUEDA", "caribe")
     if pais_cli and pais_cli.strip():
         reglas = resolver_pais_objetivo(pais_cli)
         out = prospectar_un_pais(
@@ -239,10 +267,18 @@ def prospectar(
         )
         if "fuente" not in out:
             out["fuente"] = fuente
+        _telegram_tras_isla(out, simulado, solo_listar)
+        if not solo_listar:
+            enc = int(out.get("encolados", 0))
+            avisar_resumen_barrido(
+                enc,
+                {out["pais"]: enc} if enc else {},
+                {out["pais"]: int(out.get("con_contacto", 0))} if enc else {},
+                [out["pais"]] if out.get("isla_fallida") else [],
+                out["pais"],
+                simulado=simulado,
+            )
         return out
-    import os
-
-    zona = os.getenv("B2B_ZONA_BUSQUEDA", "caribe")
     return prospectar_prioridad_inicial(
         max_leads, inbox, simulado, solo_listar, tipo_filtro, fuente=fuente, zona=zona
     )
@@ -278,6 +314,8 @@ def prospectar_prioridad_inicial(
     presupuesto_agotado = False
     paises_usados = 0
     islas_fallidas: list[str] = []
+    encolados_por_isla: dict[str, int] = {}
+    contacto_por_isla: dict[str, int] = {}
     for reglas in paises:
         if paises_usados >= max_paises:
             break
@@ -302,11 +340,17 @@ def prospectar_prioridad_inicial(
             fuente=fuente,
         )
         paises_usados += 1
-        total_encolados += int(stats.get("encolados", 0))
+        enc = int(stats.get("encolados", 0))
+        total_encolados += enc
         total_leads += int(stats.get("leads", 0))
         total_llamadas += int(stats.get("llamadas", 0))
+        nombre_isla = str(stats.get("pais", reglas["pais"]))
+        if enc > 0:
+            encolados_por_isla[nombre_isla] = enc
+            contacto_por_isla[nombre_isla] = int(stats.get("con_contacto", 0))
+        _telegram_tras_isla(stats, simulado, solo_listar)
         if stats.get("isla_fallida"):
-            islas_fallidas.append(str(stats.get("pais", reglas["pais"])))
+            islas_fallidas.append(nombre_isla)
         if stats.get("presupuesto_agotado"):
             presupuesto_agotado = True
             break
@@ -322,6 +366,15 @@ def prospectar_prioridad_inicial(
             file=sys.stderr,
         )
     zona_label = (zona or os.getenv("B2B_ZONA_BUSQUEDA", "caribe") or "caribe").strip()
+    if not solo_listar:
+        avisar_resumen_barrido(
+            total_encolados,
+            encolados_por_isla,
+            contacto_por_isla,
+            islas_fallidas,
+            zona_label,
+            simulado=simulado,
+        )
     return {
         "pais": f"zona:{zona_label}",
         "encolados": total_encolados,

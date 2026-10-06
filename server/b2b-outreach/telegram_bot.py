@@ -570,6 +570,17 @@ def _enviar_payload(payload):
     raise TelegramTransientError(ultimo)
 
 
+def enviar_texto_telegram(texto: str) -> None:
+    """Mensaje de texto plano al chat B2B (p. ej. resumen de --buscar)."""
+    _, chat_id = telegram_credentials()
+    payload = {
+        "chat_id": chat_id,
+        "text": (texto or "")[:4096],
+        "disable_web_page_preview": True,
+    }
+    _enviar_payload(payload)
+
+
 def enviar_alerta_telegram(paquete):
     token, chat_id = telegram_credentials()
     base = {
