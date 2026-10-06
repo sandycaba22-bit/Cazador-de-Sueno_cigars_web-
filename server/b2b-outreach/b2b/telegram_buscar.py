@@ -1,8 +1,18 @@
 from __future__ import annotations
 
+import os
 import sys
 
 from b2b.logging_ops import registrar_evento
+
+
+def _aviso_cero_habilitado() -> bool:
+    return (os.getenv("BUSCAR_AVISO_CERO", "0") or "0").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
 
 
 def notificar_buscar(texto: str, simulado: bool = False) -> None:
@@ -21,12 +31,29 @@ def notificar_buscar(texto: str, simulado: bool = False) -> None:
 
 
 def avisar_isla_encontradas(
-    isla: str, nuevas: int, con_contacto: int, simulado: bool = False
+    isla: str,
+    encontrados: int,
+    fuente_stats: dict,
+    nuevos: int,
+    repetidos: int,
+    con_contacto: int,
+    simulado: bool = False,
 ) -> None:
-    if nuevas <= 0:
+    osm = int(fuente_stats.get("osm", 0))
+    dealers = int(fuente_stats.get("dealers", 0))
+    web = int(fuente_stats.get("directorio", 0)) + int(fuente_stats.get("web_enriquecidos", 0))
+    if encontrados <= 0 and nuevos <= 0 and not _aviso_cero_habilitado():
+        return
+    if encontrados <= 0 and nuevos <= 0 and _aviso_cero_habilitado():
+        notificar_buscar(
+            f"📍 {isla}: 0 encontrados (OSM {osm}, dealers {dealers}, web {web}) · "
+            f"0 nuevos · 0 repetidos · 0 con contacto",
+            simulado=simulado,
+        )
         return
     notificar_buscar(
-        f"📍 {isla}: {nuevas} tiendas nuevas encontradas ({con_contacto} con teléfono/correo)",
+        f"📍 {isla}: {encontrados} encontrados (OSM {osm}, dealers {dealers}, web {web}) · "
+        f"{nuevos} nuevos · {repetidos} repetidos · {con_contacto} con contacto",
         simulado=simulado,
     )
 
@@ -42,12 +69,28 @@ def avisar_resumen_barrido(
     islas_fallidas: list[str],
     zona: str,
     simulado: bool = False,
+    detalle_islas: dict[str, dict] | None = None,
 ) -> None:
-    lineas = [f"📊 Barrido OSM ({zona}) — {total} tienda(s) nueva(s) encolada(s)"]
+    lineas = [f"📊 Barrido ({zona}) — {total} prospecto(s) nuevo(s) encolado(s)"]
+    detalle = detalle_islas or {}
     for isla, cantidad in por_isla.items():
-        if cantidad > 0:
-            c = contacto_por_isla.get(isla, 0)
+        c = contacto_por_isla.get(isla, 0)
+        extra = detalle.get(isla) or {}
+        if extra:
+            osm = int(extra.get("osm", 0))
+            dealers = int(extra.get("dealers", 0))
+            web = int(extra.get("directorio", 0)) + int(extra.get("web_enriquecidos", 0))
+            lineas.append(
+                f"• {isla}: {cantidad} encolados ({c} con tel/correo) — "
+                f"encontrados {extra.get('encontrados', '?')} "
+                f"(OSM {osm}, dealers {dealers}, web {web})"
+            )
+        elif cantidad > 0:
             lineas.append(f"• {isla}: {cantidad} ({c} con tel/correo)")
     if islas_fallidas:
         lineas.append("Islas fallidas: " + ", ".join(islas_fallidas))
     notificar_buscar("\n".join(lineas), simulado=simulado)
+
+
+def enviar_prueba_telegram() -> None:
+    notificar_buscar("✅ Prueba Telegram buscar OK (cds-b2b-buscar).", simulado=False)

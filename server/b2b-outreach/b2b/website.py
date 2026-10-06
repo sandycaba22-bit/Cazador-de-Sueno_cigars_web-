@@ -11,8 +11,12 @@ USER_AGENT = (
     "CazadorDeSuenos-B2B-Research/1.0 "
     "(+https://www.cazadordesuenocigar.com/wholesale.html; contacto mayorista)"
 )
-FETCH_DELAY = float(__import__("os").getenv("B2B_WEB_DELAY_SECONDS", "2") or "2")
-TIMEOUT = 15
+FETCH_DELAY = float(__import__("os").getenv("B2B_WEB_DELAY_SECONDS", "3") or "3")
+TIMEOUT = 30
+MAX_PAGINAS = 2
+PHONE_RE = re.compile(
+    r"(?<!\d)(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}(?:[\s.-]?\d{1,6})?(?!\d)"
+)
 
 GENERIC_LOCAL = (
     "info",
@@ -249,11 +253,32 @@ def detectar_idioma_desde_web(web: str) -> tuple[str, str]:
     return detectar_idioma_html(html)
 
 
-def analizar_sitio_prospecto(web: str) -> dict[str, str]:
-    """Correo público + idioma del sitio en una sola pasada (respeta robots y pausa)."""
+def _telefonos_en_html(html: str) -> list[str]:
+    candidatos: list[str] = []
+    for match in PHONE_RE.finditer(html):
+        digits = re.sub(r"\D", "", match.group(0))
+        if len(digits) >= 8:
+            candidatos.append(match.group(0).strip())
+    vistos: set[str] = set()
+    out: list[str] = []
+    for tel in candidatos:
+        key = re.sub(r"\D", "", tel)
+        if key in vistos:
+            continue
+        vistos.add(key)
+        out.append(tel)
+    return out
+
+
+def analizar_sitio_prospecto(
+    web: str, *, necesita_correo: bool = True, necesita_telefono: bool = True
+) -> dict[str, str]:
+    """Correo/teléfono públicos + idioma (máx. 2 páginas; robots y pausa por dominio)."""
     vacio = {
         "correo": "",
         "fuente_correo": "",
+        "telefono": "",
+        "fuente_telefono": "",
         "idioma_web": "",
         "idioma_fuente": "",
     }
@@ -261,9 +286,11 @@ def analizar_sitio_prospecto(web: str) -> dict[str, str]:
         return vacio
     correo = ""
     fuente_correo = ""
+    telefono = ""
+    fuente_telefono = ""
     idioma_web = ""
     idioma_fuente = ""
-    for url in _urls_contacto(web):
+    for url in _urls_contacto(web)[:MAX_PAGINAS]:
         if not permitido_por_robots(url):
             continue
         time.sleep(FETCH_DELAY)
@@ -273,15 +300,23 @@ def analizar_sitio_prospecto(web: str) -> dict[str, str]:
             continue
         if not idioma_web:
             idioma_web, idioma_fuente = detectar_idioma_html(html)
-        if not correo:
+        if necesita_correo and not correo:
             emails = _emails_en_html(html, web)
             if emails:
                 correo, fuente_correo = emails[0], url
-        if correo and idioma_web:
+        if necesita_telefono and not telefono:
+            tels = _telefonos_en_html(html)
+            if tels:
+                telefono, fuente_telefono = tels[0], url
+        if correo and telefono and idioma_web:
+            break
+        if correo and telefono and not necesita_correo and not necesita_telefono:
             break
     return {
         "correo": correo,
         "fuente_correo": fuente_correo,
+        "telefono": telefono,
+        "fuente_telefono": fuente_telefono,
         "idioma_web": idioma_web,
         "idioma_fuente": idioma_fuente,
     }
@@ -292,8 +327,12 @@ def _urls_contacto(web: str) -> list[str]:
     base = f"{parsed.scheme}://{parsed.netloc}"
     urls = [web]
     for path in CONTACT_PATHS:
-        urls.append(base + path)
-    return urls
+        candidata = base + path
+        if candidata not in urls:
+            urls.append(candidata)
+        if len(urls) >= MAX_PAGINAS:
+            break
+    return urls[:MAX_PAGINAS]
 
 
 def extraer_correo_publico(web: str) -> tuple[str, str]:

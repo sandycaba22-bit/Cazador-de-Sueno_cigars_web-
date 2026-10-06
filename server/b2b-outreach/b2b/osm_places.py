@@ -11,8 +11,9 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
+from b2b.buscar_filtros import NAME_BUSCAR_RE, descartar_lead_osm
 from b2b.country_rules import buscar_pais
-from b2b.logging_ops import registrar_osm_fallo
+from b2b.logging_ops import registrar_evento, registrar_osm_fallo
 from b2b.paths import data_file
 
 _DEFAULT_MIRRORS = "|".join(
@@ -37,10 +38,12 @@ USER_AGENT = os.getenv(
 )
 ISO_PATH = data_file("osm_iso3166.json")
 
-NAME_HINT = re.compile(
-    r"cigar|humidor|tabac|tobacco|puro|charuto|sigar|smoke\s*shop|"
-    r"wholesale|import|distribut|duty\s*free|casino|lounge",
-    re.I,
+NAME_HINT = NAME_BUSCAR_RE
+BBOX_PATH = data_file("osm_bbox_fallback.json")
+NAME_OVERPASS = (
+    "cigar|Cigar|cigarro|Cigarro|tabac|Tabac|tabak|Tabak|sigaar|Sigaar|"
+    "tobacco|Tobacco|humidor|Humidor|habano|Habano|havana|Havana|"
+    "smoke|Smoke|estanco|Estanco|tabaqueria|tabaquería|Tabaqueria"
 )
 
 
@@ -124,13 +127,19 @@ def _tag(tags: dict, *keys: str) -> str:
 def _elemento_a_lead(el: dict, pais: str) -> dict | None:
     tags = el.get("tags") or {}
     nombre = _tag(tags, "name", "brand", "operator")
-    if not nombre and tags.get("shop") == "tobacco":
+    if not nombre and tags.get("shop") in ("tobacco", "cigar"):
         calle = _tag(tags, "addr:street", "addr:place", "addr:city")
         nombre = f"Tobacco shop {calle}".strip() if calle else "Tobacco shop"
     if not nombre:
         return None
-    if not NAME_HINT.search(nombre) and tags.get("shop") != "tobacco":
+    if descartar_lead_osm(nombre, tags):
         return None
+    shop = tags.get("shop") or ""
+    if shop == "e-cigarette":
+        return None
+    if not NAME_HINT.search(nombre) and shop not in ("tobacco", "cigar", "duty_free", "alcohol"):
+        if tags.get("cigar") != "yes" and tags.get("smoking") != "yes":
+            return None
     lat = el.get("lat")
     lon = el.get("lon")
     if lat is None or lon is None:
@@ -152,7 +161,8 @@ def _elemento_a_lead(el: dict, pais: str) -> dict | None:
         "place_id": place_id,
         "tipo_negocio": _clasificar(nombre, tags),
         "fuente": "openstreetmap",
-        "osm_shop_tobacco": tags.get("shop") == "tobacco",
+        "osm_shop_tobacco": tags.get("shop") in ("tobacco", "cigar"),
+        "_osm_tags": dict(tags),
     }
 
 
@@ -171,40 +181,97 @@ def _ciudades_rd() -> list[dict]:
     return list(data.get("ciudades") or [])
 
 
+def _bbox_para_iso(iso: str) -> dict | None:
+    if not BBOX_PATH.is_file():
+        return None
+    data = json.loads(BBOX_PATH.read_text(encoding="utf-8"))
+    box = data.get(iso)
+    return box if isinstance(box, dict) else None
+
+
+def _query_profunda_en_area(area_selector: str) -> str:
+    return f"""
+[out:json][timeout:40];
+{area_selector}
+(
+  nwr["shop"="tobacco"](area.search);
+  nwr["shop"="cigar"](area.search);
+  nwr["shop"="e-cigarette"](area.search);
+  nwr["shop"="duty_free"](area.search);
+  nwr["shop"="alcohol"](area.search);
+  nwr["amenity"~"cafe|bar|pub|restaurant"]["cigar"="yes"](area.search);
+  nwr["amenity"~"cafe|bar|pub|restaurant"]["smoking"="yes"](area.search);
+  nwr["tourism"~"hotel|resort"]["name"~"{NAME_OVERPASS}"](area.search);
+  nwr["shop"="convenience"]["name"~"{NAME_OVERPASS}"](area.search);
+  nwr["name"~"{NAME_OVERPASS}"](area.search);
+);
+out center tags;
+""".strip()
+
+
+def _query_iso(iso: str) -> str:
+    selector = (
+        f'area["ISO3166-1"="{iso}"][admin_level=2]->.search;'
+    )
+    return _query_profunda_en_area(selector)
+
+
+def _query_bbox(box: dict) -> str:
+    s, w, n, e = box["south"], box["west"], box["north"], box["east"]
+    return f"""
+[out:json][timeout:40];
+(
+  nwr["shop"="tobacco"]({s},{w},{n},{e});
+  nwr["shop"="cigar"]({s},{w},{n},{e});
+  nwr["shop"="duty_free"]({s},{w},{n},{e});
+  nwr["shop"="alcohol"]({s},{w},{n},{e});
+  nwr["amenity"~"cafe|bar|pub|restaurant"]["cigar"="yes"]({s},{w},{n},{e});
+  nwr["amenity"~"cafe|bar|pub|restaurant"]["smoking"="yes"]({s},{w},{n},{e});
+  nwr["shop"="convenience"]["name"~"{NAME_OVERPASS}"]({s},{w},{n},{e});
+  nwr["name"~"{NAME_OVERPASS}"]({s},{w},{n},{e});
+);
+out center tags;
+""".strip()
+
+
 def _query_tobacco_around(lat: float, lon: float, radio_m: int) -> str:
     return f"""
 [out:json][timeout:25];
 (
-  node["shop"="tobacco"](around:{radio_m},{lat},{lon});
-  way["shop"="tobacco"](around:{radio_m},{lat},{lon});
+  nwr["shop"~"tobacco|cigar"](around:{radio_m},{lat},{lon});
 );
-out center 30 tags;
+out center tags;
 """.strip()
 
 
-def _query_tobacco(iso: str) -> str:
-    return f"""
-[out:json][timeout:25];
-area["ISO3166-1"="{iso}"][admin_level=2]->.country;
-(
-  node["shop"="tobacco"](area.country);
-  way["shop"="tobacco"](area.country);
-);
-out center 50 tags;
-""".strip()
+def _contar_tipos(elementos: list[dict]) -> dict[str, int]:
+    out = {"node": 0, "way": 0, "relation": 0, "other": 0}
+    for el in elementos:
+        t = (el.get("type") or "other").lower()
+        if t in out:
+            out[t] += 1
+        else:
+            out["other"] += 1
+    return out
 
 
-def _query_nombre_comercial(iso: str) -> str:
-    name_re = "cigar|Cigar|tabac|Tabac|tobacco|Tobacco|charuto|puro|humidor|Humidor"
-    return f"""
-[out:json][timeout:25];
-area["ISO3166-1"="{iso}"][admin_level=2]->.country;
-(
-  node["amenity"="bar"]["name"~"{name_re}"](area.country);
-  way["amenity"="bar"]["name"~"{name_re}"](area.country);
-);
-out center 25 tags;
-""".strip()
+def _fetch_elementos_territorio(iso: str, rotar_desde: int) -> tuple[list[dict], str]:
+    elems: list[dict] = []
+    iso_ok = False
+    try:
+        elems = _fetch_overpass(_query_iso(iso), rotar_desde=rotar_desde)
+        iso_ok = True
+        if elems:
+            return elems, "iso"
+    except RuntimeError:
+        pass
+    box = _bbox_para_iso(iso)
+    if box:
+        elems_bbox = _fetch_overpass(_query_bbox(box), rotar_desde=rotar_desde)
+        return elems_bbox, "bbox"
+    if iso_ok:
+        return elems, "iso"
+    raise RuntimeError(f"Sin resultados Overpass para ISO {iso} (área y bbox)")
 
 
 def _fetch_overpass(query: str, rotar_desde: int = 0) -> list[dict]:
@@ -249,28 +316,13 @@ def _buscar_en_pais_osm_cuerpo(
     tipo_filtro: str,
     iso: str,
     rotar_espejo: int = 0,
-) -> tuple[list[dict], int]:
+) -> tuple[list[dict], int, dict]:
     llamadas = 0
     elementos: list[dict] = []
     _pausa_entre_consultas()
-    elementos = _dedupe_elementos(
-        _fetch_overpass(_query_tobacco(iso), rotar_desde=rotar_espejo)
-    )
+    elementos, modo = _fetch_elementos_territorio(iso, rotar_espejo)
+    elementos = _dedupe_elementos(elementos)
     llamadas = 1
-
-    segunda = (os.getenv("OSM_SEGUNDA_PASADA", "0") or "0").strip().lower() not in (
-        "0",
-        "false",
-        "no",
-    )
-    if segunda and len(elementos) < limite:
-        try:
-            _pausa_entre_consultas()
-            extra = _fetch_overpass(_query_nombre_comercial(iso), rotar_desde=rotar_espejo)
-            llamadas += 1
-            elementos = _dedupe_elementos(elementos + extra)
-        except RuntimeError as error:
-            registrar_osm_fallo(pais, f"pasada2: {error}")
 
     if pais == "Dominican Republic":
         for ciudad in _ciudades_rd()[: _max_ciudades_rd()]:
@@ -313,7 +365,24 @@ def _buscar_en_pais_osm_cuerpo(
             continue
         candidatos.append(lead)
     candidatos.sort(key=lambda p: orden_tipo.get(p.get("tipo_negocio", "tienda"), 99))
-    return candidatos[:limite], llamadas
+    conteo = _contar_tipos(elementos)
+    meta = {
+        "modo": modo,
+        "raw": len(elementos),
+        "nodes": conteo["node"],
+        "ways": conteo["way"],
+        "relations": conteo["relation"],
+        "filtrados_ok": len(candidatos),
+    }
+    import sys
+
+    print(
+        f"OSM {pais}: {meta['raw']} elementos (n/w/r={conteo['node']}/{conteo['way']}/"
+        f"{conteo['relation']}, vía {modo}) → {meta['filtrados_ok']} leads",
+        file=sys.stderr,
+    )
+    registrar_evento({"evento": "osm_conteo_isla", "pais": pais, **meta})
+    return candidatos[:limite], llamadas, meta
 
 
 def buscar_en_pais_osm(
@@ -321,7 +390,7 @@ def buscar_en_pais_osm(
     tipos: list[str],
     limite: int,
     tipo_filtro: str = "",
-) -> tuple[list[dict], int]:
+) -> tuple[list[dict], int, dict]:
     if tipo_filtro:
         tipos = [tipo_filtro]
     iso = _iso_para_pais(pais)

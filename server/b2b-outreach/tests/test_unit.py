@@ -117,7 +117,7 @@ class TestRedactor(unittest.TestCase):
 
 class TestProspectarSimulado(unittest.TestCase):
     def test_sin_duplicados_place_id(self):
-        leads, _ = buscar_en_pais("Sint Maarten", ["tienda", "distribuidor"], 15, simulado=True)
+        leads, _, _stats = buscar_en_pais("Sint Maarten", ["tienda", "distribuidor"], 15, simulado=True)
         ids = [lead["place_id"] for lead in leads]
         self.assertEqual(len(ids), len(set(ids)))
 

@@ -102,7 +102,7 @@ class TestPresupuestoPlaces(unittest.TestCase):
         with patch.object(places_mod, "puede_llamar", return_value=False), patch.object(
             places_mod, "registrar_presupuesto_agotado", lambda: Path("logs/test.jsonl")
         ):
-            leads, llamadas = places_mod.buscar_en_pais(
+            leads, llamadas, _stats = places_mod.buscar_en_pais(
                 "Aruba",
                 ["tienda"],
                 5,

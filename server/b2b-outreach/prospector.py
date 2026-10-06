@@ -24,6 +24,7 @@ from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
 from b2b.logging_ops import registrar_busqueda, registrar_presupuesto_agotado
 from b2b.fuente_leads import resolver_fuente_leads
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
+from b2b.buscar_filtros import clasificar_novedad
 from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
 from b2b.website import analizar_sitio_prospecto, web_confiable_para_idioma
 
@@ -52,11 +53,24 @@ def enriquecer_lead(lead: dict, reglas: dict) -> dict:
     fuente_correo = lead.get("fuente_correo") or ""
     idioma_web = (lead.get("idioma_web") or "").strip()
     idioma_fuente = (lead.get("idioma_fuente") or "").strip()
-    if web.startswith(("http://", "https://")):
-        info = analizar_sitio_prospecto(web)
-        if not correo:
+    telefono = (lead.get("telefono") or "").strip()
+    web_enriquecido = False
+    if web.startswith(("http://", "https://")) and (not correo or not telefono):
+        info = analizar_sitio_prospecto(
+            web, necesita_correo=not correo, necesita_telefono=not telefono
+        )
+        if not correo and info.get("correo"):
             correo = info["correo"]
             fuente_correo = info["fuente_correo"]
+            web_enriquecido = True
+        if not telefono and info.get("telefono"):
+            telefono = info["telefono"]
+            web_enriquecido = True
+        if not idioma_web:
+            idioma_web = info["idioma_web"]
+            idioma_fuente = info["idioma_fuente"]
+    elif web.startswith(("http://", "https://")):
+        info = analizar_sitio_prospecto(web, necesita_correo=False, necesita_telefono=False)
         if not idioma_web:
             idioma_web = info["idioma_web"]
             idioma_fuente = info["idioma_fuente"]
@@ -64,7 +78,10 @@ def enriquecer_lead(lead: dict, reglas: dict) -> dict:
         idioma_web = ""
         idioma_fuente = ""
     lead["correo"] = correo
+    lead["telefono"] = telefono
     lead["fuente_correo"] = fuente_correo
+    if web_enriquecido:
+        lead["web_enriquecido"] = True
     lead["idioma_web"] = idioma_web
     lead["idioma_fuente"] = idioma_fuente
     if not correo:
@@ -113,16 +130,19 @@ def _payload_tiene_contacto(payload: dict) -> bool:
     return bool((payload.get("telefono") or "").strip() or (payload.get("correo") or "").strip())
 
 
-def encolar(leads: list[dict], inbox: Path, reglas: dict) -> tuple[list[Path], int]:
+def encolar(leads: list[dict], inbox: Path, reglas: dict) -> tuple[list[Path], int, int]:
     inbox.mkdir(parents=True, exist_ok=True)
     escritos: list[Path] = []
     con_contacto = 0
+    web_enriquecidos = 0
     for lead in leads:
         if en_lista_no_contactar(lead.get("nombre", ""), lead.get("web", "")):
             continue
         if ya_visto(lead.get("place_id", ""), lead.get("web", "")):
             continue
         enriquecido = enriquecer_lead(dict(lead), reglas)
+        if enriquecido.get("web_enriquecido"):
+            web_enriquecidos += 1
         if not califica_lead(enriquecido):
             continue
         payload = lead_a_inbox(enriquecido)
@@ -133,7 +153,7 @@ def encolar(leads: list[dict], inbox: Path, reglas: dict) -> tuple[list[Path], i
         if _payload_tiene_contacto(payload):
             con_contacto += 1
         time.sleep(0.05)
-    return escritos, con_contacto
+    return escritos, con_contacto, web_enriquecidos
 
 
 def _tipos_busqueda() -> list[str]:
@@ -160,8 +180,9 @@ def prospectar_un_pais(
     tipos = _tipos_busqueda()
     if not fuente:
         fuente = "simulado" if simulado else resolver_fuente_leads()
+    fuente_stats: dict = {}
     try:
-        leads, llamadas = buscar_en_pais(
+        leads, llamadas, fuente_stats = buscar_en_pais(
             pais,
             tipos,
             max_leads,
@@ -192,13 +213,14 @@ def prospectar_un_pais(
             "fuente": fuente,
             "error": str(error)[:200],
         }
-    except RuntimeError as error:
+    except Exception as error:
         from b2b.logging_ops import registrar_osm_fallo
         from b2b.osm_places import OsmIslaFallida
 
+        if not isinstance(error, OsmIslaFallida) and not isinstance(error, RuntimeError):
+            raise
         if isinstance(error, OsmIslaFallida) or fuente == "osm":
             registrar_osm_fallo(pais, str(error))
-        isla_fallida = isinstance(error, OsmIslaFallida)
         return {
             "pais": pais,
             "encolados": 0,
@@ -206,7 +228,7 @@ def prospectar_un_pais(
             "llamadas": 0,
             "fuente": fuente,
             "error": str(error)[:200],
-            "isla_fallida": isla_fallida,
+            "isla_fallida": isinstance(error, OsmIslaFallida),
         }
     if solo_listar:
         for lead in leads:
@@ -220,12 +242,24 @@ def prospectar_un_pais(
             "fuente": fuente,
         }
 
-    paths, con_contacto = encolar(leads, inbox, reglas)
+    cola_dir = inbox.parent
+    nuevos, repetidos = clasificar_novedad(leads, cola_dir)
+    con_contacto_encontrados = sum(
+        1 for lead in leads if (lead.get("telefono") or lead.get("correo") or "").strip()
+    )
+    paths, con_contacto, web_enriquecidos = encolar(nuevos, inbox, reglas)
+    fuente_stats = dict(fuente_stats or {})
+    fuente_stats["web_enriquecidos"] = web_enriquecidos
     registrar_busqueda(pais, llamadas, len(paths), simulado, fuente=fuente)
     return {
         "pais": pais,
         "encolados": len(paths),
         "con_contacto": con_contacto,
+        "con_contacto_encontrados": con_contacto_encontrados,
+        "encontrados": len(leads),
+        "nuevos": len(nuevos),
+        "repetidos": len(repetidos),
+        "fuente_stats": fuente_stats,
         "leads": len(leads),
         "llamadas": llamadas,
         "fuente": fuente,
@@ -239,11 +273,13 @@ def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
     if stats.get("isla_fallida"):
         avisar_isla_fallida(pais, simulado=simulado)
         return
-    encolados = int(stats.get("encolados", 0))
     avisar_isla_encontradas(
         pais,
-        encolados,
-        int(stats.get("con_contacto", 0)),
+        int(stats.get("encontrados", stats.get("leads", 0))),
+        stats.get("fuente_stats") or {},
+        int(stats.get("nuevos", stats.get("encolados", 0))),
+        int(stats.get("repetidos", 0)),
+        int(stats.get("con_contacto_encontrados", stats.get("con_contacto", 0))),
         simulado=simulado,
     )
 
@@ -277,6 +313,15 @@ def prospectar(
                 [out["pais"]] if out.get("isla_fallida") else [],
                 out["pais"],
                 simulado=simulado,
+                detalle_islas={
+                    out["pais"]: {
+                        **(out.get("fuente_stats") or {}),
+                        "encontrados": out.get("encontrados", 0),
+                        "web_enriquecidos": (out.get("fuente_stats") or {}).get(
+                            "web_enriquecidos", 0
+                        ),
+                    }
+                },
             )
         return out
     return prospectar_prioridad_inicial(
@@ -316,6 +361,7 @@ def prospectar_prioridad_inicial(
     islas_fallidas: list[str] = []
     encolados_por_isla: dict[str, int] = {}
     contacto_por_isla: dict[str, int] = {}
+    detalle_islas: dict[str, dict] = {}
     for reglas in paises:
         if paises_usados >= max_paises:
             break
@@ -348,6 +394,12 @@ def prospectar_prioridad_inicial(
         if enc > 0:
             encolados_por_isla[nombre_isla] = enc
             contacto_por_isla[nombre_isla] = int(stats.get("con_contacto", 0))
+        fs = stats.get("fuente_stats") or {}
+        detalle_islas[nombre_isla] = {
+            **fs,
+            "encontrados": stats.get("encontrados", stats.get("leads", 0)),
+            "web_enriquecidos": fs.get("web_enriquecidos", 0),
+        }
         _telegram_tras_isla(stats, simulado, solo_listar)
         if stats.get("isla_fallida"):
             islas_fallidas.append(nombre_isla)
@@ -374,6 +426,7 @@ def prospectar_prioridad_inicial(
             islas_fallidas,
             zona_label,
             simulado=simulado,
+            detalle_islas=detalle_islas,
         )
     return {
         "pais": f"zona:{zona_label}",

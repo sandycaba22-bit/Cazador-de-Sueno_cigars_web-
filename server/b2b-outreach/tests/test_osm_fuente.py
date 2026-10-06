@@ -59,7 +59,8 @@ class TestOsmBuscar(unittest.TestCase):
             return sample["elements"]
 
         with patch("b2b.osm_places._fetch_overpass", fake_fetch):
-            leads, llamadas = buscar_en_pais_osm("Senegal", ["tienda", "distribuidor"], 1)
+            leads, llamadas, meta = buscar_en_pais_osm("Senegal", ["tienda", "distribuidor"], 1)
+        self.assertIn("raw", meta)
         self.assertGreaterEqual(llamadas, 1)
         self.assertEqual(len(leads), 1)
         self.assertEqual(leads[0]["fuente"], "openstreetmap")

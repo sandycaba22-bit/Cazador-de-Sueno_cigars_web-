@@ -862,6 +862,11 @@ def construir_parser():
         help="Con --buscar, imprime JSON y no encola",
     )
     parser.add_argument(
+        "--test-telegram",
+        action="store_true",
+        help="Envía un mensaje de prueba al chat B2B y termina",
+    )
+    parser.add_argument(
         "--consultar",
         metavar="PREGUNTA",
         help="Responde solo desde knowledge/ citando fuentes",
@@ -899,6 +904,13 @@ def main(argv=None):
         from b2b.country_rules import revisar_reglas_propuesta
 
         print(revisar_reglas_propuesta(args.revisar_reglas))
+        return 0
+
+    if args.test_telegram:
+        from b2b.telegram_buscar import enviar_prueba_telegram
+
+        enviar_prueba_telegram()
+        print("Mensaje de prueba enviado (si TELEGRAM_* está configurado).")
         return 0
 
     if args.buscar:

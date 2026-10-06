@@ -170,21 +170,24 @@ def buscar_en_pais(
     simulado: bool = False,
     tipo_filtro: str = "",
     fuente: str = "",
-) -> tuple[list[dict], int]:
+) -> tuple[list[dict], int, dict]:
     if tipo_filtro:
         tipos = [tipo_filtro]
     if not simulado and fuente == "osm":
-        from b2b.osm_places import buscar_en_pais_osm
+        from b2b.buscar_pais import recolectar_leads_pais
 
-        return buscar_en_pais_osm(pais, tipos, limite, tipo_filtro=tipo_filtro)
+        leads, llamadas, stats = recolectar_leads_pais(
+            pais, tipos, limite, tipo_filtro=tipo_filtro, simulado=False
+        )
+        return leads, llamadas, stats
     if simulado:
         path = _fixture_path(pais)
         if not path.is_file():
-            return [], 0
+            return [], 0, {}
         data = json.loads(path.read_text(encoding="utf-8"))
         lugares = [_normalizar_place(p, pais) for p in data.get("places", [])]
         filtrados = [p for p in lugares if _es_negocio_b2b(p["nombre"], p.get("web", ""))]
-        return filtrados[:limite], 0
+        return filtrados[:limite], 0, {}
 
     resultados: list[dict] = []
     vistos: set[str] = set()
@@ -195,12 +198,12 @@ def buscar_en_pais(
                 break
             if not puede_llamar():
                 registrar_presupuesto_agotado()
-                return resultados[:limite], llamadas
+                return resultados[:limite], llamadas, {}
             consulta = plantilla.format(pais=pais)
             try:
                 raw_list = _post_search(consulta)
             except PresupuestoPlacesAgotado:
-                return resultados[:limite], llamadas
+                return resultados[:limite], llamadas, {}
             llamadas += 1
             for raw in raw_list:
                 place = _normalizar_place(raw, pais)
@@ -215,4 +218,4 @@ def buscar_en_pais(
                     break
     orden_tipo = {t: i for i, t in enumerate(tipos)}
     resultados.sort(key=lambda p: orden_tipo.get(p.get("tipo_negocio", "tienda"), 99))
-    return resultados[:limite], llamadas
+    return resultados[:limite], llamadas, {}

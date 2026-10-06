@@ -1,0 +1,18 @@
+{
+  "AW": { "south": 12.41, "west": -70.07, "north": 12.63, "east": -69.86 },
+  "CW": { "south": 11.97, "west": -69.17, "north": 12.39, "east": -68.72 },
+  "SX": { "south": 18.0, "west": -63.15, "north": 18.07, "east": -63.0 },
+  "MF": { "south": 18.05, "west": -63.15, "north": 18.12, "east": -62.95 },
+  "BS": { "south": 20.9, "west": -78.0, "north": 27.5, "east": -72.7 },
+  "BB": { "south": 13.04, "west": -59.65, "north": 13.33, "east": -59.42 },
+  "KY": { "south": 19.26, "west": -81.42, "north": 19.75, "east": -79.72 },
+  "JM": { "south": 17.7, "west": -78.6, "north": 18.5, "east": -76.2 },
+  "PR": { "south": 17.88, "west": -67.27, "north": 18.52, "east": -65.62 },
+  "VI": { "south": 17.68, "west": -65.09, "north": 18.41, "east": -64.56 },
+  "GP": { "south": 15.87, "west": -61.81, "north": 16.51, "east": -61.0 },
+  "MQ": { "south": 14.39, "west": -61.23, "north": 14.88, "east": -60.81 },
+  "GF": { "south": 2.11, "west": -54.6, "north": 5.75, "east": -51.64 },
+  "HT": { "south": 18.02, "west": -74.48, "north": 19.98, "east": -71.62 },
+  "DO": { "south": 17.47, "west": -72.0, "north": 19.94, "east": -68.32 },
+  "TT": { "south": 10.04, "west": -61.92, "north": 11.35, "east": -60.52 }
+}
