@@ -11,7 +11,13 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from b2b.budget import puede_llamar
-from b2b.country_rules import buscar_pais, cargar_reglas, paises_ordenados_por_dificultad, paises_prioridad_inicial
+from b2b.country_rules import (
+    buscar_pais,
+    cargar_reglas,
+    paises_ordenados_por_dificultad,
+    paises_prioridad_busqueda,
+    paises_prioridad_inicial,
+)
 from b2b.idioma import idioma_para_lead
 from b2b.lead_score import califica_lead, puntuar_lead
 from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
@@ -218,9 +224,21 @@ def prospectar(
         if "fuente" not in out:
             out["fuente"] = fuente
         return out
+    import os
+
+    zona = os.getenv("B2B_ZONA_BUSQUEDA", "caribe")
     return prospectar_prioridad_inicial(
-        max_leads, inbox, simulado, solo_listar, tipo_filtro, fuente=fuente
+        max_leads, inbox, simulado, solo_listar, tipo_filtro, fuente=fuente, zona=zona
     )
+
+
+def _max_paises_por_pasada() -> int:
+    import os
+
+    try:
+        return max(1, int(os.getenv("B2B_MAX_PAISES_POR_BUSCAR", "8") or "8"))
+    except ValueError:
+        return 8
 
 
 def prospectar_prioridad_inicial(
@@ -230,10 +248,12 @@ def prospectar_prioridad_inicial(
     solo_listar: bool = False,
     tipo_filtro: str = "",
     fuente: str = "",
+    zona: str | None = None,
 ) -> dict:
-    paises = paises_prioridad_inicial()
+    paises = paises_prioridad_busqueda(zona)
     if not paises:
-        raise ValueError("prioridad_inicial vacía en country_rules.json")
+        raise ValueError("Lista de países vacía para la zona de búsqueda (country_rules.json)")
+    max_paises = _max_paises_por_pasada()
     if not fuente:
         fuente = "simulado" if simulado else resolver_fuente_leads()
     total_encolados = 0
@@ -242,12 +262,15 @@ def prospectar_prioridad_inicial(
     presupuesto_agotado = False
     paises_usados = 0
     for reglas in paises:
+        if paises_usados >= max_paises:
+            break
         if solo_listar:
             restante = max_leads
         else:
             restante = max(0, max_leads - total_encolados)
             if restante <= 0:
                 break
+        print(f"Buscando en: {reglas['pais']}…", file=sys.stderr)
         if fuente == "google" and not simulado and not puede_llamar():
             registrar_presupuesto_agotado()
             presupuesto_agotado = True
@@ -268,12 +291,16 @@ def prospectar_prioridad_inicial(
         if stats.get("presupuesto_agotado"):
             presupuesto_agotado = True
             break
+    import os
+
+    zona_label = (zona or os.getenv("B2B_ZONA_BUSQUEDA", "caribe") or "caribe").strip()
     return {
-        "pais": "prioridad_inicial",
+        "pais": f"zona:{zona_label}",
         "encolados": total_encolados,
         "leads": total_leads,
         "llamadas": total_llamadas,
         "presupuesto_agotado": presupuesto_agotado,
         "paises_recorridos": paises_usados,
         "fuente": fuente,
+        "zona": zona_label,
     }

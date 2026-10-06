@@ -21,6 +21,8 @@ module.exports = {
         B2B_QUEUE_DIR: "/var/www/html/server/b2b-outreach/cola",
         B2B_POLL_SECONDS: "15",
         FUENTE_LEADS: "osm",
+        B2B_ZONA_BUSQUEDA: "caribe",
+        OSM_SEGUNDA_PASADA: "0",
       },
     },
     {
@@ -34,6 +36,9 @@ module.exports = {
       env: {
         B2B_QUEUE_DIR: "/var/www/html/server/b2b-outreach/cola",
         FUENTE_LEADS: "osm",
+        B2B_ZONA_BUSQUEDA: "caribe",
+        OSM_SEGUNDA_PASADA: "0",
+        B2B_MAX_PAISES_POR_BUSCAR: "8",
       },
     },
   ],

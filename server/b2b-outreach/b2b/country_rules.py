@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import date, datetime
 from difflib import unified_diff
 from pathlib import Path
@@ -98,6 +99,8 @@ ALIASES = {
     "marruecos": "Morocco",
     "morocco": "Morocco",
     "angola": "Angola",
+    "haiti": "Haiti",
+    "haití": "Haiti",
 }
 
 
@@ -114,8 +117,42 @@ def buscar_pais(nombre: str) -> dict | None:
     return None
 
 
+def _nombres_prioridad_busqueda(zona: str | None = None) -> list[str]:
+    data = cargar_reglas()
+    zona = (zona or os.getenv("B2B_ZONA_BUSQUEDA", "caribe") or "caribe").strip().lower()
+    if zona in ("global", "todas", "all"):
+        return list(data.get("prioridad_inicial", []))
+    if zona in ("africa", "africa_europa", "afrika"):
+        return list(data.get("prioridad_africa_europa") or [])
+    caribe = data.get("prioridad_caribe")
+    if caribe:
+        return list(caribe)
+    return list(data.get("prioridad_inicial", []))
+
+
+def _incluir_en_busqueda(entry: dict) -> bool:
+    if (os.getenv("B2B_OMITIR_MERCADO_LOCAL", "1") or "1").strip().lower() in (
+        "0",
+        "false",
+        "no",
+    ):
+        return True
+    territorio = (entry.get("territorio") or "").strip().lower()
+    return territorio != "local"
+
+
+def paises_prioridad_busqueda(zona: str | None = None) -> list[dict]:
+    """Orden de --buscar sin --pais (default: solo islas / Caribe)."""
+    out: list[dict] = []
+    for nombre in _nombres_prioridad_busqueda(zona):
+        entry = buscar_pais(nombre)
+        if entry and _incluir_en_busqueda(entry):
+            out.append(entry)
+    return out
+
+
 def paises_prioridad_inicial() -> list[dict]:
-    """Orden de prospección automática (--buscar sin --pais)."""
+    """Lista completa prioridad_inicial (tests y compat)."""
     out: list[dict] = []
     for nombre in cargar_reglas().get("prioridad_inicial", []):
         entry = buscar_pais(nombre)

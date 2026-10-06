@@ -902,9 +902,11 @@ def main(argv=None):
         if not simulado:
             fuente = resolver_fuente_leads()
             if fuente == "osm":
+                zona = os.getenv("B2B_ZONA_BUSQUEDA", "caribe")
                 print(
-                    "Buscador: OpenStreetMap (gratis, sin token). "
-                    "Usa --simulado solo para pruebas locales.",
+                    "Buscador: OpenStreetMap (gratis). "
+                    f"Zona: {zona} — tiendas EN cada país/isla, no cerca de tu servidor. "
+                    "Usa --simulado solo para pruebas.",
                     file=sys.stderr,
                 )
             elif fuente == "google":

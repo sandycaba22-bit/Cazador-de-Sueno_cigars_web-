@@ -28,9 +28,9 @@ OVERPASS_URLS = [
 
 def _overpass_timeout() -> int:
     try:
-        return max(30, int(os.getenv("OSM_OVERPASS_TIMEOUT", "180") or "180"))
+        return max(20, int(os.getenv("OSM_OVERPASS_TIMEOUT", "45") or "45"))
     except ValueError:
-        return 180
+        return 45
 
 
 def _pausa_entre_consultas() -> None:
@@ -218,7 +218,7 @@ def buscar_en_pais_osm(
         registrar_osm_fallo(pais, str(error))
         return [], llamadas
 
-    segunda = (os.getenv("OSM_SEGUNDA_PASADA", "1") or "1").strip().lower() not in (
+    segunda = (os.getenv("OSM_SEGUNDA_PASADA", "0") or "0").strip().lower() not in (
         "0",
         "false",
         "no",

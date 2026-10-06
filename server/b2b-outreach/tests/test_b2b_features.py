@@ -12,7 +12,13 @@ sys.path.insert(0, str(ROOT))
 
 from b2b.budget import registrar_llamada
 from b2b.catalogo_check import CatalogoError, verificar_catalogo
-from b2b.country_rules import ALIASES, buscar_pais, cargar_reglas, paises_prioridad_inicial
+from b2b.country_rules import (
+    ALIASES,
+    buscar_pais,
+    cargar_reglas,
+    paises_prioridad_busqueda,
+    paises_prioridad_inicial,
+)
 from b2b.idioma import idioma_para_pais
 from b2b.lead_score import califica_lead, puntuar_lead
 
@@ -21,11 +27,23 @@ class TestPrioridadInicial(unittest.TestCase):
     def test_orden_islas_luego_africa(self):
         data = cargar_reglas()
         prio = data["prioridad_inicial"]
+        caribe = data["prioridad_caribe"]
         self.assertEqual(prio[0], "Aruba")
+        self.assertEqual(caribe[0], "Aruba")
+        self.assertIn("Barbados", caribe)
+        self.assertIn("Haiti", caribe)
+        self.assertNotIn("Nigeria", caribe)
         self.assertIn("Nigeria", prio)
         self.assertLess(prio.index("Mauritius"), prio.index("Nigeria"))
         self.assertEqual(prio[-1], "Angola")
         self.assertEqual(len(paises_prioridad_inicial()), len(prio))
+
+    def test_busqueda_default_solo_caribe(self):
+        islas = [p["pais"] for p in paises_prioridad_busqueda()]
+        self.assertEqual(islas[0], "Aruba")
+        self.assertIn("Sint Maarten", islas)
+        self.assertNotIn("Nigeria", islas)
+        self.assertNotIn("Dominican Republic", islas)
 
     def test_tipos_incluyen_casino(self):
         tipos = cargar_reglas()["orden_tipos_negocio"]

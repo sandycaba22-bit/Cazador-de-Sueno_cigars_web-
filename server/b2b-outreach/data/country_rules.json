@@ -3,14 +3,60 @@
     "actualizado": "2026-10-06",
     "nota": "dificultad y licencia_comprador son informativos; no bloquean prospección ni borradores. Revisar con agente aduanal antes de marcar verificado."
   },
-  "prioridad_inicial": [
+  "prioridad_caribe": [
     "Aruba",
     "Curacao",
+    "Sint Maarten",
+    "Saint Martin",
     "Bahamas",
     "Cayman Islands",
     "Jamaica",
     "Barbados",
     "Trinidad and Tobago",
+    "Puerto Rico",
+    "US Virgin Islands",
+    "Guadeloupe",
+    "Martinique",
+    "French Guiana",
+    "Haiti",
+    "Panama",
+    "Costa Rica",
+    "Dominican Republic"
+  ],
+  "prioridad_africa_europa": [
+    "Mauritius",
+    "Seychelles",
+    "Malta",
+    "Cyprus",
+    "Nigeria",
+    "Ghana",
+    "South Africa",
+    "Kenya",
+    "Senegal",
+    "Côte d'Ivoire",
+    "Morocco",
+    "Cape Verde",
+    "Angola"
+  ],
+  "prioridad_inicial": [
+    "Aruba",
+    "Curacao",
+    "Sint Maarten",
+    "Saint Martin",
+    "Bahamas",
+    "Cayman Islands",
+    "Jamaica",
+    "Barbados",
+    "Trinidad and Tobago",
+    "Puerto Rico",
+    "US Virgin Islands",
+    "Guadeloupe",
+    "Martinique",
+    "French Guiana",
+    "Haiti",
+    "Panama",
+    "Costa Rica",
+    "Dominican Republic",
     "Mauritius",
     "Seychelles",
     "Malta",
@@ -276,6 +322,27 @@
           "url": "https://www.douane.gouv.fr/",
           "tipo": "secundaria",
           "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Haiti",
+      "territorio": "Independiente",
+      "idiomas": ["fr"],
+      "dificultad": 4,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador debe cumplir normativa local (confirmar con comprador).",
+      "puntos_clave": [
+        "Mercado difícil logísticamente; priorizar distribuidores en Puerto Príncipe.",
+        "Idioma comercial: francés."
+      ],
+      "fuentes": [
+        {
+          "url": "https://www.dgi.gouv.ht/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06",
+          "nota": "Portal referencia; verificar con asesor local."
         }
       ]
     },
