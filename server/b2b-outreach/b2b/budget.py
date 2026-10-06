@@ -5,9 +5,9 @@ import os
 from datetime import date
 from pathlib import Path
 
-from b2b.paths import data_file
+from b2b.paths import state_file
 
-BUDGET_PATH = data_file("places_budget.json")
+BUDGET_PATH = state_file("places_budget.json")
 
 
 def max_calls() -> int:

@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 from urllib.parse import urlparse
 
-from b2b.paths import data_file
+from b2b.paths import data_file, state_file
 
-SEEN_PATH = data_file("registro_leads.json")
+SEEN_PATH = state_file("registro_leads.json")
 NO_CONTACT_PATH = data_file("no_contactar.json")
 
 

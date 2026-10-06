@@ -21,7 +21,12 @@ def queue_dir() -> Path | None:
 
 
 def data_file(name: str) -> Path:
-    """Datos mutables (registro leads, presupuesto). Fuera de /var/www en producción."""
+    """JSON de configuración versionado en el repo (country_rules, osm_iso, etc.)."""
+    return DATA / name
+
+
+def state_file(name: str) -> Path:
+    """Datos que escribe el bot (registro leads, presupuesto Places)."""
     explicit = os.getenv("B2B_DATA_DIR", "").strip()
     if explicit:
         return Path(explicit) / name

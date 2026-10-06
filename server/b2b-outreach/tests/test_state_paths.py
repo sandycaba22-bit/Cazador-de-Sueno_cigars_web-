@@ -8,7 +8,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from b2b.paths import data_file, log_dir
+from b2b.paths import log_dir, state_file
 
 
 class TestStatePaths(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestStatePaths(unittest.TestCase):
                 log_dir(), Path("/var/lib/cazador-de-suenos/b2b-outreach/logs")
             )
             self.assertEqual(
-                data_file("registro_leads.json"),
+                state_file("registro_leads.json"),
                 Path("/var/lib/cazador-de-suenos/b2b-outreach/data/registro_leads.json"),
             )
 
