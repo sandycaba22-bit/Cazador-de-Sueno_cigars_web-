@@ -867,6 +867,11 @@ def construir_parser():
         help="Envía un mensaje de prueba al chat B2B y termina",
     )
     parser.add_argument(
+        "--dry-run-nombres",
+        metavar="ISLA",
+        help="Clasifica candidatos OSM por listas de nombres (sin cola ni Telegram)",
+    )
+    parser.add_argument(
         "--consultar",
         metavar="PREGUNTA",
         help="Responde solo desde knowledge/ citando fuentes",
@@ -911,6 +916,19 @@ def main(argv=None):
 
         enviar_prueba_telegram()
         print("Mensaje de prueba enviado (si TELEGRAM_* está configurado).")
+        return 0
+
+    if getattr(args, "dry_run_nombres", None):
+        from b2b.country_rules import buscar_pais
+        from b2b.dry_run_nombres import dry_run_nombres_isla, imprimir_dry_run
+
+        isla = args.dry_run_nombres.strip()
+        entry = buscar_pais(isla)
+        if entry is None:
+            parser.error(f"País/isla no configurado: {isla}")
+        pais = entry["pais"]
+        buckets = dry_run_nombres_isla(pais)
+        imprimir_dry_run(pais, buckets)
         return 0
 
     if args.buscar:

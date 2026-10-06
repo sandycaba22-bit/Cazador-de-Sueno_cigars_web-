@@ -11,7 +11,8 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
-from b2b.buscar_filtros import NAME_BUSCAR_RE, descartar_lead_osm, motivo_descarte_osm
+from b2b.buscar_filtros import descartar_lead_osm, motivo_descarte_osm
+from b2b.nombres_busqueda import clasificar_aceptacion, overpass_regex_alternativas
 from b2b.country_rules import buscar_pais
 from b2b.logging_ops import registrar_evento, registrar_osm_fallo
 from b2b.paths import data_file
@@ -38,13 +39,15 @@ USER_AGENT = os.getenv(
 )
 ISO_PATH = data_file("osm_iso3166.json")
 
-NAME_HINT = NAME_BUSCAR_RE
 BBOX_PATH = data_file("osm_bbox_fallback.json")
-NAME_OVERPASS = (
-    "cigar|Cigar|cigarro|Cigarro|tabac|Tabac|tabak|Tabak|sigaar|Sigaar|"
-    "tobacco|Tobacco|humidor|Humidor|habano|Habano|havana|Havana|"
-    "smoke|Smoke|estanco|Estanco|tabaqueria|tabaquería|Tabaqueria"
-)
+
+
+def _regex_nombre_fuertes() -> str:
+    return overpass_regex_alternativas("fuertes")
+
+
+def _regex_nombre_debiles() -> str:
+    return overpass_regex_alternativas("debiles")
 
 
 class OsmIslaFallida(RuntimeError):
@@ -149,12 +152,17 @@ def _motivo_si_sin_lead(el: dict, pais: str) -> str:
     shop = tags.get("shop") or ""
     if shop == "e-cigarette":
         return "vape/smoke shop"
-    if not NAME_HINT.search(nombre) and shop not in ("tobacco", "cigar", "duty_free", "alcohol"):
-        if tags.get("cigar") != "yes" and tags.get("smoking") != "yes":
-            amenity = (tags.get("amenity") or "").lower()
-            if amenity in ("cafe", "bar", "pub", "restaurant"):
-                return "bar/café sin humidor"
-            return "sin señal tabaco/cigarro"
+    preview = {
+        "nombre": nombre,
+        "web": _tag(tags, "website", "contact:website", "url"),
+        "_osm_tags": dict(tags),
+        "osm_shop_tobacco": shop in ("tobacco", "cigar"),
+    }
+    bucket, motivo = clasificar_aceptacion(preview)
+    if bucket == "excluido":
+        return motivo
+    if bucket == "dudoso":
+        return motivo
     return "filtro OSM"
 
 
@@ -171,9 +179,16 @@ def _elemento_a_lead(el: dict, pais: str) -> dict | None:
     shop = tags.get("shop") or ""
     if shop == "e-cigarette":
         return None
-    if not NAME_HINT.search(nombre) and shop not in ("tobacco", "cigar", "duty_free", "alcohol"):
-        if tags.get("cigar") != "yes" and tags.get("smoking") != "yes":
-            return None
+    preview = {
+        "nombre": nombre,
+        "web": _tag(tags, "website", "contact:website", "url"),
+        "_osm_tags": dict(tags),
+        "osm_shop_tobacco": shop in ("tobacco", "cigar"),
+        "fuente": "openstreetmap",
+    }
+    bucket, _motivo = clasificar_aceptacion(preview)
+    if bucket == "excluido":
+        return None
     lat = el.get("lat")
     lon = el.get("lon")
     if lat is None or lon is None:
@@ -197,6 +212,7 @@ def _elemento_a_lead(el: dict, pais: str) -> dict | None:
         "fuente": "openstreetmap",
         "osm_shop_tobacco": tags.get("shop") in ("tobacco", "cigar"),
         "_osm_tags": dict(tags),
+        "nombre_clasificacion": bucket,
     }
 
 
@@ -224,6 +240,7 @@ def _bbox_para_iso(iso: str) -> dict | None:
 
 
 def _query_profunda_en_area(area_selector: str) -> str:
+    re_f = _regex_nombre_fuertes()
     return f"""
 [out:json][timeout:40];
 {area_selector}
@@ -234,10 +251,23 @@ def _query_profunda_en_area(area_selector: str) -> str:
   nwr["shop"="duty_free"](area.search);
   nwr["shop"="alcohol"](area.search);
   nwr["amenity"~"cafe|bar|pub|restaurant"]["cigar"="yes"](area.search);
-  nwr["amenity"~"cafe|bar|pub|restaurant"]["smoking"="yes"](area.search);
-  nwr["tourism"~"hotel|resort"]["name"~"{NAME_OVERPASS}"](area.search);
-  nwr["shop"="convenience"]["name"~"{NAME_OVERPASS}"](area.search);
-  nwr["name"~"{NAME_OVERPASS}"](area.search);
+  nwr["tourism"~"hotel|resort"]["name"~"{re_f}",i](area.search);
+  nwr["shop"="convenience"]["name"~"{re_f}",i](area.search);
+  nwr["name"~"{re_f}",i](area.search);
+);
+out center tags;
+""".strip()
+
+
+def _query_debiles_en_area(area_selector: str) -> str:
+    re_d = _regex_nombre_debiles()
+    return f"""
+[out:json][timeout:40];
+{area_selector}
+(
+  nwr["shop"~"tobacco|cigar"]["name"~"{re_d}",i](area.search);
+  nwr["shop"="alcohol"]["name"~"{re_d}",i](area.search);
+  nwr["amenity"~"bar|pub|cafe|restaurant"]["name"~"{re_d}",i](area.search);
 );
 out center tags;
 """.strip()
@@ -250,8 +280,14 @@ def _query_iso(iso: str) -> str:
     return _query_profunda_en_area(selector)
 
 
+def _query_iso_debiles(iso: str) -> str:
+    selector = f'area["ISO3166-1"="{iso}"][admin_level=2]->.search;'
+    return _query_debiles_en_area(selector)
+
+
 def _query_bbox(box: dict) -> str:
     s, w, n, e = box["south"], box["west"], box["north"], box["east"]
+    re_f = _regex_nombre_fuertes()
     return f"""
 [out:json][timeout:40];
 (
@@ -260,9 +296,22 @@ def _query_bbox(box: dict) -> str:
   nwr["shop"="duty_free"]({s},{w},{n},{e});
   nwr["shop"="alcohol"]({s},{w},{n},{e});
   nwr["amenity"~"cafe|bar|pub|restaurant"]["cigar"="yes"]({s},{w},{n},{e});
-  nwr["amenity"~"cafe|bar|pub|restaurant"]["smoking"="yes"]({s},{w},{n},{e});
-  nwr["shop"="convenience"]["name"~"{NAME_OVERPASS}"]({s},{w},{n},{e});
-  nwr["name"~"{NAME_OVERPASS}"]({s},{w},{n},{e});
+  nwr["shop"="convenience"]["name"~"{re_f}",i]({s},{w},{n},{e});
+  nwr["name"~"{re_f}",i]({s},{w},{n},{e});
+);
+out center tags;
+""".strip()
+
+
+def _query_bbox_debiles(box: dict) -> str:
+    s, w, n, e = box["south"], box["west"], box["north"], box["east"]
+    re_d = _regex_nombre_debiles()
+    return f"""
+[out:json][timeout:40];
+(
+  nwr["shop"~"tobacco|cigar"]["name"~"{re_d}",i]({s},{w},{n},{e});
+  nwr["shop"="alcohol"]["name"~"{re_d}",i]({s},{w},{n},{e});
+  nwr["amenity"~"bar|pub|cafe|restaurant"]["name"~"{re_d}",i]({s},{w},{n},{e});
 );
 out center tags;
 """.strip()
@@ -289,22 +338,44 @@ def _contar_tipos(elementos: list[dict]) -> dict[str, int]:
     return out
 
 
-def _fetch_elementos_territorio(iso: str, rotar_desde: int) -> tuple[list[dict], str]:
+def _fetch_elementos_territorio(iso: str, rotar_desde: int) -> tuple[list[dict], str, int]:
+    """Dos pasadas: etiquetas + nombres fuertes, luego nombres débiles acotados."""
+    llamadas = 0
     elems: list[dict] = []
+    modo = "iso"
     iso_ok = False
     try:
         elems = _fetch_overpass(_query_iso(iso), rotar_desde=rotar_desde)
+        llamadas += 1
         iso_ok = True
-        if elems:
-            return elems, "iso"
+    except RuntimeError:
+        elems = []
+
+    try:
+        _pausa_entre_consultas()
+        extra = _fetch_overpass(_query_iso_debiles(iso), rotar_desde=rotar_desde)
+        llamadas += 1
+        elems = _dedupe_elementos(elems + extra)
     except RuntimeError:
         pass
+
+    if elems:
+        return elems, modo, llamadas
+
     box = _bbox_para_iso(iso)
     if box:
         elems_bbox = _fetch_overpass(_query_bbox(box), rotar_desde=rotar_desde)
-        return elems_bbox, "bbox"
+        llamadas += 1
+        try:
+            _pausa_entre_consultas()
+            extra_b = _fetch_overpass(_query_bbox_debiles(box), rotar_desde=rotar_desde)
+            llamadas += 1
+            elems_bbox = _dedupe_elementos(elems_bbox + extra_b)
+        except RuntimeError:
+            pass
+        return elems_bbox, "bbox", llamadas
     if iso_ok:
-        return elems, "iso"
+        return elems, modo, llamadas
     raise RuntimeError(f"Sin resultados Overpass para ISO {iso} (área y bbox)")
 
 
@@ -354,9 +425,8 @@ def _buscar_en_pais_osm_cuerpo(
     llamadas = 0
     elementos: list[dict] = []
     _pausa_entre_consultas()
-    elementos, modo = _fetch_elementos_territorio(iso, rotar_espejo)
+    elementos, modo, llamadas = _fetch_elementos_territorio(iso, rotar_espejo)
     elementos = _dedupe_elementos(elementos)
-    llamadas = 1
 
     if pais == "Dominican Republic":
         for ciudad in _ciudades_rd()[: _max_ciudades_rd()]:
@@ -470,3 +540,20 @@ def buscar_en_pais_osm(
             ultimo_error = error
             registrar_osm_fallo(pais, f"intento {intento + 1}/{_REINTENTOS_ISLA}: {error}")
     raise OsmIslaFallida(pais, str(ultimo_error or "Overpass sin respuesta"))
+
+
+def obtener_elementos_osm_pais(pais: str) -> tuple[list[dict], int]:
+    """Elementos OSM crudos (fuertes + débiles) para dry-run u auditoría."""
+    iso = _iso_para_pais(pais)
+    ultimo: RuntimeError | None = None
+    llamadas = 0
+    for intento in range(_REINTENTOS_ISLA):
+        if intento > 0:
+            time.sleep(_ESPERA_ENTRE_REINTENTOS_ISLA[intento - 1])
+        try:
+            _pausa_entre_consultas()
+            elementos, _modo, llamadas = _fetch_elementos_territorio(iso, intento)
+            return _dedupe_elementos(elementos), llamadas
+        except RuntimeError as error:
+            ultimo = error
+    raise ultimo or RuntimeError(f"Overpass sin respuesta para {pais}")

@@ -1,0 +1,69 @@
+{
+  "fuertes": [
+    "cigar",
+    "cigars",
+    "cigarro",
+    "cigarros",
+    "cigare",
+    "cigares",
+    "sigaar",
+    "sigaren",
+    "humidor",
+    "tobacconist",
+    "tabaquería",
+    "tabaqueria",
+    "tabacalera",
+    "estanco premium",
+    "cigar lounge",
+    "cigar shop",
+    "cigar bar",
+    "cigar club"
+  ],
+  "debiles": [
+    "smoke",
+    "havana",
+    "habana",
+    "habano",
+    "tobacco",
+    "tabac",
+    "tabak",
+    "club",
+    "lounge",
+    "hangout"
+  ],
+  "excluir_dominio": [
+    "burger",
+    "hamburg",
+    "pizza",
+    "grill",
+    "vape",
+    "hookah",
+    "gasstation",
+    "pharmacy"
+  ],
+  "excluir_siempre": [
+    "cigarette",
+    "cigarettes",
+    "cigarrillo",
+    "cigarrillos",
+    "cigarillo",
+    "cigarillos",
+    "vape",
+    "vapor",
+    "e-cig",
+    "hookah",
+    "shisha",
+    "narguile",
+    "burger",
+    "pizza",
+    "grill",
+    "bbq",
+    "restaurant",
+    "pharmacy",
+    "supermarket",
+    "gas station"
+  ],
+  "notas": {
+    "liquor_sin_humidor": "Si el texto contiene liquor/liquor store y no humidor ni cigar, se excluye (regla en código)."
+  }
+}

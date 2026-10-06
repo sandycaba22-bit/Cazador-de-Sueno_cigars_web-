@@ -26,6 +26,7 @@ from b2b.fuente_leads import resolver_fuente_leads
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
 from b2b.buscar_filtros import clasificar_novedad_detalle
 from b2b.descartes import (
+    append_dudoso_diario,
     append_isla_en_archivo_diario,
     lineas_resumen_descartes,
     registrar_log_descartes_isla,
@@ -156,6 +157,7 @@ def encolar(
     *,
     cola_dir: Path | None = None,
     simulado: bool = False,
+    pais: str = "",
 ) -> tuple[list[Path], int, int, StatsCalidad, list[dict]]:
     inbox.mkdir(parents=True, exist_ok=True)
     cola = cola_dir or inbox.parent
@@ -197,6 +199,9 @@ def encolar(
             time.sleep(0.05)
 
     _procesar_bucket(aceptados, inbox, marcar=True)
+    for lead in dudosos:
+        if pais and not simulado:
+            append_dudoso_diario(pais, lead, lead.get("calidad_motivo") or "dudoso")
     _procesar_bucket(dudosos, dudoso_dir, marcar=False)
     _procesar_bucket(solo_tel, solo_tel_dir, marcar=False)
 
@@ -296,7 +301,7 @@ def prospectar_un_pais(
         1 for lead in leads if (lead.get("telefono") or lead.get("correo") or "").strip()
     )
     paths, con_contacto, web_enriquecidos, stats_cal, desc_calidad = encolar(
-        nuevos, inbox, reglas, cola_dir=cola_dir, simulado=simulado
+        nuevos, inbox, reglas, cola_dir=cola_dir, simulado=simulado, pais=pais
     )
     descartes = list(descartes) + list(desc_calidad)
     if not simulado:

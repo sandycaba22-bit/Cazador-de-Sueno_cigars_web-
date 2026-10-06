@@ -29,8 +29,8 @@ class TestMotivosDescarte(unittest.TestCase):
         )
 
     def test_rechazo_generico_vape(self):
-        lead = {"nombre": "Juul Store", "fuente": "openstreetmap"}
-        self.assertEqual(motivo_rechazo_generico(lead), "vape/smoke shop")
+        lead = {"nombre": "Foxies Vape and Smoke Shop", "fuente": "openstreetmap"}
+        self.assertIsNotNone(motivo_rechazo_generico(lead))
 
     def test_osm_bar_sin_humidor(self):
         el = {

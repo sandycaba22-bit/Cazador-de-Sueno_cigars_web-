@@ -43,6 +43,32 @@ def entrada_repetido(nombre: str, contra: str, fecha: str) -> dict[str, str]:
     }
 
 
+def append_dudoso_diario(pais: str, lead: dict, motivo: str) -> None:
+    path = state_file(f"dudosos_{fecha_archivo_dia()}.json")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+    else:
+        payload = {}
+    payload.setdefault("fecha", fecha_archivo_dia())
+    payload["actualizado"] = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+    islas = payload.setdefault("islas", {})
+    prev = islas.get(pais) or []
+    prev.append(
+        {
+            "nombre": (lead.get("nombre") or "—")[:120],
+            "motivo": motivo,
+            "web": (lead.get("web") or "")[:200],
+            "pais": pais,
+        }
+    )
+    islas[pais] = prev
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def append_isla_en_archivo_diario(
     pais: str,
     descartes: list[dict[str, Any]],

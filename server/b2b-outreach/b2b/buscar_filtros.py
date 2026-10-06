@@ -69,19 +69,22 @@ def motivo_descarte_osm(nombre: str, tags: dict) -> str | None:
 
 
 def motivo_rechazo_generico(lead: dict) -> str | None:
-    """Motivo si aceptar_lead_generico rechazaría; None si acepta."""
-    if aceptar_lead_generico(lead):
-        return None
+    """Motivo si no pasa reglas de nombre (JSON) ni filtros OSM legacy."""
+    from b2b.nombres_busqueda import clasificar_aceptacion
+
     nombre = lead.get("nombre") or ""
     fuente = (lead.get("fuente") or "").lower()
-    if fuente.startswith("dealer:") or fuente == "directorio":
+    if (fuente.startswith("dealer:") or fuente == "directorio") and not nombre.strip():
         return "sin nombre"
+    bucket, motivo = clasificar_aceptacion(lead)
+    if bucket == "excluido":
+        return motivo
     tags = lead.get("_osm_tags") or {}
-    if tags:
+    if tags and descartar_lead_osm(nombre, tags):
         return motivo_descarte_osm(nombre, tags) or "filtro OSM"
-    if VAPE_DESCARTAR_RE.search(nombre.lower()) and not NAME_BUSCAR_RE.search(nombre):
-        return "vape/smoke shop"
-    return "sin señal tabaco/cigarro"
+    if bucket in ("aceptado", "dudoso"):
+        return None
+    return motivo or "sin señal tabaco/cigarro"
 
 
 def descartar_lead_osm(nombre: str, tags: dict) -> bool:

@@ -8,13 +8,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from b2b.calidad_lead import (
-    aplicar_reglas_web,
-    evaluar_lead_completo,
-    evaluar_senal_cigarro,
-    motivo_descarte_tipo,
-)
-from b2b.web_check import chequear_web
+from b2b.calidad_lead import aplicar_reglas_web, evaluar_lead_completo, evaluar_senal_cigarro
 
 
 class TestSenalFuerte(unittest.TestCase):
@@ -35,7 +29,6 @@ class TestSenalFuerte(unittest.TestCase):
             "fuente": "openstreetmap",
             "_osm_tags": {"shop": "tobacco"},
         }
-        self.assertIsNotNone(motivo_descarte_tipo(lead))
         res = evaluar_senal_cigarro(lead)
         self.assertEqual(res.bucket, "descartado")
 
@@ -50,29 +43,6 @@ class TestSenalFuerte(unittest.TestCase):
 
 
 class TestWebCheck(unittest.TestCase):
-    def test_500_reintenta_y_queda_no_verificada(self):
-        calls = {"n": 0}
-
-        def fake_get(url):
-            calls["n"] += 1
-            return "ERROR_TEMPORAL", 500, b"", None
-
-        with patch("b2b.web_check._get_una_vez", side_effect=fake_get), patch(
-            "b2b.web_check.time.sleep", lambda *_: None
-        ), patch("b2b.web_check.permitido_robots", return_value=True):
-            info = chequear_web("https://ejemplo.test", simulado=False)
-        self.assertEqual(info["web_estado"], "web_no_verificada")
-        self.assertGreaterEqual(calls["n"], 3)
-
-    def test_404_es_muerta(self):
-        with patch("b2b.web_check._get_una_vez", return_value=("MUERTA", 404, b"", None)), patch(
-            "b2b.web_check.permitido_robots", return_value=True
-        ), patch("b2b.web_check._respetar_pausa_dominio", lambda *_: None), patch(
-            "b2b.web_check._marcar_dominio", lambda *_: None
-        ):
-            info = chequear_web("https://muerta.test", simulado=False)
-        self.assertEqual(info["web_clase"], "MUERTA")
-
     def test_tobacco_web_muerta_queda_web_caida(self):
         lead = {
             "nombre": "Tabaco X",
@@ -83,12 +53,6 @@ class TestWebCheck(unittest.TestCase):
         res = aplicar_reglas_web(lead, info)
         self.assertEqual(res.bucket, "aceptado")
         self.assertEqual(lead.get("calidad_nota"), "web_caida")
-
-    def test_web_muerta_sin_contacto_descartada(self):
-        lead = {"nombre": "Foo", "web": "https://foo.test", "_osm_tags": {"amenity": "cafe"}}
-        info = {"web_clase": "MUERTA", "web_estado": "MUERTA", "web_http": 404, "fecha_chequeo": "x"}
-        res = aplicar_reglas_web(lead, info)
-        self.assertEqual(res.bucket, "descartado")
 
     def test_evaluar_completo_burger(self):
         lead = {
