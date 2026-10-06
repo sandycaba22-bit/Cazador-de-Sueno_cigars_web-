@@ -41,24 +41,32 @@ def avisar_isla_encontradas(
     simulado: bool = False,
     descartes: list | None = None,
     repetidos_detalle: list | None = None,
+    stats_calidad: dict | None = None,
 ) -> None:
-    osm = int(fuente_stats.get("osm", 0))
-    dealers = int(fuente_stats.get("dealers", 0))
-    web = int(fuente_stats.get("directorio", 0)) + int(fuente_stats.get("web_enriquecidos", 0))
+    cal = stats_calidad or fuente_stats.get("calidad") or {}
+    acept = int(cal.get("aceptados", 0))
+    dud = int(cal.get("dudosos", 0))
+    wc = int(cal.get("web_caida", 0))
+    dw = int(cal.get("descartados_web", 0))
+    dt = int(cal.get("descartados_tipo", 0))
     extra_desc = lineas_resumen_descartes(descartes or [], repetidos_detalle or [])
     tiene_detalle = bool(extra_desc)
     if encontrados <= 0 and nuevos <= 0 and not _aviso_cero_habilitado() and not tiene_detalle:
         return
+    resumen_cal = (
+        f"aceptados {acept} · dudosos {dud} · web_caida {wc} · "
+        f"desc web {dw} · desc tipo {dt}"
+    )
     if encontrados <= 0 and nuevos <= 0 and _aviso_cero_habilitado():
         lineas = [
-            f"📍 {isla}: 0 encontrados (OSM {osm}, dealers {dealers}, web {web}) · "
-            f"0 nuevos · 0 repetidos · 0 con contacto",
+            f"📍 {isla}: 0 encontrados · {resumen_cal} · "
+            f"0 nuevos · {repetidos} repetidos · {con_contacto} con contacto",
         ]
         lineas.extend(extra_desc)
         notificar_buscar("\n".join(lineas), simulado=simulado)
         return
     lineas = [
-        f"📍 {isla}: {encontrados} encontrados (OSM {osm}, dealers {dealers}, web {web}) · "
+        f"📍 {isla}: {encontrados} encontrados · {resumen_cal} · "
         f"{nuevos} nuevos · {repetidos} repetidos · {con_contacto} con contacto",
     ]
     lineas.extend(extra_desc)

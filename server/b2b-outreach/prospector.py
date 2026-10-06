@@ -31,6 +31,7 @@ from b2b.descartes import (
     registrar_log_descartes_isla,
 )
 from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
+from b2b.calidad_lead import StatsCalidad, clasificar_lote
 from b2b.website import analizar_sitio_prospecto, web_confiable_para_idioma
 
 SLUG_RE = __import__("re").compile(r"[^a-z0-9]+")
@@ -128,6 +129,12 @@ def lead_a_inbox(lead: dict) -> dict:
         "puntaje_detalle": lead.get("puntaje_detalle"),
         "rating": lead.get("rating"),
         "user_rating_count": lead.get("user_rating_count"),
+        "web_estado": lead.get("web_estado") or "",
+        "web_http": lead.get("web_http"),
+        "fecha_chequeo": lead.get("fecha_chequeo") or "",
+        "calidad_bucket": lead.get("calidad_bucket") or "aceptado",
+        "calidad_motivo": lead.get("calidad_motivo") or "",
+        "calidad_nota": lead.get("calidad_nota") or "",
     }
 
 
@@ -135,30 +142,65 @@ def _payload_tiene_contacto(payload: dict) -> bool:
     return bool((payload.get("telefono") or "").strip() or (payload.get("correo") or "").strip())
 
 
-def encolar(leads: list[dict], inbox: Path, reglas: dict) -> tuple[list[Path], int, int]:
+def _escribir_lead_cola(carpeta: Path, payload: dict) -> Path:
+    carpeta.mkdir(parents=True, exist_ok=True)
+    path = carpeta / f"{int(time.time())}-{_slug(payload['nombre'])[:40]}.json"
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return path
+
+
+def encolar(
+    leads: list[dict],
+    inbox: Path,
+    reglas: dict,
+    *,
+    cola_dir: Path | None = None,
+    simulado: bool = False,
+) -> tuple[list[Path], int, int, StatsCalidad, list[dict]]:
     inbox.mkdir(parents=True, exist_ok=True)
+    cola = cola_dir or inbox.parent
+    dudoso_dir = cola / "dudoso"
+    solo_tel_dir = cola / "solo_telefono"
+
+    if simulado:
+        aceptados = list(leads)
+        dudosos = []
+        solo_tel = []
+        desc_calidad = []
+        stats_cal = StatsCalidad(aceptados=len(leads))
+    else:
+        aceptados, dudosos, solo_tel, desc_calidad, stats_cal = clasificar_lote(leads)
+
     escritos: list[Path] = []
     con_contacto = 0
     web_enriquecidos = 0
-    for lead in leads:
-        if en_lista_no_contactar(lead.get("nombre", ""), lead.get("web", "")):
-            continue
-        if ya_visto(lead.get("place_id", ""), lead.get("web", "")):
-            continue
-        enriquecido = enriquecer_lead(dict(lead), reglas)
-        if enriquecido.get("web_enriquecido"):
-            web_enriquecidos += 1
-        if not califica_lead(enriquecido):
-            continue
-        payload = lead_a_inbox(enriquecido)
-        path = inbox / f"{int(time.time())}-{_slug(payload['nombre'])[:40]}.json"
-        path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
-        escritos.append(path)
-        if _payload_tiene_contacto(payload):
-            con_contacto += 1
-        time.sleep(0.05)
-    return escritos, con_contacto, web_enriquecidos
+
+    def _procesar_bucket(items: list[dict], carpeta: Path, marcar: bool) -> None:
+        nonlocal con_contacto, web_enriquecidos
+        for lead in items:
+            if en_lista_no_contactar(lead.get("nombre", ""), lead.get("web", "")):
+                continue
+            if marcar and ya_visto(lead.get("place_id", ""), lead.get("web", "")):
+                continue
+            enriquecido = enriquecer_lead(dict(lead), reglas)
+            if enriquecido.get("web_enriquecido"):
+                web_enriquecidos += 1
+            if carpeta == inbox and not califica_lead(enriquecido):
+                continue
+            payload = lead_a_inbox(enriquecido)
+            path = _escribir_lead_cola(carpeta, payload)
+            if marcar:
+                marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
+                escritos.append(path)
+            if _payload_tiene_contacto(payload):
+                con_contacto += 1
+            time.sleep(0.05)
+
+    _procesar_bucket(aceptados, inbox, marcar=True)
+    _procesar_bucket(dudosos, dudoso_dir, marcar=False)
+    _procesar_bucket(solo_tel, solo_tel_dir, marcar=False)
+
+    return escritos, con_contacto, web_enriquecidos, stats_cal, desc_calidad
 
 
 def _tipos_busqueda() -> list[str]:
@@ -250,16 +292,26 @@ def prospectar_un_pais(
     cola_dir = inbox.parent
     nuevos, repetidos, repetidos_detalle = clasificar_novedad_detalle(leads, cola_dir)
     descartes = list((fuente_stats or {}).get("descartes") or [])
-    if not simulado:
-        append_isla_en_archivo_diario(pais, descartes, repetidos_detalle)
-        registrar_log_descartes_isla(pais, descartes, repetidos_detalle)
     con_contacto_encontrados = sum(
         1 for lead in leads if (lead.get("telefono") or lead.get("correo") or "").strip()
     )
-    paths, con_contacto, web_enriquecidos = encolar(nuevos, inbox, reglas)
+    paths, con_contacto, web_enriquecidos, stats_cal, desc_calidad = encolar(
+        nuevos, inbox, reglas, cola_dir=cola_dir, simulado=simulado
+    )
+    descartes = list(descartes) + list(desc_calidad)
+    if not simulado:
+        append_isla_en_archivo_diario(pais, descartes, repetidos_detalle)
+        registrar_log_descartes_isla(pais, descartes, repetidos_detalle)
     fuente_stats = dict(fuente_stats or {})
     fuente_stats["web_enriquecidos"] = web_enriquecidos
     fuente_stats["descartes"] = descartes
+    fuente_stats["calidad"] = {
+        "aceptados": stats_cal.aceptados,
+        "dudosos": stats_cal.dudosos,
+        "web_caida": stats_cal.web_caida,
+        "descartados_web": stats_cal.descartados_web,
+        "descartados_tipo": stats_cal.descartados_tipo,
+    }
     registrar_busqueda(pais, llamadas, len(paths), simulado, fuente=fuente)
     return {
         "pais": pais,
@@ -272,6 +324,7 @@ def prospectar_un_pais(
         "descartes": descartes,
         "repetidos_detalle": repetidos_detalle,
         "fuente_stats": fuente_stats,
+        "stats_calidad": fuente_stats["calidad"],
         "leads": len(leads),
         "llamadas": llamadas,
         "fuente": fuente,
@@ -295,6 +348,7 @@ def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
         simulado=simulado,
         descartes=stats.get("descartes") or [],
         repetidos_detalle=stats.get("repetidos_detalle") or [],
+        stats_calidad=stats.get("stats_calidad") or (stats.get("fuente_stats") or {}).get("calidad") or {},
     )
 
 
