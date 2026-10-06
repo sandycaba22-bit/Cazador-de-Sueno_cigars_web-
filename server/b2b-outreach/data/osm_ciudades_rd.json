@@ -1,0 +1,17 @@
+{
+  "nota": "Búsqueda OSM por radio (km) además del país completo DO. Barahona, Las Terrenas, turismo norte, etc.",
+  "ciudades": [
+    { "nombre": "Las Terrenas", "lat": 19.3119, "lon": -69.5428, "radio_km": 14 },
+    { "nombre": "Samaná", "lat": 19.2058, "lon": -69.3364, "radio_km": 16 },
+    { "nombre": "Barahona", "lat": 18.2085, "lon": -71.1008, "radio_km": 18 },
+    { "nombre": "Puerto Plata", "lat": 19.7934, "lon": -70.6884, "radio_km": 18 },
+    { "nombre": "Sosúa", "lat": 19.7522, "lon": -70.5171, "radio_km": 10 },
+    { "nombre": "Cabarete", "lat": 19.7495, "lon": -70.4082, "radio_km": 12 },
+    { "nombre": "Santiago", "lat": 19.4517, "lon": -70.6973, "radio_km": 22 },
+    { "nombre": "Santo Domingo", "lat": 18.4861, "lon": -69.9312, "radio_km": 28 },
+    { "nombre": "Punta Cana", "lat": 18.5819, "lon": -68.4045, "radio_km": 22 },
+    { "nombre": "La Romana", "lat": 18.4273, "lon": -68.9728, "radio_km": 16 },
+    { "nombre": "Jarabacoa", "lat": 19.1167, "lon": -70.6333, "radio_km": 14 },
+    { "nombre": "Bávaro", "lat": 18.7178, "lon": -68.4416, "radio_km": 16 }
+  ]
+}

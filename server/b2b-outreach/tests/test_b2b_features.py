@@ -43,7 +43,8 @@ class TestPrioridadInicial(unittest.TestCase):
         self.assertEqual(islas[0], "Aruba")
         self.assertIn("Sint Maarten", islas)
         self.assertNotIn("Nigeria", islas)
-        self.assertNotIn("Dominican Republic", islas)
+        self.assertIn("Dominican Republic", islas)
+        self.assertIn("Barbados", islas)
 
     def test_tipos_incluyen_casino(self):
         tipos = cargar_reglas()["orden_tipos_negocio"]

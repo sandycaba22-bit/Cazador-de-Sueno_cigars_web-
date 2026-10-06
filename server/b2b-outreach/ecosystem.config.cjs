@@ -23,6 +23,7 @@ module.exports = {
         FUENTE_LEADS: "osm",
         B2B_ZONA_BUSQUEDA: "caribe",
         OSM_SEGUNDA_PASADA: "0",
+        B2B_OMITIR_MERCADO_LOCAL: "0",
       },
     },
     {
@@ -38,7 +39,9 @@ module.exports = {
         FUENTE_LEADS: "osm",
         B2B_ZONA_BUSQUEDA: "caribe",
         OSM_SEGUNDA_PASADA: "0",
-        B2B_MAX_PAISES_POR_BUSCAR: "8",
+        B2B_MAX_PAISES_POR_BUSCAR: "18",
+        B2B_OMITIR_MERCADO_LOCAL: "0",
+        B2B_RD_CIUDADES_MAX: "8",
       },
     },
   ],

@@ -236,9 +236,9 @@ def _max_paises_por_pasada() -> int:
     import os
 
     try:
-        return max(1, int(os.getenv("B2B_MAX_PAISES_POR_BUSCAR", "8") or "8"))
+        return max(1, int(os.getenv("B2B_MAX_PAISES_POR_BUSCAR", "18") or "18"))
     except ValueError:
-        return 8
+        return 18
 
 
 def prospectar_prioridad_inicial(

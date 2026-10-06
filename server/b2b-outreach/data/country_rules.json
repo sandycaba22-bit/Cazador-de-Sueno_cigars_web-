@@ -19,9 +19,9 @@
     "Martinique",
     "French Guiana",
     "Haiti",
+    "Dominican Republic",
     "Panama",
-    "Costa Rica",
-    "Dominican Republic"
+    "Costa Rica"
   ],
   "prioridad_africa_europa": [
     "Mauritius",
@@ -54,9 +54,9 @@
     "Martinique",
     "French Guiana",
     "Haiti",
+    "Dominican Republic",
     "Panama",
     "Costa Rica",
-    "Dominican Republic",
     "Mauritius",
     "Seychelles",
     "Malta",
@@ -348,13 +348,16 @@
     },
     {
       "pais": "Dominican Republic",
-      "territorio": "Local",
+      "territorio": "República Dominicana (nacional + zonas turísticas)",
       "idiomas": ["es"],
       "dificultad": 1,
       "estado": "preliminar",
       "verificado_el": null,
       "licencia_comprador": "RNC y facturación local del comprador.",
-      "puntos_clave": ["Mercado doméstico; no competir con canal export principal en primer contacto B2B export."],
+      "puntos_clave": [
+        "Búsqueda OSM: país completo + ciudades (Las Terrenas, Barahona, Puerto Plata, Bávaro, Santiago, etc.).",
+        "Retail turístico y distribuidores; confirmar canal export vs mostrador local."
+      ],
       "fuentes": [
         {
           "url": "https://www.dgii.gov.do/",

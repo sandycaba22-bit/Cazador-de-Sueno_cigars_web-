@@ -131,7 +131,7 @@ def _nombres_prioridad_busqueda(zona: str | None = None) -> list[str]:
 
 
 def _incluir_en_busqueda(entry: dict) -> bool:
-    if (os.getenv("B2B_OMITIR_MERCADO_LOCAL", "1") or "1").strip().lower() in (
+    if (os.getenv("B2B_OMITIR_MERCADO_LOCAL", "0") or "0").strip().lower() in (
         "0",
         "false",
         "no",

@@ -87,6 +87,14 @@ def _clasificar(nombre: str, tags: dict) -> str:
     return "tienda"
 
 
+def _direccion_lead(tags: dict) -> str:
+    base = _tag(tags, "addr:full", "contact:street", "addr:street", "addr:city")
+    zona = (tags.get("_zona_rd") or "").strip()
+    if zona and zona.lower() not in base.lower():
+        return f"{base}, {zona}, RD".strip(", ") if base else f"{zona}, RD"
+    return base
+
+
 def _tag(tags: dict, *keys: str) -> str:
     for key in keys:
         val = tags.get(key)
@@ -122,17 +130,38 @@ def _elemento_a_lead(el: dict, pais: str) -> dict | None:
         "pais": pais,
         "web": web,
         "telefono": _tag(tags, "phone", "contact:phone", "contact:mobile"),
-        "direccion": _tag(
-            tags,
-            "addr:full",
-            "contact:street",
-            "addr:street",
-        ),
+        "direccion": _direccion_lead(tags),
         "place_id": place_id,
         "tipo_negocio": _clasificar(nombre, tags),
         "fuente": "openstreetmap",
         "osm_shop_tobacco": tags.get("shop") == "tobacco",
     }
+
+
+def _max_ciudades_rd() -> int:
+    try:
+        return max(0, int(os.getenv("B2B_RD_CIUDADES_MAX", "8") or "8"))
+    except ValueError:
+        return 8
+
+
+def _ciudades_rd() -> list[dict]:
+    path = data_file("osm_ciudades_rd.json")
+    if not path.is_file():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return list(data.get("ciudades") or [])
+
+
+def _query_tobacco_around(lat: float, lon: float, radio_m: int) -> str:
+    return f"""
+[out:json][timeout:25];
+(
+  node["shop"="tobacco"](around:{radio_m},{lat},{lon});
+  way["shop"="tobacco"](around:{radio_m},{lat},{lon});
+);
+out center 30 tags;
+""".strip()
 
 
 def _query_tobacco(iso: str) -> str:
@@ -231,6 +260,33 @@ def buscar_en_pais_osm(
             elementos = _dedupe_elementos(elementos + extra)
         except RuntimeError as error:
             registrar_osm_fallo(pais, f"pasada2: {error}")
+
+    if pais == "Dominican Republic":
+        for ciudad in _ciudades_rd()[: _max_ciudades_rd()]:
+            try:
+                radio_km = float(ciudad.get("radio_km") or 12)
+            except (TypeError, ValueError):
+                radio_km = 12.0
+            radio_m = int(radio_km * 1000)
+            try:
+                lat = float(ciudad["lat"])
+                lon = float(ciudad["lon"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            try:
+                _pausa_entre_consultas()
+                extra = _fetch_overpass(_query_tobacco_around(lat, lon, radio_m))
+                llamadas += 1
+                for el in extra:
+                    tags = el.get("tags") or {}
+                    if not tags.get("_zona_rd"):
+                        tags = dict(tags)
+                        tags["_zona_rd"] = str(ciudad.get("nombre") or "")
+                        el = {**el, "tags": tags}
+                elementos = _dedupe_elementos(elementos + extra)
+            except RuntimeError as error:
+                registrar_osm_fallo(f"RD:{ciudad.get('nombre', '?')}", str(error))
+
     orden_tipo = {t: i for i, t in enumerate(tipos)}
     candidatos: list[dict] = []
     vistos: set[str] = set()
