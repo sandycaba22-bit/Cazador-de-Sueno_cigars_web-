@@ -40,13 +40,15 @@ def registrar_busqueda(
     llamadas_api: int,
     prospectos_nuevos: int,
     simulado: bool,
+    fuente: str = "",
 ) -> Path:
-    return registrar_evento(
-        {
-            "evento": "busqueda_pais",
-            "pais": _sanitizar(pais),
-            "llamadas_api": llamadas_api,
-            "prospectos_nuevos": prospectos_nuevos,
-            "modo": "simulado" if simulado else "live",
-        }
-    )
+    payload: dict = {
+        "evento": "busqueda_pais",
+        "pais": _sanitizar(pais),
+        "llamadas_api": llamadas_api,
+        "prospectos_nuevos": prospectos_nuevos,
+        "modo": "simulado" if simulado else "live",
+    }
+    if fuente:
+        payload["fuente"] = fuente
+    return registrar_evento(payload)

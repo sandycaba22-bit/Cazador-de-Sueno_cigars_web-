@@ -16,6 +16,7 @@ from b2b.idioma import idioma_para_lead
 from b2b.lead_score import califica_lead, puntuar_lead
 from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
 from b2b.logging_ops import registrar_busqueda, registrar_presupuesto_agotado
+from b2b.fuente_leads import resolver_fuente_leads
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
 from b2b.website import analizar_sitio_prospecto, web_confiable_para_idioma
 
@@ -139,12 +140,20 @@ def prospectar_un_pais(
     simulado: bool = False,
     solo_listar: bool = False,
     tipo_filtro: str = "",
+    fuente: str = "",
 ) -> dict:
     pais = reglas["pais"]
     tipos = _tipos_busqueda()
+    if not fuente:
+        fuente = "simulado" if simulado else resolver_fuente_leads()
     try:
         leads, llamadas = buscar_en_pais(
-            pais, tipos, max_leads, simulado=simulado, tipo_filtro=tipo_filtro
+            pais,
+            tipos,
+            max_leads,
+            simulado=simulado,
+            tipo_filtro=tipo_filtro,
+            fuente=fuente,
         )
     except PresupuestoPlacesAgotado:
         registrar_presupuesto_agotado()
@@ -154,16 +163,29 @@ def prospectar_un_pais(
             "leads": 0,
             "llamadas": 0,
             "presupuesto_agotado": True,
+            "fuente": fuente,
         }
     if solo_listar:
         for lead in leads:
             print(json.dumps(enriquecer_lead(dict(lead), reglas), ensure_ascii=False))
-        registrar_busqueda(pais, llamadas, len(leads), simulado)
-        return {"pais": pais, "encolados": 0, "leads": len(leads), "llamadas": llamadas}
+        registrar_busqueda(pais, llamadas, len(leads), simulado, fuente=fuente)
+        return {
+            "pais": pais,
+            "encolados": 0,
+            "leads": len(leads),
+            "llamadas": llamadas,
+            "fuente": fuente,
+        }
 
     paths = encolar(leads, inbox, reglas)
-    registrar_busqueda(pais, llamadas, len(paths), simulado)
-    return {"pais": pais, "encolados": len(paths), "leads": len(leads), "llamadas": llamadas}
+    registrar_busqueda(pais, llamadas, len(paths), simulado, fuente=fuente)
+    return {
+        "pais": pais,
+        "encolados": len(paths),
+        "leads": len(leads),
+        "llamadas": llamadas,
+        "fuente": fuente,
+    }
 
 
 def prospectar(
@@ -174,13 +196,17 @@ def prospectar(
     solo_listar: bool = False,
     tipo_filtro: str = "",
 ) -> dict:
+    fuente = "simulado" if simulado else resolver_fuente_leads()
     if pais_cli and pais_cli.strip():
         reglas = resolver_pais_objetivo(pais_cli)
-        return prospectar_un_pais(
-            reglas, max_leads, inbox, simulado, solo_listar, tipo_filtro
+        out = prospectar_un_pais(
+            reglas, max_leads, inbox, simulado, solo_listar, tipo_filtro, fuente=fuente
         )
+        if "fuente" not in out:
+            out["fuente"] = fuente
+        return out
     return prospectar_prioridad_inicial(
-        max_leads, inbox, simulado, solo_listar, tipo_filtro
+        max_leads, inbox, simulado, solo_listar, tipo_filtro, fuente=fuente
     )
 
 
@@ -190,22 +216,39 @@ def prospectar_prioridad_inicial(
     simulado: bool = False,
     solo_listar: bool = False,
     tipo_filtro: str = "",
+    fuente: str = "",
 ) -> dict:
     paises = paises_prioridad_inicial()
     if not paises:
         raise ValueError("prioridad_inicial vacía en country_rules.json")
+    if not fuente:
+        fuente = "simulado" if simulado else resolver_fuente_leads()
     total_encolados = 0
     total_leads = 0
     total_llamadas = 0
     presupuesto_agotado = False
+    paises_usados = 0
     for reglas in paises:
-        if not simulado and not puede_llamar():
+        if solo_listar:
+            restante = max_leads
+        else:
+            restante = max(0, max_leads - total_encolados)
+            if restante <= 0:
+                break
+        if fuente == "google" and not simulado and not puede_llamar():
             registrar_presupuesto_agotado()
             presupuesto_agotado = True
             break
         stats = prospectar_un_pais(
-            reglas, max_leads, inbox, simulado, solo_listar, tipo_filtro
+            reglas,
+            restante,
+            inbox,
+            simulado,
+            solo_listar,
+            tipo_filtro,
+            fuente=fuente,
         )
+        paises_usados += 1
         total_encolados += int(stats.get("encolados", 0))
         total_leads += int(stats.get("leads", 0))
         total_llamadas += int(stats.get("llamadas", 0))
@@ -218,5 +261,6 @@ def prospectar_prioridad_inicial(
         "leads": total_leads,
         "llamadas": total_llamadas,
         "presupuesto_agotado": presupuesto_agotado,
-        "paises_recorridos": len(paises),
+        "paises_recorridos": paises_usados,
+        "fuente": fuente,
     }

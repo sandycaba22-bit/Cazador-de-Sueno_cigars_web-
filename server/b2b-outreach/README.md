@@ -2,7 +2,7 @@
 
 El script recibe un prospecto que ya tienes y te deja en Telegram el borrador listo para enviar. El foco comercial es abrir con **El Sultán** y **Ligero 007** ante distribuidores, lounges y tiendas de puro premium.
 
-Con `--buscar`, el bot **sí** puede localizar negocios B2B públicos vía **Google Places** (API oficial), respetar `robots.txt` al leer webs, encolar JSON en `inbox/` y avisarte por Telegram. **Nunca** escribe al prospecto: el mensaje lo envías tú.
+Con `--buscar`, el bot localiza negocios B2B públicos **sin pagar Google** usando **OpenStreetMap** (Overpass, datos abiertos). Si más adelante pones `GOOGLE_PLACES_API_KEY`, `FUENTE_LEADS=auto` puede usar Google. Respeta `robots.txt` al leer webs, encola JSON en `inbox/` y avisa por Telegram. **Nunca** escribe al prospecto: el mensaje lo envías tú.
 
 Al leer la web del prospecto, el idioma del borrador se elige así: **1)** idioma guardado en el lead, **2)** señales del sitio (`html lang`, meta, texto visible), **3)** reglas por país en `country_rules.json`. El catálogo PDF sigue el idioma del borrador (ES/EN/FR/PT).
 
@@ -15,7 +15,7 @@ python build_wholesale_catalog.py
 
 Sube `CazadorDeSuenos_Wholesale_{ES,EN,FR,PT}.pdf` a `https://www.cazadordesuenocigar.com/catalogo/`.
 
-**Google Places:** opcional. Sin `GOOGLE_PLACES_API_KEY` el bot usa fixtures locales (gratis) para probar cola y Telegram; no hace falta pagar API para operar borradores manuales o leads que tú encolas.
+**Buscador:** por defecto **OpenStreetMap** (gratis). `--simulado` es solo para pruebas con fixtures. Objetivo: **`--buscar --limite 9`** (nueve prospectos por pasada). Google Places es opcional cuando quieras pagar API.
 
 Un prospecto del Caribe queda marcado como prioridad alta (ruta corta desde Santiago). El resto entra como mercado internacional. En los dos casos la importación la confirma el comprador en su país. El script no tramita aduana ni salta controles.
 
@@ -65,22 +65,23 @@ python telegram_bot.py --revisar-reglas Martinique
 
 ## Buscador global (local)
 
-Sin gastar cuota de Google (fixture):
+Negocios reales vía OSM (sin token):
 
 ```bash
-python telegram_bot.py --buscar Martinique --limite 3 --dry-run --solo-listar
-python telegram_bot.py --buscar Martinique --limite 3 --dry-run
+python telegram_bot.py --buscar Senegal --limite 9 --solo-listar
+python telegram_bot.py --buscar --limite 9
 python telegram_bot.py --vigilar --una-pasada --imprimir
 ```
 
-Con API real (requiere `GOOGLE_PLACES_API_KEY` en `.env`):
+Solo pruebas con datos falsos:
 
 ```bash
-python telegram_bot.py --buscar Guadeloupe --limite 5
-python telegram_bot.py --vigilar --una-pasada
+python telegram_bot.py --buscar Martinique --limite 3 --simulado --solo-listar
 ```
 
-Países ordenados por `data/country_rules.json` (dificultad + `prioridad_inicial`). Tope diario: `MAX_PLACES_CALLS_DIA`.
+Google (opcional, de pago): `GOOGLE_PLACES_API_KEY` + `FUENTE_LEADS=google`.
+
+Sin `--pais`, recorre `prioridad_inicial` hasta llenar el límite (p. ej. 9/día). Códigos país OSM: `data/osm_iso3166.json`.
 
 Lista de baja: `data/no_contactar.json`. No se regeneran borradores para esos negocios.
 
@@ -142,6 +143,19 @@ sudo systemctl status cds-b2b-outreach.service
 ```
 
 Los logs: `journalctl -u cds-b2b-outreach.service -f`
+
+Buscador diario (9 prospectos, OSM gratis):
+
+```bash
+sudo cp /var/www/html/server/b2b-outreach/cds-b2b-buscar.service /etc/systemd/system/
+sudo cp /var/www/html/server/b2b-outreach/cds-b2b-buscar.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now cds-b2b-buscar.timer
+sudo systemctl start cds-b2b-buscar.service   # prueba manual
+journalctl -u cds-b2b-buscar.service -n 30
+```
+
+En `/etc/cazador-de-suenos/b2b-outreach.env` añade `FUENTE_LEADS=osm` (no hace falta Google).
 
 ## PM2
 

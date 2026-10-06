@@ -169,9 +169,14 @@ def buscar_en_pais(
     limite: int,
     simulado: bool = False,
     tipo_filtro: str = "",
+    fuente: str = "",
 ) -> tuple[list[dict], int]:
     if tipo_filtro:
         tipos = [tipo_filtro]
+    if not simulado and fuente == "osm":
+        from b2b.osm_places import buscar_en_pais_osm
+
+        return buscar_en_pais_osm(pais, tipos, limite, tipo_filtro=tipo_filtro)
     if simulado:
         path = _fixture_path(pais)
         if not path.is_file():

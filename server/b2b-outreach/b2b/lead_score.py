@@ -56,6 +56,13 @@ def puntuar_lead(lead: dict) -> tuple[int, dict]:
     if rating_f >= 4.0:
         detalle["valoracion"] = 1
 
+    fuente = (lead.get("fuente") or "").lower()
+    if fuente in ("openstreetmap", "osm"):
+        if (lead.get("telefono") or "").strip():
+            detalle["contacto_osm"] = 2
+        elif lead.get("osm_shop_tobacco"):
+            detalle["tabaco_osm"] = 2
+
     total = sum(detalle.values())
     return total, detalle
 

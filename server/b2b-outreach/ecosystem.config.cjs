@@ -20,6 +20,20 @@ module.exports = {
       env: {
         B2B_QUEUE_DIR: "/var/www/html/server/b2b-outreach/cola",
         B2B_POLL_SECONDS: "15",
+        FUENTE_LEADS: "osm",
+      },
+    },
+    {
+      name: "cds-b2b-buscar",
+      script: "/var/www/html/server/b2b-outreach/telegram_bot.py",
+      interpreter: "/var/www/html/server/b2b-outreach/.venv/bin/python",
+      args: "--buscar --limite 9",
+      cwd: "/var/www/html/server/b2b-outreach",
+      autorestart: false,
+      cron_restart: "0 13 * * *",
+      env: {
+        B2B_QUEUE_DIR: "/var/www/html/server/b2b-outreach/cola",
+        FUENTE_LEADS: "osm",
       },
     },
   ],

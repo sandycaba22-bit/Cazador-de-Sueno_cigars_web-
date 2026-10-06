@@ -822,22 +822,22 @@ def construir_parser():
     parser.add_argument(
         "--buscar",
         action="store_true",
-        help="Busca negocios B2B vía Google Places y encola inbox/",
+        help="Busca negocios B2B (OpenStreetMap gratis o Google Places) y encola inbox/",
     )
     parser.add_argument(
         "--max",
         "--limite",
         dest="max_leads",
         type=int,
-        default=15,
-        help="Máximo de negocios por pasada de --buscar",
+        default=9,
+        help="Máximo de prospectos por pasada de --buscar (9/día por defecto)",
     )
     parser.add_argument(
         "--simulado",
         "--dry-run",
         dest="simulado",
         action="store_true",
-        help="Usa fixtures locales sin llamar a Google",
+        help="Solo pruebas: fixtures locales, sin OSM ni Google",
     )
     parser.add_argument(
         "--tipo",
@@ -896,9 +896,19 @@ def main(argv=None):
         cola = resolver_cola(args.cola)
         inbox = cola / "inbox"
         pais = (args.pais or "").strip() or None
-        simulado = args.simulado or not os.getenv("GOOGLE_PLACES_API_KEY", "").strip()
-        if simulado and not args.simulado:
-            print("GOOGLE_PLACES_API_KEY vacía: modo simulado.", file=sys.stderr)
+        from b2b.fuente_leads import resolver_fuente_leads
+
+        simulado = args.simulado
+        if not simulado:
+            fuente = resolver_fuente_leads()
+            if fuente == "osm":
+                print(
+                    "Buscador: OpenStreetMap (gratis, sin token). "
+                    "Usa --simulado solo para pruebas locales.",
+                    file=sys.stderr,
+                )
+            elif fuente == "google":
+                print("Buscador: Google Places (API de pago).", file=sys.stderr)
         stats = prospectar(
             pais,
             max(1, args.max_leads),
@@ -908,9 +918,11 @@ def main(argv=None):
             tipo_filtro=args.tipo or "",
         )
         if not args.solo_listar:
+            fuente_msg = stats.get("fuente", "")
+            extra = f", fuente: {fuente_msg}" if fuente_msg else ""
             print(
                 f"Encolados {stats['encolados']} prospecto(s) en {inbox} "
-                f"({stats['pais']}, llamadas API: {stats['llamadas']})"
+                f"({stats['pais']}, consultas: {stats['llamadas']}{extra})"
             )
         if stats.get("presupuesto_agotado"):
             print(

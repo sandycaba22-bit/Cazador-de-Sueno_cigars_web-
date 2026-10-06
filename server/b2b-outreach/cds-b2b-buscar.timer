@@ -1,0 +1,10 @@
+[Unit]
+Description=Ejecutar buscador B2B OSM una vez al día (9 prospectos)
+
+[Timer]
+OnCalendar=*-*-* 13:00:00
+Persistent=true
+RandomizedDelaySec=900
+
+[Install]
+WantedBy=timers.target
