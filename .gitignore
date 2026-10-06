@@ -49,6 +49,8 @@ server/b2b-outreach/logs/
 server/b2b-outreach/.venv/
 server/b2b-outreach/knowledge/resumen_entrenamiento.md
 server/b2b-outreach/data/propuestas/
+server/b2b-outreach/data/cache_osm_cuadricula/
+server/b2b-outreach/data/telegram_control.json
 __pycache__/
 *.py[cod]
 
