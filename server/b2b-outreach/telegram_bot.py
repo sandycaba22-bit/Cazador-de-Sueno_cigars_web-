@@ -684,8 +684,8 @@ def resolver_cola(explicita=""):
     configured = os.getenv("B2B_QUEUE_DIR", "").strip()
     if configured:
         return Path(configured).expanduser()
-    if str(HERE).replace("\\", "/").startswith("/var/www/"):
-        return Path("/var/lib/cazador-de-suenos/b2b-outreach")
+    # PM2 en /var/www/html: cola junto al script (ecosystem.config.cjs).
+    # systemd usa B2B_QUEUE_DIR=/var/lib/cazador-de-suenos/b2b-outreach en el .service.
     return HERE / "cola"
 
 
