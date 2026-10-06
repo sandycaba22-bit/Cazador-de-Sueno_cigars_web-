@@ -45,10 +45,12 @@ MAX_PLACES_CALLS_DIA=200
 En el servidor el secreto no va dentro de `/var/www`. Va fuera del sitio:
 
 ```bash
-sudo install -d -o root -g www-data -m 750 /etc/cazador-de-suenos
-sudo install -o root -g www-data -m 640 /dev/null /etc/cazador-de-suenos/b2b-outreach.env
-sudo nano /etc/cazador-de-suenos/b2b-outreach.env
+sudo bash /var/www/html/deploy/install-cds-b2b-outreach.sh
+sudo nano /etc/cazador-de-suenos/b2b-outreach.env   # solo la primera vez, si faltan TELEGRAM_*
 ```
+
+**No copies** `.env.example` encima de `/etc/cazador-de-suenos/b2b-outreach.env` si ya tiene credenciales.
+El instalador **nunca sobrescribe** un archivo que ya existe.
 
 Mismas dos variables. El chat id es el tuyo.
 

@@ -94,6 +94,9 @@ fi
 if [[ -f "$REPO_DIR/server/ai-sommelier/cds-ai-sommelier.service" ]]; then
   sudo cp -a "$REPO_DIR/server/ai-sommelier/cds-ai-sommelier.service" /etc/systemd/system/cds-ai-sommelier.service
 fi
+if [[ -f "$REPO_DIR/deploy/install-cds-b2b-outreach.sh" ]]; then
+  SITE_ROOT="$SITE_ROOT" sudo bash "$REPO_DIR/deploy/install-cds-b2b-outreach.sh"
+fi
 
 azul "==> Ajustando permisos..."
 sudo chown -R www-data:www-data "$SITE_ROOT"

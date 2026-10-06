@@ -264,6 +264,9 @@ PLACEHOLDERS = {
     "TU_CHAT_ID",
     "AQUÍ_VAS_A_PONER_TU_NUMERO_DE_CHAT_ID",
     "AQUI_VAS_A_PONER_TU_NUMERO_DE_CHAT_ID",
+    "PEGA_AQUI_EL_TOKEN",
+    "PEGA_AQUI_TU_CHAT_ID",
+    "PEGA_AQUI_EL_TOKEN_DE_TELEGRAM",
 }
 MD_V2_SPECIAL = set(r"_*[]()~`>#+-=|{}.!")
 TOKEN_IN_TEXT = re.compile(r"\d{6,}:[A-Za-z0-9_-]{20,}")
