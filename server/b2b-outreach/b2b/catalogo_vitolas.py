@@ -30,6 +30,20 @@ FORTALEZA_NL = {
     "Medium-full": "Medium-vol",
     "High and sophisticated": "Hoog",
 }
+FORTALEZA_PT = {
+    "Full": "Forte",
+    "Medium-full": "Médio-cheio",
+    "High and sophisticated": "Alta",
+}
+
+# Marcadores que no deben aparecer en líneas de vitola de otro idioma.
+VITOLA_PROHIBIDO_POR_IDIOMA: dict[str, tuple[str, ...]] = {
+    "es": (" wrapper,", " strength", " cape ", " force ", " força ", " dekblad "),
+    "en": (" capa ", " fortaleza ", " cape ", " force ", " força ", " dekblad "),
+    "fr": (" wrapper,", " strength", " capa ", " fortaleza ", " força "),
+    "pt": (" wrapper,", " strength", " cape ", " force ", " fortaleza "),
+    "nl": (" wrapper,", " strength", " capa ", " fortaleza ", " força "),
+}
 
 
 @lru_cache(maxsize=1)
@@ -77,14 +91,31 @@ def _fortaleza(vitola: dict, idioma: str) -> str:
         return FORTALEZA_FR.get(vitola["strength"]["en"], vitola["strength"]["en"])
     if idioma == "nl":
         return FORTALEZA_NL.get(vitola["strength"]["en"], vitola["strength"]["en"])
+    if idioma == "pt":
+        return FORTALEZA_PT.get(vitola["strength"]["en"], FORTALEZA_EN.get(raw, raw))
     return FORTALEZA_EN.get(raw, raw)
 
 
+def _capa(vitola: dict, idioma: str) -> str:
+    """Texto de capa del catálogo (es/en), adaptado al idioma del borrador."""
+    lk = _lang_key(idioma)
+    raw = vitola["wrapper"][lk]
+    if idioma == "pt":
+        capa = raw.replace("(Mexico)", "(México)").replace("Maduro", "Maduro")
+        return capa
+    if idioma == "fr":
+        return (
+            raw.replace("(Mexico)", "(Mexique)")
+            .replace("Maduro", "Maduro")
+        )
+    return raw
+
+
 def linea_vitola(vitola: dict, idioma: str) -> str:
-    """Nombres y capas tal como en el PDF mayorista (claves es/en del catálogo)."""
+    """Nombres del PDF (es/en) y etiquetas de capa/fortaleza en el idioma del borrador."""
     lk = _lang_key(idioma)
     nombre = vitola["name"][lk]
-    capa = vitola["wrapper"][lk]
+    capa = _capa(vitola, idioma)
     fortaleza = _fortaleza(vitola, idioma)
     if idioma == "es":
         return f"• {nombre} — capa {capa}, fortaleza {fortaleza}"
@@ -96,11 +127,27 @@ def linea_vitola(vitola: dict, idioma: str) -> str:
         return f"• {nombre} — Deckblatt {capa}, Stärke {fortaleza}"
     if idioma == "it":
         return f"• {nombre} — capa {capa}, forza {fortaleza}"
+    if idioma == "pt":
+        return f"• {nombre} — capa {capa}, força {fortaleza}"
     return f"• {nombre} — {capa} wrapper, {fortaleza} strength"
 
 
+def validar_lineas_vitolas_idioma(idioma: str, bloque: str) -> None:
+    """Lanza ValueError si alguna línea mezcla idiomas en capa/fortaleza."""
+    prohibidos = VITOLA_PROHIBIDO_POR_IDIOMA.get(idioma, VITOLA_PROHIBIDO_POR_IDIOMA["en"])
+    for linea in bloque.splitlines():
+        if not linea.strip().startswith("•"):
+            continue
+        lower = linea.lower()
+        for token in prohibidos:
+            if token.strip() in lower or token.lower() in lower:
+                raise ValueError(f"Vitola en idioma incorrecto ({idioma}): {linea}")
+
+
 def lineas_vitolas(idioma: str) -> str:
-    return "\n".join(linea_vitola(v, idioma) for v in vitolas_ordenadas())
+    lineas = "\n".join(linea_vitola(v, idioma) for v in vitolas_ordenadas())
+    validar_lineas_vitolas_idioma(idioma, lineas)
+    return lineas
 
 
 def intro_vitolas(idioma: str) -> str:

@@ -81,5 +81,27 @@ class TestBorradorCatalogoEnCuerpo(unittest.TestCase):
         self.assertIn("_EN.pdf", draft)
 
 
+class TestVitolasIdioma(unittest.TestCase):
+    def test_pt_usa_capa_e_forca(self):
+        from b2b.catalogo_vitolas import lineas_vitolas
+
+        bloque = lineas_vitolas("pt")
+        self.assertIn("capa", bloque)
+        self.assertIn("força", bloque)
+        self.assertNotIn(" wrapper,", bloque)
+        self.assertNotIn(" strength", bloque)
+        self.assertIn("México", bloque)
+
+    def test_borrador_angola_sin_ingles_en_vitolas(self):
+        from b2b.redactor import borrador_prospecto
+
+        draft = borrador_prospecto("pt", "Loja Teste", "tienda")
+        vitola_lines = [ln for ln in draft.splitlines() if ln.strip().startswith("•")]
+        self.assertEqual(len(vitola_lines), 6)
+        joined = "\n".join(vitola_lines).lower()
+        self.assertNotIn("wrapper", joined)
+        self.assertNotIn("strength", joined)
+
+
 if __name__ == "__main__":
     unittest.main()
