@@ -171,7 +171,7 @@ def prospectar_un_pais(
             "presupuesto_agotado": True,
             "fuente": fuente,
         }
-    except (RuntimeError, ValueError) as error:
+    except ValueError as error:
         from b2b.logging_ops import registrar_osm_fallo
 
         if fuente == "osm":
@@ -183,6 +183,22 @@ def prospectar_un_pais(
             "llamadas": 0,
             "fuente": fuente,
             "error": str(error)[:200],
+        }
+    except RuntimeError as error:
+        from b2b.logging_ops import registrar_osm_fallo
+        from b2b.osm_places import OsmIslaFallida
+
+        if isinstance(error, OsmIslaFallida) or fuente == "osm":
+            registrar_osm_fallo(pais, str(error))
+        isla_fallida = isinstance(error, OsmIslaFallida)
+        return {
+            "pais": pais,
+            "encolados": 0,
+            "leads": 0,
+            "llamadas": 0,
+            "fuente": fuente,
+            "error": str(error)[:200],
+            "isla_fallida": isla_fallida,
         }
     if solo_listar:
         for lead in leads:
@@ -261,6 +277,7 @@ def prospectar_prioridad_inicial(
     total_llamadas = 0
     presupuesto_agotado = False
     paises_usados = 0
+    islas_fallidas: list[str] = []
     for reglas in paises:
         if paises_usados >= max_paises:
             break
@@ -288,11 +305,22 @@ def prospectar_prioridad_inicial(
         total_encolados += int(stats.get("encolados", 0))
         total_leads += int(stats.get("leads", 0))
         total_llamadas += int(stats.get("llamadas", 0))
+        if stats.get("isla_fallida"):
+            islas_fallidas.append(str(stats.get("pais", reglas["pais"])))
         if stats.get("presupuesto_agotado"):
             presupuesto_agotado = True
             break
+        if fuente == "osm" and not simulado:
+            restantes = max_paises - paises_usados
+            if restantes > 0 and total_encolados < max_leads:
+                time.sleep(4)
     import os
 
+    if islas_fallidas:
+        print(
+            "Islas sin respuesta Overpass (reintentar): " + ", ".join(islas_fallidas),
+            file=sys.stderr,
+        )
     zona_label = (zona or os.getenv("B2B_ZONA_BUSQUEDA", "caribe") or "caribe").strip()
     return {
         "pais": f"zona:{zona_label}",
@@ -303,4 +331,5 @@ def prospectar_prioridad_inicial(
         "paises_recorridos": paises_usados,
         "fuente": fuente,
         "zona": zona_label,
+        "islas_fallidas": islas_fallidas,
     }

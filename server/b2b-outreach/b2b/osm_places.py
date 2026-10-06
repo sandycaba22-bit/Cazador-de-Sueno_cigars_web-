@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 import re
+import socket
+import ssl
 import time
 import urllib.error
 import urllib.parse
@@ -15,9 +17,9 @@ from b2b.paths import data_file
 
 _DEFAULT_MIRRORS = "|".join(
     (
-        "https://overpass.private.coffee/api/interpreter",
-        "https://overpass.kumi.systems/api/interpreter",
         "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter",
         "https://overpass.nchc.org.tw/api/interpreter",
     )
 )
@@ -25,21 +27,10 @@ OVERPASS_URLS = [
     u.strip() for u in (os.getenv("OSM_OVERPASS_URL", "") or _DEFAULT_MIRRORS).split("|") if u.strip()
 ]
 
+OVERPASS_TIMEOUT_SEC = 30
+_REINTENTOS_ISLA = 3
+_ESPERA_ENTRE_REINTENTOS_ISLA = (5, 10, 20)
 
-def _overpass_timeout() -> int:
-    try:
-        return max(20, int(os.getenv("OSM_OVERPASS_TIMEOUT", "45") or "45"))
-    except ValueError:
-        return 45
-
-
-def _pausa_entre_consultas() -> None:
-    try:
-        sec = float(os.getenv("OSM_OVERPASS_PAUSE_SEC", "2") or "2")
-    except ValueError:
-        sec = 2.0
-    if sec > 0:
-        time.sleep(sec)
 USER_AGENT = os.getenv(
     "OSM_USER_AGENT",
     "CazadorDeSuenosB2B/1.0 (B2B wholesale outreach; contact: ventas@cazadordesuenocigars.com)",
@@ -51,6 +42,33 @@ NAME_HINT = re.compile(
     r"wholesale|import|distribut|duty\s*free|casino|lounge",
     re.I,
 )
+
+
+class OsmIslaFallida(RuntimeError):
+    """Overpass no respondió tras reintentos para un país/isla."""
+
+
+def _pausa_entre_consultas() -> None:
+    try:
+        sec = float(os.getenv("OSM_OVERPASS_PAUSE_SEC", "2") or "2")
+    except ValueError:
+        sec = 2.0
+    if sec > 0:
+        time.sleep(sec)
+
+
+def _error_reintentable(error: BaseException) -> bool:
+    if isinstance(error, (TimeoutError, socket.timeout)):
+        return True
+    if isinstance(error, ssl.SSLError):
+        return True
+    if isinstance(error, urllib.error.URLError):
+        return True
+    if isinstance(error, urllib.error.HTTPError):
+        return error.code in (429, 500, 502, 503, 504)
+    if isinstance(error, OSError):
+        return True
+    return False
 
 
 def _iso_para_pais(pais: str) -> str:
@@ -189,31 +207,27 @@ out center 25 tags;
 """.strip()
 
 
-def _fetch_overpass(query: str) -> list[dict]:
+def _fetch_overpass(query: str, rotar_desde: int = 0) -> list[dict]:
+    """Un intento lógico: rota mirrors; timeout fijo 30 s por petición."""
     body = urllib.parse.urlencode({"data": query}).encode("utf-8")
     headers = {"User-Agent": USER_AGENT, "Content-Type": "application/x-www-form-urlencoded"}
+    urls = OVERPASS_URLS[rotar_desde:] + OVERPASS_URLS[:rotar_desde]
     errors: list[str] = []
-    timeout = _overpass_timeout()
-    for base_url in OVERPASS_URLS:
-        for intento in (1, 2):
-            request = urllib.request.Request(base_url, data=body, headers=headers, method="POST")
-            try:
-                with urllib.request.urlopen(request, timeout=timeout) as response:
-                    payload = json.loads(response.read().decode("utf-8"))
-                return payload.get("elements") or []
-            except urllib.error.HTTPError as error:
-                detail = error.read().decode("utf-8", errors="replace")[:120]
-                errors.append(f"{base_url}#{intento} HTTP {error.code}")
-                if error.code in (429, 502, 503, 504) and intento == 1:
-                    time.sleep(3)
-                    continue
-            except (urllib.error.URLError, TimeoutError) as error:
-                errors.append(f"{base_url}#{intento} {error}")
-                if intento == 1:
-                    time.sleep(2)
-                    continue
-            break
-    raise RuntimeError("Overpass no respondió: " + " | ".join(errors[-6:]))
+    for base_url in urls:
+        request = urllib.request.Request(base_url, data=body, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(request, timeout=OVERPASS_TIMEOUT_SEC) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            return payload.get("elements") or []
+        except urllib.error.HTTPError as error:
+            errors.append(f"{base_url} HTTP {error.code}")
+            if not _error_reintentable(error):
+                raise RuntimeError("Overpass no respondió: " + errors[-1]) from error
+        except BaseException as error:
+            if not _error_reintentable(error):
+                raise
+            errors.append(f"{base_url} {type(error).__name__}: {error}")
+    raise RuntimeError("Overpass no respondió: " + " | ".join(errors[-4:]))
 
 
 def _dedupe_elementos(elementos: list[dict]) -> list[dict]:
@@ -228,24 +242,21 @@ def _dedupe_elementos(elementos: list[dict]) -> list[dict]:
     return out
 
 
-def buscar_en_pais_osm(
+def _buscar_en_pais_osm_cuerpo(
     pais: str,
     tipos: list[str],
     limite: int,
-    tipo_filtro: str = "",
+    tipo_filtro: str,
+    iso: str,
+    rotar_espejo: int = 0,
 ) -> tuple[list[dict], int]:
-    if tipo_filtro:
-        tipos = [tipo_filtro]
-    iso = _iso_para_pais(pais)
     llamadas = 0
     elementos: list[dict] = []
-    try:
-        _pausa_entre_consultas()
-        elementos = _dedupe_elementos(_fetch_overpass(_query_tobacco(iso)))
-        llamadas = 1
-    except RuntimeError as error:
-        registrar_osm_fallo(pais, str(error))
-        return [], llamadas
+    _pausa_entre_consultas()
+    elementos = _dedupe_elementos(
+        _fetch_overpass(_query_tobacco(iso), rotar_desde=rotar_espejo)
+    )
+    llamadas = 1
 
     segunda = (os.getenv("OSM_SEGUNDA_PASADA", "0") or "0").strip().lower() not in (
         "0",
@@ -255,7 +266,7 @@ def buscar_en_pais_osm(
     if segunda and len(elementos) < limite:
         try:
             _pausa_entre_consultas()
-            extra = _fetch_overpass(_query_nombre_comercial(iso))
+            extra = _fetch_overpass(_query_nombre_comercial(iso), rotar_desde=rotar_espejo)
             llamadas += 1
             elementos = _dedupe_elementos(elementos + extra)
         except RuntimeError as error:
@@ -275,7 +286,7 @@ def buscar_en_pais_osm(
                 continue
             try:
                 _pausa_entre_consultas()
-                extra = _fetch_overpass(_query_tobacco_around(lat, lon, radio_m))
+                extra = _fetch_overpass(_query_tobacco_around(lat, lon, radio_m), rotar_desde=rotar_espejo)
                 llamadas += 1
                 for el in extra:
                     tags = el.get("tags") or {}
@@ -303,3 +314,28 @@ def buscar_en_pais_osm(
         candidatos.append(lead)
     candidatos.sort(key=lambda p: orden_tipo.get(p.get("tipo_negocio", "tienda"), 99))
     return candidatos[:limite], llamadas
+
+
+def buscar_en_pais_osm(
+    pais: str,
+    tipos: list[str],
+    limite: int,
+    tipo_filtro: str = "",
+) -> tuple[list[dict], int]:
+    if tipo_filtro:
+        tipos = [tipo_filtro]
+    iso = _iso_para_pais(pais)
+    ultimo_error: RuntimeError | None = None
+    for intento in range(_REINTENTOS_ISLA):
+        if intento > 0:
+            espera = _ESPERA_ENTRE_REINTENTOS_ISLA[intento - 1]
+            registrar_osm_fallo(pais, f"reintento isla {intento + 1}/{_REINTENTOS_ISLA} tras {espera}s")
+            time.sleep(espera)
+        try:
+            return _buscar_en_pais_osm_cuerpo(
+                pais, tipos, limite, tipo_filtro, iso, rotar_espejo=intento
+            )
+        except RuntimeError as error:
+            ultimo_error = error
+            registrar_osm_fallo(pais, f"intento {intento + 1}/{_REINTENTOS_ISLA}: {error}")
+    raise OsmIslaFallida(pais, str(ultimo_error or "Overpass sin respuesta"))

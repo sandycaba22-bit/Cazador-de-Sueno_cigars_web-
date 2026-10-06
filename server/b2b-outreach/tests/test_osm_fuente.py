@@ -55,7 +55,7 @@ class TestOsmBuscar(unittest.TestCase):
             ]
         }
 
-        def fake_fetch(_query: str) -> list[dict]:
+        def fake_fetch(_query: str, rotar_desde: int = 0) -> list[dict]:
             return sample["elements"]
 
         with patch("b2b.osm_places._fetch_overpass", fake_fetch):
