@@ -155,3 +155,29 @@ def buscar_celda(
 
 def preparar_celdas_pais(iso: str) -> list[dict]:
     return celdas_desde_bbox(_bbox_pais(iso))
+
+
+def obtener_elementos_cuadricula(
+    iso: str,
+    *,
+    max_celdas: int = 6,
+    celda_inicio: int = 0,
+) -> tuple[list[dict], int]:
+    """Elementos OSM por celdas (consultas pequeñas). Para dry-run en territorios grandes."""
+    celdas = preparar_celdas_pais(iso)
+    fin = min(len(celdas), celda_inicio + max(1, max_celdas))
+    todos: list[dict] = []
+    llamadas = 0
+    for idx in range(celda_inicio, fin):
+        celda = celdas[idx]
+        cid = _celda_id(iso, celda)
+        cached = _leer_cache(cid)
+        if cached is not None:
+            todos.extend(cached)
+            continue
+        _pausa_entre_consultas()
+        elementos = _fetch_overpass(_query_celda(celda), rotar_desde=idx % 3)
+        llamadas += 1
+        _guardar_cache(cid, elementos)
+        todos.extend(elementos)
+    return _dedupe_elementos(todos), llamadas
