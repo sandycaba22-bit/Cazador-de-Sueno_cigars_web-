@@ -136,6 +136,10 @@ def lead_a_inbox(lead: dict) -> dict:
         "calidad_bucket": lead.get("calidad_bucket") or "aceptado",
         "calidad_motivo": lead.get("calidad_motivo") or "",
         "calidad_nota": lead.get("calidad_nota") or "",
+        "lat": lead.get("lat"),
+        "lon": lead.get("lon"),
+        "whatsapp": lead.get("whatsapp") or "",
+        "telegram_notificado": bool(lead.get("telegram_notificado")),
     }
 
 
@@ -158,6 +162,7 @@ def encolar(
     cola_dir: Path | None = None,
     simulado: bool = False,
     pais: str = "",
+    notificar_telegram_buscar: bool = False,
 ) -> tuple[list[Path], int, int, StatsCalidad, list[dict]]:
     inbox.mkdir(parents=True, exist_ok=True)
     cola = cola_dir or inbox.parent
@@ -194,6 +199,34 @@ def encolar(
             if marcar:
                 marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
                 escritos.append(path)
+                if notificar_telegram_buscar and carpeta == inbox:
+                    from b2b.telegram_control import procesar_comandos_chat, esta_pausado
+                    from b2b.telegram_prospecto import enviar_prospecto_dos_mensajes
+
+                    try:
+                        import os
+                        from telegram_bot import load_local_env
+
+                        load_local_env()
+                        token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+                        chat = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+                        if token and chat:
+                            for ack in procesar_comandos_chat(token, chat):
+                                from b2b.telegram_buscar import notificar_buscar
+
+                                notificar_buscar(ack, simulado=simulado)
+                    except Exception:
+                        pass
+                    if not esta_pausado():
+                        ok = enviar_prospecto_dos_mensajes(
+                            payload, reglas["pais"], simulado=simulado
+                        )
+                        if ok:
+                            payload["telegram_notificado"] = True
+                            path.write_text(
+                                json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+                                encoding="utf-8",
+                            )
             if _payload_tiene_contacto(payload):
                 con_contacto += 1
             time.sleep(0.05)
@@ -227,6 +260,8 @@ def prospectar_un_pais(
     solo_listar: bool = False,
     tipo_filtro: str = "",
     fuente: str = "",
+    modo_global: bool = False,
+    notificar_telegram_buscar: bool = False,
 ) -> dict:
     pais = reglas["pais"]
     tipos = _tipos_busqueda()
@@ -241,6 +276,7 @@ def prospectar_un_pais(
             simulado=simulado,
             tipo_filtro=tipo_filtro,
             fuente=fuente,
+            modo_global=modo_global,
         )
     except PresupuestoPlacesAgotado:
         registrar_presupuesto_agotado()
@@ -301,7 +337,13 @@ def prospectar_un_pais(
         1 for lead in leads if (lead.get("telefono") or lead.get("correo") or "").strip()
     )
     paths, con_contacto, web_enriquecidos, stats_cal, desc_calidad = encolar(
-        nuevos, inbox, reglas, cola_dir=cola_dir, simulado=simulado, pais=pais
+        nuevos,
+        inbox,
+        reglas,
+        cola_dir=cola_dir,
+        simulado=simulado,
+        pais=pais,
+        notificar_telegram_buscar=notificar_telegram_buscar,
     )
     descartes = list(descartes) + list(desc_calidad)
     if not simulado:
@@ -364,9 +406,20 @@ def prospectar(
     simulado: bool = False,
     solo_listar: bool = False,
     tipo_filtro: str = "",
+    buscar_global: bool = False,
 ) -> dict:
     fuente = "simulado" if simulado else resolver_fuente_leads()
     import os
+
+    if buscar_global:
+        return prospectar_turno_global(
+            pais_cli,
+            max_leads,
+            inbox,
+            simulado=simulado,
+            solo_listar=solo_listar,
+            tipo_filtro=tipo_filtro,
+        )
 
     zona = os.getenv("B2B_ZONA_BUSQUEDA", "caribe")
     if pais_cli and pais_cli.strip():
@@ -400,6 +453,76 @@ def prospectar(
     return prospectar_prioridad_inicial(
         max_leads, inbox, simulado, solo_listar, tipo_filtro, fuente=fuente, zona=zona
     )
+
+
+def prospectar_turno_global(
+    pais_cli: str | None,
+    max_leads: int,
+    inbox: Path,
+    simulado: bool = False,
+    solo_listar: bool = False,
+    tipo_filtro: str = "",
+) -> dict:
+    """Un país (o celda parcial) por invocación; cola en data/paises_cola.json."""
+    from b2b.buscar_global import avanzar_siguiente_pais, cargar_estado_global, siguiente_pais_cola
+    from b2b.paises_cola import entry_por_pais
+
+    if pais_cli and pais_cli.strip():
+        reglas = resolver_pais_objetivo(pais_cli)
+        fila = entry_por_pais(reglas["pais"])
+    else:
+        fila = siguiente_pais_cola()
+        if fila is None:
+            return {
+                "pais": "cola_global",
+                "encolados": 0,
+                "leads": 0,
+                "llamadas": 0,
+                "fuente": "osm",
+                "fin_cola": True,
+            }
+        reglas = buscar_pais(fila["pais"])
+        if reglas is None:
+            avanzar_siguiente_pais()
+            raise ValueError(f"País en cola sin country_rules.json: {fila['pais']}")
+
+    fuente = "simulado" if simulado else "osm"
+    out = prospectar_un_pais(
+        reglas,
+        max_leads,
+        inbox,
+        simulado,
+        solo_listar,
+        tipo_filtro,
+        fuente=fuente,
+        modo_global=not simulado,
+        notificar_telegram_buscar=not simulado and not solo_listar,
+    )
+    out["modo"] = "buscar_global"
+    out["fuente"] = fuente
+    if not solo_listar and not simulado:
+        estado = cargar_estado_global()
+        if estado.get("completo"):
+            avanzar_siguiente_pais()
+            import os as _os
+
+            try:
+                pausa = float(_os.getenv("B2B_PAUSA_ENTRE_PAISES_SEC", "90") or "90")
+            except ValueError:
+                pausa = 90.0
+            if pausa > 0:
+                time.sleep(pausa)
+        _telegram_tras_isla(out, simulado, solo_listar)
+        avisar_resumen_barrido(
+            int(out.get("encolados", 0)),
+            {out["pais"]: int(out.get("encolados", 0))} if out.get("encolados") else {},
+            {out["pais"]: int(out.get("con_contacto", 0))} if out.get("encolados") else {},
+            [out["pais"]] if out.get("isla_fallida") else [],
+            f"global:{out['pais']}",
+            simulado=simulado,
+            detalle_islas={out["pais"]: out.get("fuente_stats") or {}},
+        )
+    return out
 
 
 def _max_paises_por_pasada() -> int:

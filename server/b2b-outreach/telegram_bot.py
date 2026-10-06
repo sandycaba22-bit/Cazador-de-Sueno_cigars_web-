@@ -712,7 +712,11 @@ def procesar_archivo(path, sent, failed, imprimir=False):
     if lock is None:
         return None
     try:
-        nombre, pais, web, correo, meta = _leer_lead(path)
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(raw, dict) and raw.get("telegram_notificado"):
+            _archivar(path, sent)
+            return {"omitido": "telegram_notificado"}
+        nombre, pais, web, correo, meta = normalizar_lead_cola(raw)
         paquete = generar_mensaje_multilingue(nombre, pais, web, correo, meta)
         if imprimir:
             print(paquete["markdown"])
@@ -763,9 +767,25 @@ def pasar_cola(queue_dir, imprimir=False):
     return hechos
 
 
+def _poll_comandos_buscar():
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    chat = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+    if not token or not chat:
+        return
+    try:
+        from b2b.telegram_control import procesar_comandos_chat
+        from b2b.telegram_buscar import notificar_buscar
+
+        for ack in procesar_comandos_chat(token, chat):
+            notificar_buscar(ack, simulado=False)
+    except Exception:
+        pass
+
+
 def vigilar(queue_dir, imprimir=False, una_pasada=False):
     intervalo = segundos_de_espera()
     while True:
+        _poll_comandos_buscar()
         pasar_cola(queue_dir, imprimir=imprimir)
         if una_pasada:
             return
@@ -834,6 +854,11 @@ def construir_parser():
         "--buscar",
         action="store_true",
         help="Busca negocios B2B (OpenStreetMap gratis o Google Places) y encola inbox/",
+    )
+    parser.add_argument(
+        "--buscar-global",
+        action="store_true",
+        help="Cola global por país/cuadrícula (paises_cola.json); ficha + texto corto por Telegram",
     )
     parser.add_argument(
         "--max",
@@ -931,7 +956,7 @@ def main(argv=None):
         imprimir_dry_run(pais, buckets)
         return 0
 
-    if args.buscar:
+    if args.buscar or getattr(args, "buscar_global", False):
         from prospector import prospectar
 
         cola = resolver_cola(args.cola)
@@ -940,7 +965,10 @@ def main(argv=None):
         from b2b.fuente_leads import resolver_fuente_leads
 
         simulado = args.simulado
-        if not simulado:
+        buscar_global = bool(getattr(args, "buscar_global", False))
+        if buscar_global and getattr(args, "dry_run_nombres", None):
+            parser.error("Use --dry-run-nombres sin --buscar-global")
+        if not simulado and not buscar_global:
             fuente = resolver_fuente_leads()
             if fuente == "osm":
                 zona = os.getenv("B2B_ZONA_BUSQUEDA", "caribe")
@@ -952,6 +980,12 @@ def main(argv=None):
                 )
             elif fuente == "google":
                 print("Buscador: Google Places (API de pago).", file=sys.stderr)
+        elif buscar_global and not simulado:
+            print(
+                "Buscador global: cola paises_cola.json, cuadrícula OSM, 2 mensajes Telegram/lead. "
+                "Comandos: /pausa /seguir",
+                file=sys.stderr,
+            )
         stats = prospectar(
             pais,
             max(1, args.max_leads),
@@ -959,6 +993,7 @@ def main(argv=None):
             simulado=simulado,
             solo_listar=args.solo_listar,
             tipo_filtro=args.tipo or "",
+            buscar_global=buscar_global,
         )
         if not args.solo_listar:
             fuente_msg = stats.get("fuente", "")

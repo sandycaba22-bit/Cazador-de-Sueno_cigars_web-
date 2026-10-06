@@ -170,10 +170,18 @@ def buscar_en_pais(
     simulado: bool = False,
     tipo_filtro: str = "",
     fuente: str = "",
+    modo_global: bool = False,
 ) -> tuple[list[dict], int, dict]:
     if tipo_filtro:
         tipos = [tipo_filtro]
     if not simulado and fuente == "osm":
+        if modo_global:
+            from b2b.buscar_global import recolectar_leads_global
+
+            leads, llamadas, stats = recolectar_leads_global(
+                pais, tipos, limite, tipo_filtro=tipo_filtro, simulado=False
+            )
+            return leads, llamadas, stats
         from b2b.buscar_pais import recolectar_leads_pais
 
         leads, llamadas, stats = recolectar_leads_pais(

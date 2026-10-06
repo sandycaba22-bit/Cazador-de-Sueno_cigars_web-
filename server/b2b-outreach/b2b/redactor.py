@@ -324,6 +324,58 @@ def code_escape(value):
     return str(value).replace("\\", "\\\\").replace("`", "\\`").replace("```", "'''")
 
 
+def texto_corto_prospecto_buscar(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
+    """Mensaje 2 del flujo --buscar (≤6 líneas). No reemplaza borrador_prospecto."""
+    nombre = (nombre_local or "").strip() or "there"
+    cat = resolver_catalogo_pdf(idioma)
+    catalogo = cat.url or WHOLESALE_URL
+    opt = OPT_OUT.get(idioma, OPT_OUT["en"])
+    tipo_txt = tipo.replace("_", " ")
+    bloques = {
+        "es": (
+            f"Hola, {nombre}: soy Yaniris (Cazador de Sueños, fábrica en Santiago, RD).\n"
+            f"Queremos poner nuestros cigarros en su {tipo_txt}.\n"
+            f"Catálogo mayorista: {catalogo}\n"
+            "¿Llamada breve o muestras esta semana?\n"
+            f"{opt}"
+        ),
+        "en": (
+            f"Hello {nombre} — Yaniris, Cazador de Sueños (factory in Santiago, DR).\n"
+            f"We'd like our cigars in your {tipo_txt}.\n"
+            f"Wholesale catalog: {catalogo}\n"
+            "Short call or samples this week?\n"
+            f"{opt}"
+        ),
+        "fr": (
+            f"Bonjour {nombre} — Yaniris, Cazador de Sueños (Santiago, RD).\n"
+            f"Nous proposons nos cigares pour votre {tipo_txt}.\n"
+            f"Catalogue grossiste : {catalogo}\n"
+            "Un appel ou des échantillons cette semaine ?\n"
+            f"{opt}"
+        ),
+        "nl": (
+            f"Hallo {nombre} — Yaniris, Cazador de Sueños (fabriek Santiago, DR).\n"
+            f"Graag onze sigaren in uw {tipo_txt}.\n"
+            f"Groothandelscatalogus: {catalogo}\n"
+            "Kort gesprek of stalen deze week?\n"
+            f"{opt}"
+        ),
+        "pt": (
+            f"Olá {nombre} — Yaniris, Cazador de Sueños (Santiago, RD).\n"
+            f"Queremos os nossos charutos na sua {tipo_txt}.\n"
+            f"Catálogo grossista: {catalogo}\n"
+            "Chamada breve ou amostras esta semana?\n"
+            f"{opt}"
+        ),
+    }
+    texto = bloques.get(idioma, bloques["en"])
+    if len(texto.splitlines()) > 6:
+        raise ValueError("Texto corto supera 6 líneas.")
+    if PROHIBIDO_RE.search(texto):
+        raise ValueError("Texto corto contiene términos prohibidos.")
+    return texto
+
+
 def generar_tarjeta_telegram(
     nombre_local: str,
     pais: str,
