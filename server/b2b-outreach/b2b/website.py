@@ -103,22 +103,50 @@ CONTACT_PATHS = (
 )
 
 
+HOSTS_MAPA = ("maps.google.com", "g.page", "goo.gl", "maps.app.goo.gl", "openstreetmap.org", "osm.org")
+
+
+def _host_sin_www(web: str) -> tuple[str, str]:
+    try:
+        parsed = urllib.parse.urlparse(web or "")
+    except ValueError:
+        return "", ""
+    host = (parsed.netloc or "").lower().split(":")[0]
+    if host.startswith("www."):
+        host = host[4:]
+    return host, (parsed.path or "").lower()
+
+
+def es_url_mapa(web: str) -> bool:
+    """True si el link es de un mapa (OSM, Google Maps, acortadores), no la web del negocio."""
+    host, path = _host_sin_www(web)
+    if not host:
+        return False
+    if host in HOSTS_MAPA or any(host.endswith("." + h) for h in HOSTS_MAPA):
+        return True
+    if host.startswith("google.") and path.startswith("/maps"):
+        return True
+    return host.endswith("googleusercontent.com")
+
+
+def dominio_negocio(web: str) -> str:
+    """Dominio de la web propia del negocio; '' si no hay o es un link de mapa."""
+    if not (web or "").startswith(("http://", "https://")) or es_url_mapa(web):
+        return ""
+    host, _path = _host_sin_www(web)
+    return host
+
+
 def web_confiable_para_idioma(web: str) -> bool:
     """False para Maps, placeholders y dominios que no son la web del negocio."""
     if not web.startswith(("http://", "https://")):
         return False
     parsed = urllib.parse.urlparse(web)
-    host = (parsed.netloc or "").lower()
-    if host.startswith("www."):
-        host = host[4:]
+    host, _path = _host_sin_www(web)
     path_q = ((parsed.path or "") + "?" + (parsed.query or "")).lower()
     if "fixture" in path_q or host == "example.com":
         return False
-    if host in ("maps.google.com", "g.page", "goo.gl", "maps.app.goo.gl"):
-        return False
-    if host == "google.com" and "/maps" in (parsed.path or "").lower():
-        return False
-    if host.endswith("googleusercontent.com"):
+    if es_url_mapa(web):
         return False
     return bool(host)
 

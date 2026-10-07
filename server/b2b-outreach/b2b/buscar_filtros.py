@@ -4,8 +4,6 @@ import json
 import re
 import unicodedata
 from pathlib import Path
-from urllib.parse import urlparse
-
 NAME_BUSCAR_RE = re.compile(
     r"cigar|cigarro|tabac|tabak|sigaar|tobacco|humidor|habano|havana|"
     r"smoke|estanco|tabaqueria|tabaquería|charuto|puro",
@@ -26,11 +24,10 @@ def normalizar_nombre(nombre: str) -> str:
 
 
 def dominio_web(web: str) -> str:
-    try:
-        host = urlparse(web).netloc.lower()
-        return host[4:] if host.startswith("www.") else host
-    except Exception:
-        return ""
+    """Dominio de la web propia; '' para links de mapa (OSM, Google Maps)."""
+    from b2b.website import dominio_negocio
+
+    return dominio_negocio(web or "")
 
 
 def clave_dedupe(lead: dict) -> str:
@@ -137,7 +134,9 @@ def fusionar_leads(base: dict, otro: dict) -> dict:
 
 
 def dedupe_y_fusionar(
-    leads: list[dict], auditoria: list[dict] | None = None
+    leads: list[dict],
+    auditoria: list[dict] | None = None,
+    fusionados_log: list[dict] | None = None,
 ) -> list[dict]:
     por_clave: dict[str, dict] = {}
     orden: list[str] = []
@@ -156,6 +155,16 @@ def dedupe_y_fusionar(
             continue
         clave = clave_dedupe(lead)
         if clave in por_clave:
+            if fusionados_log is not None:
+                fusionados_log.append(
+                    {
+                        "nombre": lead.get("nombre") or "—",
+                        "motivo": "repetido",
+                        "contra": f"misma búsqueda ({por_clave[clave].get('nombre') or '—'})",
+                        "fecha": "",
+                        "fuente": lead.get("fuente") or "",
+                    }
+                )
             por_clave[clave] = fusionar_leads(por_clave[clave], lead)
         else:
             por_clave[clave] = lead
@@ -189,7 +198,7 @@ def cargar_claves_cola(cola_dir: Path) -> set[str]:
 def duplicado_contra(lead: dict, cola_dir: Path | None) -> tuple[str, str] | None:
     """Ubicación (inbox/sent/failed/registro_leads) y fecha legible si ya existe."""
     from b2b.descartes import _iso_desde_mtime
-    from b2b.leads_store import SEEN_PATH, ya_visto
+    from b2b.leads_store import seen_path, ya_visto
 
     if cola_dir and cola_dir.is_dir():
         clave = clave_dedupe(lead)
@@ -215,7 +224,8 @@ def duplicado_contra(lead: dict, cola_dir: Path | None) -> tuple[str, str] | Non
                 if dom and dominio_web(data.get("web") or "") == dom:
                     return sub, _iso_desde_mtime(path)
     if ya_visto(lead.get("place_id", ""), lead.get("web", "")):
-        fecha = _iso_desde_mtime(SEEN_PATH) if SEEN_PATH.is_file() else ""
+        reg = seen_path()
+        fecha = _iso_desde_mtime(reg) if reg.is_file() else ""
         return "registro_leads", fecha
     return None
 

@@ -56,9 +56,11 @@ def recolectar_leads_pais(
 
     descartes: list[dict] = list(osm_meta.get("descartes") or [])
     descartes_fusion: list[dict] = []
-    fusionados = dedupe_y_fusionar(todos, descartes_fusion)
+    repetidos_fusion: list[dict] = []
+    fusionados = dedupe_y_fusionar(todos, descartes_fusion, repetidos_fusion)
     descartes.extend(descartes_fusion)
     stats["descartes"] = descartes
+    stats["repetidos_fusion"] = repetidos_fusion
     registrar_evento(
         {
             "evento": "buscar_pais_fuentes",
@@ -67,8 +69,9 @@ def recolectar_leads_pais(
             "dealers": stats["dealers"],
             "directorio": stats["directorio"],
             "fusionados": len(fusionados),
+            "repetidos_fusion": len(repetidos_fusion),
             "osm_raw": osm_meta,
             "descartes": descartes,
         }
     )
-    return fusionados[:limite], llamadas, stats
+    return fusionados, llamadas, stats

@@ -135,9 +135,11 @@ def clasificar_lote(
     for raw in leads:
         lead = dict(raw)
         res = evaluar_lead_completo(lead, simulado=simulado)
-        if res.descarte:
-            descartes.append(res.descarte)
         if res.bucket == "descartado":
+            descartes.append(
+                res.descarte
+                or {"nombre": lead.get("nombre") or "—", "motivo": res.motivo or "calidad", "etapa": "calidad"}
+            )
             if "web muerta" in (res.motivo or ""):
                 stats.descartados_web += 1
             else:
@@ -148,8 +150,6 @@ def clasificar_lote(
             lead["calidad_motivo"] = res.motivo
             dudosos.append(lead)
             stats.dudosos += 1
-            if res.descarte:
-                descartes.append(res.descarte)
             continue
         if res.bucket == "solo_telefono":
             lead["calidad_bucket"] = "solo_telefono"

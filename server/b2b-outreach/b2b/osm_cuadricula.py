@@ -115,7 +115,10 @@ def buscar_celda(
     *,
     usar_cache: bool = True,
     rotar_espejo: int = 0,
+    descartes: list[dict] | None = None,
 ) -> tuple[list[dict], int]:
+    from b2b.osm_places import _motivo_si_sin_lead, _nombre_log_osm
+
     cid = _celda_id(iso, celda)
     llamadas = 0
     if usar_cache:
@@ -135,6 +138,15 @@ def buscar_celda(
     for el in elementos:
         lead = _elemento_a_lead(el, pais)
         if not lead:
+            if descartes is not None:
+                descartes.append(
+                    {
+                        "nombre": _nombre_log_osm(el, el.get("tags") or {}),
+                        "motivo": _motivo_si_sin_lead(el, pais),
+                        "etapa": "osm",
+                        "fuente": "openstreetmap",
+                    }
+                )
             continue
         lat = el.get("lat")
         lon = el.get("lon")

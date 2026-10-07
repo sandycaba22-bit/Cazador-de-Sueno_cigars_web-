@@ -701,6 +701,10 @@ def _archivar(path, destino, nota=None):
 def resolver_cola(explicita=""):
     if explicita:
         return Path(explicita).expanduser()
+    if os.getenv("B2B_SIMULADO", "").strip() == "1":
+        from b2b.paths import dir_simulado
+
+        return dir_simulado() / "cola"
     configured = os.getenv("B2B_QUEUE_DIR", "").strip()
     if configured:
         return Path(configured).expanduser()
@@ -919,6 +923,8 @@ def main(argv=None):
     load_local_env()
     parser = construir_parser()
     args = parser.parse_args(_normalizar_argv(argv))
+    if args.simulado:
+        os.environ["B2B_SIMULADO"] = "1"
 
     if args.consultar:
         from b2b.consultar import consultar

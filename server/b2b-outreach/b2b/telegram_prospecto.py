@@ -8,6 +8,7 @@ from b2b.country_rules import buscar_pais
 from b2b.idioma import idioma_para_lead
 from b2b.redactor import presentacion_prospecto_telegram
 from b2b.telegram_control import puede_enviar_telegram, pausa_entre_mensajes, registrar_envio_telegram
+from b2b.website import dominio_negocio, es_url_mapa
 from b2b.telegram_gestion import (
     registrar_pendiente,
     tiene_medio_contacto,
@@ -37,10 +38,12 @@ def _lineas_contacto(lead: dict) -> list[str]:
     if correo:
         lineas.append(f"✉️ Correo: {correo}")
     web = (lead.get("web") or "").strip()
-    if web and web != "—":
+    if dominio_negocio(web):
         lineas.append(f"🌐 Web: {web}")
         for url in urls_formulario_contacto(web):
             lineas.append(f"📝 Formulario / contacto: {url}")
+    elif es_url_mapa(web):
+        lineas.append(f"🗺️ Mapa: {web}")
     if not lineas:
         lineas.append("— sin contacto publicado")
     return lineas

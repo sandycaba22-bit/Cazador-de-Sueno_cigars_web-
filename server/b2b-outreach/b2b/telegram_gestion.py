@@ -89,8 +89,9 @@ def quitar_pendiente(token: str) -> None:
 
 
 def agregar_no_contactar(nombre: str, web: str = "", motivo: str = "") -> None:
-    from b2b.leads_store import NO_CONTACT_STATE_PATH as NO_CONTACT_PATH
+    from b2b.leads_store import no_contact_state_path
 
+    NO_CONTACT_PATH = no_contact_state_path()
     NO_CONTACT_PATH.parent.mkdir(parents=True, exist_ok=True)
     if not NO_CONTACT_PATH.is_file():
         data = {"negocios": []}
@@ -111,16 +112,20 @@ def agregar_no_contactar(nombre: str, web: str = "", motivo: str = "") -> None:
 
 
 def tiene_medio_contacto(payload: dict) -> bool:
+    """Teléfono, correo o web propia del negocio (un link de mapa no cuenta)."""
+    from b2b.website import dominio_negocio
+
     tel = (payload.get("telefono") or "").strip()
     correo = (payload.get("correo") or "").strip()
-    web = (payload.get("web") or "").strip()
     if tel or correo:
         return True
-    return bool(web and web != "—" and web.startswith(("http://", "https://")))
+    return bool(dominio_negocio((payload.get("web") or "").strip()))
 
 
 def urls_formulario_contacto(web: str) -> list[str]:
-    if not web or web == "—" or not web.startswith(("http://", "https://")):
+    from b2b.website import dominio_negocio
+
+    if not dominio_negocio(web or ""):
         return []
     from b2b.website import CONTACT_PATHS
     import urllib.parse

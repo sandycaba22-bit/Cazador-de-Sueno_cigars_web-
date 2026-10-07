@@ -19,24 +19,37 @@ from b2b.country_rules import (
     paises_prioridad_inicial,
 )
 from b2b.idioma import idioma_para_lead
-from b2b.lead_score import califica_lead, puntuar_lead
+from b2b.lead_score import califica_lead, puntaje_minimo, puntuar_lead
 from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
-from b2b.logging_ops import registrar_busqueda, registrar_presupuesto_agotado
+from b2b.logging_ops import registrar_busqueda, registrar_evento, registrar_presupuesto_agotado
 from b2b.fuente_leads import resolver_fuente_leads
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
 from b2b.buscar_filtros import clasificar_novedad_detalle
 from b2b.descartes import (
     append_dudoso_diario,
     append_isla_en_archivo_diario,
-    lineas_resumen_descartes,
+    append_sin_contacto_diario,
+    entrada_descarte,
+    entrada_repetido,
+    entrada_sin_contacto,
     registrar_log_descartes_isla,
 )
 from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
 from b2b.calidad_lead import StatsCalidad, clasificar_lote
 from b2b.telegram_gestion import tiene_medio_contacto
-from b2b.website import analizar_sitio_prospecto, web_confiable_para_idioma
+from b2b.website import analizar_sitio_prospecto, dominio_negocio, web_confiable_para_idioma
 
 SLUG_RE = __import__("re").compile(r"[^a-z0-9]+")
+
+CATEGORIAS_ENCOLAR = (
+    "encolados",
+    "descartados",
+    "dudosos",
+    "solo_telefono",
+    "repetidos",
+    "sin_contacto",
+    "pendiente_limite",
+)
 
 
 def _slug(texto: str) -> str:
@@ -63,7 +76,8 @@ def enriquecer_lead(lead: dict, reglas: dict) -> dict:
     idioma_fuente = (lead.get("idioma_fuente") or "").strip()
     telefono = (lead.get("telefono") or "").strip()
     web_enriquecido = False
-    if web.startswith(("http://", "https://")) and (not correo or not telefono):
+    web_propia = bool(dominio_negocio(web))
+    if web_propia and (not correo or not telefono):
         info = analizar_sitio_prospecto(
             web, necesita_correo=not correo, necesita_telefono=not telefono
         )
@@ -77,7 +91,7 @@ def enriquecer_lead(lead: dict, reglas: dict) -> dict:
         if not idioma_web:
             idioma_web = info["idioma_web"]
             idioma_fuente = info["idioma_fuente"]
-    elif web.startswith(("http://", "https://")):
+    elif web_propia:
         info = analizar_sitio_prospecto(web, necesita_correo=False, necesita_telefono=False)
         if not idioma_web:
             idioma_web = info["idioma_web"]
@@ -164,9 +178,17 @@ def encolar(
     simulado: bool = False,
     pais: str = "",
     notificar_telegram_buscar: bool | None = None,
+    max_encolar: int = 0,
+    resultado: dict | None = None,
 ) -> tuple[list[Path], int, int, StatsCalidad, list[dict]]:
+    """Encola y clasifica cada lead en exactamente una categoría de ``resultado``:
+    encolados, descartados, dudosos, solo_telefono, repetidos, sin_contacto, pendiente_limite.
+    """
     if notificar_telegram_buscar is None:
         notificar_telegram_buscar = True
+    res = resultado if resultado is not None else {}
+    for clave in CATEGORIAS_ENCOLAR:
+        res.setdefault(clave, [])
     inbox.mkdir(parents=True, exist_ok=True)
     cola = cola_dir or inbox.parent
     dudoso_dir = cola / "dudoso"
@@ -180,25 +202,44 @@ def encolar(
         stats_cal = StatsCalidad(aceptados=len(leads))
     else:
         aceptados, dudosos, solo_tel, desc_calidad, stats_cal = clasificar_lote(leads)
+    res["descartados"].extend(desc_calidad)
 
     escritos: list[Path] = []
     con_contacto = 0
     web_enriquecidos = 0
 
-    def _procesar_bucket(items: list[dict], carpeta: Path, marcar: bool) -> None:
+    def _procesar_bucket(items: list[dict], carpeta: Path, marcar: bool, categoria: str) -> None:
         nonlocal con_contacto, web_enriquecidos
         for lead in items:
+            nombre = lead.get("nombre") or "—"
             if en_lista_no_contactar(lead.get("nombre", ""), lead.get("web", "")):
+                res["descartados"].append(entrada_descarte(nombre, "lista no contactar", etapa="encolar"))
                 continue
             if marcar and ya_visto(lead.get("place_id", ""), lead.get("web", "")):
+                res["repetidos"].append(entrada_repetido(nombre, "registro_leads", ""))
+                continue
+            if marcar and max_encolar and len(escritos) >= max_encolar:
+                res["pendiente_limite"].append(
+                    entrada_descarte(nombre, f"límite de {max_encolar} por pasada", etapa="encolar")
+                )
                 continue
             enriquecido = enriquecer_lead(dict(lead), reglas)
             if enriquecido.get("web_enriquecido"):
                 web_enriquecidos += 1
+            if not tiene_medio_contacto(enriquecido):
+                res["sin_contacto"].append(entrada_sin_contacto(enriquecido))
+                continue
             if carpeta == inbox and not califica_lead(enriquecido):
+                score = enriquecido.get("puntaje")
+                res["descartados"].append(
+                    entrada_descarte(
+                        nombre, f"puntaje bajo ({score} < {puntaje_minimo()})", etapa="puntaje"
+                    )
+                )
                 continue
             payload = lead_a_inbox(enriquecido)
             path = _escribir_lead_cola(carpeta, payload)
+            res[categoria].append({"nombre": nombre, "archivo": path.name})
             if marcar:
                 marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
                 escritos.append(path)
@@ -237,12 +278,14 @@ def encolar(
                 con_contacto += 1
             time.sleep(0.05)
 
-    _procesar_bucket(aceptados, inbox, marcar=True)
+    _procesar_bucket(aceptados, inbox, marcar=True, categoria="encolados")
     for lead in dudosos:
         if pais and not simulado:
             append_dudoso_diario(pais, lead, lead.get("calidad_motivo") or "dudoso")
-    _procesar_bucket(dudosos, dudoso_dir, marcar=False)
-    _procesar_bucket(solo_tel, solo_tel_dir, marcar=False)
+    _procesar_bucket(dudosos, dudoso_dir, marcar=False, categoria="dudosos")
+    _procesar_bucket(solo_tel, solo_tel_dir, marcar=False, categoria="solo_telefono")
+    if pais:
+        append_sin_contacto_diario(pais, res["sin_contacto"])
 
     return escritos, con_contacto, web_enriquecidos, stats_cal, desc_calidad
 
@@ -337,12 +380,11 @@ def prospectar_un_pais(
         }
 
     cola_dir = inbox.parent
-    nuevos, repetidos, repetidos_detalle = clasificar_novedad_detalle(leads, cola_dir)
-    descartes = list((fuente_stats or {}).get("descartes") or [])
-    con_contacto_encontrados = sum(
-        1 for lead in leads if (lead.get("telefono") or lead.get("correo") or "").strip()
-    )
-    paths, con_contacto, web_enriquecidos, stats_cal, desc_calidad = encolar(
+    descartes_fuente = list((fuente_stats or {}).get("descartes") or [])
+    repetidos_fusion = list((fuente_stats or {}).get("repetidos_fusion") or [])
+    nuevos, repetidos, repetidos_novedad = clasificar_novedad_detalle(leads, cola_dir)
+    resultado: dict = {}
+    paths, con_contacto, web_enriquecidos, stats_cal, _desc_calidad = encolar(
         nuevos,
         inbox,
         reglas,
@@ -350,8 +392,19 @@ def prospectar_un_pais(
         simulado=simulado,
         pais=pais,
         notificar_telegram_buscar=notificar_telegram_buscar,
+        max_encolar=max_leads,
+        resultado=resultado,
     )
-    descartes = list(descartes) + list(desc_calidad)
+    descartes = descartes_fuente + resultado["descartados"]
+    repetidos_detalle = repetidos_fusion + repetidos_novedad + resultado["repetidos"]
+    conteo = conteo_isla(
+        encontrados=len(descartes_fuente) + len(repetidos_fusion) + len(leads),
+        descartados=len(descartes),
+        repetidos=len(repetidos_detalle),
+        resultado=resultado,
+    )
+    if conteo["sin_clasificar"]:
+        registrar_evento({"evento": "conteo_no_cuadra", "pais": pais, **conteo})
     if not simulado:
         append_isla_en_archivo_diario(pais, descartes, repetidos_detalle)
         registrar_log_descartes_isla(pais, descartes, repetidos_detalle)
@@ -370,10 +423,10 @@ def prospectar_un_pais(
         "pais": pais,
         "encolados": len(paths),
         "con_contacto": con_contacto,
-        "con_contacto_encontrados": con_contacto_encontrados,
-        "encontrados": len(leads),
+        "encontrados": conteo["encontrados"],
         "nuevos": len(nuevos),
-        "repetidos": len(repetidos),
+        "repetidos": conteo["repetidos"],
+        "conteo": conteo,
         "descartes": descartes,
         "repetidos_detalle": repetidos_detalle,
         "fuente_stats": fuente_stats,
@@ -384,6 +437,23 @@ def prospectar_un_pais(
     }
 
 
+def conteo_isla(*, encontrados: int, descartados: int, repetidos: int, resultado: dict) -> dict:
+    """Una entrada por categoría; ``sin_clasificar`` debe ser 0 (si no, hay leads perdidos)."""
+    conteo = {
+        "encontrados": encontrados,
+        "encolados": len(resultado.get("encolados") or []),
+        "descartados": descartados,
+        "dudosos": len(resultado.get("dudosos") or []),
+        "solo_telefono": len(resultado.get("solo_telefono") or []),
+        "repetidos": repetidos,
+        "sin_contacto": len(resultado.get("sin_contacto") or []),
+        "pendiente_limite": len(resultado.get("pendiente_limite") or []),
+    }
+    suma = sum(v for k, v in conteo.items() if k != "encontrados")
+    conteo["sin_clasificar"] = encontrados - suma
+    return conteo
+
+
 def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
     if solo_listar:
         return
@@ -391,17 +461,13 @@ def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
     if stats.get("isla_fallida"):
         avisar_isla_fallida(pais, simulado=simulado)
         return
+    if not stats.get("conteo"):
+        return
     avisar_isla_encontradas(
         pais,
-        int(stats.get("encontrados", stats.get("leads", 0))),
-        stats.get("fuente_stats") or {},
-        int(stats.get("nuevos", stats.get("encolados", 0))),
-        int(stats.get("repetidos", 0)),
-        int(stats.get("con_contacto_encontrados", stats.get("con_contacto", 0))),
+        stats["conteo"],
         simulado=simulado,
         descartes=stats.get("descartes") or [],
-        repetidos_detalle=stats.get("repetidos_detalle") or [],
-        stats_calidad=stats.get("stats_calidad") or (stats.get("fuente_stats") or {}).get("calidad") or {},
     )
 
 
@@ -413,6 +479,30 @@ def prospectar(
     solo_listar: bool = False,
     tipo_filtro: str = "",
     buscar_global: bool = False,
+) -> dict:
+    import os
+
+    if not simulado:
+        return _prospectar(pais_cli, max_leads, inbox, simulado, solo_listar, tipo_filtro, buscar_global)
+    previo = os.environ.get("B2B_SIMULADO")
+    os.environ["B2B_SIMULADO"] = "1"
+    try:
+        return _prospectar(pais_cli, max_leads, inbox, simulado, solo_listar, tipo_filtro, buscar_global)
+    finally:
+        if previo is None:
+            os.environ.pop("B2B_SIMULADO", None)
+        else:
+            os.environ["B2B_SIMULADO"] = previo
+
+
+def _prospectar(
+    pais_cli: str | None,
+    max_leads: int,
+    inbox: Path,
+    simulado: bool,
+    solo_listar: bool,
+    tipo_filtro: str,
+    buscar_global: bool,
 ) -> dict:
     fuente = "simulado" if simulado else resolver_fuente_leads()
     import os

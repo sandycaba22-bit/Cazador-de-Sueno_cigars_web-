@@ -514,7 +514,7 @@ def _buscar_en_pais_osm_cuerpo(
         file=sys.stderr,
     )
     registrar_evento({"evento": "osm_conteo_isla", "pais": pais, **meta})
-    return candidatos[:limite], llamadas, meta
+    return candidatos, llamadas, meta
 
 
 def buscar_en_pais_osm(

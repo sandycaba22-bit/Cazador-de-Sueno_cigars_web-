@@ -48,32 +48,35 @@ def recolectar_pais_cuadricula(
     else:
         inicio = 0
     todos: list[dict] = []
+    descartes: list[dict] = []
     llamadas = 0
     max_c = _max_celdas_por_pais()
     fin = min(len(celdas), inicio + max_c)
+    hecho = inicio
     for idx in range(inicio, fin):
         _pausa_larga_entre_celdas()
-        batch, ll = buscar_celda(pais, iso, celdas[idx], idx)
+        batch, ll = buscar_celda(pais, iso, celdas[idx], idx, descartes=descartes)
         llamadas += ll
         todos.extend(batch)
+        hecho = idx + 1
         guardar_estado_global(
             {"pais": pais, "iso": iso, "pais_idx": estado.get("pais_idx", 0), "celda_idx": idx + 1}
         )
         if len(todos) >= limite * 3:
             break
-    descartes: list[dict] = []
-    fusionados = dedupe_y_fusionar(todos, descartes)
     stats = {
         "modo": "cuadricula",
-        "celdas": fin - inicio,
+        "celdas": hecho - inicio,
         "celda_inicio": inicio,
         "celda_total": len(celdas),
-        "descartes_fusion": descartes,
+        "descartes": descartes,
     }
-    if fin >= len(celdas):
+    if hecho >= len(celdas):
         guardar_estado_global({"pais": pais, "iso": iso, "celda_idx": 0, "completo": True})
-    registrar_evento({"evento": "buscar_global_celdas", "pais": pais, **stats, "raw": len(todos)})
-    return fusionados[: limite * 2], llamadas, stats
+    registrar_evento(
+        {"evento": "buscar_global_celdas", "pais": pais, **stats, "raw": len(todos), "descartes": len(descartes)}
+    )
+    return todos, llamadas, stats
 
 
 def siguiente_pais_cola() -> dict | None:
@@ -150,11 +153,15 @@ def recolectar_leads_global(
                     nombre, tipos, limite, tipo_filtro, simulado=False
                 )
                 stats.update(stats_osm)
-                return leads[:limite], llamadas, stats
+                return leads, llamadas, stats
             d_leads, llamadas_d, d_stats = _complemento_dealers(nombre, tipos, limite, tipo_filtro)
             stats.update(d_stats)
-            todos = dedupe_y_fusionar(leads + d_leads)
-            return todos[:limite], llamadas + llamadas_d, stats
+            descartes_fusion: list[dict] = []
+            repetidos_fusion: list[dict] = []
+            todos = dedupe_y_fusionar(leads + d_leads, descartes_fusion, repetidos_fusion)
+            stats["descartes"] = list(stats.get("descartes") or []) + descartes_fusion
+            stats["repetidos_fusion"] = repetidos_fusion
+            return todos, llamadas + llamadas_d, stats
         leads, llamadas, stats_osm = recolectar_leads_pais(
             nombre, tipos, limite, tipo_filtro, simulado=False
         )

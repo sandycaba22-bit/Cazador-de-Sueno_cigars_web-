@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sys
 
-from b2b.descartes import lineas_resumen_descartes
+from b2b.descartes import resumen_motivos
 from b2b.logging_ops import registrar_evento
 
 
@@ -18,7 +18,10 @@ def _aviso_cero_habilitado() -> bool:
 
 def notificar_buscar(texto: str, simulado: bool = False) -> None:
     """Envía texto al chat B2B; no lanza excepción (el barrido sigue)."""
-    if simulado or not (texto or "").strip():
+    if not (texto or "").strip():
+        return
+    if simulado:
+        print(f"[Telegram simulado] {texto.strip()}", file=sys.stderr)
         return
     try:
         from telegram_bot import enviar_texto_telegram, load_local_env
@@ -31,44 +34,36 @@ def notificar_buscar(texto: str, simulado: bool = False) -> None:
         print(f"Aviso Telegram no enviado: {msg}", file=sys.stderr)
 
 
+def texto_conteo_isla(isla: str, conteo: dict, descartes: list | None = None) -> str:
+    """Resumen corto; la suma de categorías es igual a 'encontrados'."""
+    partes = [
+        f"{conteo.get('encolados', 0)} encolados",
+        f"{conteo.get('descartados', 0)} descartados",
+        f"{conteo.get('dudosos', 0)} dudosos",
+        f"{conteo.get('repetidos', 0)} repetidos",
+        f"{conteo.get('sin_contacto', 0)} sin contacto",
+    ]
+    if conteo.get("solo_telefono"):
+        partes.insert(3, f"{conteo['solo_telefono']} solo teléfono")
+    if conteo.get("pendiente_limite"):
+        partes.append(f"{conteo['pendiente_limite']} pendientes (límite)")
+    lineas = [f"📍 {isla}: {conteo.get('encontrados', 0)} encontrados = " + " · ".join(partes)]
+    if descartes:
+        lineas.append("Descartes: " + resumen_motivos(descartes))
+    if conteo.get("sin_clasificar"):
+        lineas.append(f"⚠️ {conteo['sin_clasificar']} sin clasificar (revisar log)")
+    return "\n".join(lineas)
+
+
 def avisar_isla_encontradas(
     isla: str,
-    encontrados: int,
-    fuente_stats: dict,
-    nuevos: int,
-    repetidos: int,
-    con_contacto: int,
+    conteo: dict,
     simulado: bool = False,
     descartes: list | None = None,
-    repetidos_detalle: list | None = None,
-    stats_calidad: dict | None = None,
 ) -> None:
-    cal = stats_calidad or fuente_stats.get("calidad") or {}
-    acept = int(cal.get("aceptados", 0))
-    dud = int(cal.get("dudosos", 0))
-    wc = int(cal.get("web_caida", 0))
-    dw = int(cal.get("descartados_web", 0))
-    dt = int(cal.get("descartados_tipo", 0))
-    extra_desc = lineas_resumen_descartes(descartes or [], repetidos_detalle or [])
-    tiene_detalle = bool(extra_desc)
-    if encontrados <= 0 and nuevos <= 0 and not _aviso_cero_habilitado() and not tiene_detalle:
+    if int(conteo.get("encontrados", 0)) <= 0 and not _aviso_cero_habilitado():
         return
-    resumen_cal = (
-        f"aceptados {acept} · dudosos {dud} · web_caida {wc} · "
-        f"desc web {dw} · desc tipo {dt}"
-    )
-    if encontrados <= 0 and nuevos <= 0 and _aviso_cero_habilitado():
-        lineas = [
-            f"📍 {isla}: 0 encontrados · {resumen_cal} · "
-            f"0 nuevos · {repetidos} repetidos · {con_contacto} con contacto",
-        ]
-        lineas.extend(extra_desc)
-        notificar_buscar("\n".join(lineas), simulado=simulado)
-        return
-    lineas = [f"📍 {isla}: {nuevos} nuevos encolados · {con_contacto} con contacto · {resumen_cal}"]
-    if repetidos:
-        lineas.append(f"↩️ {repetidos} repetidos (no reenviados)")
-    notificar_buscar("\n".join(lineas), simulado=simulado)
+    notificar_buscar(texto_conteo_isla(isla, conteo, descartes), simulado=simulado)
 
 
 def avisar_isla_fallida(isla: str, simulado: bool = False) -> None:

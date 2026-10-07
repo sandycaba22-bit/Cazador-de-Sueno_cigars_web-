@@ -95,6 +95,54 @@ def append_isla_en_archivo_diario(
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def entrada_sin_contacto(lead: dict) -> dict[str, str]:
+    return {
+        "nombre": (lead.get("nombre") or "—")[:120],
+        "fuente": (lead.get("fuente") or "")[:60],
+        "direccion": (lead.get("direccion") or "")[:200],
+        "place_id": (lead.get("place_id") or "")[:80],
+        "web": (lead.get("web") or "")[:200],
+    }
+
+
+def append_sin_contacto_diario(pais: str, filas: list[dict[str, Any]]) -> None:
+    if not filas:
+        return
+    path = state_file(f"sin_contacto_{fecha_archivo_dia()}.json")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload: dict = {}
+    if path.is_file():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+    payload.setdefault("fecha", fecha_archivo_dia())
+    payload["actualizado"] = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+    islas = payload.setdefault("islas", {})
+    prev = list(islas.get(pais) or [])
+    vistos = {(r.get("nombre"), r.get("place_id")) for r in prev}
+    for fila in filas:
+        clave = (fila.get("nombre"), fila.get("place_id"))
+        if clave not in vistos:
+            prev.append(fila)
+            vistos.add(clave)
+    islas[pais] = prev
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def resumen_motivos(descartes: list[dict[str, Any]], max_motivos: int = 4) -> str:
+    """'web muerta ×2, vape/smoke shop ×1' (los más frecuentes)."""
+    cuenta: dict[str, int] = {}
+    for row in descartes:
+        mot = (row.get("motivo") or "descartado").strip()
+        cuenta[mot] = cuenta.get(mot, 0) + 1
+    orden = sorted(cuenta.items(), key=lambda kv: (-kv[1], kv[0]))
+    partes = [f"{m} ×{n}" for m, n in orden[:max_motivos]]
+    if len(orden) > max_motivos:
+        partes.append(f"+{len(orden) - max_motivos} motivos")
+    return ", ".join(partes)
+
+
 def registrar_log_descartes_isla(
     pais: str,
     descartes: list[dict[str, Any]],
