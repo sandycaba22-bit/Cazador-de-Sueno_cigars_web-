@@ -25,14 +25,17 @@ def puntuar_lead(lead: dict) -> tuple[int, dict]:
     tipo = (lead.get("tipo") or lead.get("tipo_negocio") or "tienda").lower()
     detalle["tipo"] = PESO_TIPO.get(tipo, 1)
 
-    web = (lead.get("web") or "").strip()
-    if web.startswith(("http://", "https://")) and "google.com/maps" not in web.lower():
+    from b2b.website import dominio_negocio
+
+    if dominio_negocio((lead.get("web") or "").strip()):
         detalle["web"] = 2
-    elif web.startswith(("http://", "https://")):
-        detalle["web"] = 1
+    if lead.get("vende_cigarros") is True:
+        detalle["web_cigarros"] = 2
 
     if (lead.get("telefono") or "").strip():
         detalle["telefono"] = 1
+    if any((lead.get(k) or "").strip() for k in ("instagram", "facebook", "whatsapp")):
+        detalle["redes"] = 1
 
     if (lead.get("correo") or "").strip():
         detalle["correo"] = 2
@@ -62,6 +65,8 @@ def puntuar_lead(lead: dict) -> tuple[int, dict]:
             detalle["contacto_osm"] = 2
         elif lead.get("osm_shop_tobacco"):
             detalle["tabaco_osm"] = 2
+    if fuente.startswith("google_places") and lead.get("business_status") == "OPERATIONAL":
+        detalle["google_operativo"] = 1
 
     total = sum(detalle.values())
     return total, detalle

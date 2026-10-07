@@ -112,31 +112,10 @@ def agregar_no_contactar(nombre: str, web: str = "", motivo: str = "") -> None:
 
 
 def tiene_medio_contacto(payload: dict) -> bool:
-    """Teléfono, correo o web propia del negocio (un link de mapa no cuenta)."""
+    """Teléfono, correo, web propia, Instagram, Facebook o WhatsApp (un link de mapa no cuenta)."""
     from b2b.website import dominio_negocio
 
-    tel = (payload.get("telefono") or "").strip()
-    correo = (payload.get("correo") or "").strip()
-    if tel or correo:
-        return True
+    for campo in ("telefono", "correo", "instagram", "facebook", "whatsapp"):
+        if (payload.get(campo) or "").strip():
+            return True
     return bool(dominio_negocio((payload.get("web") or "").strip()))
-
-
-def urls_formulario_contacto(web: str) -> list[str]:
-    from b2b.website import dominio_negocio
-
-    if not dominio_negocio(web or ""):
-        return []
-    from b2b.website import CONTACT_PATHS
-    import urllib.parse
-
-    parsed = urllib.parse.urlparse(web)
-    base = f"{parsed.scheme}://{parsed.netloc}"
-    out: list[str] = []
-    for path in CONTACT_PATHS:
-        url = base + path
-        if url not in out:
-            out.append(url)
-        if len(out) >= 3:
-            break
-    return out

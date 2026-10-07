@@ -149,9 +149,10 @@ def senal_extra(lead: dict) -> bool:
     fuente = (lead.get("fuente") or "").lower()
     if fuente.startswith("dealer:"):
         return True
-    web = (lead.get("web") or "").strip()
-    if web.startswith(("http://", "https://")) and WEB_CIGAR_RE.search(web):
-        return True
+    for campo in ("web", "instagram", "facebook"):
+        url = (lead.get(campo) or "").strip()
+        if url.startswith(("http://", "https://")) and WEB_CIGAR_RE.search(url):
+            return True
     return False
 
 

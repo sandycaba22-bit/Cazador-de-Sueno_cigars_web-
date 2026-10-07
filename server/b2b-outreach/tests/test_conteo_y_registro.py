@@ -211,7 +211,7 @@ class TestConteoIsla(unittest.TestCase):
         with mock.patch.object(
             prospector, "buscar_en_pais", return_value=(leads, 0, {"descartes": descartes_fuente})
         ), mock.patch.object(prospector, "clasificar_lote", side_effect=fake_clasificar), mock.patch.object(
-            prospector, "enriquecer_lead", side_effect=lambda lead, _r: dict(lead, puntaje=9)
+            prospector, "enriquecer_lead", side_effect=lambda lead, _r, **_kw: dict(lead, puntaje=9)
         ), mock.patch.object(prospector, "califica_lead", return_value=True), mock.patch.object(
             prospector.time, "sleep"
         ):

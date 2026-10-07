@@ -10,7 +10,6 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
-from b2b.budget import puede_llamar
 from b2b.country_rules import (
     buscar_pais,
     cargar_reglas,
@@ -37,7 +36,8 @@ from b2b.descartes import (
 from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
 from b2b.calidad_lead import StatsCalidad, clasificar_lote
 from b2b.telegram_gestion import tiene_medio_contacto
-from b2b.website import analizar_sitio_prospecto, dominio_negocio, web_confiable_para_idioma
+from b2b.contacto_web import extraer_contactos, normalizar_canales
+from b2b.website import dominio_negocio, web_confiable_para_idioma
 
 SLUG_RE = __import__("re").compile(r"[^a-z0-9]+")
 
@@ -70,7 +70,8 @@ def resolver_pais_objetivo(pais_cli: str | None) -> dict:
     return paises_ordenados_por_dificultad()[0]
 
 
-def enriquecer_lead(lead: dict, reglas: dict) -> dict:
+def enriquecer_lead(lead: dict, reglas: dict, simulado: bool = False) -> dict:
+    normalizar_canales(lead)
     web = lead.get("web") or ""
     correo = (lead.get("correo") or "").strip()
     fuente_correo = lead.get("fuente_correo") or ""
@@ -78,23 +79,21 @@ def enriquecer_lead(lead: dict, reglas: dict) -> dict:
     idioma_fuente = (lead.get("idioma_fuente") or "").strip()
     telefono = (lead.get("telefono") or "").strip()
     web_enriquecido = False
-    web_propia = bool(dominio_negocio(web))
-    if web_propia and (not correo or not telefono):
-        info = analizar_sitio_prospecto(
-            web, necesita_correo=not correo, necesita_telefono=not telefono
-        )
-        if not correo and info.get("correo"):
+    if dominio_negocio(web) and not simulado and web_confiable_para_idioma(web):
+        info = extraer_contactos(web)
+        if not correo and info["correo"]:
             correo = info["correo"]
             fuente_correo = info["fuente_correo"]
             web_enriquecido = True
-        if not telefono and info.get("telefono"):
+        if not telefono and info["telefono"]:
             telefono = info["telefono"]
             web_enriquecido = True
-        if not idioma_web:
-            idioma_web = info["idioma_web"]
-            idioma_fuente = info["idioma_fuente"]
-    elif web_propia:
-        info = analizar_sitio_prospecto(web, necesita_correo=False, necesita_telefono=False)
+        for campo in ("instagram", "facebook", "whatsapp", "formulario"):
+            if not (lead.get(campo) or "").strip() and info[campo]:
+                lead[campo] = info[campo]
+                web_enriquecido = True
+        if info["vende_cigarros"] is not None:
+            lead["vende_cigarros"] = info["vende_cigarros"]
         if not idioma_web:
             idioma_web = info["idioma_web"]
             idioma_fuente = info["idioma_fuente"]
@@ -156,6 +155,14 @@ def lead_a_inbox(lead: dict) -> dict:
         "lat": lead.get("lat"),
         "lon": lead.get("lon"),
         "whatsapp": lead.get("whatsapp") or "",
+        "instagram": lead.get("instagram") or "",
+        "facebook": lead.get("facebook") or "",
+        "formulario": lead.get("formulario") or "",
+        "maps_url": lead.get("maps_url") or "",
+        "telefono_internacional": lead.get("telefono_internacional") or "",
+        "vende_cigarros": lead.get("vende_cigarros"),
+        "business_status": lead.get("business_status") or "",
+        "fuente": lead.get("fuente") or "",
         "telegram_notificado": bool(lead.get("telegram_notificado")),
     }
 
@@ -225,7 +232,7 @@ def encolar(
                     entrada_descarte(nombre, f"límite de {max_encolar} por pasada", etapa="encolar")
                 )
                 continue
-            enriquecido = enriquecer_lead(dict(lead), reglas)
+            enriquecido = enriquecer_lead(dict(lead), reglas, simulado=simulado)
             if enriquecido.get("web_enriquecido"):
                 web_enriquecidos += 1
             if not tiene_medio_contacto(enriquecido):
@@ -371,7 +378,7 @@ def prospectar_un_pais(
         }
     if solo_listar:
         for lead in leads:
-            print(json.dumps(enriquecer_lead(dict(lead), reglas), ensure_ascii=False))
+            print(json.dumps(enriquecer_lead(dict(lead), reglas, simulado=simulado), ensure_ascii=False))
         registrar_busqueda(pais, llamadas, len(leads), simulado, fuente=fuente)
         return {
             "pais": pais,
@@ -589,7 +596,7 @@ def prospectar_turno_global(
             avanzar_siguiente_pais()
             raise ValueError(f"País en cola sin country_rules.json: {fila['pais']}")
 
-    fuente = "simulado" if simulado else "osm"
+    fuente = "simulado" if simulado else resolver_fuente_leads()
     out = prospectar_un_pais(
         reglas,
         max_leads,
@@ -671,10 +678,6 @@ def prospectar_prioridad_inicial(
             if restante <= 0:
                 break
         print(f"Buscando en: {reglas['pais']}…", file=sys.stderr)
-        if fuente == "google" and not simulado and not puede_llamar():
-            registrar_presupuesto_agotado()
-            presupuesto_agotado = True
-            break
         stats = prospectar_un_pais(
             reglas,
             restante,
@@ -705,7 +708,7 @@ def prospectar_prioridad_inicial(
         if stats.get("presupuesto_agotado"):
             presupuesto_agotado = True
             break
-        if fuente == "osm" and not simulado:
+        if fuente in ("osm", "google", "ambas") and not simulado:
             restantes = max_paises - paises_usados
             if restantes > 0 and total_encolados < max_leads:
                 time.sleep(4)

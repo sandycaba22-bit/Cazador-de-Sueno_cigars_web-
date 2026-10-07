@@ -6,6 +6,30 @@ from b2b.website import web_confiable_para_idioma
 PAPIAMENTO_PAISES = {"aruba", "curacao", "curaçao"}
 IDIOMAS_BORRADOR = frozenset({"es", "en", "fr", "pt", "nl", "de", "it"})
 
+# Idioma fijo del borrador por isla (gana a lo que diga la web del negocio).
+IDIOMA_ISLA = {
+    "aruba": "en",
+    "curacao": "en",
+    "curaçao": "en",
+    "sint maarten": "en",
+    "bahamas": "en",
+    "cayman islands": "en",
+    "jamaica": "en",
+    "barbados": "en",
+    "turks and caicos islands": "en",
+    "trinidad and tobago": "en",
+    "saint martin": "fr",
+    "guadeloupe": "fr",
+    "martinique": "fr",
+    "puerto rico": "es",
+}
+
+
+def idioma_isla(pais: str) -> str:
+    entry = buscar_pais(pais or "")
+    nombre = (entry or {}).get("pais") or pais or ""
+    return IDIOMA_ISLA.get(nombre.strip().lower(), "")
+
 
 def idioma_para_lead(
     pais: str,
@@ -14,10 +38,13 @@ def idioma_para_lead(
     preferido: str = "",
     web: str = "",
 ) -> str:
-    """Preferido → web del negocio (si es fiable) → reglas por país."""
+    """Preferido → idioma fijo de la isla → web del negocio (si es fiable) → reglas por país."""
     pref = (preferido or "").strip().lower()
     if pref in IDIOMAS_BORRADOR:
         return pref
+    fijo = idioma_isla(pais)
+    if fijo:
+        return fijo
     url = (web or "").strip()
     codigo_web = (idioma_web or "").strip().lower().split("-")[0]
     if url and not web_confiable_para_idioma(url):
@@ -38,6 +65,9 @@ def idioma_para_pais(pais: str, preferido: str = "") -> str:
     pref = (preferido or "").strip().lower()
     if pref in idiomas:
         return pref
+    fijo = idioma_isla(pais)
+    if fijo:
+        return fijo
     if pref == "pap" and pais.strip().lower() in PAPIAMENTO_PAISES:
         return "pap"
     pais_l = pais.strip().lower()

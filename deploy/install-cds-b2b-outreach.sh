@@ -84,7 +84,8 @@ if [[ -n "$MERGE_SECRETS" ]]; then
       touch "$ENV_FILE"
     fi
   fi
-  for key in TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID SENDER_NAME SENDER_CONTACT FIRMA_EMAIL FIRMA_TELEFONO; do
+  for key in TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID SENDER_NAME SENDER_CONTACT FIRMA_EMAIL FIRMA_TELEFONO \
+      GOOGLE_PLACES_API_KEY; do
     _merge_key_from "$MERGE_SECRETS" "$key" "$ENV_FILE"
   done
   chown root:www-data "$ENV_FILE"
@@ -115,10 +116,30 @@ if ! _env_has_valid_telegram "$ENV_FILE"; then
   fi
 fi
 
-if grep -qE '^FUENTE_LEADS=' "$ENV_FILE"; then
-  sed -i 's|^FUENTE_LEADS=.*|FUENTE_LEADS=osm|' "$ENV_FILE"
+# Solo agrega claves que falten (nunca cambia valores existentes ni los imprime).
+_add_if_missing() {
+  local key="$1" val="$2"
+  if ! grep -qE "^${key}=" "$ENV_FILE"; then
+    printf '%s=%s\n' "$key" "$val" >> "$ENV_FILE"
+    echo "Agregada $key a $ENV_FILE."
+  fi
+}
+# El instalador anterior forzaba FUENTE_LEADS=osm en cada despliegue; se migra una vez a
+# "ambas" (sin clave sigue siendo solo OSM). Para fijar osm a mano, añade la línea
+# "# B2B_FUENTE_MANUAL" al archivo y el instalador no volverá a tocarla.
+if grep -qxE 'FUENTE_LEADS=osm' "$ENV_FILE" && ! grep -qE '^# B2B_FUENTE_MANUAL' "$ENV_FILE"; then
+  sed -i 's|^FUENTE_LEADS=osm$|FUENTE_LEADS=ambas|' "$ENV_FILE"
+  echo "FUENTE_LEADS: osm (puesto por el instalador anterior) -> ambas."
+fi
+_add_if_missing FUENTE_LEADS ambas
+_add_if_missing GOOGLE_PLACES_API_KEY ""
+_add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_DAY 30
+_add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_MONTH 900
+
+if grep -qE '^GOOGLE_PLACES_API_KEY=.+' "$ENV_FILE"; then
+  echo "Google Places: clave presente (no se muestra)."
 else
-  printf '\nFUENTE_LEADS=osm\n' >> "$ENV_FILE"
+  echo "Google Places: sin clave; el buscador usa solo OpenStreetMap."
 fi
 
 for unit in cds-b2b-outreach.service cds-b2b-buscar.service cds-b2b-buscar.timer; do

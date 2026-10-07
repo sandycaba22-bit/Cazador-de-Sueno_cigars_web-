@@ -30,8 +30,8 @@ class TestEmail(unittest.TestCase):
 
 
 class TestIdioma(unittest.TestCase):
-    def test_sint_maarten_nl(self):
-        self.assertEqual(idioma_para_pais("Sint Maarten"), "nl")
+    def test_sint_maarten_en(self):
+        self.assertEqual(idioma_para_pais("Sint Maarten"), "en")
 
     def test_aruba_en(self):
         self.assertEqual(idioma_para_pais("Aruba"), "en")

@@ -102,6 +102,7 @@ def entrada_sin_contacto(lead: dict) -> dict[str, str]:
         "direccion": (lead.get("direccion") or "")[:200],
         "place_id": (lead.get("place_id") or "")[:80],
         "web": (lead.get("web") or "")[:200],
+        "maps_url": (lead.get("maps_url") or "")[:300],
     }
 
 

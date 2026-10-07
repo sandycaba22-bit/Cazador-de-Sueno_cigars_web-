@@ -87,6 +87,24 @@ for d in "${SERVER_DIRS[@]}"; do
   sudo rm -f "$SITE_ROOT/$d/.env" "$SITE_ROOT/$d/.env.local" 2>/dev/null || true
 done
 
+# Buscador B2B: código y configuración. Nunca .env, cola ni estado (vive en /var/lib).
+B2B_SRC="$REPO_DIR/server/b2b-outreach"
+if [[ -d "$B2B_SRC" ]]; then
+  echo "    -> server/b2b-outreach/"
+  sudo mkdir -p "$SITE_ROOT/server/b2b-outreach"
+  tar -C "$B2B_SRC" \
+    --exclude='./.env' --exclude='./.env.local' --exclude='./cola' --exclude='./cola_*' \
+    --exclude='__pycache__' --exclude='.pytest_cache' --exclude='./logs' \
+    --exclude='./cache_osm_cuadricula' \
+    --exclude='./data/registro_leads.json' --exclude='./data/telegram_*.json' \
+    --exclude='./data/no_contactar_telegram.json' --exclude='./data/places_budget.json' \
+    --exclude='./data/google_places_cache.json' --exclude='./data/buscar_global_estado.json' \
+    --exclude='./data/descartados_*.json' --exclude='./data/dudosos_*.json' \
+    --exclude='./data/sin_contacto_*.json' \
+    -cf - . | sudo tar -C "$SITE_ROOT/server/b2b-outreach" -xf -
+  sudo rm -f "$SITE_ROOT/server/b2b-outreach/.env.local" 2>/dev/null || true
+fi
+
 # Unit files apuntan a /var/www/html (SITE_ROOT).
 if [[ -f "$REPO_DIR/server/commerce/cds-commerce.service" ]]; then
   sudo cp -a "$REPO_DIR/server/commerce/cds-commerce.service" /etc/systemd/system/cds-commerce.service
@@ -112,6 +130,13 @@ if systemctl list-unit-files | grep -q '^cds-commerce.service'; then
 fi
 if systemctl list-unit-files | grep -q '^cds-ai-sommelier.service'; then
   sudo systemctl restart cds-ai-sommelier || true
+fi
+# Buscador B2B: el vigilante se reinicia; la búsqueda solo si estaba corriendo.
+if systemctl list-unit-files | grep -q '^cds-b2b-outreach.service'; then
+  sudo systemctl restart cds-b2b-outreach || true
+fi
+if systemctl list-unit-files | grep -q '^cds-b2b-buscar.service'; then
+  sudo systemctl try-restart cds-b2b-buscar || true
 fi
 
 # --- 4. Verificacion ------------------------------------------------------------

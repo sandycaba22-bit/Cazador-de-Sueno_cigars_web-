@@ -99,8 +99,30 @@ def aplicar_reglas_web(lead: dict, web_info: dict, *, simulado: bool = False) ->
     return ResultadoCalidad(bucket="aceptado")
 
 
+def confirmar_cigarros_google(lead: dict, base: ResultadoCalidad, *, simulado: bool = False) -> ResultadoCalidad:
+    """Google: la web propia decide si un nombre ambiguo vende cigarros."""
+    if simulado or "google" not in (lead.get("fuente") or "").lower() or base.bucket == "descartado":
+        return base
+    from b2b.contacto_web import vende_cigarros
+
+    confirma = vende_cigarros((lead.get("web") or "").strip())
+    if confirma is None:
+        return base
+    lead["vende_cigarros"] = confirma
+    if confirma:
+        return ResultadoCalidad(bucket="aceptado", motivo="web confirma cigarros")
+    if base.bucket == "dudoso":
+        motivo = "sin señal de cigarros en el nombre ni en la web"
+        return ResultadoCalidad(
+            bucket="dudoso",
+            motivo=motivo,
+            descarte={"nombre": lead.get("nombre") or "—", "motivo": motivo, "etapa": "calidad_web"},
+        )
+    return base
+
+
 def evaluar_lead_completo(lead: dict, *, simulado: bool = False) -> ResultadoCalidad:
-    base = evaluar_senal_cigarro(lead)
+    base = confirmar_cigarros_google(lead, evaluar_senal_cigarro(lead), simulado=simulado)
     if base.bucket in ("descartado", "dudoso"):
         return base
 

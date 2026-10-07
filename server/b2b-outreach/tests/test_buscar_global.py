@@ -56,7 +56,8 @@ class TestTelegramProspecto(unittest.TestCase):
         self.assertIn("PROSPECTO", msg)
         self.assertIn("wa.me/", msg)
         self.assertIn(EMAIL_VP_VENTAS, msg)
-        self.assertIn("Mensaje para copiar", msg)
+        self.assertIn("Mensaje WhatsApp / Instagram", msg)
+        self.assertIn("Versión correo", msg)
 
     def test_tiene_medio_web(self):
         self.assertTrue(tiene_medio_contacto({"web": "https://shop.example"}))

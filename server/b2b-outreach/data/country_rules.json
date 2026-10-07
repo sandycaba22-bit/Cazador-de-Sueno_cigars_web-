@@ -10,6 +10,7 @@
     "Saint Martin",
     "Bahamas",
     "Cayman Islands",
+    "Turks and Caicos Islands",
     "Jamaica",
     "Barbados",
     "Trinidad and Tobago",
@@ -45,6 +46,7 @@
     "Saint Martin",
     "Bahamas",
     "Cayman Islands",
+    "Turks and Caicos Islands",
     "Jamaica",
     "Barbados",
     "Trinidad and Tobago",
@@ -288,6 +290,23 @@
           "url": "https://www.gov.ky/",
           "tipo": "secundaria",
           "consulta": "2026-10-04"
+        }
+      ]
+    },
+    {
+      "pais": "Turks and Caicos Islands",
+      "territorio": "Reino Unido",
+      "idiomas": ["en"],
+      "dificultad": 2,
+      "estado": "preliminar",
+      "verificado_el": null,
+      "licencia_comprador": "Importador con licencia local.",
+      "puntos_clave": ["Turismo de lujo (Providenciales); retail premium y resorts."],
+      "fuentes": [
+        {
+          "url": "https://www.gov.tc/",
+          "tipo": "secundaria",
+          "consulta": "2026-10-06"
         }
       ]
     },

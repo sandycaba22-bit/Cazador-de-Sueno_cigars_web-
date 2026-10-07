@@ -99,17 +99,16 @@ class TestPresupuestoPlaces(unittest.TestCase):
     def test_tope_detiene_busqueda(self):
         from b2b import places as places_mod
 
-        with patch.object(places_mod, "puede_llamar", return_value=False), patch.object(
-            places_mod, "registrar_presupuesto_agotado", lambda: Path("logs/test.jsonl")
+        with patch.object(places_mod.budget, "motivo_bloqueo", return_value="diario"), patch.object(
+            places_mod, "_avisar_tope"
+        ), patch.object(places_mod, "_post_search") as post, patch.object(
+            places_mod, "cache_path", return_value=Path(tempfile.mkdtemp()) / "cache.json"
         ):
-            leads, llamadas, _stats = places_mod.buscar_en_pais(
-                "Aruba",
-                ["tienda"],
-                5,
-                simulado=False,
-            )
+            leads, llamadas, stats = places_mod.buscar_google_pais("Aruba", ["tienda"])
+        post.assert_not_called()
         self.assertEqual(leads, [])
         self.assertEqual(llamadas, 0)
+        self.assertEqual(stats["presupuesto_agotado"], "diario")
 
 
 class TestCatalogoFaltante(unittest.TestCase):

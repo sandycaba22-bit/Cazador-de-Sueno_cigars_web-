@@ -1,51 +1,73 @@
 from __future__ import annotations
 
-import re
 import sys
-import time
+import urllib.parse
 
-from b2b.country_rules import buscar_pais
+from b2b.contacto_web import numero_whatsapp
 from b2b.idioma import idioma_para_lead
-from b2b.redactor import presentacion_prospecto_telegram
+from b2b.redactor import borrador_correo, borrador_corto, tipo_en_idioma
 from b2b.telegram_control import puede_enviar_telegram, pausa_entre_mensajes, registrar_envio_telegram
 from b2b.website import dominio_negocio, es_url_mapa
 from b2b.telegram_gestion import (
     registrar_pendiente,
     tiene_medio_contacto,
     token_callback,
-    urls_formulario_contacto,
     ya_gestionado_telegram,
 )
 
-
-def _solo_digitos(tel: str) -> str:
-    return re.sub(r"\D", "", tel or "")
+LIMITE_TELEGRAM = 4096
 
 
-def _tipo_etiqueta(tipo: str) -> str:
-    return (tipo or "tienda").replace("_", " ")
+def _maps_url(lead: dict) -> str:
+    url = (lead.get("maps_url") or "").strip()
+    if url:
+        return url
+    web = (lead.get("web") or "").strip()
+    return web if es_url_mapa(web) else ""
 
 
-def _lineas_contacto(lead: dict) -> list[str]:
+def _linea_rating(lead: dict) -> str:
+    rating = lead.get("rating")
+    reviews = lead.get("user_rating_count")
+    if rating in (None, ""):
+        return "⭐ Sin calificación en Google"
+    try:
+        return f"⭐ {float(rating):.1f} ({int(reviews or 0)} reseñas)"
+    except (TypeError, ValueError):
+        return "⭐ Sin calificación en Google"
+
+
+def link_whatsapp(lead: dict, borrador: str) -> str:
+    num = numero_whatsapp(lead)
+    if not num:
+        return ""
+    return f"https://wa.me/{num}?text={urllib.parse.quote(borrador)}"
+
+
+def _lineas_contacto(lead: dict, wa: str) -> list[str]:
     lineas: list[str] = []
     tel = (lead.get("telefono") or "").strip()
     if tel:
         lineas.append(f"📞 Teléfono: {tel}")
-        num = _solo_digitos(tel)
-        if len(num) >= 8:
-            lineas.append(f"💬 WhatsApp: https://wa.me/{num}")
+    if wa:
+        lineas.append(f"💬 WhatsApp con borrador: {wa}")
     correo = (lead.get("correo") or "").strip()
     if correo:
         lineas.append(f"✉️ Correo: {correo}")
     web = (lead.get("web") or "").strip()
     if dominio_negocio(web):
         lineas.append(f"🌐 Web: {web}")
-        for url in urls_formulario_contacto(web):
-            lineas.append(f"📝 Formulario / contacto: {url}")
-    elif es_url_mapa(web):
-        lineas.append(f"🗺️ Mapa: {web}")
-    if not lineas:
-        lineas.append("— sin contacto publicado")
+    for campo, icono, etiqueta in (
+        ("instagram", "📸", "Instagram"),
+        ("facebook", "👍", "Facebook"),
+        ("formulario", "📝", "Formulario"),
+    ):
+        valor = (lead.get(campo) or "").strip()
+        if valor:
+            lineas.append(f"{icono} {etiqueta}: {valor}")
+    maps = _maps_url(lead)
+    if maps:
+        lineas.append(f"🗺️ Google Maps: {maps}")
     return lineas
 
 
@@ -59,23 +81,28 @@ def mensaje_prospecto_completo(lead: dict, pais: str) -> str:
         preferido=(lead.get("idioma") or "").strip(),
         web=lead.get("web") or "",
     )
-    presentacion = presentacion_prospecto_telegram(nombre, idioma, tipo)
-    bloque_contacto = "\n".join(_lineas_contacto(lead))
+    corto = borrador_corto(nombre, idioma, tipo)
+    wa = link_whatsapp(lead, corto)
     partes = [
         f"📍 PROSPECTO · {pais}",
         f"🏪 {nombre}",
-        f"📋 Tipo: {_tipo_etiqueta(tipo)}",
+        f"📋 Tipo: {tipo_en_idioma(tipo, 'es')}",
         f"📌 Dirección: {dir_}",
+        _linea_rating(lead),
         "",
         "——— Contacto ———",
-        bloque_contacto,
+        *_lineas_contacto(lead, wa),
         "",
-        "——— Mensaje para copiar (tú envías al cliente) ———",
-        presentacion,
+        "——— Mensaje WhatsApp / Instagram (tú lo envías) ———",
+        corto,
     ]
+    if (lead.get("correo") or "").strip():
+        partes += ["", "——— Versión correo ———", borrador_correo(nombre, idioma, tipo)]
     texto = "\n".join(partes)
-    if len(texto) > 4000:
-        texto = texto[:3990] + "\n…"
+    if len(texto) > LIMITE_TELEGRAM and wa:
+        texto = texto.replace(f"💬 WhatsApp con borrador: {wa}", f"💬 WhatsApp: https://wa.me/{numero_whatsapp(lead)}")
+    if len(texto) > LIMITE_TELEGRAM:
+        texto = texto[: LIMITE_TELEGRAM - 10] + "\n…"
     return texto
 
 

@@ -126,7 +126,7 @@ def aceptar_lead_generico(lead: dict) -> bool:
 
 def fusionar_leads(base: dict, otro: dict) -> dict:
     out = dict(base)
-    for key in ("web", "telefono", "correo", "direccion", "place_id"):
+    for key in ("web", "telefono", "correo", "direccion", "place_id", "instagram", "facebook", "maps_url"):
         if not (out.get(key) or "").strip() and (otro.get(key) or "").strip():
             out[key] = otro[key]
     fuentes = {out.get("fuente", ""), otro.get("fuente", "")} - {""}
@@ -176,6 +176,55 @@ def dedupe_y_fusionar(
             por_clave[clave] = lead
             orden.append(clave)
     return [por_clave[k] for k in orden]
+
+
+def _claves_cruce(lead: dict) -> list[str]:
+    claves = []
+    dom = dominio_web(lead.get("web") or "")
+    if dom:
+        claves.append(f"dom:{dom}")
+    tel = re.sub(r"\D", "", lead.get("telefono_internacional") or lead.get("telefono") or "")[-8:]
+    if len(tel) >= 7:
+        claves.append(f"tel:{tel}")
+    nom = normalizar_nombre(lead.get("nombre") or "")
+    if len(nom) >= 4:
+        claves.append(f"nom:{nom}")
+    return claves
+
+
+def combinar_fuentes(
+    principales: list[dict], respaldo: list[dict], fusiones: list[dict] | None = None
+) -> list[dict]:
+    """Google (principal) + OSM (respaldo): el mismo negocio en ambas se fusiona y queda registrado."""
+    out = [dict(l) for l in principales]
+    indice: dict[str, int] = {}
+    for i, lead in enumerate(out):
+        for clave in _claves_cruce(lead):
+            indice.setdefault(clave, i)
+    for lead in respaldo:
+        hit = next(((c, indice[c]) for c in _claves_cruce(lead) if c in indice), None)
+        if hit is None:
+            out.append(lead)
+            for clave in _claves_cruce(lead):
+                indice.setdefault(clave, len(out) - 1)
+            continue
+        clave, i = hit
+        base = out[i].get("nombre") or "—"
+        nombre = lead.get("nombre") or "—"
+        if fusiones is not None:
+            fusiones.append(
+                {
+                    "nombre": nombre,
+                    "motivo": "fusionado_misma_clave",
+                    "etapa": "fusion_google_osm",
+                    "clave": clave,
+                    "fusionado_en": base,
+                    "nombres": [base, nombre],
+                    "fuente": lead.get("fuente") or "",
+                }
+            )
+        out[i] = fusionar_leads(out[i], lead)
+    return out
 
 
 def indice_cola_por_clave(cola_dir: Path) -> dict[str, tuple[str, Path]]:

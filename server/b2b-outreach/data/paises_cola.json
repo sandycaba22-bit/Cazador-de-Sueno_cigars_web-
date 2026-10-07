@@ -7,6 +7,7 @@
     {"pais": "Saint Martin", "iso3166": "MF", "idioma": "fr", "zona": "caribe", "prioridad": 4},
     {"pais": "Bahamas", "iso3166": "BS", "idioma": "en", "zona": "caribe", "prioridad": 5},
     {"pais": "Cayman Islands", "iso3166": "KY", "idioma": "en", "zona": "caribe", "prioridad": 6},
+    {"pais": "Turks and Caicos Islands", "iso3166": "TC", "idioma": "en", "zona": "caribe", "prioridad": 6},
     {"pais": "Jamaica", "iso3166": "JM", "idioma": "en", "zona": "caribe", "prioridad": 7},
     {"pais": "Barbados", "iso3166": "BB", "idioma": "en", "zona": "caribe", "prioridad": 8},
     {"pais": "Trinidad and Tobago", "iso3166": "TT", "idioma": "en", "zona": "caribe", "prioridad": 9},

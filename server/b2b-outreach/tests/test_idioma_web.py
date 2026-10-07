@@ -42,7 +42,8 @@ class TestIdiomaWeb(unittest.TestCase):
                 idioma_web="es",
                 web="https://cigar-shop.aw/",
             ),
-            "es",
+            "en",
+            "Aruba tiene idioma fijo (inglés) aunque la web esté en español",
         )
 
     def test_maps_no_pisa_idioma_del_pais(self):

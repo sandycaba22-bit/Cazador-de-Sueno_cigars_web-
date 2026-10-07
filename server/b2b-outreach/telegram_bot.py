@@ -993,8 +993,16 @@ def main(argv=None):
                     "Usa --simulado solo para pruebas.",
                     file=sys.stderr,
                 )
-            elif fuente == "google":
-                print("Buscador: Google Places (API de pago).", file=sys.stderr)
+            else:
+                from b2b.budget import estado
+
+                est = estado()
+                modo = "Google Places + OSM" if fuente == "ambas" else "Google Places (OSM de respaldo)"
+                print(
+                    f"Buscador: {modo}. Presupuesto Google hoy {est['dia']}/{est['max_dia']}, "
+                    f"mes {est['mes']}/{est['max_mes']}.",
+                    file=sys.stderr,
+                )
         elif buscar_global and not simulado:
             print(
                 "Buscador global: cola paises_cola.json, cuadrícula OSM, 2 mensajes Telegram/lead. "
@@ -1019,7 +1027,7 @@ def main(argv=None):
             )
         if stats.get("presupuesto_agotado"):
             print(
-                "Tope diario MAX_PLACES_CALLS_DIA alcanzado; búsqueda detenida (ver logs/).",
+                "Tope de Google Places alcanzado; Google detenido hasta el próximo periodo (ver logs/).",
                 file=sys.stderr,
             )
         if not args.solo_listar and stats.get("encolados", 0) == 0 and stats.get("fuente") == "osm":
