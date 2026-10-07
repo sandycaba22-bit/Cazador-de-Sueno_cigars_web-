@@ -4,24 +4,28 @@ import json
 import os
 import re
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from b2b import budget
-from b2b.contacto_web import normalizar_canales
+from b2b.contacto_web import normalizar_canales, tipo_url
 from b2b.country_rules import buscar_pais
 from b2b.logging_ops import registrar_evento, registrar_presupuesto_agotado
 from b2b.paths import FIXTURES, state_file
+from b2b.telefono import internacional
 
 PLACES_URL = "https://places.googleapis.com/v1/places:searchText"
 FIELD_MASK = (
-    "places.id,places.displayName,places.formattedAddress,places.location,"
-    "places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,"
-    "places.googleMapsUri,places.businessStatus,places.rating,places.userRatingCount,places.types"
+    "places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,"
+    "places.websiteUri,places.rating,places.userRatingCount,places.businessStatus,places.types"
 )
 PAGE_SIZE = 20
+MAPS_PLACE_URL = "https://www.google.com/maps/search/?api=1&query={nombre}&query_place_id={pid}"
+DEFAULT_MIN_RATING = 4.0
+DEFAULT_MIN_RESENAS = 5
 
 # (tipo de negocio, idioma, término). "*" = se busca en toda isla.
 TERMINOS_GOOGLE: tuple[tuple[str, str, str], ...] = (
@@ -54,12 +58,28 @@ QUERIES_BASE = {
 
 SOCIAL_PERSONAL = ("facebook.com/profile", "linkedin.com/in/")
 
-# Tras un 400/401/403 (clave inválida o API no habilitada) no se insiste en este proceso.
+# Tras cualquier error de Google (4xx, 5xx o sin respuesta) no se insiste en este proceso.
 _GOOGLE_DESACTIVADO: dict[str, str] = {}
+
+EXPLICACION_HTTP = {
+    0: "sin respuesta",
+    400: "petición inválida",
+    401: "clave inválida",
+    403: "clave inválida o Places API (New) no habilitada",
+    429: "cuota de Google agotada",
+}
 
 
 class PresupuestoPlacesAgotado(RuntimeError):
-    """Tope diario o mensual de llamadas a Google Places alcanzado."""
+    """Tope de la tanda, diario o mensual de llamadas a Google Places alcanzado."""
+
+
+class GooglePlacesError(RuntimeError):
+    """Error HTTP o de red de Google Places; ``codigo`` 0 = sin respuesta."""
+
+    def __init__(self, codigo: int, mensaje: str):
+        super().__init__(mensaje)
+        self.codigo = codigo
 
 
 def _slug(pais: str) -> str:
@@ -117,16 +137,21 @@ def _normalizar_place(raw: dict, pais: str, tipo_consulta: str = "") -> dict[str
     if tipo == "tienda" and tipo_consulta == "lounge":
         tipo = "lounge"
     loc = raw.get("location") or {}
-    intl = raw.get("internationalPhoneNumber") or ""
+    nacional = raw.get("nationalPhoneNumber") or ""
+    intl = raw.get("internationalPhoneNumber") or internacional(pais, nacional)
+    google_id = raw.get("id") or ""
+    maps = raw.get("googleMapsUri") or raw.get("maps_url") or ""
+    if not maps and google_id:
+        maps = MAPS_PLACE_URL.format(nombre=urllib.parse.quote(nombre), pid=urllib.parse.quote(google_id))
     lead = {
         "nombre": nombre,
         "pais": pais,
         "web": raw.get("websiteUri") or raw.get("web") or "",
-        "maps_url": raw.get("googleMapsUri") or raw.get("maps_url") or "",
-        "telefono": raw.get("nationalPhoneNumber") or intl or raw.get("telefono") or "",
+        "maps_url": maps,
+        "telefono": nacional or intl or raw.get("telefono") or "",
         "telefono_internacional": intl,
         "direccion": raw.get("formattedAddress") or raw.get("direccion") or "",
-        "place_id": raw.get("id") or raw.get("place_id") or "",
+        "place_id": google_id or raw.get("place_id") or "",
         "tipo_negocio": tipo,
         "fuente": raw.get("fuente") or "google_places",
         "rating": raw.get("rating"),
@@ -185,6 +210,11 @@ def isla_buscada_este_mes(pais: str, consultas: list[str] | None = None) -> bool
     return bool(consultas) and all(_clave_busqueda(pais, c) in data["busquedas"] for c in consultas)
 
 
+def islas_agotadas_google(paises: list[str]) -> bool:
+    """True si todas las islas de la lista ya se buscaron en Google este mes."""
+    return bool(paises) and all(isla_buscada_este_mes(p) for p in paises)
+
+
 # --- Llamada a la API -------------------------------------------------------------------
 
 
@@ -212,12 +242,52 @@ def _post_search(text_query: str, idioma: str = "") -> list[dict]:
             body = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
         detalle = _sin_clave(error.read().decode("utf-8", errors="replace"))[:300]
-        if error.code in (400, 401, 403):
-            _GOOGLE_DESACTIVADO["motivo"] = f"HTTP {error.code}"
-        raise RuntimeError(f"Google Places respondió {error.code}: {detalle}") from None
-    except (urllib.error.URLError, TimeoutError, OSError) as error:
-        raise RuntimeError(f"Google Places sin respuesta: {_sin_clave(str(error))[:200]}") from None
+        _GOOGLE_DESACTIVADO["motivo"] = f"HTTP {error.code}"
+        raise GooglePlacesError(error.code, f"Google Places respondió {error.code}: {detalle}") from None
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as error:
+        _GOOGLE_DESACTIVADO["motivo"] = "sin respuesta"
+        raise GooglePlacesError(0, f"Google Places sin respuesta: {_sin_clave(str(error))[:200]}") from None
     return body.get("places") or []
+
+
+def _min_rating() -> float:
+    try:
+        return float(os.getenv("GOOGLE_PLACES_MIN_RATING", "").strip() or DEFAULT_MIN_RATING)
+    except ValueError:
+        return DEFAULT_MIN_RATING
+
+
+def _min_resenas() -> int:
+    try:
+        return max(0, int(os.getenv("GOOGLE_PLACES_MIN_RESENAS", "").strip() or DEFAULT_MIN_RESENAS))
+    except ValueError:
+        return DEFAULT_MIN_RESENAS
+
+
+def motivo_no_seguro(raw: dict) -> str:
+    """'' si el lugar es un "negocio seguro": abierto, con teléfono, web y buenas reseñas."""
+    estado = raw.get("businessStatus") or "sin estado"
+    if estado != "OPERATIONAL":
+        return f"Google: {estado}"
+    if not (raw.get("nationalPhoneNumber") or raw.get("internationalPhoneNumber") or "").strip():
+        return "Google: sin teléfono"
+    web = (raw.get("websiteUri") or "").strip()
+    if not web or tipo_url(web) == "mapa":
+        return "Google: sin sitio web"
+    try:
+        rating = float(raw.get("rating"))
+    except (TypeError, ValueError):
+        return "Google: sin valoraciones"
+    minimo = _min_rating()
+    if rating < minimo:
+        return f"Google: rating {rating:.1f} (mínimo {minimo:.1f})"
+    try:
+        resenas = int(raw.get("userRatingCount") or 0)
+    except (TypeError, ValueError):
+        resenas = 0
+    if resenas < _min_resenas():
+        return f"Google: {resenas} reseñas (mínimo {_min_resenas()})"
+    return ""
 
 
 def consultas_google(pais: str, tipos: list[str]) -> list[tuple[str, str, str]]:
@@ -246,14 +316,37 @@ def _avisar_tope(motivo: str) -> None:
             f"⛔ Google Places: tope mensual alcanzado ({est['mes']}/{est['max_mes']} búsquedas). "
             "Sigo solo con OpenStreetMap hasta el mes que viene."
         )
+    elif motivo == "tanda":
+        nombre = "de la mañana" if est["tanda"] == "manana" else "de la tarde"
+        retomo = "en la tanda de la tarde (15:00)" if est["tanda"] == "manana" else "mañana a las 09:00"
+        texto = (
+            f"⏸️ Google Places: tanda {nombre} completa ({est['tanda_llamadas']}/{est['max_tanda']} "
+            f"búsquedas). Sigo con OpenStreetMap y retomo Google {retomo}."
+        )
     else:
         texto = (
             f"⛔ Google Places: tope diario alcanzado ({est['dia']}/{est['max_dia']} búsquedas). "
             "Sigo solo con OpenStreetMap y retomo Google mañana."
         )
+    _notificar(texto)
+
+
+def _notificar(texto: str) -> None:
     from b2b.telegram_buscar import notificar_buscar
 
     notificar_buscar(texto, simulado=False)
+
+
+def _avisar_error(error: GooglePlacesError) -> None:
+    codigo = error.codigo
+    registrar_evento({"evento": "google_places_error", "codigo": codigo, "error": _sin_clave(str(error))[:300]})
+    if not budget.marcar_aviso(f"error_{codigo}"):
+        return
+    explicacion = EXPLICACION_HTTP.get(codigo) or ("error de Google" if codigo >= 500 else "error")
+    etiqueta = f"respondió {codigo}" if codigo else "no respondió"
+    _notificar(
+        f"⚠️ Google Places {etiqueta} ({explicacion}). En esta corrida sigo solo con OpenStreetMap."
+    )
 
 
 def _orden_calidad(lead: dict) -> tuple:
@@ -281,6 +374,9 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
             raws = [cache["places"][pid] for pid in hit.get("ids", []) if pid in cache["places"]]
             stats["google_cache"] += 1
         else:
+            if _GOOGLE_DESACTIVADO:
+                stats["google_omitido"] = _GOOGLE_DESACTIVADO.get("motivo", "")
+                break
             motivo = budget.motivo_bloqueo()
             if motivo:
                 stats["presupuesto_agotado"] = motivo
@@ -291,6 +387,10 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
             except PresupuestoPlacesAgotado as error:
                 stats["presupuesto_agotado"] = str(error)
                 _avisar_tope(str(error))
+                break
+            except GooglePlacesError as error:
+                stats["google_error"] = _sin_clave(str(error))[:300]
+                _avisar_error(error)
                 break
             llamadas += 1
             ids = []
@@ -312,11 +412,11 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
     leads: list[dict] = []
     for raw, tipo in vistos.values():
         lead = _normalizar_place(raw, pais, tipo)
-        estado = lead.get("business_status") or "sin estado"
-        if estado != "OPERATIONAL":
+        motivo = motivo_no_seguro(raw)
+        if motivo:
             stats["descartes"].append(
-                {"nombre": lead["nombre"], "motivo": f"Google: {estado}", "etapa": "google_estado",
-                 "fuente": "google_places"}
+                {"nombre": lead["nombre"], "motivo": motivo, "etapa": "google_negocio_seguro",
+                 "fuente": "google_places", "maps_url": lead.get("maps_url", "")}
             )
             continue
         if not _es_negocio_b2b(lead["nombre"], raw.get("websiteUri") or ""):

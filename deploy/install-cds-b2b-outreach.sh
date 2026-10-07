@@ -135,9 +135,17 @@ _add_if_missing FUENTE_LEADS ambas
 _add_if_missing GOOGLE_PLACES_API_KEY ""
 _add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_DAY 30
 _add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_MONTH 900
+_add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_RUN 15
 
+# El bot también lee $B2B_DIR/.env (rellena lo que en $ENV_FILE esté vacío); www-data debe poder leerlo.
+if [[ -f "$B2B_DIR/.env" ]]; then
+  chown root:www-data "$B2B_DIR/.env"
+  chmod 0640 "$B2B_DIR/.env"
+fi
 if grep -qE '^GOOGLE_PLACES_API_KEY=.+' "$ENV_FILE"; then
-  echo "Google Places: clave presente (no se muestra)."
+  echo "Google Places: clave presente en $ENV_FILE (no se muestra)."
+elif [[ -f "$B2B_DIR/.env" ]] && grep -qE '^GOOGLE_PLACES_API_KEY=.+' "$B2B_DIR/.env"; then
+  echo "Google Places: clave presente en $B2B_DIR/.env (no se muestra)."
 else
   echo "Google Places: sin clave; el buscador usa solo OpenStreetMap."
 fi
@@ -151,6 +159,7 @@ done
 systemctl daemon-reload
 systemctl enable cds-b2b-outreach.service 2>/dev/null || true
 systemctl enable cds-b2b-buscar.timer 2>/dev/null || true
+systemctl restart cds-b2b-buscar.timer 2>/dev/null || true
 
 if _env_has_valid_telegram "$ENV_FILE"; then
   echo "Telegram: credenciales OK en $ENV_FILE."

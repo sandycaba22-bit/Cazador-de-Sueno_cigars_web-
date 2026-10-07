@@ -1,10 +1,11 @@
 [Unit]
-Description=Ejecutar buscador B2B OSM una vez al día (9 prospectos)
+Description=Buscador B2B en dos tandas diarias (09:00 y 15:00, hasta 15 búsquedas Google cada una)
 
 [Timer]
-OnCalendar=*-*-* 13:00:00
+OnCalendar=*-*-* 09:00:00 America/Santo_Domingo
+OnCalendar=*-*-* 15:00:00 America/Santo_Domingo
 Persistent=true
-RandomizedDelaySec=900
+RandomizedDelaySec=300
 
 [Install]
 WantedBy=timers.target

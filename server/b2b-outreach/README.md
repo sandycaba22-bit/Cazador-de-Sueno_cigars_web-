@@ -8,14 +8,16 @@ Idioma del borrador: **1)** idioma guardado en el lead, **2)** idioma fijo por i
 
 ## Google Places (New)
 
-- **Clave:** `GOOGLE_PLACES_API_KEY` solo en `/etc/cazador-de-suenos/b2b-outreach.env` (servidor) o en `.env` local. Nunca se imprime, ni en logs ni en errores (se reemplaza por `***`).
+- **Clave:** `GOOGLE_PLACES_API_KEY` en `/var/www/html/server/b2b-outreach/.env` o en `/etc/cazador-de-suenos/b2b-outreach.env`. Si en `/etc` está con valor, gana esa; si está vacía, se usa la del `.env` del módulo. Nunca se imprime, ni en logs ni en errores (se reemplaza por `***`).
 - **Fuente:** `FUENTE_LEADS=ambas` (Google primero + OSM, duplicados fusionados y anotados como `fusionado_misma_clave`), `google` (OSM solo si Google no da nada), `osm`, o `auto` (= `ambas` con clave, `osm` sin clave).
-- **Llamada:** una sola `POST https://places.googleapis.com/v1/places:searchText` por búsqueda (`pageSize` 20), con `X-Goog-FieldMask: places.id,places.displayName,places.formattedAddress,places.location,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.googleMapsUri,places.businessStatus,places.rating,places.userRatingCount,places.types`. **Sin Place Details.**
+- **Llamada:** una sola `POST https://places.googleapis.com/v1/places:searchText` por búsqueda (`pageSize` 20), con `X-Goog-FieldMask: places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.businessStatus,places.types`. **Sin Place Details.** El número internacional (para `wa.me`) se arma con el prefijo del país (`b2b/telefono.py`) y el link de Google Maps con el `place_id`.
 - **Búsquedas por isla y tipo, en el idioma local:** `cigar shop`, `cigar lounge` en todas; `tobacconist` (inglés), `tabaquería` (español), `sigarenwinkel` (neerlandés), `cave à cigares` (francés), según `idiomas` de `country_rules.json`.
-- **Filtro y orden:** solo `businessStatus = OPERATIONAL` (los demás quedan en descartes con motivo `Google: CLOSED_…`); orden por calificación y luego número de reseñas. Si el negocio tiene web propia se visita (`b2b/contacto_web.py` con `http_polite`, respeta robots) para confirmar que vende cigarros y sacar correo, Instagram, WhatsApp y formulario **solo si aparecen en la página**.
-- **Canales:** si `websiteUri` es Instagram o Facebook se guarda como red social, no como web. `googleMapsUri` se guarda en `maps_url`; un link de mapa nunca cuenta como web ni como contacto.
-- **Presupuesto:** `GOOGLE_PLACES_MAX_CALLS_PER_DAY` (30) y `GOOGLE_PLACES_MAX_CALLS_PER_MONTH` (900), contador en `data/places_budget.json` (en producción `/var/lib/cazador-de-suenos/b2b-outreach/data/`). Al llegar al tope: deja de llamar a Google, avisa una vez por Telegram y sigue con OSM; al día (o mes) siguiente retoma.
+- **Negocios seguros:** solo pasan los que cumplen todo: `businessStatus = OPERATIONAL`, teléfono, `websiteUri` (que no sea un mapa), `rating` ≥ 4.0 (`GOOGLE_PLACES_MIN_RATING`) y al menos 5 reseñas (`GOOGLE_PLACES_MIN_RESENAS`). Los demás quedan en descartes con el motivo (`Google: sin teléfono`, `Google: rating 3.6 (mínimo 4.0)`, …). Orden por calificación y luego número de reseñas. Si el negocio tiene web propia se visita (`b2b/contacto_web.py` con `http_polite`, respeta robots) para confirmar que vende cigarros y sacar correo, Instagram, WhatsApp y formulario **solo si aparecen en la página**.
+- **Canales:** si `websiteUri` es Instagram o Facebook se guarda como red social, no como web. Un link de mapa nunca cuenta como web ni como contacto.
+- **Presupuesto en dos tandas:** el timer corre a las 09:00 y a las 15:00 (hora de Santo Domingo, `B2B_TZ`). Cada tanda gasta como máximo `GOOGLE_PLACES_MAX_CALLS_PER_RUN` (15) búsquedas; el día, `GOOGLE_PLACES_MAX_CALLS_PER_DAY` (30); el mes, `GOOGLE_PLACES_MAX_CALLS_PER_MONTH` (900). Contador en `data/places_budget.json` (en producción `/var/lib/cazador-de-suenos/b2b-outreach/data/`); se cuenta antes de cada llamada. La tanda es "mañana" antes de las 12:00 y "tarde" después, así que correr el buscador a mano dos veces en la mañana no pasa de 15. Al llegar a un tope: deja de llamar a Google, avisa una vez por Telegram y sigue con OSM.
+- **Errores:** cualquier 4xx/5xx (incluida la cuota de Google, 429) o falta de respuesta apaga Google por el resto de la corrida, avisa una vez al día por Telegram y sigue con OpenStreetMap. Lo ya encontrado en esa isla se conserva.
 - **Caché:** `data/google_places_cache.json` guarda cada búsqueda (isla + término) del mes y los lugares por `place_id`; una isla ya buscada en el mes no gasta llamadas.
+- **Rotación:** `--buscar` recorre primero las islas de `prioridad_caribe`. Cuando todas ya se buscaron en Google este mes, pasa solo a la rotación global (`data/paises_cola.json`, un país por corrida); al terminar la cola vuelve a empezar.
 
 Mensaje por prospecto en Telegram: nombre, tipo, isla, dirección, calificación y reseñas, teléfono, link `wa.me` con el borrador ya escrito (solo con número internacional), correo, web, Instagram, Facebook, formulario encontrado, Google Maps y botones **Enviado / Descartar**. Plantilla corta para WhatsApp/Instagram (sin STOP) y, si hay correo, versión correo con la línea de STOP. Sin ningún canal real no hay borrador: el negocio va a `sin_contacto_YYYYMMDD.json` con su link de Maps.
 
@@ -161,7 +163,7 @@ sudo systemctl status cds-b2b-outreach.service
 
 Los logs: `journalctl -u cds-b2b-outreach.service -f`
 
-Buscador diario (9 prospectos, OSM gratis):
+Buscador en dos tandas diarias (09:00 y 15:00, hasta 9 prospectos y 15 búsquedas Google cada una):
 
 ```bash
 sudo cp /var/www/html/server/b2b-outreach/cds-b2b-buscar.service /etc/systemd/system/
@@ -172,7 +174,7 @@ sudo systemctl start cds-b2b-buscar.service   # prueba manual
 journalctl -u cds-b2b-buscar.service -n 30
 ```
 
-El instalador agrega a `/etc/cazador-de-suenos/b2b-outreach.env` las variables que falten (`FUENTE_LEADS=ambas`, `GOOGLE_PLACES_API_KEY=` vacía y los topes) sin cambiar las existentes. Para activar Google basta con pegar la clave en esa línea y reiniciar `cds-b2b-buscar`.
+El instalador agrega a `/etc/cazador-de-suenos/b2b-outreach.env` las variables que falten (`FUENTE_LEADS=ambas`, `GOOGLE_PLACES_API_KEY=` vacía y los topes) sin cambiar las existentes, y deja `server/b2b-outreach/.env` legible para `www-data` (`root:www-data`, 0640). Para activar Google basta con pegar la clave en uno de los dos archivos; la próxima tanda ya la usa.
 
 ## Despliegue
 

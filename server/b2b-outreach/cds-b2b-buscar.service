@@ -1,5 +1,5 @@
 [Unit]
-Description=Cazador de Sueños — buscador B2B diario (OpenStreetMap, sin Google)
+Description=Cazador de Sueños — buscador B2B (Google Places + OpenStreetMap de respaldo)
 After=network-online.target
 Wants=network-online.target
 
@@ -10,7 +10,6 @@ Group=www-data
 WorkingDirectory=/var/www/html/server/b2b-outreach
 EnvironmentFile=/etc/cazador-de-suenos/b2b-outreach.env
 Environment=B2B_QUEUE_DIR=/var/lib/cazador-de-suenos/b2b-outreach
-Environment=FUENTE_LEADS=osm
 ExecStart=/usr/bin/python3 /var/www/html/server/b2b-outreach/telegram_bot.py --buscar --limite 9
 StandardOutput=journal
 StandardError=journal

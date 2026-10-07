@@ -281,23 +281,26 @@ class TelegramFormatError(RuntimeError):
 
 
 def load_local_env():
-    """Lee el .env junto al script. No pisa variables que ya vengan del servicio."""
+    """Lee el .env junto al script. No pisa variables con valor que ya vengan del servicio,
+    pero sí rellena las que llegan vacías (p. ej. GOOGLE_PLACES_API_KEY= en /etc)."""
     env_path = HERE / ".env"
-    try:
-        from dotenv import load_dotenv
-
-        load_dotenv(env_path, override=False)
-        return
-    except ImportError:
-        pass
     if not env_path.is_file():
         return
-    for raw in env_path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+    try:
+        from dotenv import dotenv_values
+
+        valores = dict(dotenv_values(env_path))
+    except ImportError:
+        valores = {}
+        for raw in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            valores[key.strip()] = value.strip().strip('"').strip("'")
+    for key, value in valores.items():
+        if value and not os.environ.get(key, "").strip():
+            os.environ[key] = value
 
 
 def telegram_credentials():
@@ -999,7 +1002,8 @@ def main(argv=None):
                 est = estado()
                 modo = "Google Places + OSM" if fuente == "ambas" else "Google Places (OSM de respaldo)"
                 print(
-                    f"Buscador: {modo}. Presupuesto Google hoy {est['dia']}/{est['max_dia']}, "
+                    f"Buscador: {modo}. Presupuesto Google: tanda {est['tanda']} "
+                    f"{est['tanda_llamadas']}/{est['max_tanda']}, hoy {est['dia']}/{est['max_dia']}, "
                     f"mes {est['mes']}/{est['max_mes']}.",
                     file=sys.stderr,
                 )

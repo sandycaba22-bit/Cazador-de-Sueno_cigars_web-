@@ -560,9 +560,23 @@ def _prospectar(
                 },
             )
         return out
+    if _islas_agotadas_en_google(fuente, zona):
+        print("Islas ya buscadas en Google este mes: paso a la rotación global.", file=sys.stderr)
+        registrar_evento({"evento": "rotacion_global", "zona": zona, "fuente": fuente})
+        return prospectar_turno_global(
+            None, max_leads, inbox, simulado=simulado, solo_listar=solo_listar, tipo_filtro=tipo_filtro
+        )
     return prospectar_prioridad_inicial(
         max_leads, inbox, simulado, solo_listar, tipo_filtro, fuente=fuente, zona=zona
     )
+
+
+def _islas_agotadas_en_google(fuente: str, zona: str | None) -> bool:
+    from b2b.places import google_disponible, islas_agotadas_google
+
+    if fuente not in ("google", "ambas") or not google_disponible():
+        return False
+    return islas_agotadas_google([p["pais"] for p in paises_prioridad_busqueda(zona)])
 
 
 def prospectar_turno_global(
@@ -582,6 +596,12 @@ def prospectar_turno_global(
         fila = entry_por_pais(reglas["pais"])
     else:
         fila = siguiente_pais_cola()
+        if fila is None and not simulado:
+            from b2b.buscar_global import guardar_estado_global
+
+            guardar_estado_global({"pais_idx": 0, "celda_idx": 0, "completo": False, "pais": ""})
+            registrar_evento({"evento": "cola_global_reiniciada"})
+            fila = siguiente_pais_cola()
         if fila is None:
             return {
                 "pais": "cola_global",
