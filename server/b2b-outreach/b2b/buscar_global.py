@@ -157,10 +157,9 @@ def recolectar_leads_global(
             d_leads, llamadas_d, d_stats = _complemento_dealers(nombre, tipos, limite, tipo_filtro)
             stats.update(d_stats)
             descartes_fusion: list[dict] = []
-            repetidos_fusion: list[dict] = []
-            todos = dedupe_y_fusionar(leads + d_leads, descartes_fusion, repetidos_fusion)
-            stats["descartes"] = list(stats.get("descartes") or []) + descartes_fusion
-            stats["repetidos_fusion"] = repetidos_fusion
+            fusiones: list[dict] = []
+            todos = dedupe_y_fusionar(leads + d_leads, descartes_fusion, fusiones)
+            stats["descartes"] = list(stats.get("descartes") or []) + descartes_fusion + fusiones
             return todos, llamadas + llamadas_d, stats
         leads, llamadas, stats_osm = recolectar_leads_pais(
             nombre, tipos, limite, tipo_filtro, simulado=False

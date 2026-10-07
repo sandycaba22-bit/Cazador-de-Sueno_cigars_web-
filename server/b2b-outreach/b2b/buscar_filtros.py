@@ -31,15 +31,17 @@ def dominio_web(web: str) -> str:
 
 
 def clave_dedupe(lead: dict) -> str:
+    """Orden: dominio propio, place_id (osm:node/…), teléfono, nombre+país."""
     dom = dominio_web(lead.get("web") or "")
-    tel = re.sub(r"\D", "", lead.get("telefono") or "")[-10:]
-    nom = normalizar_nombre(lead.get("nombre") or "")
     if dom:
         return f"dom:{dom}"
+    pid = (lead.get("place_id") or "").strip()
+    if pid:
+        return f"id:{pid}"
+    tel = re.sub(r"\D", "", lead.get("telefono") or "")[-10:]
+    nom = normalizar_nombre(lead.get("nombre") or "")
     if tel:
         return f"tel:{tel}|{nom[:30]}"
-    if lead.get("place_id"):
-        return f"id:{lead['place_id']}"
     return f"nom:{nom}|{lead.get('pais','')}"
 
 
@@ -156,12 +158,16 @@ def dedupe_y_fusionar(
         clave = clave_dedupe(lead)
         if clave in por_clave:
             if fusionados_log is not None:
+                base = por_clave[clave].get("nombre") or "—"
+                nombre = lead.get("nombre") or "—"
                 fusionados_log.append(
                     {
-                        "nombre": lead.get("nombre") or "—",
-                        "motivo": "repetido",
-                        "contra": f"misma búsqueda ({por_clave[clave].get('nombre') or '—'})",
-                        "fecha": "",
+                        "nombre": nombre,
+                        "motivo": "fusionado_misma_clave",
+                        "etapa": "fusion_fuentes",
+                        "clave": clave,
+                        "fusionado_en": base,
+                        "nombres": [base, nombre],
                         "fuente": lead.get("fuente") or "",
                     }
                 )

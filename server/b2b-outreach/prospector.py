@@ -51,6 +51,8 @@ CATEGORIAS_ENCOLAR = (
     "pendiente_limite",
 )
 
+CATEGORIAS_RESUMEN = ("nuevos", "repetidos", "descartados", "dudosos", "sin_contacto", "pendiente_limite")
+
 
 def _slug(texto: str) -> str:
     return SLUG_RE.sub("-", texto.lower()).strip("-")
@@ -381,7 +383,6 @@ def prospectar_un_pais(
 
     cola_dir = inbox.parent
     descartes_fuente = list((fuente_stats or {}).get("descartes") or [])
-    repetidos_fusion = list((fuente_stats or {}).get("repetidos_fusion") or [])
     nuevos, repetidos, repetidos_novedad = clasificar_novedad_detalle(leads, cola_dir)
     resultado: dict = {}
     paths, con_contacto, web_enriquecidos, stats_cal, _desc_calidad = encolar(
@@ -396,9 +397,9 @@ def prospectar_un_pais(
         resultado=resultado,
     )
     descartes = descartes_fuente + resultado["descartados"]
-    repetidos_detalle = repetidos_fusion + repetidos_novedad + resultado["repetidos"]
+    repetidos_detalle = repetidos_novedad + resultado["repetidos"]
     conteo = conteo_isla(
-        encontrados=len(descartes_fuente) + len(repetidos_fusion) + len(leads),
+        encontrados=len(descartes_fuente) + len(leads),
         descartados=len(descartes),
         repetidos=len(repetidos_detalle),
         resultado=resultado,
@@ -438,18 +439,24 @@ def prospectar_un_pais(
 
 
 def conteo_isla(*, encontrados: int, descartados: int, repetidos: int, resultado: dict) -> dict:
-    """Una entrada por categoría; ``sin_clasificar`` debe ser 0 (si no, hay leads perdidos)."""
+    """encontrados = nuevos + repetidos + descartados + dudosos + sin_contacto (+ pendiente_limite).
+
+    ``nuevos`` = encolados en inbox + solo_telefono. ``sin_clasificar`` debe ser 0.
+    """
+    encolados = len(resultado.get("encolados") or [])
+    solo_telefono = len(resultado.get("solo_telefono") or [])
     conteo = {
         "encontrados": encontrados,
-        "encolados": len(resultado.get("encolados") or []),
+        "nuevos": encolados + solo_telefono,
+        "encolados": encolados,
+        "solo_telefono": solo_telefono,
+        "repetidos": repetidos,
         "descartados": descartados,
         "dudosos": len(resultado.get("dudosos") or []),
-        "solo_telefono": len(resultado.get("solo_telefono") or []),
-        "repetidos": repetidos,
         "sin_contacto": len(resultado.get("sin_contacto") or []),
         "pendiente_limite": len(resultado.get("pendiente_limite") or []),
     }
-    suma = sum(v for k, v in conteo.items() if k != "encontrados")
+    suma = sum(conteo[k] for k in CATEGORIAS_RESUMEN)
     conteo["sin_clasificar"] = encontrados - suma
     return conteo
 

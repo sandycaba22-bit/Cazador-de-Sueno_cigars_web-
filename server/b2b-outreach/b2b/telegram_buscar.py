@@ -36,15 +36,16 @@ def notificar_buscar(texto: str, simulado: bool = False) -> None:
 
 def texto_conteo_isla(isla: str, conteo: dict, descartes: list | None = None) -> str:
     """Resumen corto; la suma de categorías es igual a 'encontrados'."""
+    nuevos = f"{conteo.get('nuevos', 0)} nuevos"
+    if conteo.get("solo_telefono"):
+        nuevos += f" ({conteo['solo_telefono']} solo teléfono)"
     partes = [
-        f"{conteo.get('encolados', 0)} encolados",
+        nuevos,
+        f"{conteo.get('repetidos', 0)} repetidos",
         f"{conteo.get('descartados', 0)} descartados",
         f"{conteo.get('dudosos', 0)} dudosos",
-        f"{conteo.get('repetidos', 0)} repetidos",
         f"{conteo.get('sin_contacto', 0)} sin contacto",
     ]
-    if conteo.get("solo_telefono"):
-        partes.insert(3, f"{conteo['solo_telefono']} solo teléfono")
     if conteo.get("pendiente_limite"):
         partes.append(f"{conteo['pendiente_limite']} pendientes (límite)")
     lineas = [f"📍 {isla}: {conteo.get('encontrados', 0)} encontrados = " + " · ".join(partes)]

@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT))
 import prospector  # noqa: E402
 from b2b import leads_store as ls  # noqa: E402
 from b2b import paths  # noqa: E402
-from b2b.buscar_filtros import dedupe_y_fusionar  # noqa: E402
+from b2b.buscar_filtros import clave_dedupe, dedupe_y_fusionar  # noqa: E402
 from b2b.calidad_lead import StatsCalidad  # noqa: E402
 from b2b.telegram_buscar import texto_conteo_isla  # noqa: E402
 from b2b.website import dominio_negocio, es_url_mapa  # noqa: E402
@@ -83,13 +83,58 @@ class TestRegistroLeads(unittest.TestCase):
 
 
 class TestDedupeEnlacesOsm(unittest.TestCase):
-    def test_no_fusiona_negocios_distintos_con_enlace_osm(self):
+    def test_seis_leads_osm_con_place_id_distinto_son_seis(self):
         leads = [
-            {"nombre": f"Negocio {i}", "place_id": f"osm:node/{i}",
-             "web": f"https://www.openstreetmap.org/node/{i}", "telefono": f"+297 58{i}0000"}
-            for i in range(1, 6)
+            {"nombre": f"Cigar Shop {i}", "pais": "Aruba", "place_id": f"osm:{t}/{i}",
+             "web": f"https://www.openstreetmap.org/{t}/{i}", "fuente": "osm"}
+            for i, t in zip(range(1, 7), ("node", "way", "node", "way", "node", "node"))
         ]
-        self.assertEqual(len(dedupe_y_fusionar(leads)), 5)
+        fusiones: list[dict] = []
+        salida = dedupe_y_fusionar(leads, [], fusiones)
+        self.assertEqual(len(salida), 6)
+        self.assertEqual(fusiones, [])
+        self.assertEqual(len({clave_dedupe(l) for l in leads}), 6)
+        self.assertTrue(all(clave_dedupe(l).startswith("id:osm:") for l in leads))
+
+    def test_place_id_antes_que_telefono(self):
+        a = {"nombre": "Cigar A", "place_id": "osm:node/1", "telefono": "+297 5800000"}
+        b = {"nombre": "Cigar A", "place_id": "osm:node/2", "telefono": "+297 5800000"}
+        self.assertNotEqual(clave_dedupe(a), clave_dedupe(b))
+        self.assertEqual(clave_dedupe({"web": "https://cigar.aw/", "place_id": "osm:node/9"}), "dom:cigar.aw")
+
+    def test_fusion_deja_rastro(self):
+        leads = [
+            {"nombre": "Cigar Bar Uno", "web": "https://cigarbar.aw/", "place_id": "osm:node/1"},
+            {"nombre": "Cigar Bar Uno (dealer)", "web": "https://www.cigarbar.aw/es", "fuente": "dealer:x"},
+        ]
+        fusiones: list[dict] = []
+        self.assertEqual(len(dedupe_y_fusionar(leads, [], fusiones)), 1)
+        self.assertEqual(len(fusiones), 1)
+        f = fusiones[0]
+        self.assertEqual(f["motivo"], "fusionado_misma_clave")
+        self.assertEqual(f["nombres"], ["Cigar Bar Uno", "Cigar Bar Uno (dealer)"])
+        self.assertEqual(f["clave"], "dom:cigarbar.aw")
+
+    def test_buscar_pais_reporta_fusiones_en_descartes(self):
+        from b2b import buscar_pais as bp
+
+        osm = [
+            {"nombre": "Cigar Bar Uno", "pais": "Aruba", "web": "https://cigarbar.aw/",
+             "place_id": "osm:node/1", "fuente": "osm"},
+            {"nombre": "Cigar Bar Uno", "pais": "Aruba", "web": "https://cigarbar.aw/",
+             "place_id": "osm:node/2", "fuente": "osm"},
+            {"nombre": "Tabaco Dos", "pais": "Aruba", "web": "https://www.openstreetmap.org/node/3",
+             "place_id": "osm:node/3", "fuente": "osm"},
+        ]
+        with mock.patch.object(bp, "buscar_en_pais_osm", return_value=(osm, 0, {"descartes": []})), \
+                mock.patch.object(bp, "buscar_dealers_pais", return_value=([], [])), \
+                mock.patch.object(bp, "buscar_directorios_pais", return_value=([], [])), \
+                mock.patch.object(bp, "registrar_evento"):
+            leads, _ll, stats = bp.recolectar_leads_pais("Aruba", ["tienda"], 10, "", simulado=False)
+        self.assertEqual(len(leads), 2)
+        motivos = [d.get("motivo") for d in stats["descartes"]]
+        self.assertIn("fusionado_misma_clave", motivos)
+        self.assertEqual(len(leads) + motivos.count("fusionado_misma_clave"), len(osm))
 
 
 class TestSimuladoAislado(unittest.TestCase):
@@ -182,8 +227,9 @@ class TestConteoIsla(unittest.TestCase):
         self.assertEqual(c["dudosos"], 1)
         self.assertEqual(c["sin_contacto"], 1)
         self.assertEqual(c["encolados"], 2)
+        self.assertEqual(c["nuevos"], 2)
         self.assertEqual(c["pendiente_limite"], 1)
-        suma = sum(v for k, v in c.items() if k not in ("encontrados", "sin_clasificar"))
+        suma = sum(c[k] for k in prospector.CATEGORIAS_RESUMEN)
         self.assertEqual(suma, c["encontrados"])
 
         archivos = list((self.tmp / "data").glob("sin_contacto_*.json"))
@@ -194,7 +240,7 @@ class TestConteoIsla(unittest.TestCase):
         )
 
         texto = texto_conteo_isla("Aruba", c, stats["descartes"])
-        self.assertIn("8 encontrados", texto)
+        self.assertIn("8 encontrados = 2 nuevos · 1 repetidos · 2 descartados · 1 dudosos", texto)
         self.assertIn("1 sin contacto", texto)
         self.assertNotIn("sin clasificar", texto)
 
