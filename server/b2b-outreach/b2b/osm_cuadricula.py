@@ -60,7 +60,7 @@ def _query_celda(celda: dict) -> str:
     s, w, n, e = celda["south"], celda["west"], celda["north"], celda["east"]
     re_f = overpass_regex_alternativas("fuertes")
     return f"""
-[out:json][timeout:35];
+[out:json][timeout:15];
 (
   nwr["shop"~"tobacco|cigar"]({s},{w},{n},{e});
   nwr["shop"="duty_free"]({s},{w},{n},{e});

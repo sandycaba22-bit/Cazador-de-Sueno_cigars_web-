@@ -29,9 +29,11 @@ OVERPASS_URLS = [
     u.strip() for u in (os.getenv("OSM_OVERPASS_URL", "") or _DEFAULT_MIRRORS).split("|") if u.strip()
 ]
 
-OVERPASS_TIMEOUT_SEC = 30
-_REINTENTOS_ISLA = 3
-_ESPERA_ENTRE_REINTENTOS_ISLA = (5, 10, 20)
+OVERPASS_TIMEOUT_SEC = 15
+_REINTENTOS_ISLA = 2
+_TOPE_SEGUNDOS_ISLA = 120
+_ESPERA_ENTRE_REINTENTOS_ISLA = (5,)
+_deadline_isla: float | None = None
 
 USER_AGENT = os.getenv(
     "OSM_USER_AGENT",
@@ -54,13 +56,31 @@ class OsmIslaFallida(RuntimeError):
     """Overpass no respondió tras reintentos para un país/isla."""
 
 
+class OsmTopeIsla(Exception):
+    """Se agotaron los 2 minutos de esta isla. No es RuntimeError: no se traga en los reintentos internos."""
+
+
 def _pausa_entre_consultas() -> None:
     try:
         sec = float(os.getenv("OSM_OVERPASS_PAUSE_SEC", "2") or "2")
     except ValueError:
         sec = 2.0
+    if _deadline_isla is not None:
+        restante = _deadline_isla - time.monotonic()
+        if restante <= 0:
+            raise OsmTopeIsla("OSM: tope de 2 minutos por isla")
+        sec = min(sec, restante)
     if sec > 0:
         time.sleep(sec)
+
+
+def _timeout_peticion() -> float:
+    if _deadline_isla is None:
+        return float(OVERPASS_TIMEOUT_SEC)
+    restante = _deadline_isla - time.monotonic()
+    if restante <= 0:
+        raise OsmTopeIsla("OSM: tope de 2 minutos por isla")
+    return min(float(OVERPASS_TIMEOUT_SEC), restante)
 
 
 def _error_reintentable(error: BaseException) -> bool:
@@ -242,7 +262,7 @@ def _bbox_para_iso(iso: str) -> dict | None:
 def _query_profunda_en_area(area_selector: str) -> str:
     re_f = _regex_nombre_fuertes()
     return f"""
-[out:json][timeout:40];
+[out:json][timeout:15];
 {area_selector}
 (
   nwr["shop"="tobacco"](area.search);
@@ -262,7 +282,7 @@ out center tags;
 def _query_debiles_en_area(area_selector: str) -> str:
     re_d = _regex_nombre_debiles()
     return f"""
-[out:json][timeout:40];
+[out:json][timeout:15];
 {area_selector}
 (
   nwr["shop"~"tobacco|cigar"]["name"~"{re_d}",i](area.search);
@@ -289,7 +309,7 @@ def _query_bbox(box: dict) -> str:
     s, w, n, e = box["south"], box["west"], box["north"], box["east"]
     re_f = _regex_nombre_fuertes()
     return f"""
-[out:json][timeout:40];
+[out:json][timeout:15];
 (
   nwr["shop"="tobacco"]({s},{w},{n},{e});
   nwr["shop"="cigar"]({s},{w},{n},{e});
@@ -307,7 +327,7 @@ def _query_bbox_debiles(box: dict) -> str:
     s, w, n, e = box["south"], box["west"], box["north"], box["east"]
     re_d = _regex_nombre_debiles()
     return f"""
-[out:json][timeout:40];
+[out:json][timeout:15];
 (
   nwr["shop"~"tobacco|cigar"]["name"~"{re_d}",i]({s},{w},{n},{e});
   nwr["shop"="alcohol"]["name"~"{re_d}",i]({s},{w},{n},{e});
@@ -319,7 +339,7 @@ out center tags;
 
 def _query_tobacco_around(lat: float, lon: float, radio_m: int) -> str:
     return f"""
-[out:json][timeout:25];
+[out:json][timeout:15];
 (
   nwr["shop"~"tobacco|cigar"](around:{radio_m},{lat},{lon});
 );
@@ -380,15 +400,16 @@ def _fetch_elementos_territorio(iso: str, rotar_desde: int) -> tuple[list[dict],
 
 
 def _fetch_overpass(query: str, rotar_desde: int = 0) -> list[dict]:
-    """Un intento lógico: rota mirrors; timeout fijo 30 s por petición."""
+    """Un intento lógico: rota mirrors; como máximo 15 s por petición."""
     body = urllib.parse.urlencode({"data": query}).encode("utf-8")
     headers = {"User-Agent": USER_AGENT, "Content-Type": "application/x-www-form-urlencoded"}
     urls = OVERPASS_URLS[rotar_desde:] + OVERPASS_URLS[:rotar_desde]
     errors: list[str] = []
     for base_url in urls:
+        timeout = _timeout_peticion()
         request = urllib.request.Request(base_url, data=body, headers=headers, method="POST")
         try:
-            with urllib.request.urlopen(request, timeout=OVERPASS_TIMEOUT_SEC) as response:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
                 payload = json.loads(response.read().decode("utf-8"))
             return payload.get("elements") or []
         except urllib.error.HTTPError as error:
@@ -517,6 +538,16 @@ def _buscar_en_pais_osm_cuerpo(
     return candidatos, llamadas, meta
 
 
+def _abrir_tope_isla() -> None:
+    global _deadline_isla
+    _deadline_isla = time.monotonic() + _TOPE_SEGUNDOS_ISLA
+
+
+def _cerrar_tope_isla() -> None:
+    global _deadline_isla
+    _deadline_isla = None
+
+
 def buscar_en_pais_osm(
     pais: str,
     tipos: list[str],
@@ -526,34 +557,55 @@ def buscar_en_pais_osm(
     if tipo_filtro:
         tipos = [tipo_filtro]
     iso = _iso_para_pais(pais)
-    ultimo_error: RuntimeError | None = None
-    for intento in range(_REINTENTOS_ISLA):
-        if intento > 0:
-            espera = _ESPERA_ENTRE_REINTENTOS_ISLA[intento - 1]
-            registrar_osm_fallo(pais, f"reintento isla {intento + 1}/{_REINTENTOS_ISLA} tras {espera}s")
-            time.sleep(espera)
-        try:
-            return _buscar_en_pais_osm_cuerpo(
-                pais, tipos, limite, tipo_filtro, iso, rotar_espejo=intento
-            )
-        except RuntimeError as error:
-            ultimo_error = error
-            registrar_osm_fallo(pais, f"intento {intento + 1}/{_REINTENTOS_ISLA}: {error}")
+    ultimo_error: BaseException | None = None
+    _abrir_tope_isla()
+    try:
+        for intento in range(_REINTENTOS_ISLA):
+            if _deadline_isla is not None and time.monotonic() >= _deadline_isla:
+                ultimo_error = OsmTopeIsla("OSM: tope de 2 minutos por isla")
+                break
+            if intento > 0:
+                espera = _ESPERA_ENTRE_REINTENTOS_ISLA[min(intento - 1, len(_ESPERA_ENTRE_REINTENTOS_ISLA) - 1)]
+                registrar_osm_fallo(pais, f"reintento isla {intento + 1}/{_REINTENTOS_ISLA} tras {espera}s")
+                time.sleep(espera)
+            try:
+                return _buscar_en_pais_osm_cuerpo(
+                    pais, tipos, limite, tipo_filtro, iso, rotar_espejo=intento
+                )
+            except OsmTopeIsla as error:
+                ultimo_error = error
+                registrar_osm_fallo(pais, str(error))
+                break
+            except RuntimeError as error:
+                ultimo_error = error
+                registrar_osm_fallo(pais, f"intento {intento + 1}/{_REINTENTOS_ISLA}: {error}")
+    finally:
+        _cerrar_tope_isla()
     raise OsmIslaFallida(pais, str(ultimo_error or "Overpass sin respuesta"))
 
 
 def obtener_elementos_osm_pais(pais: str) -> tuple[list[dict], int]:
     """Elementos OSM crudos (fuertes + débiles) para dry-run u auditoría."""
     iso = _iso_para_pais(pais)
-    ultimo: RuntimeError | None = None
+    ultimo: BaseException | None = None
     llamadas = 0
-    for intento in range(_REINTENTOS_ISLA):
-        if intento > 0:
-            time.sleep(_ESPERA_ENTRE_REINTENTOS_ISLA[intento - 1])
-        try:
-            _pausa_entre_consultas()
-            elementos, _modo, llamadas = _fetch_elementos_territorio(iso, intento)
-            return _dedupe_elementos(elementos), llamadas
-        except RuntimeError as error:
-            ultimo = error
+    _abrir_tope_isla()
+    try:
+        for intento in range(_REINTENTOS_ISLA):
+            if _deadline_isla is not None and time.monotonic() >= _deadline_isla:
+                ultimo = OsmTopeIsla("OSM: tope de 2 minutos por isla")
+                break
+            if intento > 0:
+                time.sleep(_ESPERA_ENTRE_REINTENTOS_ISLA[min(intento - 1, len(_ESPERA_ENTRE_REINTENTOS_ISLA) - 1)])
+            try:
+                _pausa_entre_consultas()
+                elementos, _modo, llamadas = _fetch_elementos_territorio(iso, intento)
+                return _dedupe_elementos(elementos), llamadas
+            except OsmTopeIsla as error:
+                ultimo = error
+                break
+            except RuntimeError as error:
+                ultimo = error
+    finally:
+        _cerrar_tope_isla()
     raise ultimo or RuntimeError(f"Overpass sin respuesta para {pais}")

@@ -71,6 +71,28 @@ def avisar_isla_fallida(isla: str, simulado: bool = False) -> None:
     notificar_buscar(f"⚠️ {isla}: Overpass no respondió tras reintentos.", simulado=simulado)
 
 
+def texto_cero_prospectos(cero: dict | None) -> str:
+    """Motivo cuando la corrida no encoló a nadie."""
+    cero = cero or {}
+    lineas = ["0 prospectos en esta corrida."]
+    google_error = (cero.get("google_error") or "").strip()
+    if google_error:
+        lineas.append(f"Motivo: error de Google ({google_error[:200]}).")
+    if cero.get("presupuesto"):
+        lineas.append("Motivo: presupuesto de Google agotado.")
+    repetidos = int(cero.get("repetidos") or 0)
+    descartes = list(cero.get("descartes") or [])
+    if repetidos and not descartes and not google_error and not cero.get("presupuesto"):
+        lineas.append(f"Motivo: todo repetido ({repetidos}).")
+    elif repetidos:
+        lineas.append(f"Repetidos: {repetidos}.")
+    if descartes:
+        lineas.append("Descartes: " + resumen_motivos(descartes))
+    if len(lineas) == 1:
+        lineas.append("Motivo: ningún local nuevo pasó los filtros.")
+    return "\n".join(lineas)
+
+
 def avisar_resumen_barrido(
     total: int,
     por_isla: dict[str, int],
@@ -79,6 +101,7 @@ def avisar_resumen_barrido(
     zona: str,
     simulado: bool = False,
     detalle_islas: dict[str, dict] | None = None,
+    cero: dict | None = None,
 ) -> None:
     lineas = [f"📊 Resumen ({zona}): {total} encolado(s)"]
     for isla, cantidad in por_isla.items():
@@ -86,6 +109,8 @@ def avisar_resumen_barrido(
         lineas.append(f"• {isla}: {cantidad} ({c} con contacto)")
     if islas_fallidas:
         lineas.append("⚠️ " + ", ".join(islas_fallidas))
+    if total == 0:
+        lineas.append(texto_cero_prospectos(cero))
     notificar_buscar("\n".join(lineas), simulado=simulado)
 
 

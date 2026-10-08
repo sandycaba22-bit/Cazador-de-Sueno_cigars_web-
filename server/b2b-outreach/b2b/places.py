@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -11,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from b2b import budget
-from b2b.contacto_web import normalizar_canales, tipo_url
+from b2b.contacto_web import normalizar_canales
 from b2b.country_rules import buscar_pais
 from b2b.logging_ops import registrar_evento, registrar_presupuesto_agotado
 from b2b.paths import FIXTURES, state_file
@@ -19,13 +20,24 @@ from b2b.telefono import internacional
 
 PLACES_URL = "https://places.googleapis.com/v1/places:searchText"
 FIELD_MASK = (
-    "places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,"
-    "places.websiteUri,places.rating,places.userRatingCount,places.businessStatus,places.types"
+    "places.id,places.displayName,places.formattedAddress,"
+    "places.nationalPhoneNumber,places.internationalPhoneNumber,"
+    "places.websiteUri,places.googleMapsUri,"
+    "places.rating,places.userRatingCount,places.businessStatus,places.types"
 )
 PAGE_SIZE = 20
 MAPS_PLACE_URL = "https://www.google.com/maps/search/?api=1&query={nombre}&query_place_id={pid}"
-DEFAULT_MIN_RATING = 4.0
-DEFAULT_MIN_RESENAS = 5
+_CAMPOS_CRUDOS = (
+    "websiteUri",
+    "nationalPhoneNumber",
+    "internationalPhoneNumber",
+    "rating",
+    "userRatingCount",
+    "businessStatus",
+    "googleMapsUri",
+)
+_TIPOS_BAR = {"bar", "night_club", "cafe", "restaurant"}
+_TIPOS_LICOR = {"liquor_store"}
 
 # (tipo de negocio, idioma, término). "*" = se busca en toda isla.
 TERMINOS_GOOGLE: tuple[tuple[str, str, str], ...] = (
@@ -250,43 +262,67 @@ def _post_search(text_query: str, idioma: str = "") -> list[dict]:
     return body.get("places") or []
 
 
-def _min_rating() -> float:
-    try:
-        return float(os.getenv("GOOGLE_PLACES_MIN_RATING", "").strip() or DEFAULT_MIN_RATING)
-    except ValueError:
-        return DEFAULT_MIN_RATING
+def _log_place_crudo(raw: dict) -> None:
+    """Un local por búsqueda: qué campos devolvió Google (presentes vs vacíos)."""
+    nombre = (raw.get("displayName") or {}).get("text") or raw.get("nombre") or ""
+    presentes = {campo: campo in raw for campo in _CAMPOS_CRUDOS}
+    valores = {}
+    for campo in _CAMPOS_CRUDOS:
+        valor = raw.get(campo)
+        if isinstance(valor, (dict, list)):
+            valores[campo] = "obj"
+        else:
+            valores[campo] = valor
+    ausentes = [campo for campo, ok in presentes.items() if not ok]
+    registrar_evento(
+        {
+            "evento": "google_place_crudo",
+            "nombre": nombre,
+            "place_id": raw.get("id") or "",
+            "campos_presentes": presentes,
+            "ausentes": ausentes,
+            "valores": valores,
+        }
+    )
+    print(
+        "Google crudo: "
+        f"{nombre or 'sin nombre'} "
+        f"status={valores.get('businessStatus') or 'ausente'} "
+        f"tel_nacional={'sí' if valores.get('nationalPhoneNumber') else 'no'} "
+        f"tel_internacional={'sí' if valores.get('internationalPhoneNumber') else 'no'} "
+        f"web={'sí' if valores.get('websiteUri') else 'no'} "
+        f"maps={'sí' if valores.get('googleMapsUri') else 'no'} "
+        f"rating={valores.get('rating') if valores.get('rating') is not None else 'ausente'} "
+        f"reseñas={valores.get('userRatingCount') if valores.get('userRatingCount') is not None else 'ausente'} "
+        f"ausentes={','.join(ausentes) or 'ninguno'}",
+        file=sys.stderr,
+    )
 
 
-def _min_resenas() -> int:
-    try:
-        return max(0, int(os.getenv("GOOGLE_PLACES_MIN_RESENAS", "").strip() or DEFAULT_MIN_RESENAS))
-    except ValueError:
-        return DEFAULT_MIN_RESENAS
+def motivo_descarte_google(raw: dict, lead: dict) -> str:
+    """'' si el local está OPERATIONAL y no cae en las exclusiones ya existentes.
 
-
-def motivo_no_seguro(raw: dict) -> str:
-    """'' si el lugar es un "negocio seguro": abierto, con teléfono, web y buenas reseñas."""
-    estado = raw.get("businessStatus") or "sin estado"
+    Teléfono, web, rating y reseñas no descartan: solo ordenan y se muestran en el aviso.
+    """
+    estado = (raw.get("businessStatus") or lead.get("business_status") or "").strip() or "sin estado"
     if estado != "OPERATIONAL":
         return f"Google: {estado}"
-    if not (raw.get("nationalPhoneNumber") or raw.get("internationalPhoneNumber") or "").strip():
-        return "Google: sin teléfono"
-    web = (raw.get("websiteUri") or "").strip()
-    if not web or tipo_url(web) == "mapa":
-        return "Google: sin sitio web"
-    try:
-        rating = float(raw.get("rating"))
-    except (TypeError, ValueError):
-        return "Google: sin valoraciones"
-    minimo = _min_rating()
-    if rating < minimo:
-        return f"Google: rating {rating:.1f} (mínimo {minimo:.1f})"
-    try:
-        resenas = int(raw.get("userRatingCount") or 0)
-    except (TypeError, ValueError):
-        resenas = 0
-    if resenas < _min_resenas():
-        return f"Google: {resenas} reseñas (mínimo {_min_resenas()})"
+    nombre = lead.get("nombre") or ""
+    web = lead.get("web") or raw.get("websiteUri") or ""
+    if not _es_negocio_b2b(nombre, web):
+        return "perfil personal"
+    from b2b.nombres_busqueda import clasificar_aceptacion, contiene_fuerte, texto_nombre_web
+
+    bucket, motivo = clasificar_aceptacion(lead)
+    if bucket == "excluido":
+        return motivo
+    types = {str(tipo).lower() for tipo in (raw.get("types") or lead.get("types") or [])}
+    texto = texto_nombre_web(lead)
+    senal_cigarro = "humidor" in texto.lower() or contiene_fuerte(texto)
+    if not senal_cigarro and types & _TIPOS_LICOR:
+        return "licorería sin humidor"
+    if not senal_cigarro and types & _TIPOS_BAR:
+        return "bar/café sin humidor"
     return ""
 
 
@@ -306,27 +342,41 @@ def consultas_google(pais: str, tipos: list[str]) -> list[tuple[str, str, str]]:
     return out
 
 
+def _continua_con_osm() -> bool:
+    from b2b.fuente_leads import resolver_fuente_leads
+
+    return resolver_fuente_leads() != "google"
+
+
 def _avisar_tope(motivo: str) -> None:
     if not budget.marcar_aviso(motivo):
         return
     registrar_presupuesto_agotado()
     est = budget.estado()
+    if _continua_con_osm():
+        respaldo_mes = "Sigo solo con OpenStreetMap hasta el mes que viene."
+        respaldo_tanda = "Sigo con OpenStreetMap y retomo Google"
+        respaldo_dia = "Sigo solo con OpenStreetMap y retomo Google mañana."
+    else:
+        respaldo_mes = "En este modo no consulto OpenStreetMap."
+        respaldo_tanda = "No consulto OpenStreetMap. Retomo Google"
+        respaldo_dia = "En este modo no consulto OpenStreetMap. Retomo Google mañana."
     if motivo == "mensual":
         texto = (
             f"⛔ Google Places: tope mensual alcanzado ({est['mes']}/{est['max_mes']} búsquedas). "
-            "Sigo solo con OpenStreetMap hasta el mes que viene."
+            f"{respaldo_mes}"
         )
     elif motivo == "tanda":
         nombre = "de la mañana" if est["tanda"] == "manana" else "de la tarde"
         retomo = "en la tanda de la tarde (15:00)" if est["tanda"] == "manana" else "mañana a las 09:00"
         texto = (
             f"⏸️ Google Places: tanda {nombre} completa ({est['tanda_llamadas']}/{est['max_tanda']} "
-            f"búsquedas). Sigo con OpenStreetMap y retomo Google {retomo}."
+            f"búsquedas). {respaldo_tanda} {retomo}."
         )
     else:
         texto = (
             f"⛔ Google Places: tope diario alcanzado ({est['dia']}/{est['max_dia']} búsquedas). "
-            "Sigo solo con OpenStreetMap y retomo Google mañana."
+            f"{respaldo_dia}"
         )
     _notificar(texto)
 
@@ -344,9 +394,11 @@ def _avisar_error(error: GooglePlacesError) -> None:
         return
     explicacion = EXPLICACION_HTTP.get(codigo) or ("error de Google" if codigo >= 500 else "error")
     etiqueta = f"respondió {codigo}" if codigo else "no respondió"
-    _notificar(
-        f"⚠️ Google Places {etiqueta} ({explicacion}). En esta corrida sigo solo con OpenStreetMap."
-    )
+    if _continua_con_osm():
+        sigue = "En esta corrida sigo solo con OpenStreetMap."
+    else:
+        sigue = "En esta corrida no consulto OpenStreetMap."
+    _notificar(f"⚠️ Google Places {etiqueta} ({explicacion}). {sigue}")
 
 
 def _orden_calidad(lead: dict) -> tuple:
@@ -367,6 +419,7 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
     stats: dict = {"google": 0, "google_llamadas": 0, "google_cache": 0, "descartes": []}
     vistos: dict[str, tuple[dict, str]] = {}
     llamadas = 0
+    crudo_logueado = False
     for tipo, idioma, consulta in consultas_google(pais, tipos):
         clave = _clave_busqueda(pais, consulta)
         hit = cache["busquedas"].get(clave)
@@ -405,6 +458,9 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
             }
             _save_cache(cache)
         for raw in raws:
+            if not crudo_logueado and isinstance(raw, dict):
+                _log_place_crudo(raw)
+                crudo_logueado = True
             pid = raw.get("id") or raw.get("place_id") or ""
             if pid and pid not in vistos:
                 vistos[pid] = (raw, tipo)
@@ -412,17 +468,12 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
     leads: list[dict] = []
     for raw, tipo in vistos.values():
         lead = _normalizar_place(raw, pais, tipo)
-        motivo = motivo_no_seguro(raw)
+        motivo = motivo_descarte_google(raw, lead)
         if motivo:
+            etapa = "google_exclusion" if not motivo.startswith("Google:") and motivo != "perfil personal" else "google_estado"
             stats["descartes"].append(
-                {"nombre": lead["nombre"], "motivo": motivo, "etapa": "google_negocio_seguro",
+                {"nombre": lead["nombre"], "motivo": motivo, "etapa": etapa,
                  "fuente": "google_places", "maps_url": lead.get("maps_url", "")}
-            )
-            continue
-        if not _es_negocio_b2b(lead["nombre"], raw.get("websiteUri") or ""):
-            stats["descartes"].append(
-                {"nombre": lead["nombre"], "motivo": "perfil personal", "etapa": "google_estado",
-                 "fuente": "google_places"}
             )
             continue
         leads.append(lead)
@@ -497,8 +548,8 @@ def buscar_en_pais(
     modo_global: bool = False,
 ) -> tuple[list[dict], int, dict]:
     """
-    fuente: osm | google (Google y OSM solo si Google no da nada) | ambas (Google primero + OSM).
-    Sin clave o con el tope agotado, Google se omite y sigue OSM.
+    fuente: osm | google (solo Google, nunca OSM) | ambas (Google primero + OSM).
+    Sin clave o con el tope agotado, google no llama a OSM; ambas/osm sí pueden usar OSM.
     """
     if tipo_filtro:
         tipos = [tipo_filtro]
@@ -515,7 +566,7 @@ def buscar_en_pais(
 
     g_leads, g_llamadas, g_stats = _buscar_google_seguro(pais, tipos)
     g_descartes = list(g_stats.pop("descartes", []) or [])
-    if fuente == "google" and g_leads:
+    if fuente == "google":
         return g_leads, g_llamadas, {**g_stats, "descartes": g_descartes}
 
     from b2b.buscar_filtros import combinar_fuentes

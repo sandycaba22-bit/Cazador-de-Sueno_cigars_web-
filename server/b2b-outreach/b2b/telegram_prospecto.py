@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import sys
 import urllib.parse
+from pathlib import Path
 
 from b2b.contacto_web import numero_whatsapp
 from b2b.idioma import idioma_para_lead
@@ -9,6 +11,7 @@ from b2b.redactor import borrador_correo, borrador_corto, tipo_en_idioma
 from b2b.telegram_control import puede_enviar_telegram, pausa_entre_mensajes, registrar_envio_telegram
 from b2b.website import dominio_negocio, es_url_mapa
 from b2b.telegram_gestion import (
+    puede_avisar_prospecto,
     registrar_pendiente,
     tiene_medio_contacto,
     token_callback,
@@ -49,6 +52,8 @@ def _lineas_contacto(lead: dict, wa: str) -> list[str]:
     tel = (lead.get("telefono") or "").strip()
     if tel:
         lineas.append(f"📞 Teléfono: {tel}")
+    else:
+        lineas.append("📞 sin teléfono")
     if wa:
         lineas.append(f"💬 WhatsApp con borrador: {wa}")
     correo = (lead.get("correo") or "").strip()
@@ -57,6 +62,8 @@ def _lineas_contacto(lead: dict, wa: str) -> list[str]:
     web = (lead.get("web") or "").strip()
     if dominio_negocio(web):
         lineas.append(f"🌐 Web: {web}")
+    else:
+        lineas.append("🌐 sin web")
     for campo, icono, etiqueta in (
         ("instagram", "📸", "Instagram"),
         ("facebook", "👍", "Facebook"),
@@ -68,6 +75,8 @@ def _lineas_contacto(lead: dict, wa: str) -> list[str]:
     maps = _maps_url(lead)
     if maps:
         lineas.append(f"🗺️ Google Maps: {maps}")
+    else:
+        lineas.append("🗺️ sin enlace de Google Maps")
     return lineas
 
 
@@ -117,6 +126,19 @@ def _teclado_prospecto(token: str) -> dict:
     }
 
 
+def _registrar_fallo_telegram(lead: dict, exc: BaseException) -> None:
+    from b2b.logging_ops import registrar_evento
+
+    registrar_evento(
+        {
+            "evento": "telegram_prospecto_fallo",
+            "nombre": lead.get("nombre") or "",
+            "error": str(exc)[:400],
+        }
+    )
+    print(f"Telegram no envió {lead.get('nombre') or 'prospecto'}: {exc}", file=sys.stderr)
+
+
 def enviar_prospecto_telegram(
     lead: dict,
     pais: str,
@@ -124,7 +146,7 @@ def enviar_prospecto_telegram(
     simulado: bool = False,
     inbox_path: str = "",
 ) -> bool:
-    if not tiene_medio_contacto(lead):
+    if not puede_avisar_prospecto(lead) and not tiene_medio_contacto(lead):
         return False
     if ya_gestionado_telegram(lead) or lead.get("telegram_notificado"):
         return False
@@ -148,10 +170,61 @@ def enviar_prospecto_telegram(
 
     load_local_env()
     registrar_pendiente(token, lead, inbox_path)
-    enviar_mensaje_telegram(texto, reply_markup=_teclado_prospecto(token))
+    try:
+        enviar_mensaje_telegram(texto, reply_markup=_teclado_prospecto(token))
+    except Exception as exc:
+        _registrar_fallo_telegram(lead, exc)
+        return False
     registrar_envio_telegram()
     pausa_entre_mensajes()
     return True
+
+
+def reintentar_avisos_cola(cola_dir: Path, *, simulado: bool = False) -> int:
+    """Reintenta avisos que no salieron. Un 401 no mueve el lead a failed ni aborta."""
+    inbox = cola_dir / "inbox"
+    failed = cola_dir / "failed"
+    inbox.mkdir(parents=True, exist_ok=True)
+    if failed.is_dir():
+        for path in list(failed.glob("*.json")):
+            dest = inbox / path.name
+            if dest.exists():
+                dest = inbox / f"reintento-{path.name}"
+            try:
+                path.replace(dest)
+            except OSError as exc:
+                _registrar_fallo_telegram({"nombre": path.name}, exc)
+            nota = Path(str(path) + ".error.txt")
+            if nota.is_file():
+                try:
+                    nota.unlink()
+                except OSError:
+                    pass
+    enviados = 0
+    for path in sorted(inbox.glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(data, dict) or data.get("telegram_notificado"):
+            continue
+        if ya_gestionado_telegram(data):
+            data["telegram_notificado"] = True
+            path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            continue
+        pais = (data.get("pais") or "").strip()
+        try:
+            ok = enviar_prospecto_telegram(data, pais, simulado=simulado, inbox_path=str(path))
+        except Exception as exc:
+            _registrar_fallo_telegram(data, exc)
+            continue
+        if not ok:
+            continue
+        data["telegram_notificado"] = True
+        data.pop("telegram_error", None)
+        path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        enviados += 1
+    return enviados
 
 
 # Compatibilidad con código anterior

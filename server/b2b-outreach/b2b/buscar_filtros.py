@@ -250,35 +250,58 @@ def cargar_claves_cola(cola_dir: Path) -> set[str]:
     return set(indice_cola_por_clave(cola_dir).keys())
 
 
+def archivo_en_cola(cola_dir: Path, sub: str, lead: dict) -> Path | None:
+    """JSON de esa carpeta que es el mismo negocio (clave, place_id o dominio)."""
+    carpeta = cola_dir / sub
+    if not carpeta.is_dir():
+        return None
+    clave = clave_dedupe(lead)
+    pid = (lead.get("place_id") or "").strip()
+    dom = dominio_web(lead.get("web") or "")
+    for path in carpeta.glob("*.json"):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        if clave_dedupe(data) == clave:
+            return path
+        if pid and (data.get("place_id") or "").strip() == pid:
+            return path
+        if dom and dominio_web(data.get("web") or "") == dom:
+            return path
+    return None
+
+
+def solo_reintento_failed(lead: dict, cola_dir: Path | None) -> bool:
+    """True si el único rastro en la cola es failed: el envío se puede reintentar."""
+    if cola_dir is None or not cola_dir.is_dir():
+        return False
+    if archivo_en_cola(cola_dir, "inbox", lead) or archivo_en_cola(cola_dir, "sent", lead):
+        return False
+    return archivo_en_cola(cola_dir, "failed", lead) is not None
+
+
 def duplicado_contra(lead: dict, cola_dir: Path | None) -> tuple[str, str] | None:
-    """Ubicación (inbox/sent/failed/registro_leads) y fecha legible si ya existe."""
+    """Ubicación (inbox/sent/registro_leads) y fecha si ya existe.
+
+    Un archivo en failed no cuenta: el aviso de Telegram falló y se reintenta.
+    """
     from b2b.descartes import _iso_desde_mtime
     from b2b.leads_store import seen_path, ya_visto
 
     if cola_dir and cola_dir.is_dir():
         clave = clave_dedupe(lead)
         hit = indice_cola_por_clave(cola_dir).get(clave)
-        if hit:
+        if hit and hit[0] != "failed":
             sub, path = hit
             return sub, _iso_desde_mtime(path)
-        pid = (lead.get("place_id") or "").strip()
-        dom = dominio_web(lead.get("web") or "")
-        for sub in ("inbox", "sent", "failed"):
-            carpeta = cola_dir / sub
-            if not carpeta.is_dir():
-                continue
-            for path in carpeta.glob("*.json"):
-                try:
-                    data = json.loads(path.read_text(encoding="utf-8"))
-                except (OSError, json.JSONDecodeError):
-                    continue
-                if not isinstance(data, dict):
-                    continue
-                if pid and (data.get("place_id") or "").strip() == pid:
-                    return sub, _iso_desde_mtime(path)
-                if dom and dominio_web(data.get("web") or "") == dom:
-                    return sub, _iso_desde_mtime(path)
-    if ya_visto(lead.get("place_id", ""), lead.get("web", "")):
+        for sub in ("inbox", "sent"):
+            path = archivo_en_cola(cola_dir, sub, lead)
+            if path is not None:
+                return sub, _iso_desde_mtime(path)
+    if ya_visto(lead.get("place_id", ""), lead.get("web", "")) and not solo_reintento_failed(lead, cola_dir):
         reg = seen_path()
         fecha = _iso_desde_mtime(reg) if reg.is_file() else ""
         return "registro_leads", fecha

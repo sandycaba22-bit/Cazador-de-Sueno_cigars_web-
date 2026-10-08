@@ -23,7 +23,7 @@ from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
 from b2b.logging_ops import registrar_busqueda, registrar_evento, registrar_presupuesto_agotado
 from b2b.fuente_leads import resolver_fuente_leads
 from b2b.places import PresupuestoPlacesAgotado, buscar_en_pais
-from b2b.buscar_filtros import clasificar_novedad_detalle
+from b2b.buscar_filtros import archivo_en_cola, clasificar_novedad_detalle, solo_reintento_failed
 from b2b.descartes import (
     append_dudoso_diario,
     append_isla_en_archivo_diario,
@@ -35,7 +35,7 @@ from b2b.descartes import (
 )
 from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
 from b2b.calidad_lead import StatsCalidad, clasificar_lote
-from b2b.telegram_gestion import tiene_medio_contacto
+from b2b.telegram_gestion import puede_avisar_prospecto, tiene_medio_contacto
 from b2b.contacto_web import extraer_contactos, normalizar_canales
 from b2b.website import dominio_negocio, web_confiable_para_idioma
 
@@ -224,7 +224,9 @@ def encolar(
             if en_lista_no_contactar(lead.get("nombre", ""), lead.get("web", "")):
                 res["descartados"].append(entrada_descarte(nombre, "lista no contactar", etapa="encolar"))
                 continue
-            if marcar and ya_visto(lead.get("place_id", ""), lead.get("web", "")):
+            reintento_failed = solo_reintento_failed(lead, cola)
+            failed_previo = archivo_en_cola(cola, "failed", lead) if reintento_failed else None
+            if marcar and ya_visto(lead.get("place_id", ""), lead.get("web", "")) and not reintento_failed:
                 res["repetidos"].append(entrada_repetido(nombre, "registro_leads", ""))
                 continue
             if marcar and max_encolar and len(escritos) >= max_encolar:
@@ -235,7 +237,7 @@ def encolar(
             enriquecido = enriquecer_lead(dict(lead), reglas, simulado=simulado)
             if enriquecido.get("web_enriquecido"):
                 web_enriquecidos += 1
-            if not tiene_medio_contacto(enriquecido):
+            if not puede_avisar_prospecto(enriquecido):
                 res["sin_contacto"].append(entrada_sin_contacto(enriquecido))
                 continue
             if carpeta == inbox and not califica_lead(enriquecido):
@@ -252,7 +254,12 @@ def encolar(
             if marcar:
                 marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
                 escritos.append(path)
-                if notificar_telegram_buscar and carpeta == inbox and tiene_medio_contacto(payload):
+                if failed_previo is not None and failed_previo.is_file():
+                    try:
+                        failed_previo.unlink()
+                    except OSError:
+                        pass
+                if notificar_telegram_buscar and carpeta == inbox and puede_avisar_prospecto(payload):
                     from b2b.telegram_control import procesar_comandos_chat, esta_pausado
                     from b2b.telegram_prospecto import enviar_prospecto_telegram
 
@@ -268,15 +275,27 @@ def encolar(
                                 from b2b.telegram_buscar import notificar_buscar
 
                                 notificar_buscar(ack, simulado=simulado)
-                    except Exception:
-                        pass
-                    if not esta_pausado():
-                        ok = enviar_prospecto_telegram(
-                            payload,
-                            reglas["pais"],
-                            simulado=simulado,
-                            inbox_path=str(path),
+                    except Exception as exc:
+                        registrar_evento(
+                            {"evento": "telegram_comandos_fallo", "error": str(exc)[:400]}
                         )
+                    if not esta_pausado():
+                        try:
+                            ok = enviar_prospecto_telegram(
+                                payload,
+                                reglas["pais"],
+                                simulado=simulado,
+                                inbox_path=str(path),
+                            )
+                        except Exception as exc:
+                            registrar_evento(
+                                {
+                                    "evento": "telegram_prospecto_fallo",
+                                    "nombre": payload.get("nombre") or "",
+                                    "error": str(exc)[:400],
+                                }
+                            )
+                            ok = False
                         if ok:
                             payload["telegram_notificado"] = True
                             path.write_text(
@@ -468,6 +487,30 @@ def conteo_isla(*, encontrados: int, descartados: int, repetidos: int, resultado
     return conteo
 
 
+def _diagnostico_cero(stats_list: list[dict]) -> dict:
+    descartes: list = []
+    repetidos = 0
+    errores: list[str] = []
+    presupuesto = False
+    for stats in stats_list:
+        descartes.extend(stats.get("descartes") or [])
+        repetidos += int(stats.get("repetidos") or 0)
+        fuente_stats = stats.get("fuente_stats") or {}
+        err = fuente_stats.get("google_error") or ""
+        if not err and stats.get("fuente") == "google" and stats.get("error"):
+            err = stats.get("error")
+        if err:
+            errores.append(str(err)[:200])
+        if stats.get("presupuesto_agotado") or fuente_stats.get("presupuesto_agotado"):
+            presupuesto = True
+    return {
+        "presupuesto": presupuesto,
+        "google_error": "; ".join(errores[:3]),
+        "repetidos": repetidos,
+        "descartes": descartes,
+    }
+
+
 def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
     if solo_listar:
         return
@@ -496,6 +539,13 @@ def prospectar(
 ) -> dict:
     import os
 
+    if not simulado and not solo_listar:
+        from b2b.telegram_prospecto import reintentar_avisos_cola
+
+        try:
+            reintentar_avisos_cola(inbox.parent)
+        except Exception as exc:
+            registrar_evento({"evento": "telegram_reintento_fallo", "error": str(exc)[:400]})
     if not simulado:
         return _prospectar(pais_cli, max_leads, inbox, simulado, solo_listar, tipo_filtro, buscar_global)
     previo = os.environ.get("B2B_SIMULADO")
@@ -558,6 +608,7 @@ def _prospectar(
                         ),
                     }
                 },
+                cero=_diagnostico_cero([out]) if enc == 0 else None,
             )
         return out
     if _islas_agotadas_en_google(fuente, zona):
@@ -651,6 +702,7 @@ def prospectar_turno_global(
             f"global:{out['pais']}",
             simulado=simulado,
             detalle_islas={out["pais"]: out.get("fuente_stats") or {}},
+            cero=_diagnostico_cero([out]) if int(out.get("encolados", 0)) == 0 else None,
         )
     return out
 
@@ -688,6 +740,7 @@ def prospectar_prioridad_inicial(
     encolados_por_isla: dict[str, int] = {}
     contacto_por_isla: dict[str, int] = {}
     detalle_islas: dict[str, dict] = {}
+    stats_corrida: list[dict] = []
     for reglas in paises:
         if paises_usados >= max_paises:
             break
@@ -708,6 +761,7 @@ def prospectar_prioridad_inicial(
             fuente=fuente,
         )
         paises_usados += 1
+        stats_corrida.append(stats)
         enc = int(stats.get("encolados", 0))
         total_encolados += enc
         total_leads += int(stats.get("leads", 0))
@@ -749,6 +803,7 @@ def prospectar_prioridad_inicial(
             zona_label,
             simulado=simulado,
             detalle_islas=detalle_islas,
+            cero=_diagnostico_cero(stats_corrida) if total_encolados == 0 else None,
         )
     return {
         "pais": f"zona:{zona_label}",

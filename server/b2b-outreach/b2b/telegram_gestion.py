@@ -119,3 +119,13 @@ def tiene_medio_contacto(payload: dict) -> bool:
         if (payload.get(campo) or "").strip():
             return True
     return bool(dominio_negocio((payload.get("web") or "").strip()))
+
+
+def puede_avisar_prospecto(payload: dict) -> bool:
+    """Entra al aviso aunque no tenga teléfono ni web si Google dejó Maps o place_id."""
+    if tiene_medio_contacto(payload):
+        return True
+    fuente = (payload.get("fuente") or "").lower()
+    if "google" not in fuente:
+        return False
+    return bool((payload.get("maps_url") or "").strip() or (payload.get("place_id") or "").strip())

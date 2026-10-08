@@ -26,8 +26,10 @@ from b2b.telegram_prospecto import enviar_prospecto_telegram, mensaje_prospecto_
 FIXTURE = ROOT / "tests" / "fixtures" / "google_places_new_aruba.json"
 CLAVE_FALSA = "AIzaSyFAKE-test-key-0123456789abcdefghij"
 MASCARA_PEDIDA = (
-    "places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,"
-    "places.websiteUri,places.rating,places.userRatingCount,places.businessStatus,places.types"
+    "places.id,places.displayName,places.formattedAddress,"
+    "places.nationalPhoneNumber,places.internationalPhoneNumber,"
+    "places.websiteUri,places.googleMapsUri,"
+    "places.rating,places.userRatingCount,places.businessStatus,places.types"
 )
 MAPS_EMPORIUM = (
     "https://www.google.com/maps/search/?api=1&query=Aruba%20Cigar%20Emporium"
@@ -35,10 +37,14 @@ MAPS_EMPORIUM = (
 )
 DESCARTES_FIXTURE = [
     "Google: CLOSED_PERMANENTLY",
-    "Google: sin teléfono",
-    "Google: rating 3.6 (mínimo 4.0)",
-    "Google: 2 reseñas (mínimo 5)",
-    "Google: sin sitio web",
+]
+OPERATIVOS_POR_RATING = [
+    "New Leaf Cigars",
+    "La Casa del Habano Aruba",
+    "Aruba Cigar Emporium",
+    "Eagle Beach Cigars",
+    "Palm Beach Cigar Lounge",
+    "Smoke Corner Tobacconist",
 ]
 
 
@@ -106,32 +112,62 @@ class TestLlamadaApi(GoogleBase):
         pr = [c for _t, _i, c in places.consultas_google("Puerto Rico", [])]
         self.assertIn("tabaquería Puerto Rico", pr)
 
-    def test_solo_negocios_seguros_ordenados_y_canales(self):
-        with mock.patch.object(places.urllib.request, "urlopen", side_effect=self._urlopen_ok):
+    def test_operativos_pasan_sin_web_telefono_ni_resenas(self):
+        with mock.patch.object(places.urllib.request, "urlopen", side_effect=self._urlopen_ok), \
+                mock.patch.object(places, "registrar_evento") as log:
             leads, _ll, stats = places.buscar_google_pais("Aruba", ["tienda"])
-        self.assertEqual([l["nombre"] for l in leads], ["La Casa del Habano Aruba", "Aruba Cigar Emporium"])
+        self.assertEqual([l["nombre"] for l in leads], OPERATIVOS_POR_RATING)
         self.assertEqual([d["motivo"] for d in stats["descartes"]], DESCARTES_FIXTURE)
-        self.assertTrue(all(d["etapa"] == "google_negocio_seguro" for d in stats["descartes"]))
-        casa, emporium = leads
+        self.assertTrue(all(d["etapa"] == "google_estado" for d in stats["descartes"]))
+        por_nombre = {l["nombre"]: l for l in leads}
+        casa = por_nombre["La Casa del Habano Aruba"]
+        emporium = por_nombre["Aruba Cigar Emporium"]
+        eagle = por_nombre["Eagle Beach Cigars"]
         self.assertEqual(casa["web"], "")
         self.assertEqual(casa["instagram"], "https://www.instagram.com/casadelhabanoaruba/")
         self.assertEqual(emporium["web"], "https://www.arubacigaremporium.aw/")
         self.assertEqual(emporium["telefono"], "583 1111")
         self.assertEqual(emporium["telefono_internacional"], "+2975831111")
         self.assertEqual(emporium["maps_url"], MAPS_EMPORIUM)
+        self.assertEqual(eagle["web"], "")
+        self.assertTrue(eagle["telefono"])
+        self.assertTrue(eagle["maps_url"])
         for lead in leads:
             self.assertNotIn("maps", lead["web"])
+        crudos = [c.args[0] for c in log.call_args_list if c.args and c.args[0].get("evento") == "google_place_crudo"]
+        self.assertEqual(len(crudos), 1)
+        for campo in (
+            "websiteUri", "nationalPhoneNumber", "internationalPhoneNumber",
+            "rating", "userRatingCount", "businessStatus", "googleMapsUri",
+        ):
+            self.assertIn(campo, crudos[0]["campos_presentes"])
 
-    def test_umbral_de_resenas_y_rating_configurable(self):
-        raw = {"businessStatus": "OPERATIONAL", "nationalPhoneNumber": "1", "websiteUri": "https://a.aw/",
-               "rating": 4.0, "userRatingCount": 5}
-        self.assertEqual(places.motivo_no_seguro(raw), "")
-        with mock.patch.dict(os.environ, {"GOOGLE_PLACES_MIN_RESENAS": "10", "GOOGLE_PLACES_MIN_RATING": "4.5"}):
-            self.assertEqual(places.motivo_no_seguro(raw), "Google: rating 4.0 (mínimo 4.5)")
-            self.assertEqual(places.motivo_no_seguro({**raw, "rating": 4.7}), "Google: 5 reseñas (mínimo 10)")
-        self.assertEqual(places.motivo_no_seguro({**raw, "rating": None}), "Google: sin valoraciones")
-        self.assertEqual(places.motivo_no_seguro({**raw, "websiteUri": "https://maps.google.com/?cid=1"}),
-                         "Google: sin sitio web")
+    def test_rating_telefono_y_web_no_descartan(self):
+        raw = {
+            "businessStatus": "OPERATIONAL",
+            "displayName": {"text": "Oranjestad Cigar Shop"},
+            "types": ["store"],
+            "rating": 3.1,
+            "userRatingCount": 1,
+        }
+        lead = places._normalizar_place(raw, "Aruba")
+        self.assertEqual(places.motivo_descarte_google(raw, lead), "")
+        cerrado = {**raw, "businessStatus": "CLOSED_TEMPORARILY"}
+        self.assertEqual(places.motivo_descarte_google(cerrado, lead), "Google: CLOSED_TEMPORARILY")
+        bar = {
+            "businessStatus": "OPERATIONAL",
+            "displayName": {"text": "Joe Sports Bar"},
+            "types": ["bar"],
+        }
+        bar_lead = places._normalizar_place(bar, "Aruba")
+        self.assertEqual(places.motivo_descarte_google(bar, bar_lead), "bar/café sin humidor")
+        licor = {
+            "businessStatus": "OPERATIONAL",
+            "displayName": {"text": "Sunny Liquor Store"},
+            "types": ["liquor_store"],
+        }
+        licor_lead = places._normalizar_place(licor, "Aruba")
+        self.assertEqual(places.motivo_descarte_google(licor, licor_lead), "excluir_siempre")
 
     def test_cache_no_repite_isla_en_el_mes(self):
         with mock.patch.object(places.urllib.request, "urlopen", side_effect=self._urlopen_ok):
@@ -257,29 +293,43 @@ class TestErroresGoogle(GoogleBase):
 
         return _falla
 
-    def test_4xx_y_5xx_conmutan_a_osm(self):
+    def test_error_google_no_llama_osm(self):
         for codigo in (400, 429, 500, 503):
             with self.subTest(codigo=codigo):
                 places._GOOGLE_DESACTIVADO.clear()
                 self.peticiones.clear()
                 with mock.patch.object(places.urllib.request, "urlopen", side_effect=self._error(codigo)), \
-                        mock.patch.object(places, "_buscar_osm", return_value=(self.OSM, 1, {"descartes": []})), \
+                        mock.patch.object(places, "_buscar_osm") as osm, \
                         mock.patch.object(places, "_notificar"):
                     leads, _ll, stats = places.buscar_en_pais("Aruba", ["tienda"], 5, fuente="google")
-                    leads2, _l2, stats2 = places.buscar_en_pais("Curacao", ["tienda"], 5, fuente="ambas")
-                self.assertEqual([l["nombre"] for l in leads], ["Tabaco OSM"])
+                    leads2, _l2, stats2 = places.buscar_en_pais("Curacao", ["tienda"], 5, fuente="google")
+                osm.assert_not_called()
+                self.assertEqual(leads, [])
                 self.assertIn(str(codigo), stats["google_error"])
                 self.assertEqual(len(self.peticiones), 1)
-                self.assertEqual([l["nombre"] for l in leads2], ["Tabaco OSM"])
+                self.assertEqual(leads2, [])
                 self.assertIn(f"HTTP {codigo}", stats2["google_omitido"])
 
-    def test_sin_respuesta_conmuta_a_osm(self):
-        with mock.patch.object(places.urllib.request, "urlopen", side_effect=TimeoutError("timed out")), \
-                mock.patch.object(places, "_buscar_osm", return_value=(self.OSM, 1, {"descartes": []})), \
-                mock.patch.object(places, "_notificar") as aviso:
-            leads, _ll, stats = places.buscar_en_pais("Aruba", ["tienda"], 5, fuente="google")
+    def test_ambas_si_google_falla_sigue_con_osm(self):
+        places._GOOGLE_DESACTIVADO.clear()
+        with mock.patch.object(places.urllib.request, "urlopen", side_effect=self._error(500)), \
+                mock.patch.object(places, "_buscar_osm", return_value=(self.OSM, 1, {"descartes": []})) as osm, \
+                mock.patch.object(places, "_notificar"):
+            leads, _ll, stats = places.buscar_en_pais("Aruba", ["tienda"], 5, fuente="ambas")
+        osm.assert_called_once()
         self.assertEqual([l["nombre"] for l in leads], ["Tabaco OSM"])
+        self.assertIn("500", stats["google_error"])
+
+    def test_sin_respuesta_no_llama_osm(self):
+        with mock.patch.dict(os.environ, {"FUENTE_LEADS": "google"}), \
+                mock.patch.object(places.urllib.request, "urlopen", side_effect=TimeoutError("timed out")), \
+                mock.patch.object(places, "_buscar_osm") as osm, \
+                mock.patch.object(places, "_notificar") as aviso:
+            leads, _ll, _stats = places.buscar_en_pais("Aruba", ["tienda"], 5, fuente="google")
+        osm.assert_not_called()
+        self.assertEqual(leads, [])
         self.assertIn("no respondió", aviso.call_args[0][0])
+        self.assertIn("no consulto OpenStreetMap", aviso.call_args[0][0])
 
     def test_cuota_429_avisa_una_vez_al_dia(self):
         with mock.patch.object(places.urllib.request, "urlopen", side_effect=self._error(429)), \
@@ -305,7 +355,7 @@ class TestErroresGoogle(GoogleBase):
                 mock.patch.object(places, "_notificar"):
             leads, llamadas, stats = places.buscar_google_pais("Aruba", ["tienda", "lounge"])
         self.assertEqual(llamadas, 1)
-        self.assertEqual([l["nombre"] for l in leads], ["La Casa del Habano Aruba", "Aruba Cigar Emporium"])
+        self.assertEqual([l["nombre"] for l in leads], OPERATIVOS_POR_RATING)
         self.assertIn("502", stats["google_error"])
 
 
@@ -382,18 +432,19 @@ class TestClaveDesdeEnv(unittest.TestCase):
 
 
 class TestSinClave(GoogleBase):
-    def test_sin_clave_solo_osm_sin_fallar(self):
-        osm = [{"nombre": "Tabaco OSM", "pais": "Aruba", "place_id": "osm:node/1",
-                "telefono": "+297 5800000", "fuente": "openstreetmap"}]
+    def test_sin_clave_google_no_cae_a_osm(self):
         with mock.patch.dict(os.environ, {"GOOGLE_PLACES_API_KEY": ""}):
-            for valor in ("google", "ambas", "auto"):
+            for valor in ("ambas", "auto"):
                 with mock.patch.dict(os.environ, {"FUENTE_LEADS": valor}):
                     self.assertEqual(resolver_fuente_leads(), "osm")
-            with mock.patch.object(places, "_buscar_osm", return_value=(osm, 1, {"descartes": []})), \
+            with mock.patch.dict(os.environ, {"FUENTE_LEADS": "google"}):
+                self.assertEqual(resolver_fuente_leads(), "google")
+            with mock.patch.object(places, "_buscar_osm") as osm, \
                     mock.patch.object(places.urllib.request, "urlopen") as red:
-                leads, _ll, stats = places.buscar_en_pais("Aruba", ["tienda"], 5, fuente="ambas")
+                leads, _ll, stats = places.buscar_en_pais("Aruba", ["tienda"], 5, fuente="google")
+        osm.assert_not_called()
         red.assert_not_called()
-        self.assertEqual([l["nombre"] for l in leads], ["Tabaco OSM"])
+        self.assertEqual(leads, [])
         self.assertIn("sin GOOGLE_PLACES_API_KEY", stats["google_omitido"])
 
     def test_con_clave_auto_es_ambas(self):
@@ -407,13 +458,13 @@ class TestSinClave(GoogleBase):
             cuerpo = json.dumps({"error": {"message": f"API key {CLAVE_FALSA} not valid"}}).encode()
             raise urllib.error.HTTPError(request.full_url, 403, "Forbidden", {}, io.BytesIO(cuerpo))
 
-        osm = [{"nombre": "Tabaco OSM", "pais": "Aruba", "place_id": "osm:node/1", "telefono": "+297 5800000"}]
         with mock.patch.object(places.urllib.request, "urlopen", side_effect=_403), \
                 mock.patch.object(places, "registrar_evento") as evento, \
-                mock.patch.object(places, "_buscar_osm", return_value=(osm, 1, {"descartes": []})):
+                mock.patch.object(places, "_buscar_osm") as osm:
             leads, _ll, stats = places.buscar_en_pais("Aruba", ["tienda"], 5, fuente="google")
-            leads2, _l2, stats2 = places.buscar_en_pais("Curacao", ["tienda"], 5, fuente="google")
-        self.assertEqual(len(leads), 1)
+            _leads2, _l2, stats2 = places.buscar_en_pais("Curacao", ["tienda"], 5, fuente="google")
+        osm.assert_not_called()
+        self.assertEqual(leads, [])
         self.assertNotIn(CLAVE_FALSA, json.dumps(stats))
         self.assertNotIn(CLAVE_FALSA, str(evento.call_args_list))
         self.assertIn("***", stats["google_error"])
@@ -432,7 +483,7 @@ class TestAmbasFuentes(GoogleBase):
                 mock.patch.object(places, "_buscar_osm", return_value=(osm, 1, {"descartes": []})):
             leads, _ll, stats = places.buscar_en_pais("Aruba", ["tienda"], 10, fuente="ambas")
         nombres = [l["nombre"] for l in leads]
-        self.assertEqual(nombres, ["La Casa del Habano Aruba", "Aruba Cigar Emporium", "Tabaquería San Nicolas"])
+        self.assertEqual(nombres, OPERATIVOS_POR_RATING + ["Tabaquería San Nicolas"])
         fusion = [d for d in stats["descartes"] if d["motivo"] == "fusionado_misma_clave"]
         self.assertEqual(len(fusion), 1)
         self.assertEqual(fusion[0]["nombres"], ["Aruba Cigar Emporium", "Emporium (OSM)"])
@@ -464,13 +515,23 @@ class TestFlujoCompletoIsla(GoogleBase):
         self.assertEqual(c["encontrados"], 7)
         self.assertEqual(c["sin_clasificar"], 0)
         self.assertEqual(c["descartados"], len(DESCARTES_FIXTURE))
-        self.assertEqual(c["nuevos"], 1)
+        self.assertEqual(c["nuevos"], 5)
         self.assertEqual(c["dudosos"], 1)
         self.assertEqual(c["sin_contacto"], 0)
         encolados = [json.loads(p.read_text(encoding="utf-8")) for p in inbox.glob("*.json")]
-        self.assertEqual([e["nombre"] for e in encolados], ["Aruba Cigar Emporium"])
-        self.assertEqual(encolados[0]["maps_url"], MAPS_EMPORIUM)
-        self.assertTrue(encolados[0]["vende_cigarros"])
+        self.assertEqual(
+            sorted(e["nombre"] for e in encolados),
+            [
+                "Aruba Cigar Emporium",
+                "Eagle Beach Cigars",
+                "New Leaf Cigars",
+                "Palm Beach Cigar Lounge",
+                "Smoke Corner Tobacconist",
+            ],
+        )
+        emporium = next(e for e in encolados if e["nombre"] == "Aruba Cigar Emporium")
+        self.assertEqual(emporium["maps_url"], MAPS_EMPORIUM)
+        self.assertTrue(emporium["vende_cigarros"])
         dudosos = [json.loads(p.read_text(encoding="utf-8")) for p in (inbox.parent / "dudoso").glob("*.json")]
         casa = dudosos[0]
         self.assertEqual(casa["nombre"], "La Casa del Habano Aruba")
@@ -563,6 +624,7 @@ class TestMensajeTelegram(unittest.TestCase):
             "📞 Teléfono: 588 2222",
             "https://wa.me/2975882222?text=Hello%20La%20Casa%20del%20Habano",
             "📸 Instagram: https://www.instagram.com/casadelhabanoaruba/",
+            "🌐 sin web",
             "🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=La%20Casa%20del%20Habano%20Aruba"
             "&query_place_id=ChIJ-casa-habano-aw",
             "your cigar shop",
@@ -578,10 +640,16 @@ class TestMensajeTelegram(unittest.TestCase):
         self.assertIn("Versión correo", msg)
         self.assertIn("reply STOP", msg)
 
-    def test_solo_mapa_va_a_sin_contacto_sin_borrador(self):
+    def test_sin_telefono_ni_web_entra_y_lo_dice_en_el_aviso(self):
         lead = places._normalizar_place(json.loads(FIXTURE.read_text(encoding="utf-8"))["places"][3], "Aruba")
         self.assertFalse(tiene_medio_contacto(lead))
-        self.assertFalse(enviar_prospecto_telegram(lead, "Aruba", simulado=True))
+        self.assertFalse(lead.get("telefono"))
+        self.assertFalse(lead.get("web"))
+        msg = mensaje_prospecto_completo(lead, "Aruba")
+        self.assertIn("📞 sin teléfono", msg)
+        self.assertIn("🌐 sin web", msg)
+        self.assertIn("query_place_id=ChIJ-smoke-lounge-aw", msg)
+        self.assertTrue(enviar_prospecto_telegram(lead, "Aruba", simulado=True))
         fila = entrada_sin_contacto(lead)
         self.assertIn("query_place_id=ChIJ-smoke-lounge-aw", fila["maps_url"])
         self.assertEqual(fila["web"], "")
@@ -628,6 +696,69 @@ class TestIdiomaYPlantillas(unittest.TestCase):
             self.assertNotIn("this week", texto.lower())
         self.assertIn("votre cave à cigares", borrador_corto("Cave", "fr", "tienda"))
         self.assertIn("su tabaquería", borrador_corto("Tabaquería", "es", "tienda"))
+
+
+class TestCeroYReintento(unittest.TestCase):
+    def test_aviso_cero_dice_el_motivo(self):
+        from b2b.telegram_buscar import texto_cero_prospectos
+
+        self.assertIn("error de Google (HTTP 403)", texto_cero_prospectos({"google_error": "HTTP 403"}))
+        self.assertIn("presupuesto de Google agotado", texto_cero_prospectos({"presupuesto": True}))
+        self.assertIn("todo repetido (3)", texto_cero_prospectos({"repetidos": 3}))
+        texto = texto_cero_prospectos({"descartes": [{"motivo": "Google: CLOSED_PERMANENTLY"}, {"motivo": "Google: CLOSED_PERMANENTLY"}]})
+        self.assertIn("Google: CLOSED_PERMANENTLY ×2", texto)
+
+    def test_failed_se_puede_reintentar(self):
+        from b2b.buscar_filtros import clasificar_novedad_detalle
+        from b2b.leads_store import marcar_visto
+
+        raiz = Path(tempfile.mkdtemp())
+        cola = raiz / "cola"
+        failed = cola / "failed"
+        failed.mkdir(parents=True)
+        lead = {
+            "nombre": "Caribbean Cigar Company",
+            "pais": "Aruba",
+            "place_id": "ChIJ-caribbean",
+            "web": "https://caribbean-cigar.example/",
+            "fuente": "google_places",
+        }
+        (failed / "caribbean.json").write_text(json.dumps(lead), encoding="utf-8")
+        with mock.patch.dict(os.environ, {"B2B_QUEUE_DIR": str(raiz)}):
+            marcar_visto(lead["place_id"], lead["web"])
+            nuevos, repetidos, _det = clasificar_novedad_detalle([dict(lead)], cola)
+        self.assertEqual([l["nombre"] for l in nuevos], ["Caribbean Cigar Company"])
+        self.assertEqual(repetidos, [])
+        inbox = cola / "inbox"
+        inbox.mkdir()
+        (inbox / "caribbean.json").write_text(json.dumps(lead), encoding="utf-8")
+        nuevos2, repetidos2, _det2 = clasificar_novedad_detalle([dict(lead)], cola)
+        self.assertEqual(nuevos2, [])
+        self.assertEqual(len(repetidos2), 1)
+
+    def test_telegram_401_no_aborta(self):
+        lead = {
+            "nombre": "Caribbean Cigar Company",
+            "pais": "Aruba",
+            "place_id": "ChIJ-caribbean",
+            "maps_url": "https://maps.google.com/?cid=1",
+            "fuente": "google_places",
+            "tipo": "tienda",
+        }
+        from b2b import telegram_gestion
+
+        with mock.patch("telegram_bot.enviar_mensaje_telegram", side_effect=RuntimeError("Telegram respondió 401: unauthorized")), \
+                mock.patch("telegram_bot.load_local_env"), \
+                mock.patch.object(telegram_gestion, "PENDIENTES_PATH", Path(tempfile.mkdtemp()) / "pend.json"):
+            ok = enviar_prospecto_telegram(lead, "Aruba")
+        self.assertFalse(ok)
+
+    def test_osm_tiene_tope_de_tiempo(self):
+        from b2b import osm_places
+
+        self.assertEqual(osm_places.OVERPASS_TIMEOUT_SEC, 15)
+        self.assertEqual(osm_places._REINTENTOS_ISLA, 2)
+        self.assertEqual(osm_places._TOPE_SEGUNDOS_ISLA, 120)
 
 
 if __name__ == "__main__":

@@ -723,6 +723,17 @@ def segundos_de_espera():
         return 15
 
 
+def _es_fallo_telegram(error: BaseException) -> bool:
+    if isinstance(error, (TelegramTransientError, TelegramFormatError)):
+        return True
+    texto = str(error)
+    return (
+        "Telegram respondió" in texto
+        or "Telegram rechazó" in texto
+        or "Telegram no respondió" in texto
+    )
+
+
 def procesar_archivo(path, sent, failed, imprimir=False):
     lock = _reclamar(path)
     if lock is None:
@@ -750,6 +761,13 @@ def procesar_archivo(path, sent, failed, imprimir=False):
     except Exception as error:
         nota = sanitizar_error(error)
         print(f"No se pudo procesar {path.name}: {nota}", file=sys.stderr)
+        if _es_fallo_telegram(error):
+            from b2b.logging_ops import registrar_evento
+
+            registrar_evento(
+                {"evento": "telegram_alerta_fallo", "archivo": path.name, "error": nota}
+            )
+            return {"telegram_error": nota}
         if path.exists():
             _archivar(path, failed, nota)
         return None
@@ -1000,7 +1018,12 @@ def main(argv=None):
                 from b2b.budget import estado
 
                 est = estado()
-                modo = "Google Places + OSM" if fuente == "ambas" else "Google Places (OSM de respaldo)"
+                if fuente == "google":
+                    modo = "Google Places (sin OpenStreetMap)"
+                elif fuente == "ambas":
+                    modo = "Google Places + OSM"
+                else:
+                    modo = "Google Places"
                 print(
                     f"Buscador: {modo}. Presupuesto Google: tanda {est['tanda']} "
                     f"{est['tanda_llamadas']}/{est['max_tanda']}, hoy {est['dia']}/{est['max_dia']}, "
