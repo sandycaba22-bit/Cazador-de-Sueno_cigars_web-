@@ -782,9 +782,15 @@ def _orden_inbox(path):
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         pais = data.get("pais", "") if isinstance(data, dict) else ""
-        return (clasificar_mercado(str(pais))["orden"], path.name)
+        telefono = str(data.get("telefono") or "").strip()
+        correo = str(data.get("correo") or "").strip()
+        
+        # Priorizar leads con teléfono o correo (0) vs sin contacto (1)
+        has_contact = 0 if (telefono or correo) else 1
+        
+        return (clasificar_mercado(str(pais))["orden"], has_contact, path.name)
     except (OSError, json.JSONDecodeError, TypeError):
-        return (1, path.name)
+        return (1, 1, path.name)
 
 
 def pasar_cola(queue_dir, imprimir=False):
