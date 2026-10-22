@@ -1,0 +1,30 @@
+{
+  "places": [
+    {
+      "id": "ChIJ-usa-sample-1",
+      "displayName": {"text": "Miami Cigar Lounge"},
+      "formattedAddress": "123 Brickell Ave, Miami, FL 33131, USA",
+      "nationalPhoneNumber": "(305) 555-0100",
+      "internationalPhoneNumber": "+13055550100",
+      "websiteUri": "https://miamicigarlounge.example.com",
+      "googleMapsUri": "https://www.google.com/maps/place/?q=place_id:ChIJ-usa-sample-1",
+      "rating": 4.6,
+      "userRatingCount": 85,
+      "businessStatus": "OPERATIONAL",
+      "types": ["bar", "store", "point_of_interest", "establishment"]
+    },
+    {
+      "id": "ChIJ-usa-sample-2",
+      "displayName": {"text": "Downtown Tobacconist"},
+      "formattedAddress": "200 Main St, Orlando, FL 32801, USA",
+      "nationalPhoneNumber": "(407) 555-0200",
+      "internationalPhoneNumber": "+14075550200",
+      "websiteUri": "",
+      "googleMapsUri": "https://www.google.com/maps/place/?q=place_id:ChIJ-usa-sample-2",
+      "rating": 4.2,
+      "userRatingCount": 22,
+      "businessStatus": "OPERATIONAL",
+      "types": ["store", "point_of_interest", "establishment"]
+    }
+  ]
+}

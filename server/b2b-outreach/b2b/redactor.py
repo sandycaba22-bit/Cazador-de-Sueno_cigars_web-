@@ -384,16 +384,35 @@ def asunto_correo(nombre_local: str, idioma: str) -> str:
 
 
 def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
-    """WhatsApp / Instagram: máximo 3–4 líneas, catálogo PDF y sampler."""
+    """WhatsApp / Instagram: presentación breve, catálogo PDF y muestra."""
     nombre = (nombre_local or "").strip() or "there"
-    catalogo, aviso = _catalogo("en")
-    t = tipo_en_idioma(tipo, "en")
+    catalogo, aviso = _catalogo(idioma)
+    t = tipo_en_idioma(tipo, idioma)
+
+    if idioma == "es":
+        return _validar(
+            f"Saludos, equipo de {nombre}.\n"
+            f"Somos Cazador de Sueño, fábrica boutique de puros premium hechos a mano en Santiago, "
+            f"República Dominicana. Nos gustaría presentar nuestra línea a su {t}.\n"
+            f"{aviso}Catálogo mayorista: {catalogo}\n"
+            "Ofrecemos una muestra gratuita (free sample) para evaluación. ¿Conversamos?\n"
+            f"Atentamente,\n{NOMBRE_VP} - {CARGO_VP['es']}"
+        )
+    if idioma == "fr":
+        return _validar(
+            f"Bonjour l'équipe de {nombre},\n"
+            f"Nous sommes Cazador de Sueño, manufacture de cigares faits main à Santiago, "
+            f"République dominicaine. Nous souhaitons présenter notre gamme à votre {t}.\n"
+            f"{aviso}Catalogue grossiste : {catalogo}\n"
+            "Un échantillon gratuit est disponible pour évaluation. Pouvons-nous échanger ?\n"
+            f"Cordialement,\n{NOMBRE_VP} - {CARGO_VP['fr']}"
+        )
     
     texto = (
         f"Hello {nombre} team,\n"
-        f"We are Cazador de Sueños, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {t}.\n"
-        f"Wholesale Catalog: {catalogo}\n"
-        "We're happy to provide commercial samples for your consideration. Open to a brief chat?\n"
+        f"We are Cazador de Sueño, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {tipo_en_idioma(tipo, 'en')}.\n"
+        f"{aviso}Wholesale Catalog: {catalogo}\n"
+        "We're happy to provide a free sample for your consideration. Open to a brief chat?\n"
         "Best,\n"
         "Yaniris Agustina Ureña - VP of Sales"
     )
@@ -408,14 +427,14 @@ def borrador_correo(nombre_local: str, idioma: str, tipo: str = "tienda") -> str
     texto = (
         f"Subject: Handmade Dominican cigars for {nombre}\n\n"
         f"Hello {nombre} team,\n\n"
-        "We are Cazador de Sueños Cigar SRL, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
+        "We are Cazador de Sueño, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
         f"making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
         f"Wholesale catalog: {catalogo}\n"
-        "Commercial samples available for licensed retailers. Would a short call work for you?\n\n"
+        "A free sample is available for evaluation. Would a short call work for you?\n\n"
         "Best regards,\n"
         "Yaniris Agustina Ureña\n"
-        "VP of Sales\n"
-        "Cazador de Sueños Cigar SRL\n"
+        "Vice President, Sales\n"
+        "Cazador de Sueño\n"
         "cazadordesueno1@gmail.com\n\n"
         "If you prefer not to receive further messages, reply STOP."
     )
@@ -491,6 +510,8 @@ def generar_tarjeta_telegram(
         f"Contacto: {estado_contacto_str}\n"
     )
     texto += "\nBorrador (3-4 líneas):\n" + draft
+    if sin_correo:
+        texto += "\nNota: sin correo publicado; confirmar otro canal de contacto."
 
     markdown = (
         "*Cazador de Sueños · Prospecto B2B*\n"

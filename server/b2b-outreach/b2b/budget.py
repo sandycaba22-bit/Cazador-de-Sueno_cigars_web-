@@ -34,8 +34,11 @@ def _entero_env(*nombres: str, default: int) -> int:
 
 
 def max_calls() -> int:
-    """Tope diario (GOOGLE_PLACES_MAX_CALLS_PER_DAY; MAX_PLACES_CALLS_DIA es el nombre viejo)."""
-    return _entero_env("GOOGLE_PLACES_MAX_CALLS_PER_DAY", "MAX_PLACES_CALLS_DIA", "B2B_GOOGLE_MAX_DIARIO", default=DEFAULT_DIA)
+    """Tope diario canónico; los dos nombres anteriores siguen como respaldo deprecado."""
+    return _entero_env(
+        "GOOGLE_PLACES_MAX_CALLS_PER_DAY", "MAX_PLACES_CALLS_DIA", "B2B_GOOGLE_MAX_DIARIO",
+        default=DEFAULT_DIA,
+    )
 
 
 def max_calls_mes() -> int:

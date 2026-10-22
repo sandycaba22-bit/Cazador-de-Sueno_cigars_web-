@@ -23,7 +23,7 @@ FIELD_MASK = (
     "places.id,places.displayName,places.formattedAddress,"
     "places.nationalPhoneNumber,places.internationalPhoneNumber,"
     "places.websiteUri,places.googleMapsUri,"
-    "places.rating,places.userRatingCount,places.businessStatus,places.types"
+    "places.rating,places.userRatingCount,places.businessStatus,places.types,nextPageToken"
 )
 PAGE_SIZE = 20
 MAPS_PLACE_URL = "https://www.google.com/maps/search/?api=1&query={nombre}&query_place_id={pid}"
@@ -39,14 +39,20 @@ _CAMPOS_CRUDOS = (
 _TIPOS_BAR = {"bar", "night_club", "cafe", "restaurant"}
 _TIPOS_LICOR = {"liquor_store"}
 
-# (tipo de negocio, idioma, término). "*" = se busca en toda isla.
+# (tipo de negocio, idioma, término). Todos los términos en EN.
 TERMINOS_GOOGLE: tuple[tuple[str, str, str], ...] = (
-    ("tienda", "*", "cigar shop"),
+    ("tienda", "en", "cigar shop"),
+    ("lounge", "en", "cigar lounge"),
+    ("lounge", "en", "cigar bar"),
     ("tienda", "en", "tobacconist"),
-    ("tienda", "es", "tabaquería"),
-    ("tienda", "nl", "sigarenwinkel"),
-    ("tienda", "fr", "cave à cigares"),
-    ("lounge", "*", "cigar lounge"),
+    ("tienda", "en", "cigar distributor"),
+    ("tienda", "en", "tobacco wholesaler"),
+    ("tienda", "en", "humidor"),
+    ("lounge", "en", "hotel resort cigar lounge"),
+    ("lounge", "en", "steakhouse humidor"),
+    ("lounge", "en", "casino cigar room"),
+    ("lounge", "en", "golf club cigar lounge"),
+    ("tienda", "en", "liquor store humidor"),
 )
 
 QUERIES_BASE = {
@@ -231,35 +237,47 @@ def islas_agotadas_google(paises: list[str]) -> bool:
 
 
 def _post_search(text_query: str, idioma: str = "") -> list[dict]:
-    """Una sola llamada places:searchText (sin Place Details)."""
+    """Text Search con paginación completa (sin Place Details)."""
     motivo = budget.motivo_bloqueo()
     if motivo:
         raise PresupuestoPlacesAgotado(motivo)
-    cuerpo: dict[str, Any] = {"textQuery": text_query, "pageSize": PAGE_SIZE}
-    if idioma:
-        cuerpo["languageCode"] = idioma
-    request = urllib.request.Request(
-        PLACES_URL,
-        data=json.dumps(cuerpo).encode("utf-8"),
-        headers={
-            "Content-Type": "application/json",
-            "X-Goog-Api-Key": _api_key(),
-            "X-Goog-FieldMask": FIELD_MASK,
-        },
-        method="POST",
-    )
-    budget.registrar_llamada(1)
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            body = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as error:
-        detalle = _sin_clave(error.read().decode("utf-8", errors="replace"))[:300]
-        _GOOGLE_DESACTIVADO["motivo"] = f"HTTP {error.code}"
-        raise GooglePlacesError(error.code, f"Google Places respondió {error.code}: {detalle}") from None
-    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as error:
-        _GOOGLE_DESACTIVADO["motivo"] = "sin respuesta"
-        raise GooglePlacesError(0, f"Google Places sin respuesta: {_sin_clave(str(error))[:200]}") from None
-    return body.get("places") or []
+    resultados: list[dict] = []
+    token = ""
+    while True:
+        motivo = budget.motivo_bloqueo()
+        if motivo:
+            raise PresupuestoPlacesAgotado(motivo)
+        cuerpo: dict[str, Any] = {"textQuery": text_query, "pageSize": PAGE_SIZE}
+        if idioma:
+            cuerpo["languageCode"] = idioma
+        if token:
+            cuerpo["pageToken"] = token
+        request = urllib.request.Request(
+            PLACES_URL,
+            data=json.dumps(cuerpo).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "X-Goog-Api-Key": _api_key(),
+                "X-Goog-FieldMask": FIELD_MASK,
+            },
+            method="POST",
+        )
+        budget.registrar_llamada(1)
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                body = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as error:
+            detalle = _sin_clave(error.read().decode("utf-8", errors="replace"))[:300]
+            _GOOGLE_DESACTIVADO["motivo"] = f"HTTP {error.code}"
+            raise GooglePlacesError(error.code, f"Google Places respondió {error.code}: {detalle}") from None
+        except (urllib.error.URLError, TimeoutError, OSError, ValueError) as error:
+            _GOOGLE_DESACTIVADO["motivo"] = "sin respuesta"
+            raise GooglePlacesError(0, f"Google Places sin respuesta: {_sin_clave(str(error))[:200]}") from None
+        resultados.extend(body.get("places") or [])
+        token = body.get("nextPageToken") or ""
+        if not token:
+            break
+    return resultados
 
 
 def _log_place_crudo(raw: dict) -> None:
@@ -327,18 +345,19 @@ def motivo_descarte_google(raw: dict, lead: dict) -> str:
 
 
 def consultas_google(pais: str, tipos: list[str]) -> list[tuple[str, str, str]]:
-    """(tipo, idioma, texto) por isla, en los idiomas locales de country_rules."""
+    """(tipo, idioma, texto) por estado/ciudad: '{término} in {ciudad}, {estado}'."""
     entry = buscar_pais(pais) or {}
-    idiomas = list(entry.get("idiomas") or ["en"])
+    ciudades = list(entry.get("ciudades") or [])
     tipos_ok = set(tipos) if tipos else {"tienda", "lounge"}
     out: list[tuple[str, str, str]] = []
+    if not ciudades:
+        ciudades = [entry.get("pais") or pais]
     for tipo, idioma, termino in TERMINOS_GOOGLE:
         if tipo not in tipos_ok:
             continue
-        if idioma != "*" and idioma not in idiomas:
-            continue
-        lang = idioma if idioma != "*" else ("en" if "en" in idiomas else idiomas[0])
-        out.append((tipo, lang, f"{termino} {pais}"))
+        for ciudad in ciudades:
+            consulta = f"{termino} in {ciudad}, {entry.get('pais') or pais}"
+            out.append((tipo, "en", consulta))
     return out
 
 
@@ -492,26 +511,20 @@ def _fixture_path(pais: str) -> Path:
     slug = _slug(pais)
     candidatos = [
         FIXTURES / f"places_{slug}.json",
-        FIXTURES / "places_martinique_sample.json",
+        FIXTURES / "places_usa_sample.json",
     ]
     for path in candidatos:
         if path.is_file():
             return path
-    return FIXTURES / "places_martinique_sample.json"
+    return FIXTURES / "places_usa_sample.json"
 
 
 def _consultas_para_pais(pais: str, tipo: str) -> list[str]:
     entry = buscar_pais(pais) or {}
     idiomas = entry.get("idiomas") or ["en"]
     plantillas = list(QUERIES_BASE.get(tipo, QUERIES_BASE["tienda"]))
-    if "fr" in idiomas:
-        plantillas.extend([f"tabac cigares {pais}", f"boutique cigare {pais}"])
-    if "nl" in idiomas:
-        plantillas.extend([f"sigarenwinkel {pais}", f"sigaar lounge {pais}"])
     if "es" in idiomas:
         plantillas.extend([f"tabaquería {pais}", f"importador puros {pais}"])
-    if "pt" in idiomas:
-        plantillas.extend([f"loja charutos {pais}", f"importador tabaco {pais}"])
     return plantillas
 
 

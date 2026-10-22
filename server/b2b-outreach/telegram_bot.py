@@ -169,69 +169,15 @@ ANGULO_TIPO = {
     },
 }
 
-# Islas y territorios del Caribe. La prioridad es comercial (ruta corta
-# desde Santiago), no un dictamen de aduana. La importación la confirma
-# el comprador en su territorio.
+# Islas y territorios activos. Se prioriza ruta corta desde Santiago.
+# Se reducen a mercados vigentes: Puerto Rico y Jamaica.
 CARIBE = (
-    "martinique",
-    "guadeloupe",
-    "guyane",
-    "haiti",
-    "haïti",
-    "saint-martin",
-    "st. martin",
-    "saint martin",
-    "sint maarten",
-    "st. maarten",
-    "saint maarten",
-    "st. barth",
-    "saint bart",
-    "saint-barth",
-    "aruba",
-    "curacao",
-    "curaçao",
-    "bonaire",
-    "saba",
-    "statia",
-    "eustatius",
-    "bahamas",
-    "jamaica",
-    "barbados",
-    "trinidad",
-    "tobago",
-    "cayman",
-    "antigua",
-    "barbuda",
-    "saint lucia",
-    "st. lucia",
-    "grenada",
-    "dominica",
-    "saint kitts",
-    "st. kitts",
-    "nevis",
-    "turks",
-    "caicos",
-    "anguilla",
-    "montserrat",
     "puerto rico",
-    "virgin",
-    "dominicana",
-    "dominican",
+    "jamaica",
 )
 
 FRENCH = (
-    "martinique",
-    "guadeloupe",
-    "guyane",
     "france",
-    "st. barth",
-    "saint bart",
-    "saint-barth",
-    "saint-martin",
-    "st. martin",
-    "saint martin",
-    "haiti",
-    "haïti",
 )
 GERMAN = (
     "germany",
@@ -453,31 +399,31 @@ def borrador_prospecto(idioma, nombre_local, tipo_negocio="tienda", sin_correo_p
     if idioma == "es":
         return (
             f"Saludos, equipo de {nombre_local}.\n\n"
-            "Somos Cazador de Sueños Cigar SRL, fábrica en "
+            "Somos Cazador de Sueño, fábrica en "
             f"{origen}.\n\n"
             f"{posicion}\n\n"
             f"{angulo}\n\n"
             f"{vitola}\n\n"
-            "Queremos presentarles el catálogo mayorista para su establecimiento. "
+            "Queremos presentarles el catálogo mayorista y ofrecer un free sample para evaluación. "
             "El portal B2B está aquí:\n"
             f"{WHOLESALE_URL}\n\n"
             f"{baja}\n\n"
             "Atentamente,\n"
-            "Equipo de Cazador de Sueños"
+            "Yaniris Agustina Ureña"
         ) + nota_correo
     return (
         f"Hello {nombre_local} team,\n\n"
-        "we are Cazador de Sueños Cigar SRL, a factory in "
+        "we are Cazador de Sueño, a factory in "
         f"{origen}.\n\n"
         f"{posicion}\n\n"
         f"{angulo}\n\n"
         f"{vitola}\n\n"
-        "We would like to introduce our wholesale collection and catalog to your "
-        "lounge or shop. Our B2B portal:\n"
+        "We would like to introduce our wholesale collection and offer a free sample for evaluation. "
+        "Our B2B portal:\n"
         f"{WHOLESALE_URL}\n\n"
         f"{baja}\n\n"
         "Best regards,\n"
-        "Cazador de Sueños Team"
+        "Yaniris Agustina Ureña"
     ) + nota_correo
 
 

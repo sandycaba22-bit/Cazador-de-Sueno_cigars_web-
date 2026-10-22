@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -13,32 +16,33 @@ from b2b.redactor import texto_corto_prospecto_buscar
 from b2b.telegram_control import puede_enviar_telegram, set_pausado
 from b2b.redactor import EMAIL_VP_VENTAS, presentacion_prospecto_telegram
 from b2b.telegram_gestion import tiene_medio_contacto, token_callback
-from b2b.telegram_prospecto import mensaje_prospecto_completo
+from b2b.telegram_prospecto import mensaje_prospecto_completo, teclado_prospecto
 
 
 class TestPaisesCola(unittest.TestCase):
-    def test_orden_caribe_primero(self):
+    def test_orden_florida_primero(self):
         fila = cargar_paises_cola()
         self.assertGreater(len(fila), 10)
-        self.assertEqual(fila[0].get("zona"), "caribe")
-        self.assertEqual(fila[0].get("pais"), "Aruba")
+        self.assertEqual(fila[0].get("zona"), "florida")
+        self.assertEqual(fila[0].get("pais"), "Florida")
 
-    def test_entry_aruba(self):
-        row = entry_por_pais("Aruba")
-        self.assertIsNotNone(row)
-        self.assertEqual(row["iso3166"], "AW")
+    def test_entries_activos(self):
+        for pais, iso in (("Florida", "US"), ("Puerto Rico", "PR"), ("Jamaica", "JM")):
+            row = entry_por_pais(pais)
+            self.assertIsNotNone(row)
+            self.assertEqual(row["iso3166"], iso)
 
 
 class TestCuadricula(unittest.TestCase):
-    def test_celdas_aruba_pequeno(self):
-        box = {"south": 12.41, "west": -70.07, "north": 12.63, "east": -69.86}
+    def test_celdas_miami_pequeno(self):
+        box = {"south": 25.65, "west": -80.35, "north": 25.87, "east": -80.14}
         celdas = celdas_desde_bbox(box, paso=0.45)
         self.assertGreaterEqual(len(celdas), 1)
         self.assertLessEqual(len(celdas), 4)
 
-    def test_preparar_aw(self):
-        celdas = preparar_celdas_pais("AW")
-        self.assertTrue(celdas)
+    def test_preparar_pr_jm(self):
+        for iso in ("PR", "JM"):
+            self.assertTrue(preparar_celdas_pais(iso))
 
 
 class TestTelegramProspecto(unittest.TestCase):
@@ -46,18 +50,24 @@ class TestTelegramProspecto(unittest.TestCase):
         lead = {
             "nombre": "Test Shop",
             "tipo": "lounge",
-            "telefono": "+297 123 4567",
+            "telefono": "+13055550100",
+            "telefono_internacional": "+13055550100",
             "web": "https://example.com",
             "correo": "info@example.com",
             "direccion": "Main St",
-            "pais": "Aruba",
+            "pais": "Florida",
         }
-        msg = mensaje_prospecto_completo(lead, "Aruba")
-        self.assertIn("PROSPECTO", msg)
-        self.assertIn("wa.me/", msg)
-        self.assertIn(EMAIL_VP_VENTAS, msg)
-        self.assertIn("Mensaje WhatsApp / Instagram", msg)
-        self.assertIn("Versión correo", msg)
+        msg = mensaje_prospecto_completo(lead, "Florida")
+        self.assertIn("Test Shop", msg)
+        self.assertIn("Teléfono y correo confirmados", msg)
+        self.assertIn("Yaniris Agustina Ureña", msg)
+        botones = teclado_prospecto(lead, "Florida", token_callback(lead))
+        urls = [b.get("url", "") for fila in botones["inline_keyboard"] for b in fila]
+        self.assertTrue(any(url.startswith("https://wa.me/13055550100?") for url in urls))
+        correo = next(unquote(url) for url in urls if url.startswith("mailto:"))
+        self.assertIn(EMAIL_VP_VENTAS, correo)
+        self.assertIn("reply STOP", correo)
+        self.assertNotIn("STOP", msg)
 
     def test_tiene_medio_web(self):
         self.assertTrue(tiene_medio_contacto({"web": "https://shop.example"}))
@@ -69,7 +79,7 @@ class TestTelegramProspecto(unittest.TestCase):
         self.assertIn(EMAIL_VP_VENTAS, t)
 
     def test_token_callback_estable(self):
-        lead = {"nombre": "A", "web": "https://a.com", "pais": "Aruba"}
+        lead = {"nombre": "A", "web": "https://a.com", "pais": "Jamaica"}
         self.assertEqual(token_callback(lead), token_callback(lead))
 
 
@@ -89,7 +99,7 @@ class TestCallbackDescartar(unittest.TestCase):
             ), patch.object(tg, "PENDIENTES_PATH", tmp_p / "pend.json"), patch.object(
                 tc, "_telegram_post", return_value={"ok": True}
             ):
-                lead = {"nombre": "Shop X", "web": "https://shopx.test", "pais": "Aruba"}
+                lead = {"nombre": "Shop X", "web": "https://shopx.test", "pais": "Puerto Rico"}
                 tok = tg.token_callback(lead)
                 tg.registrar_pendiente(tok, lead)
                 cb = {
@@ -105,9 +115,13 @@ class TestCallbackDescartar(unittest.TestCase):
 
 class TestTelegramControl(unittest.TestCase):
     def test_pausa_bloquea(self):
-        set_pausado(True)
-        self.assertFalse(puede_enviar_telegram())
-        set_pausado(False)
+        with tempfile.TemporaryDirectory() as tmp, patch(
+            "b2b.telegram_control.CONTROL_PATH", Path(tmp) / "control.json"
+        ):
+            set_pausado(True)
+            self.assertFalse(puede_enviar_telegram())
+            set_pausado(False)
+            self.assertTrue(puede_enviar_telegram())
 
 
 if __name__ == "__main__":

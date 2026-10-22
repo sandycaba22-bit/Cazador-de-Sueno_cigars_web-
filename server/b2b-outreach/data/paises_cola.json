@@ -368,6 +368,20 @@
       "idioma": "en",
       "zona": "resto",
       "prioridad": 51
+    },
+    {
+      "pais": "Puerto Rico",
+      "iso3166": "PR",
+      "idioma": "es",
+      "zona": "resto",
+      "prioridad": 52
+    },
+    {
+      "pais": "Jamaica",
+      "iso3166": "JM",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 53
     }
   ]
 }

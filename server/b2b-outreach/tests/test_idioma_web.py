@@ -30,36 +30,36 @@ class TestIdiomaWeb(unittest.TestCase):
     def test_web_prioriza_sobre_pais(self):
         self.assertEqual(
             idioma_para_lead(
-                "Angola",
+                "Florida",
                 idioma_web="en",
-                web="https://loja-exemplo.ao/contact",
+                web="https://miami-shop.example/contact",
             ),
             "en",
         )
         self.assertEqual(
             idioma_para_lead(
-                "Aruba",
+                "Jamaica",
                 idioma_web="es",
-                web="https://cigar-shop.aw/",
+                web="https://cigar-shop.jm/",
             ),
             "en",
-            "Aruba tiene idioma fijo (inglés) aunque la web esté en español",
+            "Jamaica tiene idioma fijo (inglés) aunque la web esté en español",
         )
 
     def test_maps_no_pisa_idioma_del_pais(self):
         self.assertEqual(
             idioma_para_lead(
-                "Senegal",
+                "Puerto Rico",
                 idioma_web="en",
                 web="https://maps.google.com/?q=fixture-lounge",
             ),
-            "fr",
+            "es",
         )
 
     def test_preferido_explicito_gana(self):
         self.assertEqual(
-            idioma_para_lead("Senegal", idioma_web="en", preferido="fr"),
-            "fr",
+            idioma_para_lead("Florida", idioma_web="en", preferido="es"),
+            "es",
         )
 
 

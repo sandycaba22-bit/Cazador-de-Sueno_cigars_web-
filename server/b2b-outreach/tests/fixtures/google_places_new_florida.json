@@ -1,0 +1,79 @@
+{
+  "places": [
+    {
+      "id": "ChIJ-emporium-miami-test",
+      "displayName": {"text": "Miami Cigar Emporium", "languageCode": "en"},
+      "formattedAddress": "100 Brickell Avenue, Miami, FL 33131, USA",
+      "nationalPhoneNumber": "(305) 555-0123",
+      "internationalPhoneNumber": "+13055550123",
+      "websiteUri": "https://miamicigaremporium.example/",
+      "businessStatus": "OPERATIONAL",
+      "rating": 4.6,
+      "userRatingCount": 85,
+      "types": ["store", "point_of_interest", "establishment"]
+    },
+    {
+      "id": "ChIJ-casa-habano-miami-test",
+      "displayName": {"text": "La Casa del Habano Miami", "languageCode": "en"},
+      "formattedAddress": "Brickell Mall, Miami, FL 33131, USA",
+      "nationalPhoneNumber": "(305) 555-0222",
+      "websiteUri": "https://www.instagram.com/casadelhabanomiami/",
+      "businessStatus": "OPERATIONAL",
+      "rating": 4.8,
+      "userRatingCount": 40,
+      "types": ["store", "establishment"]
+    },
+    {
+      "id": "ChIJ-old-corner-miami-test",
+      "displayName": {"text": "Old Miami Tobacco Corner", "languageCode": "en"},
+      "formattedAddress": "200 Main Street, Miami, FL 33130, USA",
+      "nationalPhoneNumber": "(305) 555-0333",
+      "websiteUri": "https://oldmiamitobacco.example/",
+      "businessStatus": "CLOSED_PERMANENTLY",
+      "rating": 4.9,
+      "userRatingCount": 200,
+      "types": ["store"]
+    },
+    {
+      "id": "ChIJ-smoke-lounge-miami-test",
+      "displayName": {"text": "Brickell Cigar Lounge", "languageCode": "en"},
+      "formattedAddress": "300 Brickell Avenue, Miami, FL 33131, USA",
+      "businessStatus": "OPERATIONAL",
+      "rating": 4.2,
+      "userRatingCount": 12,
+      "types": ["bar", "establishment"]
+    },
+    {
+      "id": "ChIJ-smoke-corner-miami-test",
+      "displayName": {"text": "Miami Smoke Corner Tobacconist", "languageCode": "en"},
+      "formattedAddress": "400 Flagler Street, Miami, FL 33130, USA",
+      "nationalPhoneNumber": "(305) 555-0555",
+      "websiteUri": "https://miamismokecorner.example/",
+      "businessStatus": "OPERATIONAL",
+      "rating": 3.6,
+      "userRatingCount": 50,
+      "types": ["store"]
+    },
+    {
+      "id": "ChIJ-new-leaf-miami-test",
+      "displayName": {"text": "Miami New Leaf Cigars", "languageCode": "en"},
+      "formattedAddress": "500 Biscayne Boulevard, Miami, FL 33132, USA",
+      "nationalPhoneNumber": "(305) 555-0666",
+      "websiteUri": "https://miaminewleafcigars.example/",
+      "businessStatus": "OPERATIONAL",
+      "rating": 5.0,
+      "userRatingCount": 2,
+      "types": ["store"]
+    },
+    {
+      "id": "ChIJ-biscayne-cigars-miami-test",
+      "displayName": {"text": "Biscayne Cigars", "languageCode": "en"},
+      "formattedAddress": "600 Biscayne Boulevard, Miami, FL 33132, USA",
+      "nationalPhoneNumber": "(305) 555-0777",
+      "businessStatus": "OPERATIONAL",
+      "rating": 4.5,
+      "userRatingCount": 30,
+      "types": ["store"]
+    }
+  ]
+}

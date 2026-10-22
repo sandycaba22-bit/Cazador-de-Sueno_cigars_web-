@@ -1013,6 +1013,46 @@
       "puntos_clave": [
         "B2B USA"
       ]
+    },
+    {
+      "pais": "Puerto Rico",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "es",
+        "en"
+      ],
+      "dificultad": 3,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y territorial.",
+      "ciudades": [
+        "San Juan",
+        "Ponce",
+        "Dorado",
+        "Rincón",
+        "Mayagüez"
+      ],
+      "puntos_clave": [
+        "B2B Caribe"
+      ]
+    },
+    {
+      "pais": "Jamaica",
+      "territorio": "Caribe",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 3,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Regulación de importación local.",
+      "ciudades": [
+        "Kingston",
+        "Montego Bay",
+        "Negril",
+        "Ocho Rios"
+      ],
+      "puntos_clave": [
+        "B2B Caribe"
+      ]
     }
   ]
 }
