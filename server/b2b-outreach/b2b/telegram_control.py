@@ -134,7 +134,7 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
 
 
 def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
-    """Lee updates: /pausa, /seguir y botones Enviado/Descartar."""
+    """Lee updates: /pausa, /seguir, /estado, /stats, /pendientes y botones Enviado/Descartar."""
     data = _load()
     offset = int(data.get("update_offset") or 0)
     url = f"https://api.telegram.org/bot{token}/getUpdates?timeout=1&limit=10&offset={offset}"
@@ -159,11 +159,46 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
         cid = str(msg.get("chat", {}).get("id", ""))
         if cid != str(chat_id):
             continue
+            
         if text in ("/pausa", "pausa"):
             set_pausado(True)
             acks.append("⏸ Búsqueda Telegram pausada (/seguir para reanudar).")
         elif text in ("/seguir", "seguir", "/resume"):
             set_pausado(False)
             acks.append("▶️ Envíos Telegram reanudados.")
+        elif text == "/pendientes":
+            from b2b.telegram_gestion import _load_pendientes
+            pend = _load_pendientes()
+            acks.append(f"📋 Tienes {len(pend)} leads pendientes en total.")
+        elif text == "/stats":
+            from b2b.telegram_gestion import _load_pendientes
+            pend = _load_pendientes()
+            stats = {}
+            for p in pend.values():
+                pais = p.get("pais", "Unknown")
+                stats[pais] = stats.get(pais, 0) + 1
+            if not stats:
+                acks.append("📊 No hay leads pendientes.")
+            else:
+                lineas = ["📊 Pendientes por Estado:"]
+                for p, c in sorted(stats.items(), key=lambda x: x[1], reverse=True):
+                    lineas.append(f"- {p}: {c}")
+                acks.append("\n".join(lineas))
+        elif text.startswith("/estado "):
+            estado_req = text.replace("/estado ", "").strip().lower()
+            from b2b.telegram_gestion import _load_pendientes
+            pend = _load_pendientes()
+            matches = [p.get("nombre", "Unknown") for p in pend.values() if p.get("pais", "").lower() == estado_req]
+            if not matches:
+                acks.append(f"🔍 No hay leads pendientes para el estado '{estado_req.upper()}'.")
+            else:
+                lineas = [f"📍 Leads pendientes en {estado_req.upper()} ({len(matches)}):"]
+                for m in matches[:20]: # limit to 20 so telegram doesn't complain about message size
+                    lineas.append(f"- {m}")
+                if len(matches) > 20:
+                    lineas.append(f"... y {len(matches)-20} más.")
+                acks.append("\n".join(lineas))
+
     _save(data)
     return acks
+

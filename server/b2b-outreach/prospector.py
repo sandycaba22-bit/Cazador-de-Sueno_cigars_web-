@@ -18,7 +18,7 @@ from b2b.country_rules import (
     paises_prioridad_inicial,
 )
 from b2b.idioma import idioma_para_lead
-from b2b.lead_score import califica_lead, puntaje_minimo, puntuar_lead
+from b2b.lead_score import califica_lead, priorizar_leads_contacto, puntaje_minimo, puntuar_lead
 from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
 from b2b.logging_ops import registrar_busqueda, registrar_evento, registrar_presupuesto_agotado
 from b2b.fuente_leads import resolver_fuente_leads
@@ -211,6 +211,7 @@ def encolar(
         stats_cal = StatsCalidad(aceptados=len(leads))
     else:
         aceptados, dudosos, solo_tel, desc_calidad, stats_cal = clasificar_lote(leads)
+    aceptados = priorizar_leads_contacto(aceptados)
     res["descartados"].extend(desc_calidad)
 
     escritos: list[Path] = []

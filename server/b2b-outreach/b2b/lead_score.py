@@ -75,3 +75,19 @@ def puntuar_lead(lead: dict) -> tuple[int, dict]:
 def califica_lead(lead: dict) -> bool:
     score, _ = puntuar_lead(lead)
     return score >= puntaje_minimo()
+
+
+def tiene_telefono_o_correo(lead: dict) -> bool:
+    return bool((lead.get("telefono") or "").strip() or (lead.get("correo") or "").strip()
+                or (lead.get("whatsapp") or "").strip())
+
+
+def priorizar_leads_contacto(leads: list[dict]) -> list[dict]:
+    """Primero negocios con correo o teléfono confirmado (mejor conversión)."""
+
+    def clave(lead: dict) -> tuple:
+        mail = 1 if (lead.get("correo") or "").strip() else 0
+        tel = 1 if (lead.get("telefono") or lead.get("whatsapp") or "").strip() else 0
+        return (0 if (mail or tel) else 1, 0 if mail else 1, 0 if tel else 1, lead.get("nombre") or "")
+
+    return sorted(leads, key=clave)

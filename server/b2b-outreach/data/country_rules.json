@@ -1,77 +1,60 @@
 {
   "meta": {
     "actualizado": "2026-10-06",
-    "nota": "dificultad y licencia_comprador son informativos; no bloquean prospección ni borradores. Revisar con agente aduanal antes de marcar verificado."
+    "nota": "Estados Unidos, estado por estado"
   },
-  "prioridad_caribe": [
-    "Aruba",
-    "Curacao",
-    "Sint Maarten",
-    "Saint Martin",
-    "Bahamas",
-    "Cayman Islands",
-    "Turks and Caicos Islands",
-    "Jamaica",
-    "Barbados",
-    "Trinidad and Tobago",
-    "Puerto Rico",
-    "US Virgin Islands",
-    "Guadeloupe",
-    "Martinique",
-    "French Guiana",
-    "Haiti",
-    "Dominican Republic",
-    "Panama",
-    "Costa Rica"
-  ],
-  "prioridad_africa_europa": [
-    "Mauritius",
-    "Seychelles",
-    "Malta",
-    "Cyprus",
-    "Nigeria",
-    "Ghana",
-    "South Africa",
-    "Kenya",
-    "Senegal",
-    "Côte d'Ivoire",
-    "Morocco",
-    "Cape Verde",
-    "Angola"
-  ],
   "prioridad_inicial": [
-    "Aruba",
-    "Curacao",
-    "Sint Maarten",
-    "Saint Martin",
-    "Bahamas",
-    "Cayman Islands",
-    "Turks and Caicos Islands",
-    "Jamaica",
-    "Barbados",
-    "Trinidad and Tobago",
-    "Puerto Rico",
-    "US Virgin Islands",
-    "Guadeloupe",
-    "Martinique",
-    "French Guiana",
-    "Haiti",
-    "Dominican Republic",
-    "Panama",
-    "Costa Rica",
-    "Mauritius",
-    "Seychelles",
-    "Malta",
-    "Cyprus",
-    "Nigeria",
-    "Ghana",
-    "South Africa",
-    "Kenya",
-    "Senegal",
-    "Côte d'Ivoire",
-    "Morocco",
-    "Cape Verde",
-    "Angola"
+    "Florida",
+    "Texas",
+    "New York",
+    "California",
+    "Nevada",
+    "Georgia",
+    "North Carolina",
+    "South Carolina",
+    "Illinois",
+    "New Jersey",
+    "Pennsylvania",
+    "Ohio",
+    "Michigan",
+    "Virginia",
+    "Washington",
+    "Massachusetts",
+    "Arizona",
+    "Colorado",
+    "Maryland",
+    "Indiana",
+    "Missouri",
+    "Wisconsin",
+    "Minnesota",
+    "Tennessee",
+    "Alabama",
+    "Louisiana",
+    "Kentucky",
+    "Oregon",
+    "Oklahoma",
+    "Connecticut",
+    "Utah",
+    "Iowa",
+    "Arkansas",
+    "Mississippi",
+    "Kansas",
+    "New Mexico",
+    "Nebraska",
+    "Idaho",
+    "West Virginia",
+    "Hawaii",
+    "New Hampshire",
+    "Maine",
+    "Rhode Island",
+    "Montana",
+    "Delaware",
+    "South Dakota",
+    "North Dakota",
+    "Alaska",
+    "Vermont",
+    "Wyoming",
+    "District of Columbia"
   ],
   "orden_tipos_negocio": [
     "distribuidor",
@@ -83,684 +66,952 @@
   ],
   "paises": [
     {
-      "pais": "Martinique",
-      "territorio": "Francia (DOM)",
-      "idiomas": ["fr"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador / détaillant debe cumplir normativa tabaco UE y local (confirmar con asesor).",
-      "puntos_clave": [
-        "Mercado insular con retail especializado limitado; priorizar tiendas y lounges con web.",
-        "Ruta desde RD vía exportador; burocracia del comprador en Francia/UE."
-      ],
-      "fuentes": [
-        {
-          "url": "https://www.douane.gouv.fr/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04",
-          "nota": "Portal aduanero francés; requiere revisión formal antes de marcar verificado."
-        }
-      ]
-    },
-    {
-      "pais": "Guadeloupe",
-      "territorio": "Francia (DOM)",
-      "idiomas": ["fr"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Licencia tabaco del importador en Guadalupe / UE.",
-      "puntos_clave": ["Perfil similar a Martinica.", "Priorizar Saint-Martin y Basse-Terre retail."],
-      "fuentes": [
-        {
-          "url": "https://www.douane.gouv.fr/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Sint Maarten",
-      "territorio": "Países Bajos (Reino)",
-      "idiomas": ["nl", "en", "es"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador con licencia local (lado holandés); confirmar con comprador.",
-      "puntos_clave": ["Turismo, duty free y retail en Philipsburg.", "Idioma comercial: nl/en."],
-      "fuentes": [
-        {
-          "url": "https://www.sintmaartengov.org/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Saint Martin",
-      "territorio": "Francia / Países Bajos (isla dividida)",
-      "idiomas": ["fr", "en", "nl"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Depende del lado francés o holandés; confirmar con comprador.",
-      "puntos_clave": ["Turismo y duty free; mezcla de idiomas."],
-      "fuentes": [
-        {
-          "url": "https://www.douane.gouv.fr/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Aruba",
-      "territorio": "Países Bajos (Reino)",
-      "idiomas": ["en", "nl", "es"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Licencia importador local.",
-      "puntos_clave": ["Turismo alto; hoteles con humidor."],
-      "fuentes": [
-        {
-          "url": "https://www.government.aw/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Curacao",
-      "territorio": "Países Bajos (Reino)",
-      "idiomas": ["en", "nl", "es"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador autorizado.",
-      "puntos_clave": ["Hub caribeño; retail y cruise."],
-      "fuentes": [
-        {
-          "url": "https://www.government.cw/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Bahamas",
-      "territorio": "Independiente",
-      "idiomas": ["en"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Licencia importador bahamense.",
-      "puntos_clave": ["Turismo; lounges en Nassau."],
-      "fuentes": [
-        {
-          "url": "https://www.bahamas.gov.bs/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Barbados",
-      "territorio": "Independiente",
-      "idiomas": ["en"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador con permiso local.",
-      "puntos_clave": ["Retail compacto; resorts."],
-      "fuentes": [
-        {
-          "url": "https://www.gov.bb/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Puerto Rico",
+      "pais": "Florida",
       "territorio": "Estados Unidos",
-      "idiomas": ["es", "en"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador debe cumplir FDA y normativa tabaco US (confirmar con asesor).",
-      "puntos_clave": [
-        "Mercado grande; barrera regulatoria mayor que islas pequeñas.",
-        "No prometer aprobación FDA en borradores."
+      "idiomas": [
+        "en"
       ],
-      "fuentes": [
-        {
-          "url": "https://www.fda.gov/tobacco-products",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Miami",
+        "Fort Lauderdale",
+        "West Palm Beach",
+        "Tampa",
+        "Ybor City",
+        "Orlando",
+        "Jacksonville",
+        "Naples",
+        "Key West",
+        "St. Petersburg",
+        "Sarasota",
+        "Tallahassee",
+        "Pensacola"
+      ],
+      "puntos_clave": [
+        "B2B USA"
       ]
     },
     {
-      "pais": "Jamaica",
-      "territorio": "Independiente",
-      "idiomas": ["en"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador registrado.",
-      "puntos_clave": ["Turismo; tiendas en Kingston y Montego Bay."],
-      "fuentes": [
-        {
-          "url": "https://www.jca.gov.jm/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Trinidad and Tobago",
-      "territorio": "Independiente",
-      "idiomas": ["en"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Permiso importación tabaco.",
-      "puntos_clave": ["Cultura puro fuerte; distribuidores locales."],
-      "fuentes": [
-        {
-          "url": "https://www.customs.gov.tt/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Cayman Islands",
-      "territorio": "Reino Unido",
-      "idiomas": ["en"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador con licencia local.",
-      "puntos_clave": ["Alto poder adquisitivo; retail premium."],
-      "fuentes": [
-        {
-          "url": "https://www.gov.ky/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Turks and Caicos Islands",
-      "territorio": "Reino Unido",
-      "idiomas": ["en"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador con licencia local.",
-      "puntos_clave": ["Turismo de lujo (Providenciales); retail premium y resorts."],
-      "fuentes": [
-        {
-          "url": "https://www.gov.tc/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "US Virgin Islands",
+      "pais": "Texas",
       "territorio": "Estados Unidos",
-      "idiomas": ["en"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Normativa US + local.",
-      "puntos_clave": ["Similar a Puerto Rico en cautela regulatoria."],
-      "fuentes": [
-        {
-          "url": "https://www.fda.gov/tobacco-products",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "French Guiana",
-      "territorio": "Francia (DOM)",
-      "idiomas": ["fr"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "UE / Francia.",
-      "puntos_clave": ["Mercado menor; retail en Cayena."],
-      "fuentes": [
-        {
-          "url": "https://www.douane.gouv.fr/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Haiti",
-      "territorio": "Independiente",
-      "idiomas": ["fr"],
-      "dificultad": 4,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador debe cumplir normativa local (confirmar con comprador).",
-      "puntos_clave": [
-        "Mercado difícil logísticamente; priorizar distribuidores en Puerto Príncipe.",
-        "Idioma comercial: francés."
+      "idiomas": [
+        "en"
       ],
-      "fuentes": [
-        {
-          "url": "https://www.dgi.gouv.ht/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06",
-          "nota": "Portal referencia; verificar con asesor local."
-        }
-      ]
-    },
-    {
-      "pais": "Dominican Republic",
-      "territorio": "República Dominicana (nacional + zonas turísticas)",
-      "idiomas": ["es"],
-      "dificultad": 1,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "RNC y facturación local del comprador.",
-      "puntos_clave": [
-        "Búsqueda OSM: país completo + ciudades (Las Terrenas, Barahona, Puerto Plata, Bávaro, Santiago, etc.).",
-        "Retail turístico y distribuidores; confirmar canal export vs mostrador local."
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Houston",
+        "Dallas",
+        "Austin",
+        "San Antonio",
+        "Fort Worth",
+        "El Paso"
       ],
-      "fuentes": [
-        {
-          "url": "https://www.dgii.gov.do/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Panama",
-      "territorio": "Independiente",
-      "idiomas": ["es", "en"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador autorizado.",
-      "puntos_clave": ["Hub logístico; duty free."],
-      "fuentes": [
-        {
-          "url": "https://www.arca.gob.pa/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Costa Rica",
-      "territorio": "Independiente",
-      "idiomas": ["es"],
-      "dificultad": 2,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "Permiso sanitario / aduanal del importador.",
-      "puntos_clave": ["Retail San José; turismo."],
-      "fuentes": [
-        {
-          "url": "https://www.hacienda.go.cr/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Germany",
-      "territorio": "Unión Europea",
-      "idiomas": ["de", "en"],
-      "dificultad": 4,
-      "estado": "sin_verificar",
-      "verificado_el": null,
-      "licencia_comprador": "Steuer / Tabakhandlung según Bundesland.",
-      "puntos_clave": ["Mercado grande; burocracia UE."],
-      "fuentes": [
-        {
-          "url": "https://www.zoll.de/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "France",
-      "territorio": "Unión Europea",
-      "idiomas": ["fr"],
-      "dificultad": 4,
-      "estado": "sin_verificar",
-      "verificado_el": null,
-      "licencia_comprador": "Débit de tabac / importador.",
-      "puntos_clave": ["Canal regulado; no prometer facilidad."],
-      "fuentes": [
-        {
-          "url": "https://www.douane.gouv.fr/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "United Kingdom",
-      "territorio": "Post-Brexit",
-      "idiomas": ["en"],
-      "dificultad": 4,
-      "estado": "sin_verificar",
-      "verificado_el": null,
-      "licencia_comprador": "HMRC tobacco import rules.",
-      "puntos_clave": ["Retail Londres; importador obligatorio."],
-      "fuentes": [
-        {
-          "url": "https://www.gov.uk/guidance/tobacco-products-duty",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "United Arab Emirates",
-      "territorio": "Golfo",
-      "idiomas": ["en", "ar"],
-      "dificultad": 3,
-      "estado": "sin_verificar",
-      "verificado_el": null,
-      "licencia_comprador": "Importador con licencia emirati.",
-      "puntos_clave": ["Hospitality premium; distribuidores Dubai."],
-      "fuentes": [
-        {
-          "url": "https://u.ae/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-04"
-        }
-      ]
-    },
-    {
-      "pais": "Mauritius",
-      "territorio": "Isla Índico",
-      "idiomas": ["en", "fr"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: licencia del importador local; confirmar con asesor del comprador.",
-      "puntos_clave": ["Turismo premium; retail en Port Louis."],
-      "fuentes": [
-        {
-          "url": "https://www.govmu.org/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06",
-          "nota": "Pendiente revisión formal."
-        }
-      ]
-    },
-    {
-      "pais": "Seychelles",
-      "territorio": "Islas Seychelles",
-      "idiomas": ["en", "fr"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: permisos del importador; confirmar con asesor.",
-      "puntos_clave": ["Resorts y duty free."],
-      "fuentes": [
-        {
-          "url": "https://www.egov.sc/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Malta",
-      "territorio": "Unión Europea",
-      "idiomas": ["en"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: normativa UE/tabaco del importador.",
-      "puntos_clave": ["Hub mediterráneo; turismo y casino."],
-      "fuentes": [
-        {
-          "url": "https://gov.mt/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Cyprus",
-      "territorio": "Unión Europea",
-      "idiomas": ["en"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: licencias UE del importador.",
-      "puntos_clave": ["Retail y turismo."],
-      "fuentes": [
-        {
-          "url": "https://www.gov.cy/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Nigeria",
-      "territorio": "África occidental",
-      "idiomas": ["en"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: registro importador nigeriano; confirmar con asesor.",
-      "puntos_clave": ["Mercado grande; distribuidores en Lagos."],
-      "fuentes": [
-        {
-          "url": "https://www.nigeria.gov.ng/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Ghana",
-      "territorio": "África occidental",
-      "idiomas": ["en"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: permisos del importador en Ghana.",
-      "puntos_clave": ["Accra retail y hospitality."],
-      "fuentes": [
-        {
-          "url": "https://www.ghana.gov.gh/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "South Africa",
-      "territorio": "África austral",
-      "idiomas": ["en"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: licencias SARS/importador tabaco.",
-      "puntos_clave": ["Cape Town y Johannesburg; lounges premium."],
-      "fuentes": [
-        {
-          "url": "https://www.gov.za/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Kenya",
-      "territorio": "África oriental",
-      "idiomas": ["en"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: importador registrado en Kenia.",
-      "puntos_clave": ["Nairobi retail; turismo safari."],
-      "fuentes": [
-        {
-          "url": "https://www.mygov.go.ke/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Senegal",
-      "territorio": "África occidental",
-      "idiomas": ["fr"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: importateur agréé; confirmer avec conseiller local.",
-      "puntos_clave": ["Dakar; canal francófono."],
-      "fuentes": [
-        {
-          "url": "https://www.sec.gouv.sn/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Côte d'Ivoire",
-      "territorio": "África occidental",
-      "idiomas": ["fr"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: importateur tabac; confirmer avec conseiller.",
-      "puntos_clave": ["Abidjan distribución y retail."],
-      "fuentes": [
-        {
-          "url": "https://www.gouv.ci/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Morocco",
-      "territorio": "Magreb",
-      "idiomas": ["fr", "ar"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: importateur agréé; confirmer réglementation locale.",
-      "puntos_clave": ["Casablanca y Marrakech; turismo."],
-      "fuentes": [
-        {
-          "url": "https://www.gov.ma/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Cape Verde",
-      "territorio": "África atlántica",
-      "idiomas": ["pt"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: licença do importador; confirmar com assessor.",
-      "puntos_clave": ["Islas; turismo y duty free."],
-      "fuentes": [
-        {
-          "url": "https://gov.cv/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "Angola",
-      "territorio": "África austral",
-      "idiomas": ["pt"],
-      "dificultad": 3,
-      "estado": "preliminar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: licença importador; confirmar com assessor local.",
-      "puntos_clave": ["Luanda; canal lusófono."],
-      "fuentes": [
-        {
-          "url": "https://www.governo.gov.ao/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-06"
-        }
-      ]
-    },
-    {
-      "pais": "United States",
-      "territorio": "Estados Unidos (continental y territorios)",
-      "idiomas": ["en"],
-      "dificultad": 4,
-      "estado": "sin_verificar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: importador/distribuidor debe cumplir normativa tabaco federal y estatal (FDA, licencias estatales). Confirmar con asesor del comprador; no prometer aprobación en borradores.",
       "puntos_clave": [
-        "Mercado grande; barrera regulatoria alta.",
-        "Separar de Puerto Rico / USVI en trámite del importador."
-      ],
-      "fuentes": [
-        {
-          "url": "https://www.fda.gov/tobacco-products",
-          "tipo": "secundaria",
-          "consulta": "2026-10-05",
-          "nota": "Referencia orientativa; revisar requisitos vigentes con agente aduanal antes de marcar verificado."
-        },
-        {
-          "url": "https://www.cbp.gov/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-05",
-          "nota": "Portal aduanero US; pendiente revisión formal."
-        }
+        "B2B USA"
       ]
     },
     {
-      "pais": "Canada",
-      "territorio": "Canadá (provincias y territorios)",
-      "idiomas": ["en", "fr"],
+      "pais": "New York",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
       "dificultad": 4,
       "estado": "sin_verificar",
-      "verificado_el": null,
-      "licencia_comprador": "BORRADOR: importador con licencias federales/provinciales de tabaco. Confirmar con asesor del comprador.",
-      "puntos_clave": [
-        "Regulación federal/provincial; Quebec francés útil en borradores.",
-        "No afirmar aranceles ni tiempos de despacho sin documentación oficial."
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "New York City",
+        "Brooklyn",
+        "Queens",
+        "Manhattan",
+        "Staten Island",
+        "Bronx",
+        "Buffalo",
+        "Albany"
       ],
-      "fuentes": [
-        {
-          "url": "https://www.canada.ca/en/health-canada/services/health-concerns/tobacco.html",
-          "tipo": "secundaria",
-          "consulta": "2026-10-05",
-          "nota": "Referencia orientativa; pendiente revisión con agente aduanal."
-        },
-        {
-          "url": "https://www.cbsa-asfc.gc.ca/",
-          "tipo": "secundaria",
-          "consulta": "2026-10-05",
-          "nota": "Aduana canadiense; pendiente revisión formal."
-        }
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "California",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Los Angeles",
+        "San Francisco",
+        "San Diego",
+        "San Jose",
+        "Sacramento",
+        "Fresno",
+        "Beverly Hills"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Nevada",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Las Vegas",
+        "Henderson",
+        "Reno",
+        "Paradise"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Georgia",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Atlanta",
+        "Savannah",
+        "Augusta",
+        "Athens"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "North Carolina",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Charlotte",
+        "Raleigh",
+        "Greensboro",
+        "Durham",
+        "Asheville"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "South Carolina",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Charleston",
+        "Columbia",
+        "Myrtle Beach",
+        "Greenville"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Illinois",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Chicago",
+        "Aurora",
+        "Naperville",
+        "Joliet"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "New Jersey",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Newark",
+        "Jersey City",
+        "Paterson",
+        "Atlantic City",
+        "Hoboken"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Pennsylvania",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Philadelphia",
+        "Pittsburgh",
+        "Allentown"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Ohio",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Columbus",
+        "Cleveland",
+        "Cincinnati"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Michigan",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Detroit",
+        "Grand Rapids",
+        "Warren"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Virginia",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Virginia Beach",
+        "Norfolk",
+        "Chesapeake",
+        "Richmond"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Washington",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Seattle",
+        "Spokane",
+        "Tacoma",
+        "Vancouver"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Massachusetts",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Boston",
+        "Worcester",
+        "Providence"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Arizona",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Phoenix",
+        "Tucson",
+        "Mesa",
+        "Chandler"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Colorado",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Denver",
+        "Colorado Springs",
+        "Aurora"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Maryland",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Baltimore",
+        "Annapolis",
+        "Frederick"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Indiana",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Indianapolis",
+        "Fort Wayne",
+        "Evansville"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Missouri",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Kansas City",
+        "St. Louis",
+        "Springfield"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Wisconsin",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Milwaukee",
+        "Madison",
+        "Green Bay"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Minnesota",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Minneapolis",
+        "St. Paul",
+        "Rochester"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Tennessee",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Nashville",
+        "Memphis",
+        "Knoxville"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Alabama",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Birmingham",
+        "Montgomery",
+        "Huntsville"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Louisiana",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "New Orleans",
+        "Baton Rouge",
+        "Shreveport"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Kentucky",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Louisville",
+        "Lexington",
+        "Bowling Green"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Oregon",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Portland",
+        "Salem",
+        "Eugene"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Oklahoma",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Oklahoma City",
+        "Tulsa",
+        "Norman"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Connecticut",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Bridgeport",
+        "New Haven",
+        "Stamford"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Utah",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Salt Lake City",
+        "West Valley City",
+        "Provo"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Iowa",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Des Moines",
+        "Cedar Rapids",
+        "Davenport"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Arkansas",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Little Rock",
+        "Fort Smith",
+        "Fayetteville"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Mississippi",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Jackson",
+        "Gulfport",
+        "Southaven"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Kansas",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Wichita",
+        "Overland Park",
+        "Kansas City"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "New Mexico",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Albuquerque",
+        "Las Cruces",
+        "Rio Rancho"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Nebraska",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Omaha",
+        "Lincoln",
+        "Bellevue"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Idaho",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Boise",
+        "Meridian",
+        "Nampa"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "West Virginia",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Charleston",
+        "Huntington",
+        "Morgantown"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Hawaii",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Honolulu",
+        "East Honolulu",
+        "Pearl City"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "New Hampshire",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Manchester",
+        "Nashua",
+        "Concord"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Maine",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Portland",
+        "Lewiston",
+        "Bangor"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Rhode Island",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Providence",
+        "Warwick",
+        "Cranston"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Montana",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Billings",
+        "Missoula",
+        "Great Falls"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Delaware",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Wilmington",
+        "Dover",
+        "Newark"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "South Dakota",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Sioux Falls",
+        "Rapid City",
+        "Aberdeen"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "North Dakota",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Fargo",
+        "Bismarck",
+        "Grand Forks"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Alaska",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Anchorage",
+        "Fairbanks",
+        "Juneau"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Vermont",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Burlington",
+        "South Burlington",
+        "Rutland"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "Wyoming",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Cheyenne",
+        "Casper",
+        "Laramie"
+      ],
+      "puntos_clave": [
+        "B2B USA"
+      ]
+    },
+    {
+      "pais": "District of Columbia",
+      "territorio": "Estados Unidos",
+      "idiomas": [
+        "en"
+      ],
+      "dificultad": 4,
+      "estado": "sin_verificar",
+      "licencia_comprador": "Normativa tabaco federal y estatal.",
+      "ciudades": [
+        "Washington"
+      ],
+      "puntos_clave": [
+        "B2B USA"
       ]
     }
   ]

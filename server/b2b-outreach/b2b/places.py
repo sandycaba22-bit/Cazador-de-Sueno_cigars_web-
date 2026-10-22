@@ -410,7 +410,9 @@ def _orden_calidad(lead: dict) -> tuple:
         reviews = int(lead.get("user_rating_count") or 0)
     except (TypeError, ValueError):
         reviews = 0
-    return (-rating, -reviews, lead.get("nombre") or "")
+    mail = 1 if (lead.get("correo") or "").strip() else 0
+    tel = 1 if (lead.get("telefono") or "").strip() else 0
+    return (0 if (mail or tel) else 1, -mail, -tel, -rating, -reviews, lead.get("nombre") or "")
 
 
 def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, dict]:

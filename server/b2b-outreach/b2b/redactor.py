@@ -384,99 +384,42 @@ def asunto_correo(nombre_local: str, idioma: str) -> str:
 
 
 def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
-    """WhatsApp / Instagram: máximo 3–4 líneas, catálogo PDF y sampler (sin STOP)."""
+    """WhatsApp / Instagram: máximo 3–4 líneas, catálogo PDF y sampler."""
     nombre = (nombre_local or "").strip() or "there"
-    idioma = idioma if idioma in MUESTRAS else "en"
-    catalogo, aviso = _catalogo(idioma)
-    t = tipo_en_idioma(tipo, idioma)
-    textos = {
-        "es": (
-            f"Hola, equipo de {nombre}: puros dominicanos hechos a mano de Cazador de Sueños (Santiago) para su {t}.\n"
-            f"{aviso}Catálogo PDF: {catalogo}\n"
-            "Si les resulta útil, podemos enviar un sampler comercial.\n"
-            "¿Conversamos?"
-        ),
-        "en": (
-            f"Hello {nombre} team — handmade Dominican cigars from Cazador de Sueños (Santiago) for your {t}.\n"
-            f"{aviso}Catalog PDF: {catalogo}\n"
-            "Happy to send a business sampler if useful.\n"
-            "Open to a short chat?"
-        ),
-        "fr": (
-            f"Bonjour l'équipe {nombre} — cigares dominicains faits main de Cazador de Sueños (Santiago) pour votre {t}.\n"
-            f"{aviso}Catalogue PDF : {catalogo}\n"
-            "Nous pouvons envoyer un sampler commercial si cela vous est utile.\n"
-            "Pouvons-nous en parler ?"
-        ),
-        "nl": (
-            f"Hallo team {nombre} — handgemaakte Dominicaanse sigaren van Cazador de Sueños (Santiago) voor uw {t}.\n"
-            f"{aviso}Catalogus-PDF: {catalogo}\n"
-            "We sturen graag een zakelijke sampler als dat helpt.\n"
-            "Zullen we kort bellen?"
-        ),
-        "pt": (
-            f"Olá, equipa {nombre}: charutos dominicanos feitos à mão da Cazador de Sueños (Santiago) para a sua {t}.\n"
-            f"{aviso}Catálogo PDF: {catalogo}\n"
-            "Podemos enviar um sampler comercial se for útil.\n"
-            "Podemos conversar?"
-        ),
-    }
-    texto = _validar(textos[idioma].strip())
-    lineas = [ln for ln in texto.splitlines() if ln.strip()]
-    if len(lineas) > 4:
-        texto = "\n".join(lineas[:4])
+    catalogo, aviso = _catalogo("en")
+    t = tipo_en_idioma(tipo, "en")
+    
+    texto = (
+        f"Hello {nombre} team,\n"
+        f"We are Cazador de Sueños, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {t}.\n"
+        f"Wholesale Catalog: {catalogo}\n"
+        "We're happy to provide commercial samples for your consideration. Open to a brief chat?\n"
+        "Best,\n"
+        "Yaniris Agustina Ureña - VP of Sales"
+    )
     return texto
-
 
 def borrador_correo(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """Versión correo: asunto, firma de la VP y línea de STOP (solo en correo)."""
     nombre = (nombre_local or "").strip() or "there"
-    idioma = idioma if idioma in MUESTRAS else "en"
-    catalogo, aviso = _catalogo(idioma)
-    t = tipo_en_idioma(tipo, idioma)
-    muestras = MUESTRAS[idioma]
-    firma = f"{NOMBRE_VP}\n{CARGO_VP.get(idioma, CARGO_VP['en'])}\n{EMPRESA_FIRMA}\n{EMAIL_VP_VENTAS}"
-    opt = OPT_OUT.get(idioma, OPT_OUT["en"])
-    textos = {
-        "es": (
-            f"Asunto: Puros dominicanos hechos a mano para {nombre}\n\n"
-            f"Hola, equipo de {nombre}:\n\n"
-            "Somos Cazador de Sueños Cigar SRL, fábrica en Santiago de los Caballeros, República Dominicana. "
-            f"Elaboramos puros premium 100% hechos a mano y queremos explorar colocar nuestra línea en su {t}.\n\n"
-            f"{aviso}Catálogo mayorista: {catalogo}\n{muestras} ¿Les parece una llamada breve?"
-        ),
-        "en": (
-            f"Subject: Handmade Dominican cigars for {nombre}\n\n"
-            f"Hello {nombre} team,\n\n"
-            "We are Cazador de Sueños Cigar SRL, a cigar factory in Santiago de los Caballeros, Dominican "
-            f"Republic, making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
-            f"{aviso}Wholesale catalog: {catalogo}\n{muestras} Would a short call work for you?"
-        ),
-        "fr": (
-            f"Objet : Cigares dominicains roulés à la main pour {nombre}\n\n"
-            f"Bonjour l'équipe {nombre},\n\n"
-            "Nous sommes Cazador de Sueños Cigar SRL, manufacture à Santiago de los Caballeros, République "
-            "dominicaine, spécialisée dans les cigares premium 100 % faits main. Nous souhaitons proposer notre "
-            f"ligne pour votre {t}.\n\n"
-            f"{aviso}Catalogue grossiste : {catalogo}\n{muestras} Un court appel vous conviendrait-il ?"
-        ),
-        "nl": (
-            f"Onderwerp: Handgemaakte Dominicaanse sigaren voor {nombre}\n\n"
-            f"Hallo team {nombre},\n\n"
-            "Wij zijn Cazador de Sueños Cigar SRL, fabriek in Santiago de los Caballeros, Dominicaanse "
-            f"Republiek, met 100% handgemaakte premium sigaren. We bieden onze lijn graag aan voor uw {t}.\n\n"
-            f"{aviso}Groothandelscatalogus: {catalogo}\n{muestras} Past een kort gesprek?"
-        ),
-        "pt": (
-            f"Assunto: Charutos dominicanos feitos à mão para {nombre}\n\n"
-            f"Olá, equipa {nombre},\n\n"
-            "Somos a Cazador de Sueños Cigar SRL, fábrica em Santiago de los Caballeros, República Dominicana, "
-            f"com charutos premium 100% feitos à mão. Queremos colocar a nossa linha na sua {t}.\n\n"
-            f"{aviso}Catálogo grossista: {catalogo}\n{muestras} Uma chamada breve funciona para si?"
-        ),
-    }
-    return _validar(f"{textos[idioma]}\n\n{firma}\n\n{opt}")
-
+    catalogo, aviso = _catalogo("en")
+    t = tipo_en_idioma(tipo, "en")
+    
+    texto = (
+        f"Subject: Handmade Dominican cigars for {nombre}\n\n"
+        f"Hello {nombre} team,\n\n"
+        "We are Cazador de Sueños Cigar SRL, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
+        f"making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
+        f"Wholesale catalog: {catalogo}\n"
+        "Commercial samples available for licensed retailers. Would a short call work for you?\n\n"
+        "Best regards,\n"
+        "Yaniris Agustina Ureña\n"
+        "VP of Sales\n"
+        "Cazador de Sueños Cigar SRL\n"
+        "cazadordesueno1@gmail.com\n\n"
+        "If you prefer not to receive further messages, reply STOP."
+    )
+    return _validar(texto)
 
 def presentacion_prospecto_telegram(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """Compatibilidad: versión correo (firma VP + catálogo + STOP)."""
