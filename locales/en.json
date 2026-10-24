@@ -3,7 +3,7 @@
   "direction": "ltr",
   "translations": {
     "age_gate": {
-      "title": "Cazador de Sueños Cigars",
+      "title": "Cazador de Sueño Cigars SRL",
       "eyebrow": "Age Verification",
       "text": "This site contains information about tobacco products reserved for adults of legal age. Please confirm that you are 21 years or older to continue.",
       "enter": "Yes, I am 21 or older",
@@ -11,7 +11,7 @@
       "legal": "By entering, you confirm that you meet the legal age requirement in your jurisdiction."
     },
     "header": {
-      "brand": "Cazador de Sueños",
+      "brand": "Cazador de Sueño Cigars SRL",
       "nav": {
         "legacy": "The Legacy",
         "mastery": "Mastery",
@@ -37,7 +37,7 @@
     },
     "hero": {
       "eyebrow": "Cerro Angola · Dominican Republic",
-      "title": "Cazador de Sueños",
+      "title": "Cazador de Sueño Cigars SRL",
       "subtitle": "Where family tradition meets scientific precision.",
       "cta": "Discover the collection"
     },
@@ -80,7 +80,7 @@
     "mission_vision": {
       "label": "Our Identity",
       "title": "Mission, Vision and Values",
-      "intro": "Cazador de Sueños Sigar SRL — Tradition, excellence and commitment",
+      "intro": "Cazador de Sueño Cigars SRL — Tradition, excellence and commitment",
       "mission": {
         "title": "Mission",
         "text": "To produce high-quality cigars using the finest tobacco leaves and specialized processes, satisfying our clients' expectations through excellence, responsibility, respect for our collaborators, and sustainable development of the tobacco industry."
@@ -92,13 +92,41 @@
       "values": {
         "title": "Values",
         "items": [
-          {"key": "quality", "label": "Quality", "text": "Maintain the highest standards at every stage of production."},
-          {"key": "commitment", "label": "Commitment", "text": "Fulfill responsibly with clients, collaborators, and partners."},
-          {"key": "tradition", "label": "Tradition", "text": "Preserve the legacy and culture of the cigar-making art."},
-          {"key": "integrity", "label": "Integrity", "text": "Act with honesty, ethics, and transparency."},
-          {"key": "innovation", "label": "Innovation", "text": "Continuously improve our processes and products."},
-          {"key": "teamwork", "label": "Teamwork", "text": "Foster collaboration and mutual respect."},
-          {"key": "responsibility", "label": "Social and Environmental Responsibility", "text": "Contribute to community welfare and environmental care."}
+          {
+            "key": "quality",
+            "label": "Quality",
+            "text": "Maintain the highest standards at every stage of production."
+          },
+          {
+            "key": "commitment",
+            "label": "Commitment",
+            "text": "Fulfill responsibly with clients, collaborators, and partners."
+          },
+          {
+            "key": "tradition",
+            "label": "Tradition",
+            "text": "Preserve the legacy and culture of the cigar-making art."
+          },
+          {
+            "key": "integrity",
+            "label": "Integrity",
+            "text": "Act with honesty, ethics, and transparency."
+          },
+          {
+            "key": "innovation",
+            "label": "Innovation",
+            "text": "Continuously improve our processes and products."
+          },
+          {
+            "key": "teamwork",
+            "label": "Teamwork",
+            "text": "Foster collaboration and mutual respect."
+          },
+          {
+            "key": "responsibility",
+            "label": "Social and Environmental Responsibility",
+            "text": "Contribute to community welfare and environmental care."
+          }
         ]
       }
     },
@@ -130,7 +158,7 @@
     },
     "sommelier": {
       "fab_label": "Cellar Sommelier — House advisor",
-      "kicker": "Cazador de Sueños",
+      "kicker": "Cazador de Sueño Cigars SRL",
       "title": "Cellar Sommelier",
       "welcome": "Welcome to the cellar. I am the house master blender. Are you looking for a vitola recommendation, tasting notes, or do you represent a distributor?",
       "placeholder": "Write your inquiry…",
@@ -145,7 +173,7 @@
     },
     "footer": {
       "tagline": "Factory located in Santiago de los Caballeros, Dominican Republic",
-      "copy": "© 2026 Cazador de Sueños Cigars. All rights reserved."
+      "copy": "© 2026 Cazador de Sueño Cigars SRL. All rights reserved."
     },
     "maestria": {
       "label": "Mastery",
@@ -155,7 +183,7 @@
       "chapter1": {
         "kicker": "The Origin · San José de las Matas",
         "title": "This is where our story begins.",
-        "text": "In the lands of the Dominican Republic, among pines, mist and fresh earth, the memory of Cazador de Sueños begins. We don't come from an office. We come from the mountain.",
+        "text": "In the lands of the Dominican Republic, among pines, mist and fresh earth, the memory of Cazador de Sueño Cigars SRL begins. We don't come from an office. We come from the mountain.",
         "note": "Cordillera Central · Dominican Republic"
       },
       "chapter2": {
@@ -192,12 +220,73 @@
         "kicker": "The Legacy",
         "text1": "It all began in the northern region of the Dominican Republic, where an ancestor of our family dedicated his life to the cultivation and processing of tobacco. Over time, he mastered the secrets of fermentation, valuable knowledge that he passed on to subsequent generations as part of a legacy built with effort, patience and passion.",
         "text2": "Over the years, each generation contributed their experience, preserving traditions and love for this noble craft. What began as a family teaching became an inheritance that strengthened our identity and our commitment to quality.",
-        "text3": "Inspired by that legacy and guided by the dream of sharing our passion with the world, Cazador de Sueños Cigars was born. Our name represents the perseverance of those who never stopped believing in their ideals and worked to turn them into reality.",
+        "text3": "Inspired by that legacy and guided by the dream of sharing our passion with the world, Cazador de Sueño Cigars SRL was born. Our name represents the perseverance of those who never stopped believing in their ideals and worked to turn them into reality.",
         "text4": "Today, each cigar we craft is a tribute to our ancestors, to our land and to the dreams that made this path possible. More than a brand, we are the continuation of a family story that remains alive in every tobacco leaf and in every experience we offer.",
-        "note": "Cazador de Sueños Sigar SRL"
+        "note": "Cazador de Sueño Cigars SRL"
       }
     },
     "vitolas": {
+      "brand": {
+        "pairing": {
+          "title": "Recommended pairing",
+          "spirit": "Spirit",
+          "coffee": "Coffee",
+          "bite": "Pairs with",
+          "moment": "Moment"
+        },
+        "pairings": {
+          "emperador": {
+            "spirit": "Aged Dominican rum",
+            "coffee": "Drip coffee from Jarabacoa",
+            "bite": "70% dark chocolate",
+            "moment": "A long afternoon on the terrace"
+          },
+          "puro_habano": {
+            "spirit": "Speyside single malt whisky",
+            "coffee": "Cortado",
+            "bite": "Toasted walnuts",
+            "moment": "After a steak dinner"
+          },
+          "exquisito": {
+            "spirit": "XO cognac",
+            "coffee": "Espresso",
+            "bite": "Dark chocolate with sea salt",
+            "moment": "An unhurried celebration"
+          },
+          "rango": {
+            "spirit": "Amber rum or Malbec",
+            "coffee": "Americano",
+            "bite": "Roasted almonds",
+            "moment": "After lunch"
+          },
+          "ligero": {
+            "spirit": "Peated Islay whisky",
+            "coffee": "Ristretto",
+            "bite": "Dried figs",
+            "moment": "To close the night"
+          },
+          "sultan": {
+            "spirit": "Extra-aged Dominican rum",
+            "coffee": "Double espresso",
+            "bite": "Dark cacao",
+            "moment": "After a rich dinner"
+          }
+        },
+        "seal": {
+          "label": "Seal of origin",
+          "title": "Handmade in the Dominican Republic",
+          "text": "Every cigar is hand-rolled at our factory in Santiago de los Caballeros and inspected before it leaves for your humidor.",
+          "place": "Santiago de los Caballeros · D.R."
+        },
+        "b2b": {
+          "label": "Wholesale & export",
+          "title": "Do you run a lounge, shop or distribution company?",
+          "text": "Volume pricing, wholesale catalogue and international shipping. Write to us and we'll send you the terms.",
+          "cta": "Wholesale terms",
+          "whatsapp": "Export WhatsApp"
+        },
+        "legal_age": "Sold only to adults 21 and over. Smoking harms your health."
+      },
       "back_to_catalog": "← Back to catalog",
       "gallery": {
         "single_cigar": "Single cigar",
@@ -223,7 +312,7 @@
         "badge": "The First Dream",
         "section_label": "The Origin",
         "title": "The Emperor",
-        "subtitle": "The first cigar born at the Cazador de Sueños factory. Living history, family heritage, and the dream that started it all.",
+        "subtitle": "The first cigar born at the Cazador de Sueño Cigars SRL factory. Living history, family heritage, and the dream that started it all.",
         "concept_title": "The Unique Concept",
         "concept_text": "The factory's foundational cigar, created under the secret of a special tobacco fermentation that my grandfather taught me. It's not just another vitola: it's the starting point of an entire house, the first smoke that gave name to a legacy.",
         "seal": "Special Fermentation",
@@ -470,7 +559,7 @@
       },
       "footer": {
         "eyebrow": "Contact",
-        "copy": "© 2026 Cazador de Sueños Cigar SRL. Sale subject to local importer regulations."
+        "copy": "© 2026 Cazador de Sueño Cigars SRL. Sale subject to local importer regulations."
       },
       "cart": {
         "title": "Your cart",
@@ -497,6 +586,15 @@
       }
     },
     "checkout": {
+      "trust": {
+        "secure_title": "Protected payment",
+        "secure_text": "PayPal or direct transfer to the factory's account. We never store card details.",
+        "humidity_title": "Airtight packaging",
+        "humidity_text": "Sealed with humidity control so your cigars arrive just as they left the humidor.",
+        "origin_title": "Factory authentic",
+        "origin_text": "Hand-rolled in Santiago de los Caballeros, Dominican Republic.",
+        "age": "Sold only to adults 21 and over."
+      },
       "back": "← Continue shopping",
       "secure": "Secure payment",
       "lang": "Select language",
@@ -537,6 +635,7 @@
       "dec_aria": "Remove one",
       "inc_aria": "Add one",
       "methods_empty": "No payment methods are available right now.",
+      "unavailable": "Not available right now",
       "cardnet_note": "Secure CardNET window on confirm.",
       "paypal_loading": "Loading PayPal…",
       "paypal_aria": "Pay with PayPal in USD",
@@ -554,8 +653,15 @@
         "reference_prefix": "Reference:",
         "concept_use": "Use the reference in the payment description",
         "concept_and_email": " and send the receipt to",
-        "whatsapp_cta": "Send receipt via WhatsApp"
+        "whatsapp_cta": "Send receipt via WhatsApp",
+        "online": "Open online banking",
+        "copy": "Copy",
+        "copied": "Copied",
+        "copy_failed": "Copy it manually",
+        "step_copy": "Copy the account number and open your online banking.",
+        "step_transfer": "Transfer the exact total in DOP or USD, depending on your account."
       },
+      "paypal_sandbox": "PayPal is in test mode: no real money is charged. Use bank transfer to buy now.",
       "hints": {
         "cardnet": "Visa / Mastercard",
         "bank_transfer": "Banreservas · BHD",

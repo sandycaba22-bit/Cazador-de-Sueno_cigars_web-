@@ -4,24 +4,37 @@
       "active": true,
       "name": "Transferencia Bancaria",
       "name_en": "Bank Transfer",
-      "bank_name": "BHD Venta Reserva",
-      "account_name": "Cazador de Sueños Cigars SRL",
-      "account_number": "1234567890",
-      "account_type": "Ahorros",
-      "routing_number": "BPD0",
       "currency": "USD",
-      "instructions_es": "Realice la transferencia a la cuenta indicada y suba el comprobante de pago.",
-      "instructions_en": "Make the transfer to the indicated account and upload the payment proof."
+      "accounts": [
+        {
+          "bank_name": "Banco de Reservas",
+          "online_banking_url": "https://www.banreservas.com",
+          "account_name": "Sandy Dejesús Rodríguez Abreu",
+          "account_number": "9605921112",
+          "account_type": "Cuenta de Ahorros",
+          "currency": "DOP"
+        },
+        {
+          "bank_name": "Banco BHD",
+          "online_banking_url": "https://www.bhd.com.do",
+          "account_name": "Sandy Rodríguez",
+          "account_number": "15705310035",
+          "account_type": "Cuenta de Ahorros",
+          "currency": "DOP"
+        }
+      ],
+      "instructions_es": "Realice la transferencia a la cuenta indicada, use la referencia del pedido en el concepto y envíe el comprobante a cazadordesueno1@gmail.com.",
+      "instructions_en": "Transfer to the indicated account, use the order reference as the description and send the receipt to cazadordesueno1@gmail.com."
     }
   },
   "admin_notification": {
-    "email": "cazadordesueno2024@gmail.com",
-    "subject_prefix": "[NUEVO PEDIDO] Cazador de Sueños Cigars",
+    "email": "cazadordesueno1@gmail.com",
+    "subject_prefix": "[NUEVO PEDIDO] Cazador de Sueño Cigars SRL",
     "enabled": true
   },
   "whatsapp_notification": {
     "enabled": true,
-    "phone_number": "18095551234",
+    "phone_number": "18094645016",
     "message_template": "Nuevo pedido recibido. Por favor verifique los detalles y confirme el pago."
   },
   "order_status": {
@@ -36,5 +49,5 @@
     "cancelled": "Cancelado",
     "cancelled_en": "Cancelled"
   },
-  "last_updated": "2026-07-30"
+  "last_updated": "2026-10-23"
 }

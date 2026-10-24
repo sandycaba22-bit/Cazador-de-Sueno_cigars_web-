@@ -1,4 +1,4 @@
-# Análisis de Mercado y Estructura de Costos - Cazador de Sueños Cigars
+# Análisis de Mercado y Estructura de Costos - Cazador de Sueño Cigars SRL
 
 ## 1. Análisis de Mercado - Cigarros Premium (2024)
 
@@ -92,7 +92,7 @@
 
 ### Posicionamiento en Mercado
 
-**Cazador de Sueños vs Competidores:**
+**Cazador de Sueño Cigars SRL vs Competidores:**
 - Precio wholesale: $4.25 - $6.50 por cigarro
 - Competidores premium: $4.00 - $12.00 por cigarro
 - Posicionamiento: Mid-to-high premium

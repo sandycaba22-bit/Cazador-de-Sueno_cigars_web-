@@ -1,10 +1,10 @@
-# Marca Cazador de Sueños (base B2B)
+# Marca Cazador de Sueño Cigars SRL (base B2B)
 
 **Última revisión de vitolas:** 2026-10-04 (extraído del catálogo mayorista y vitolas del repositorio).
 
 ## Casa
 
-- **Razón social comercial:** Cazador de Sueños Cigar SRL.
+- **Razón social comercial:** Cazador de Sueño Cigars SRL.
 - **Origen fabril:** Santiago de los Caballeros, República Dominicana.
 - **Oficio:** puros premium 100% hechos a mano por maestros torcedores (maestros tabaqueros).
 - **Portal mayorista (sin precios públicos):** https://www.cazadordesuenocigar.com/wholesale.html

@@ -85,7 +85,7 @@ class TestRegistroLeads(unittest.TestCase):
 class TestDedupeEnlacesOsm(unittest.TestCase):
     def test_seis_leads_osm_con_place_id_distinto_son_seis(self):
         leads = [
-            {"nombre": f"Cigar Shop {i}", "pais": "Aruba", "place_id": f"osm:{t}/{i}",
+            {"nombre": f"Cigar Shop {i}", "pais": "Florida", "place_id": f"osm:{t}/{i}",
              "web": f"https://www.openstreetmap.org/{t}/{i}", "fuente": "osm"}
             for i, t in zip(range(1, 7), ("node", "way", "node", "way", "node", "node"))
         ]
@@ -119,18 +119,18 @@ class TestDedupeEnlacesOsm(unittest.TestCase):
         from b2b import buscar_pais as bp
 
         osm = [
-            {"nombre": "Cigar Bar Uno", "pais": "Aruba", "web": "https://cigarbar.aw/",
+            {"nombre": "Cigar Bar Uno", "pais": "Puerto Rico", "web": "https://cigarbar.aw/",
              "place_id": "osm:node/1", "fuente": "osm"},
-            {"nombre": "Cigar Bar Uno", "pais": "Aruba", "web": "https://cigarbar.aw/",
+            {"nombre": "Cigar Bar Uno", "pais": "Puerto Rico", "web": "https://cigarbar.aw/",
              "place_id": "osm:node/2", "fuente": "osm"},
-            {"nombre": "Tabaco Dos", "pais": "Aruba", "web": "https://www.openstreetmap.org/node/3",
+            {"nombre": "Tabaco Dos", "pais": "Puerto Rico", "web": "https://www.openstreetmap.org/node/3",
              "place_id": "osm:node/3", "fuente": "osm"},
         ]
         with mock.patch.object(bp, "buscar_en_pais_osm", return_value=(osm, 0, {"descartes": []})), \
                 mock.patch.object(bp, "buscar_dealers_pais", return_value=([], [])), \
                 mock.patch.object(bp, "buscar_directorios_pais", return_value=([], [])), \
                 mock.patch.object(bp, "registrar_evento"):
-            leads, _ll, stats = bp.recolectar_leads_pais("Aruba", ["tienda"], 10, "", simulado=False)
+            leads, _ll, stats = bp.recolectar_leads_pais("Puerto Rico", ["tienda"], 10, "", simulado=False)
         self.assertEqual(len(leads), 2)
         motivos = [d.get("motivo") for d in stats["descartes"]]
         self.assertIn("fusionado_misma_clave", motivos)
@@ -148,8 +148,10 @@ class TestSimuladoAislado(unittest.TestCase):
         real = paths.state_file("registro_leads.json")
         antes = real.read_bytes() if real.is_file() else None
         inbox = Path(tempfile.mkdtemp()) / "cola" / "inbox"
-        with mock.patch.object(prospector.time, "sleep"):
-            prospector.prospectar("Martinique", 2, inbox, simulado=True)
+        with mock.patch.object(prospector.time, "sleep"), mock.patch(
+            "telegram_bot.load_local_env"
+        ), mock.patch("b2b.telegram_control.procesar_comandos_chat", return_value=[]):
+            prospector.prospectar("Florida", 2, inbox, simulado=True)
         despues = real.read_bytes() if real.is_file() else None
         self.assertEqual(antes, despues)
         self.assertNotIn("B2B_SIMULADO", os.environ)
@@ -158,20 +160,20 @@ class TestSimuladoAislado(unittest.TestCase):
 def _lead(i: int, **extra) -> dict:
     base = {
         "nombre": f"Lead {i}",
-        "pais": "Aruba",
+        "pais": "Jamaica",
         "place_id": f"osm:node/{i}",
         "web": f"https://www.openstreetmap.org/node/{i}",
-        "direccion": f"Calle {i}, Oranjestad",
+        "direccion": f"Calle {i}, Kingston",
         "fuente": "osm",
         "tipo_negocio": "tienda",
-        "telefono": f"+297 58{i}0000",
+        "telefono": f"+1876555{i:04d}",
     }
     base.update(extra)
     return base
 
 
 class TestConteoIsla(unittest.TestCase):
-    """Escenario tipo Aruba: todas las categorías deben sumar 'encontrados'."""
+    """Escenario tipo Jamaica: todas las categorías deben sumar 'encontrados'."""
 
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
@@ -207,12 +209,14 @@ class TestConteoIsla(unittest.TestCase):
             return acept, dud, [], desc, StatsCalidad(aceptados=len(acept), dudosos=len(dud))
 
         inbox = self.tmp / "cola" / "inbox"
-        reglas = {"pais": "Aruba", "idioma": "es"}
+        reglas = {"pais": "Jamaica", "idioma": "en"}
         with mock.patch.object(
             prospector, "buscar_en_pais", return_value=(leads, 0, {"descartes": descartes_fuente})
         ), mock.patch.object(prospector, "clasificar_lote", side_effect=fake_clasificar), mock.patch.object(
             prospector, "enriquecer_lead", side_effect=lambda lead, _r, **_kw: dict(lead, puntaje=9)
         ), mock.patch.object(prospector, "califica_lead", return_value=True), mock.patch.object(
+            prospector, "priorizar_leads_contacto", side_effect=list
+        ), mock.patch.object(
             prospector.time, "sleep"
         ):
             stats = prospector.prospectar_un_pais(
@@ -234,12 +238,12 @@ class TestConteoIsla(unittest.TestCase):
 
         archivos = list((self.tmp / "data").glob("sin_contacto_*.json"))
         self.assertEqual(len(archivos), 1)
-        fila = json.loads(archivos[0].read_text(encoding="utf-8"))["islas"]["Aruba"][0]
+        fila = json.loads(archivos[0].read_text(encoding="utf-8"))["islas"]["Jamaica"][0]
         self.assertEqual(
-            (fila["nombre"], fila["fuente"], fila["direccion"]), ("Lead 3", "osm", "Calle 3, Oranjestad")
+            (fila["nombre"], fila["fuente"], fila["direccion"]), ("Lead 3", "osm", "Calle 3, Kingston")
         )
 
-        texto = texto_conteo_isla("Aruba", c, stats["descartes"])
+        texto = texto_conteo_isla("Jamaica", c, stats["descartes"])
         self.assertIn("8 encontrados = 2 nuevos · 1 repetidos · 2 descartados · 1 dudosos", texto)
         self.assertIn("1 sin contacto", texto)
         self.assertNotIn("sin clasificar", texto)

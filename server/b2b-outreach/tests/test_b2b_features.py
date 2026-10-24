@@ -24,27 +24,27 @@ from b2b.lead_score import califica_lead, puntuar_lead
 
 
 class TestPrioridadInicial(unittest.TestCase):
-    def test_orden_islas_luego_africa(self):
+    def test_orden_estados_y_mercados_activos(self):
         data = cargar_reglas()
         prio = data["prioridad_inicial"]
-        caribe = data["prioridad_caribe"]
-        self.assertEqual(prio[0], "Aruba")
-        self.assertEqual(caribe[0], "Aruba")
-        self.assertIn("Barbados", caribe)
-        self.assertIn("Haiti", caribe)
-        self.assertNotIn("Nigeria", caribe)
-        self.assertIn("Nigeria", prio)
-        self.assertLess(prio.index("Mauritius"), prio.index("Nigeria"))
-        self.assertEqual(prio[-1], "Angola")
+        mercados = [p["pais"] for p in data["paises"]]
+        self.assertEqual(prio[0], "Florida")
+        self.assertEqual(prio[1], "Texas")
+        self.assertIn("Puerto Rico", mercados)
+        self.assertIn("Jamaica", mercados)
+        self.assertNotIn("Nigeria", mercados)
+        self.assertEqual(len(mercados), 53)
+        self.assertLess(prio.index("California"), prio.index("Wyoming"))
+        self.assertEqual(prio[-1], "District of Columbia")
         self.assertEqual(len(paises_prioridad_inicial()), len(prio))
 
-    def test_busqueda_default_solo_caribe(self):
+    def test_busqueda_default_estados_configurados(self):
         islas = [p["pais"] for p in paises_prioridad_busqueda()]
-        self.assertEqual(islas[0], "Aruba")
-        self.assertIn("Sint Maarten", islas)
+        self.assertEqual(islas[0], "Florida")
+        self.assertIn("Virginia", islas)
         self.assertNotIn("Nigeria", islas)
-        self.assertIn("Dominican Republic", islas)
-        self.assertIn("Barbados", islas)
+        self.assertIn("District of Columbia", islas)
+        self.assertEqual(islas, cargar_reglas()["prioridad_inicial"])
 
     def test_tipos_incluyen_casino(self):
         tipos = cargar_reglas()["orden_tipos_negocio"]
@@ -53,29 +53,29 @@ class TestPrioridadInicial(unittest.TestCase):
 
 
 class TestIdiomaPais(unittest.TestCase):
-    def test_senegal_frances(self):
-        self.assertEqual(idioma_para_pais("Senegal"), "fr")
+    def test_puerto_rico_espanol(self):
+        self.assertEqual(idioma_para_pais("Puerto Rico"), "es")
 
-    def test_aruba_ingles(self):
-        self.assertEqual(idioma_para_pais("Aruba"), "en")
+    def test_florida_ingles(self):
+        self.assertEqual(idioma_para_pais("Florida"), "en")
 
-    def test_angola_portugues(self):
-        self.assertEqual(idioma_para_pais("Angola"), "pt")
+    def test_jamaica_ingles(self):
+        self.assertEqual(idioma_para_pais("Jamaica"), "en")
 
-    def test_cabo_verde_portugues(self):
-        self.assertEqual(idioma_para_pais("Cape Verde"), "pt")
+    def test_puerto_rico_preferido_ingles(self):
+        self.assertEqual(idioma_para_pais("Puerto Rico", preferido="en"), "en")
 
 
 class TestAliasUSA(unittest.TestCase):
-    def test_alias_resuelven_united_states(self):
+    def test_alias_nacionales_no_inventan_un_estado(self):
         for clave in ("USA", "U.S.A.", "EE.UU.", "Estados Unidos"):
             entry = buscar_pais(clave)
-            self.assertIsNotNone(entry, clave)
-            self.assertEqual(entry["pais"], "United States")
+            self.assertIsNone(entry, clave)
+            self.assertEqual(ALIASES[clave.lower()], "United States")
 
-    def test_canada(self):
-        self.assertEqual(buscar_pais("Canadá")["pais"], "Canada")
-        self.assertIn("canada", ALIASES)
+    def test_nombres_activos_sin_mayusculas(self):
+        for nombre in ("Florida", "Puerto Rico", "Jamaica"):
+            self.assertEqual(buscar_pais(nombre.lower())["pais"], nombre)
 
 
 class TestPuntajeLead(unittest.TestCase):
@@ -104,7 +104,7 @@ class TestPresupuestoPlaces(unittest.TestCase):
         ), patch.object(places_mod, "_post_search") as post, patch.object(
             places_mod, "cache_path", return_value=Path(tempfile.mkdtemp()) / "cache.json"
         ):
-            leads, llamadas, stats = places_mod.buscar_google_pais("Aruba", ["tienda"])
+            leads, llamadas, stats = places_mod.buscar_google_pais("Florida", ["tienda"])
         post.assert_not_called()
         self.assertEqual(leads, [])
         self.assertEqual(llamadas, 0)
@@ -122,18 +122,18 @@ class TestCatalogoFaltante(unittest.TestCase):
 
 
 class TestBorradorIdioma(unittest.TestCase):
-    def test_senegal_frances(self):
+    def test_catalogo_frances_preservado(self):
         from b2b.redactor import borrador_prospecto
 
         draft = borrador_prospecto("fr", "Boutique Test", "tienda")
         self.assertIn("Bonjour", draft)
         self.assertIn("Catalogue grossiste PDF", draft)
 
-    def test_aruba_ingles(self):
+    def test_florida_ingles(self):
         from b2b.redactor import borrador_prospecto
 
-        draft = borrador_prospecto("en", "Aruba Shop", "tienda")
-        self.assertIn("Hello Aruba Shop", draft)
+        draft = borrador_prospecto("en", "Florida Shop", "tienda")
+        self.assertIn("Hello Florida Shop", draft)
         self.assertIn("Wholesale catalog PDF", draft)
 
 

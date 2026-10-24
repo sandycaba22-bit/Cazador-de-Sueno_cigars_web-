@@ -483,6 +483,26 @@ body[data-page='confirmation'] {
   margin: 0 0 0.45rem;
 }
 
+.co-bank__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  margin-top: 0.65rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--accent);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.co-bank__link:hover,
+.co-bank__link:focus-visible {
+  border-color: var(--accent);
+  background: rgba(196, 165, 116, 0.1);
+}
+
 .co-bank dl {
   display: grid;
   gap: 0.28rem;
@@ -517,6 +537,64 @@ body[data-page='confirmation'] {
   font-size: 0.82rem;
   line-height: 1.45;
   color: var(--text-muted);
+}
+
+.co-bank__steps {
+  margin: 0 0 0.85rem;
+  padding-left: 1.15rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.co-bank__steps li + li {
+  margin-top: 0.2rem;
+}
+
+.co-bank__steps strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.co-bank dd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.co-bank__copy {
+  min-height: 32px;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.co-bank__copy:hover,
+.co-bank__copy:focus-visible {
+  border-color: var(--accent);
+  background: rgba(196, 165, 116, 0.1);
+}
+
+.co-bank__copy.is-copied {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.co-paypal-mode {
+  margin: 0.65rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px dashed var(--accent);
+  border-radius: 3px;
+  font-size: 0.8rem;
+  color: var(--accent);
 }
 
 /* --------------------------------------------------------------- legal */
@@ -625,8 +703,7 @@ body[data-page='confirmation'] {
   padding: 1rem 1.5rem;
 }
 
-.co-submit__note,
-.co-trust {
+.co-submit__note {
   display: none;
 }
 
@@ -791,11 +868,63 @@ body[data-page='confirmation'] {
 }
 
 .co-trust {
-  display: none;
+  list-style: none;
+  margin: 1.35rem 0 0;
+  padding: 1.1rem 0 0;
+  border-top: 1px solid rgba(196, 165, 116, 0.18);
+  display: grid;
+  gap: 0.85rem;
 }
 
-.co-trust li::before {
-  content: none;
+.co-trust__item {
+  position: relative;
+  display: grid;
+  gap: 0.15rem;
+  padding-left: 1.6rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.co-trust__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  width: 1rem;
+  height: 1rem;
+  background: var(--accent);
+  -webkit-mask: var(--co-trust-icon) center / contain no-repeat;
+  mask: var(--co-trust-icon) center / contain no-repeat;
+}
+
+.co-trust__item--secure {
+  --co-trust-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Crect x='4' y='10' width='16' height='11' rx='2'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E");
+}
+
+.co-trust__item--humidity {
+  --co-trust-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Cpath d='M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z'/%3E%3C/svg%3E");
+}
+
+.co-trust__item--origin {
+  --co-trust-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Ccircle cx='12' cy='9' r='6'/%3E%3Cpath d='M8.5 14 7 22l5-3 5 3-1.5-8'/%3E%3C/svg%3E");
+}
+
+.co-trust__item strong {
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+.co-trust__item span {
+  color: var(--text-muted);
+}
+
+.co-legal-age {
+  margin: 1rem 0 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  opacity: 0.8;
 }
 
 /* ------------------------------------------------ asistente de checkout */

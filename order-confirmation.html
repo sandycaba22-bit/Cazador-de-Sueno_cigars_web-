@@ -12,7 +12,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Pedido confirmado — Cazador de Sueños</title>
+    <title>Pedido confirmado — Cazador de Sueño Cigars SRL</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -28,10 +28,10 @@
     <main class="co">
       <header class="co__bar">
         <a class="co__back" href="index.html" data-i18n="confirmation.back">← Volver a la tienda</a>
-        <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueños Cigar SRL">
+        <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueño Cigars SRL">
           <img
             src="images/logo.png"
-            alt="Cazador de Sueños"
+            alt="Cazador de Sueño Cigars SRL"
             class="cds-brand__mark site-logo site-logo--compact"
             width="339"
             height="256"
@@ -58,8 +58,20 @@
       </div>
     </main>
 
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <div class="site-footer__brand">
+          <p class="site-footer__title">Cazador de Sueño Cigars SRL</p>
+        </div>
+        <p class="site-footer__contact">
+          <a href="mailto:cazadordesueno1@gmail.com">cazadordesueno1@gmail.com</a>
+        </p>
+      </div>
+    </footer>
+
     <script src="js/language-switcher.js" defer></script>
     <script src="js/config.js" defer></script>
+    <script src="js/bank-transfer-links.js" defer></script>
     <script src="js/policies.js" defer></script>
     <script>
       /**
@@ -170,8 +182,9 @@
                   <dl>
                     <div><dt>${safe(tt('confirmation.holder', 'Titular'))}</dt><dd>${safe(account.accountHolder)}</dd></div>
                     <div><dt>${safe(tt('confirmation.type', 'Tipo'))}</dt><dd>${safe(account.accountType)}</dd></div>
-                    <div><dt>${safe(tt('confirmation.account', 'Cuenta'))}</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
+                    <div><dt>${safe(tt('confirmation.account', 'Cuenta'))}</dt><dd><code>${safe(account.accountNumber)}</code>${BankTransferLinks.copyButton(account.accountNumber, tt('checkout.bank.copy', 'Copiar'))}</dd></div>
                   </dl>
+                  ${BankTransferLinks.render(account.bankName, tt('checkout.bank.online', 'Abrir banca en línea'))}
                 </div>`
                 )
                 .join('')}
@@ -257,6 +270,10 @@
           }
         }
 
+        BankTransferLinks.bindCopy(container, () => ({
+          copied: tt('checkout.bank.copied', 'Copiado'),
+          failed: tt('checkout.bank.copy_failed', 'Copia manualmente'),
+        }));
         renderOrder();
         window.addEventListener('cds:language-changed', renderOrder);
       });

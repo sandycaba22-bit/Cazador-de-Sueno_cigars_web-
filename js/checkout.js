@@ -22,8 +22,10 @@
   const PAYPAL_SDK_HOST_LIVE = 'https://www.paypal.com/sdk/js';
   const PAYPAL_SDK_HOST_SANDBOX = 'https://www.sandbox.paypal.com/sdk/js';
   const PAYPAL_BLOCKED_ERROR = 'PAYPAL_CHECKOUT_BLOCKED';
-  const BANK_TRANSFER_WHATSAPP = '18096764090';
+  const BANK_TRANSFER_WHATSAPP = '18094645016';
   const PAYPAL_CONTAINER_ID = 'paypal-button-container';
+  const REQUEST_TIMEOUT_MS = 45000;
+  const SDK_TIMEOUT_MS = 15000;
 
   /** @type {{ config: object|null, quote: object|null, quoteToken: string|null, method: string|null, idempotencyKey: string|null, submitting: boolean }} */
   const state = {
@@ -105,12 +107,25 @@
   // -------------------------------------------------------------- red
 
   async function apiFetch(path, options) {
-    const response = await fetch(`${API}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...(options && options.headers) },
-      ...options,
-    });
-
-    const text = await response.text();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    let response;
+    let text;
+    try {
+      response = await fetch(`${API}${path}`, {
+        ...options,
+        headers: { 'Content-Type': 'application/json', ...(options && options.headers) },
+        signal: controller.signal,
+      });
+      text = await response.text();
+    } catch (cause) {
+      throw new Error(tt(
+        'checkout.errors.network',
+        'No pudimos recibir la respuesta del servicio de pagos. Verifica tu conexión y el estado del pedido antes de reintentar.'
+      ));
+    } finally {
+      clearTimeout(timeout);
+    }
     let body = {};
     try {
       body = text ? JSON.parse(text) : {};
@@ -181,7 +196,7 @@
     state.submitting = busy;
     // El botón se habilita en cuanto hay cotización: la validación de campos
     // ocurre al confirmar, no bloquea la UI de pago.
-    button.disabled = Boolean(busy) || !state.quoteToken;
+    button.disabled = Boolean(busy) || !state.quoteToken || !state.method;
     button.textContent = busy
       ? tt('checkout.processing', 'Procesando…')
       : tt('checkout.submit', 'Confirmar pedido');
@@ -195,13 +210,23 @@
   // ---------------------------------------------------------- cotización
 
   let quoteTimer = null;
+  let quoteRequestId = 0;
 
   function scheduleQuote() {
+    if (state.submitting) return;
+    state.quoteToken = null;
+    quoteRequestId++;
+    setBusy(false);
     clearTimeout(quoteTimer);
     quoteTimer = setTimeout(refreshQuote, QUOTE_DEBOUNCE_MS);
   }
 
   async function refreshQuote() {
+    if (state.submitting) return;
+    clearTimeout(quoteTimer);
+    const requestId = ++quoteRequestId;
+    state.quoteToken = null;
+    setBusy(false);
     const items = cartPayload();
     const country = el('co-form').country.value;
 
@@ -219,6 +244,7 @@
         method: 'POST',
         body: JSON.stringify({ items, country }),
       });
+      if (requestId !== quoteRequestId) return;
 
       state.quote = data.quote;
       state.quoteToken = data.quoteToken;
@@ -232,6 +258,7 @@
       clearAlert();
       setBusy(false);
     } catch (error) {
+      if (requestId !== quoteRequestId) return;
       state.quote = null;
       state.quoteToken = null;
       setBusy(false);
@@ -273,10 +300,18 @@
       )
       .join('');
 
-    state.method = methods[0].id;
+    state.method = (methods.find((method) => method.ready !== false) || {}).id || null;
 
     container.querySelectorAll('input[name="paymentMethod"]').forEach((input) => {
+      const method = methods.find((entry) => entry.id === input.value);
+      input.disabled = method.ready === false;
+      input.checked = input.value === state.method;
       input.addEventListener('change', () => {
+        if (state.submitting) {
+          input.checked = false;
+          container.querySelector(`input[value="${state.method}"]`).checked = true;
+          return;
+        }
         state.method = input.value;
         renderMethodDetail();
       });
@@ -290,6 +325,8 @@
   }
 
   function methodHint(id) {
+    const method = ((state.config && state.config.paymentMethods) || []).find((entry) => entry.id === id);
+    if (method && method.ready === false) return tt('checkout.unavailable', 'No disponible ahora');
     if (id === 'cardnet') return tt('checkout.hints.cardnet', 'Visa / Mastercard');
     if (id === 'bank_transfer') return tt('checkout.hints.bank_transfer', 'Banreservas · BHD');
     if (id === 'paypal') return tt('checkout.hints.paypal', 'USD');
@@ -307,8 +344,24 @@
 
   function setPaypalHostVisible(visible) {
     const host = paypalHostEl();
-    if (!host) return;
-    host.hidden = !visible;
+    if (host) host.hidden = !visible;
+    syncPaypalModeNote(visible);
+  }
+
+  /** El comprador debe saber si PayPal está en pruebas: ahí no se cobra dinero real. */
+  function syncPaypalModeNote(visible) {
+    const note = el('co-paypal-mode');
+    if (!note) return;
+    const method = currentMethod();
+    const sandbox =
+      visible && method && method.id === 'paypal' && resolvePaypalClient(method.client).mode === 'sandbox';
+    note.hidden = !sandbox;
+    note.textContent = sandbox
+      ? tt(
+          'checkout.paypal_sandbox',
+          'PayPal está en modo de prueba: no se cobra dinero real. Usa transferencia bancaria para comprar ahora.'
+        )
+      : '';
   }
 
   function renderMethodDetail() {
@@ -326,6 +379,10 @@
         email: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.bankTransfer && APP_CONFIG.bankTransfer.email) || ''
       };
       panel.innerHTML = renderBankDetails(bankData);
+      BankTransferLinks.bindCopy(panel, () => ({
+        copied: tt('checkout.bank.copied', 'Copiado'),
+        failed: tt('checkout.bank.copy_failed', 'Copia manualmente'),
+      }));
       bindBankWhatsApp();
       syncSubmitVisibility();
       return;
@@ -344,9 +401,11 @@
     if (method.id === 'paypal') {
       const host = paypalHostEl();
       if (host) {
-        panel.hidden = true;
-        panel.innerHTML = '';
-        host.hidden = false;
+        // A legacy layout may place the PayPal host inside this panel.
+        // Clearing that panel would remove the payment button itself.
+        panel.hidden = !panel.contains(host);
+        if (!panel.contains(host)) panel.innerHTML = '';
+        setPaypalHostVisible(true);
         if (!host.querySelector('iframe, .paypal-buttons')) {
           host.innerHTML = `<p class="co-note co-paypal__loading">${safe(
             tt('checkout.paypal_loading', 'Cargando PayPal…')
@@ -399,13 +458,14 @@
           <dl>
             <div><dt>${safe(tt('checkout.bank.holder', 'Titular'))}</dt><dd>${safe(account.accountHolder)}</dd></div>
             <div><dt>${safe(tt('checkout.bank.type', 'Tipo'))}</dt><dd>${safe(account.accountType)}</dd></div>
-            <div><dt>${safe(tt('checkout.bank.account', 'Cuenta'))}</dt><dd><code>${safe(account.accountNumber)}</code></dd></div>
+            <div><dt>${safe(tt('checkout.bank.account', 'Cuenta'))}</dt><dd><code>${safe(account.accountNumber)}</code>${BankTransferLinks.copyButton(account.accountNumber, tt('checkout.bank.copy', 'Copiar'))}</dd></div>
             ${
               account.currency
                 ? `<div><dt>${safe(tt('checkout.bank.currency', 'Moneda'))}</dt><dd>${safe(account.currency)}</dd></div>`
                 : ''
             }
           </dl>
+          ${BankTransferLinks.render(account.bankName, tt('checkout.bank.online', 'Abrir banca en línea'))}
         </div>`;
   }
 
@@ -549,9 +609,11 @@
 
     return `
       <div class="co-bank">
-        <p class="co-note">
-          ${refNote}${safe(tt('checkout.bank.concept_use', 'Usa la referencia en el concepto'))}${emailNote}.
-        </p>
+        <ol class="co-bank__steps">
+          <li>${safe(tt('checkout.bank.step_copy', 'Copia el número de cuenta y abre tu banca en línea.'))}</li>
+          <li>${safe(tt('checkout.bank.step_transfer', 'Transfiere el total exacto en DOP o USD, según tu cuenta.'))}</li>
+          <li>${refNote}${safe(tt('checkout.bank.concept_use', 'Usa la referencia en el concepto'))}${emailNote}.</li>
+        </ol>
         ${doBlock}
         ${usBlock}
         <a
@@ -582,7 +644,7 @@
       script.onload = () => {
         try {
           window.PWCheckout.SetProperties({
-            name: 'Cazador de Sueños Cigars',
+            name: 'Cazador de Sueño Cigars SRL',
             description: 'Compra de puros premium',
             currency: client.currency,
             lang: 'ESP',
@@ -731,20 +793,33 @@
   function mountPaypal(method) {
     const client = method && method.client;
     const sdkUrl = buildPaypalSdkUrl(client);
-    const canLoad = Boolean(client && sdkUrl);
+    const canLoad = Boolean(method && method.ready !== false && client && sdkUrl);
     if (!canLoad) {
-      const fromConfig = ((state.config && state.config.paymentMethods) || []).find((m) => m.id === 'paypal');
-      if (fromConfig && fromConfig.client && buildPaypalSdkUrl(fromConfig.client)) {
-        return mountPaypal(fromConfig);
-      }
+      showPaypalFailure(tt('checkout.errors.paypal_unavailable', 'PayPal no está disponible ahora. Usa transferencia bancaria.'));
       return;
     }
 
     loadPaypalSdk(client)
-      .then(() => renderPaypalButtons())
-      .catch(() => {
-        /* No bloquear la UI ni mostrar "No pudimos cargar PayPal". */
+      .then(() => {
+        if (state.method === 'paypal') return renderPaypalButtons();
+      })
+      .catch((error) => {
+        if (state.method === 'paypal') showPaypalFailure(error.message);
       });
+  }
+
+  function showPaypalFailure(message) {
+    setBusy(false);
+    showAlert(message);
+    const host = paypalHostEl();
+    if (!host) return;
+    host.hidden = false;
+    host.innerHTML = `<p class="co-note">${safe(message)}</p>
+      <button type="button" id="co-paypal-retry" class="co-btn co-btn--ghost">${safe(tt('checkout.retry', 'Reintentar PayPal'))}</button>`;
+    el('co-paypal-retry').addEventListener('click', () => {
+      clearAlert();
+      mountPaypal(currentMethod());
+    });
   }
 
   function loadPaypalSdk(client) {
@@ -771,30 +846,26 @@
 
     paypalSdkReady = new Promise((resolve, reject) => {
       const script = document.createElement('script');
+      const fail = () => {
+        clearTimeout(timeout);
+        script.remove();
+        resetPaypalSdk();
+        reject(new Error(tt('checkout.errors.paypal_load', 'No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.')));
+      };
+      const timeout = setTimeout(fail, SDK_TIMEOUT_MS);
       script.src = scriptUrl;
       script.async = true;
       script.dataset.paypalSdk = 'true';
       paypalSdkSource = scriptUrl;
       script.onload = () => {
+        clearTimeout(timeout);
         if (!window.paypal) {
-          paypalSdkReady = null;
-          reject(
-            new Error(
-              tt('checkout.errors.paypal_load', 'No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.')
-            )
-          );
+          fail();
           return;
         }
         resolve(window.paypal);
       };
-      script.onerror = () => {
-        resetPaypalSdk();
-        reject(
-          new Error(
-            tt('checkout.errors.paypal_load', 'No pudimos cargar PayPal. Prueba de nuevo o usa transferencia.')
-          )
-        );
-      };
+      script.onerror = fail;
       document.head.appendChild(script);
     });
 
@@ -806,7 +877,7 @@
     if (!host || !window.paypal || typeof window.paypal.Buttons !== 'function') return;
 
     host.hidden = false;
-    host.innerHTML = '';
+    if (paypalButtons && host.querySelector('iframe, .paypal-buttons')) return;
     if (paypalButtons && typeof paypalButtons.close === 'function') {
       try {
         paypalButtons.close();
@@ -814,12 +885,14 @@
         /* el SDK a veces ya desmontó el botón */
       }
     }
+    host.innerHTML = '';
 
     paypalButtons = window.paypal.Buttons({
       style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
       createOrder: async () => {
         const data = readForm();
-        const errors = localErrors(data, { requireTerms: false });
+        if (state.submitting) throw paypalAbort(tt('checkout.processing', 'Procesando…'));
+        const errors = localErrors(data);
         if (errors.length) {
           throw paypalAbort(errors[0]);
         }
@@ -832,10 +905,18 @@
           throw paypalAbort(message);
         }
         clearAlert();
-        const created = await apiFetch('/paypal/orders', {
-          method: 'POST',
-          body: JSON.stringify({ quoteToken: state.quoteToken }),
-        });
+        setBusy(true);
+        let created;
+        try {
+          created = await apiFetch('/paypal/orders', {
+            method: 'POST',
+            body: JSON.stringify({ quoteToken: state.quoteToken }),
+          });
+        } catch (error) {
+          setBusy(false);
+          showAlert(error.message);
+          throw paypalAbort(error.message);
+        }
         if (!created || !created.paypalOrderId) {
           throw new Error(
             tt(
@@ -892,34 +973,32 @@
       },
     });
 
-    return paypalButtons.render(`#${PAYPAL_CONTAINER_ID}`).catch((error) => {
-      if (isPaypalAbort(error)) return;
-      /* El contenedor permanece visible; no bloqueamos el resto del checkout. */
-    });
+    return paypalButtons.render(`#${PAYPAL_CONTAINER_ID}`);
   }
 
   // ------------------------------------------------------------- envío
 
   function readForm() {
     const form = el('co-form');
+    const field = (name) => form.elements.namedItem(name);
     return {
       customer: {
-        fullName: form.fullName.value.trim(),
-        email: form.email.value.trim(),
-        phone: form.phone.value.trim(),
+        fullName: field('fullName').value.trim(),
+        email: field('email').value.trim(),
+        phone: field('phone').value.trim(),
       },
       shipping: {
-        address: form.address.value.trim(),
-        city: form.city.value.trim(),
-        state: form.state.value.trim(),
-        postalCode: form.postalCode.value.trim(),
-        country: form.country.value,
+        address: field('address').value.trim(),
+        city: field('city').value.trim(),
+        state: field('state').value.trim(),
+        postalCode: field('postalCode').value.trim(),
+        country: field('country').value,
       },
-      notes: form.notes.value.trim(),
+      notes: field('notes').value.trim(),
       acceptances: {
         // Un solo checkbox en UI → ambas aceptaciones para el contrato del servidor.
-        finalSale: form.acceptTerms.checked,
-        customs: form.acceptTerms.checked,
+        finalSale: field('acceptTerms').checked,
+        customs: field('acceptTerms').checked,
       },
     };
   }
@@ -967,6 +1046,7 @@
   /** Crea el pedido en el servidor. Devuelve el cuerpo o null si falló con alerta. */
   async function createOrderPayload(paymentPayload) {
     if (!state.quoteToken) {
+      setBusy(false);
       showAlert(
         tt(
           'checkout.errors.quote_expired',
@@ -1097,6 +1177,7 @@
   }
 
   function reapplyLanguage() {
+    if (state.submitting) return;
     renderStaticCopy();
     if (state.quote) {
       renderItems();
@@ -1175,7 +1256,7 @@
 
   function prefetchPaypalSdk() {
     const paypal = ((state.config && state.config.paymentMethods) || []).find((m) => m.id === 'paypal');
-    if (!paypal || !paypal.client) return;
+    if (!paypal || paypal.ready === false || !paypal.client) return;
     if (!buildPaypalSdkUrl(paypal.client)) return;
     loadPaypalSdk(paypal.client).catch(() => {
       /* se reintenta al seleccionar PayPal */

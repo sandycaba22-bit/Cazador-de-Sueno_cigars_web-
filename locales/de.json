@@ -3,7 +3,7 @@
   "direction": "ltr",
   "translations": {
     "age_gate": {
-      "title": "Cazador de Sueños Cigars",
+      "title": "Cazador de Sueño Cigars SRL",
       "eyebrow": "Altersverifikation",
       "text": "Diese Website enthält Informationen über Tabakprodukte, die für Erwachsene reserviert sind. Bitte bestätigen Sie, dass Sie 21 Jahre oder älter sind, um fortzufahren.",
       "enter": "Ja, ich bin 21 oder älter",
@@ -11,7 +11,7 @@
       "legal": "Durch den Bestätigen bestätigen Sie, dass Sie das gesetzliche Alter in Ihrer Gerichtsbarkeit erfüllen."
     },
     "header": {
-      "brand": "Cazador de Sueños",
+      "brand": "Cazador de Sueño Cigars SRL",
       "nav": {
         "legacy": "Das Erbe",
         "mastery": "Meisterschaft",
@@ -37,7 +37,7 @@
     },
     "hero": {
       "eyebrow": "Cerro Angola · Dominikanische Republik",
-      "title": "Cazador de Sueños",
+      "title": "Cazador de Sueño Cigars SRL",
       "subtitle": "Wo Familientradition auf wissenschaftliche Präzision trifft.",
       "cta": "Kollektion entdecken"
     },
@@ -80,7 +80,7 @@
     "mission_vision": {
       "label": "Unsere Identität",
       "title": "Mission, Vision und Werte",
-      "intro": "Cazador de Sueños Sigar SRL — Tradition, Exzellenz und Engagement",
+      "intro": "Cazador de Sueño Cigars SRL — Tradition, Exzellenz und Engagement",
       "mission": {
         "title": "Mission",
         "text": "Hochwertige Zigarren unter Verwendung der besten Tabakblätter und spezialisierten Prozessen produzieren, die Erwartungen unserer Kunden durch Exzellenz, Verantwortung, Respekt für unsere Mitarbeiter und nachhaltige Entwicklung der Tabakindustrie erfüllen."
@@ -92,13 +92,41 @@
       "values": {
         "title": "Werte",
         "items": [
-          {"key": "quality", "label": "Qualität", "text": "Die höchsten Standards in jeder Produktionsphase aufrechterhalten."},
-          {"key": "commitment", "label": "Engagement", "text": "Verantwortung gegenüber Kunden, Mitarbeitern und Partnern erfüllen."},
-          {"key": "tradition", "label": "Tradition", "text": "Das Erbe und die Kultur der Zigarrenherstellung bewahren."},
-          {"key": "integrity", "label": "Integrität", "text": "Mit Ehrlichkeit, Ethik und Transparenz handeln."},
-          {"key": "innovation", "label": "Innovation", "text": "Unsere Prozesse und Produkte kontinuierlich verbessern."},
-          {"key": "teamwork", "label": "Teamarbeit", "text": "Zusammenarbeit und gegenseitigen Respekt fördern."},
-          {"key": "responsibility", "label": "Soziale und Umweltverantwortung", "text": "Zum Wohlergehen der Gemeinschaft und zur Pflege der Umwelt beitragen."}
+          {
+            "key": "quality",
+            "label": "Qualität",
+            "text": "Die höchsten Standards in jeder Produktionsphase aufrechterhalten."
+          },
+          {
+            "key": "commitment",
+            "label": "Engagement",
+            "text": "Verantwortung gegenüber Kunden, Mitarbeitern und Partnern erfüllen."
+          },
+          {
+            "key": "tradition",
+            "label": "Tradition",
+            "text": "Das Erbe und die Kultur der Zigarrenherstellung bewahren."
+          },
+          {
+            "key": "integrity",
+            "label": "Integrität",
+            "text": "Mit Ehrlichkeit, Ethik und Transparenz handeln."
+          },
+          {
+            "key": "innovation",
+            "label": "Innovation",
+            "text": "Unsere Prozesse und Produkte kontinuierlich verbessern."
+          },
+          {
+            "key": "teamwork",
+            "label": "Teamarbeit",
+            "text": "Zusammenarbeit und gegenseitigen Respekt fördern."
+          },
+          {
+            "key": "responsibility",
+            "label": "Soziale und Umweltverantwortung",
+            "text": "Zum Wohlergehen der Gemeinschaft und zur Pflege der Umwelt beitragen."
+          }
         ]
       }
     },
@@ -130,7 +158,7 @@
     },
     "sommelier": {
       "fab_label": "Keller-Sommelier — Berater des Hauses",
-      "kicker": "Cazador de Sueños",
+      "kicker": "Cazador de Sueño Cigars SRL",
       "title": "Keller-Sommelier",
       "welcome": "Willkommen im Keller. Ich bin der Meisterblender des Hauses. Suchen Sie eine Vitola-Empfehlung, Verkostungsnotizen, oder vertreten Sie einen Distributor?",
       "placeholder": "Schreiben Sie Ihre Anfrage…",
@@ -145,7 +173,7 @@
     },
     "footer": {
       "tagline": "Fabrik in Santiago de los Caballeros, Dominikanische Republik",
-      "copy": "© 2026 Cazador de Sueños Cigars. Alle Rechte vorbehalten."
+      "copy": "© 2026 Cazador de Sueño Cigars SRL. Alle Rechte vorbehalten."
     },
     "maestria": {
       "label": "Meisterschaft",
@@ -155,7 +183,7 @@
       "chapter1": {
         "kicker": "Der Ursprung · San José de las Matas",
         "title": "Hier beginnt unsere Geschichte.",
-        "text": "In den Ländereien der Dominikanischen Republik, zwischen Kiefern, Nebel und frischer Erde, beginnt die Erinnerung von Cazador de Sueños. Wir kommen nicht aus einem Büro. Wir kommen vom Berg.",
+        "text": "In den Ländereien der Dominikanischen Republik, zwischen Kiefern, Nebel und frischer Erde, beginnt die Erinnerung von Cazador de Sueño Cigars SRL. Wir kommen nicht aus einem Büro. Wir kommen vom Berg.",
         "note": "Cordillera Central · Dominikanische Republik"
       },
       "chapter2": {
@@ -192,12 +220,73 @@
         "kicker": "Das Erbe",
         "text1": "Alles begann in der nördlichen Region der Dominikanischen Republik, wo ein Vorfahre unserer Familie sein Leben dem Anbau und der Verarbeitung von Tabak widmete. Mit der Zeit beherrschte er die Geheimnisse der Fermentation, wertvolles Wissen, das er an nachfolgende Generationen als Teil eines mit Mühe, Geduld und Leidenschaft aufgebauten Erbes weitergab.",
         "text2": "Im Laufe der Jahre trug jede Generation ihre Erfahrung bei, bewahrte Traditionen und Liebe für diesen edlen Beruf. Was als Familienunterricht begann, wurde zu einem Erbe, das unsere Identität und unser Engagement für Qualität stärkte.",
-        "text3": "Inspiriert von diesem Erbe und geleitet vom Traum, unsere Leidenschaft mit der Welt zu teilen, wurde Cazador de Sueños Cigars geboren. Unser Name repräsentiert die Ausdauer derjenigen, die nie aufhörten, an ihre Ideale zu glauben und daran arbeiteten, sie in die Realität umzuwandeln.",
+        "text3": "Inspiriert von diesem Erbe und geleitet vom Traum, unsere Leidenschaft mit der Welt zu teilen, wurde Cazador de Sueño Cigars SRL geboren. Unser Name repräsentiert die Ausdauer derjenigen, die nie aufhörten, an ihre Ideale zu glauben und daran arbeiteten, sie in die Realität umzuwandeln.",
         "text4": "Heute ist jede Zigarre, die wir herstellen, eine Hommage an unsere Vorfahren, an unser Land und an die Träume, die diesen Weg möglich machten. Mehr als eine Marke sind wir die Fortsetzung einer Familiengeschichte, die in jedem Tabakblatt und in jeder Erfahrung, die wir anbieten, weiterlebt.",
-        "note": "Cazador de Sueños Sigar SRL"
+        "note": "Cazador de Sueño Cigars SRL"
       }
     },
     "vitolas": {
+      "brand": {
+        "pairing": {
+          "title": "Empfohlene Begleitung",
+          "spirit": "Spirituose",
+          "coffee": "Kaffee",
+          "bite": "Dazu",
+          "moment": "Moment"
+        },
+        "pairings": {
+          "emperador": {
+            "spirit": "Gereifter dominikanischer Rum",
+            "coffee": "Filterkaffee aus Jarabacoa",
+            "bite": "Zartbitterschokolade 70 %",
+            "moment": "Ein langer Nachmittag auf der Terrasse"
+          },
+          "puro_habano": {
+            "spirit": "Speyside Single Malt Whisky",
+            "coffee": "Cortado",
+            "bite": "Geröstete Walnüsse",
+            "moment": "Nach einem Steak-Dinner"
+          },
+          "exquisito": {
+            "spirit": "Cognac XO",
+            "coffee": "Espresso",
+            "bite": "Bitterschokolade mit Meersalz",
+            "moment": "Ein Fest ohne Eile"
+          },
+          "rango": {
+            "spirit": "Brauner Rum oder Malbec",
+            "coffee": "Americano",
+            "bite": "Geröstete Mandeln",
+            "moment": "Nach dem Mittagessen"
+          },
+          "ligero": {
+            "spirit": "Torfiger Islay-Whisky",
+            "coffee": "Ristretto",
+            "bite": "Getrocknete Feigen",
+            "moment": "Zum Ausklang des Abends"
+          },
+          "sultan": {
+            "spirit": "Extra gereifter dominikanischer Rum",
+            "coffee": "Doppelter Espresso",
+            "bite": "Dunkler Kakao",
+            "moment": "Nach einem üppigen Abendessen"
+          }
+        },
+        "seal": {
+          "label": "Herkunftssiegel",
+          "title": "Handgefertigt in der Dominikanischen Republik",
+          "text": "Jede Zigarre wird in unserer Manufaktur in Santiago de los Caballeros von Hand gerollt und vor dem Versand geprüft.",
+          "place": "Santiago de los Caballeros · D.R."
+        },
+        "b2b": {
+          "label": "Großhandel & Export",
+          "title": "Sie führen eine Lounge, ein Geschäft oder einen Vertrieb?",
+          "text": "Mengenpreise, Großhandelskatalog und internationaler Versand. Schreiben Sie uns, wir senden Ihnen die Konditionen.",
+          "cta": "Großhandelskonditionen",
+          "whatsapp": "Export-WhatsApp"
+        },
+        "legal_age": "Verkauf nur an Personen ab 21 Jahren. Rauchen schadet der Gesundheit."
+      },
       "back_to_catalog": "← Zurück zum Katalog",
       "gallery": {
         "single_cigar": "Einzelne Zigarre",
@@ -223,7 +312,7 @@
         "badge": "Der Erste Traum",
         "section_label": "Der Ursprung",
         "title": "Der Kaiser",
-        "subtitle": "Die erste Zigarre, die in der Cazador de Sueños-Fabrik geboren wurde. Lebendige Geschichte, Familienerbe und der Traum, der alles begann.",
+        "subtitle": "Die erste Zigarre, die in der Cazador de Sueño Cigars SRL-Fabrik geboren wurde. Lebendige Geschichte, Familienerbe und der Traum, der alles begann.",
         "concept_title": "Das Einzigartige Konzept",
         "concept_text": "Die Gründungszigarre der Fabrik, geschaffen unter dem Geheimnis einer speziellen Tabakfermentation, die mir mein Großvater lehrte. Sie ist nicht nur eine weitere Vitola: sie ist der Ausgangspunkt eines ganzen Hauses, der erste Rauch, der einem Erbe den Namen gab.",
         "seal": "Spezielle Fermentation",
@@ -390,6 +479,27 @@
         },
         "mystique": "Der Sultan bittet nicht um Zeit: er fordert Aufmerksamkeit. Es ist die sechste Vitola, das letzte Wort und die dominikanischste des Hauses — Cibao, verwandelt in Rauch, in Macht, in Tradition."
       }
+    },
+    "checkout": {
+      "trust": {
+        "secure_title": "Geschützte Zahlung",
+        "secure_text": "PayPal oder direkte Überweisung auf das Konto der Manufaktur. Wir speichern keine Kartendaten.",
+        "humidity_title": "Luftdichte Verpackung",
+        "humidity_text": "Mit Feuchtigkeitskontrolle versiegelt, damit Ihre Zigarren so ankommen, wie sie den Humidor verlassen haben.",
+        "origin_title": "Original ab Manufaktur",
+        "origin_text": "Handgerollt in Santiago de los Caballeros, Dominikanische Republik.",
+        "age": "Verkauf nur an Personen ab 21 Jahren."
+      },
+      "unavailable": "Derzeit nicht verfügbar",
+      "bank": {
+        "online": "Onlinebanking öffnen",
+        "copy": "Kopieren",
+        "copied": "Kopiert",
+        "copy_failed": "Bitte manuell kopieren",
+        "step_copy": "Kopieren Sie die Kontonummer und öffnen Sie Ihr Onlinebanking.",
+        "step_transfer": "Überweisen Sie den genauen Betrag in DOP oder USD, je nach Konto."
+      },
+      "paypal_sandbox": "PayPal ist im Testmodus: Es wird kein echtes Geld belastet. Nutzen Sie die Banküberweisung, um jetzt zu kaufen."
     }
   }
 }

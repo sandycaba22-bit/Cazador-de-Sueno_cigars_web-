@@ -22,6 +22,9 @@ IDIOMA_ISLA = {
     "guadeloupe": "fr",
     "martinique": "fr",
     "puerto rico": "es",
+    "united states": "en",
+    "canada": "en",
+    "united kingdom": "en",
 }
 
 

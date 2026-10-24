@@ -172,7 +172,7 @@ const config = {
 
   contact: {
     whatsapp: process.env.HOUSE_WHATSAPP_E164 || '18094645016',
-    email: process.env.HOUSE_EMAIL || 'cazadordesueno2024@gmail.com',
+    email: process.env.HOUSE_EMAIL || 'cazadordesueno1@gmail.com',
   },
 };
 

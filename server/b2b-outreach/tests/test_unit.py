@@ -30,14 +30,14 @@ class TestEmail(unittest.TestCase):
 
 
 class TestIdioma(unittest.TestCase):
-    def test_sint_maarten_en(self):
-        self.assertEqual(idioma_para_pais("Sint Maarten"), "en")
+    def test_jamaica_en(self):
+        self.assertEqual(idioma_para_pais("Jamaica"), "en")
 
-    def test_aruba_en(self):
-        self.assertEqual(idioma_para_pais("Aruba"), "en")
+    def test_florida_en(self):
+        self.assertEqual(idioma_para_pais("Florida"), "en")
 
-    def test_barbados_en(self):
-        self.assertEqual(idioma_para_pais("Barbados"), "en")
+    def test_puerto_rico_es(self):
+        self.assertEqual(idioma_para_pais("Puerto Rico"), "es")
 
 
 class TestDedup(unittest.TestCase):
@@ -106,7 +106,7 @@ class TestRedactor(unittest.TestCase):
     def test_tarjeta_sin_correo(self):
         paquete = generar_tarjeta_telegram(
             "Demo",
-            "Barbados",
+            "Jamaica",
             "https://example-bb.test",
             "",
             {"sin_correo_publico": True, "tipo": "tienda", "dificultad_aduana": 2},
@@ -117,7 +117,7 @@ class TestRedactor(unittest.TestCase):
 
 class TestProspectarSimulado(unittest.TestCase):
     def test_sin_duplicados_place_id(self):
-        leads, _, _stats = buscar_en_pais("Sint Maarten", ["tienda", "distribuidor"], 15, simulado=True)
+        leads, _, _stats = buscar_en_pais("Florida", ["tienda", "distribuidor"], 15, simulado=True)
         ids = [lead["place_id"] for lead in leads]
         self.assertEqual(len(ids), len(set(ids)))
 

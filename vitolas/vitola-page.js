@@ -68,7 +68,7 @@
     if (document.body.dataset.page === 'checkout') return;
     if (document.getElementById('cds-float-whatsapp')) return;
 
-    var phone = '18095550198';
+    var phone = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.whatsapp && APP_CONFIG.whatsapp.phone) || '18094645016';
     var wa = document.createElement('a');
     wa.id = 'cds-float-whatsapp';
     wa.className = 'cds-float-whatsapp';

@@ -1,5 +1,5 @@
 ﻿/**
- * CAZADOR DE SUEÑOS CIGARS - Luxury Purchase Panel
+ * Cazador de Sueño Cigars SRL - Luxury Purchase Panel
  * Handles purchase panel interactions with shopping cart
  */
 

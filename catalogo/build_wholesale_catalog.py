@@ -48,23 +48,23 @@ LINE = HexColor("#C4A574")
 
 WELCOME = {
     "es": (
-        "Bienvenido a nuestro portal B2B exclusivo. En Cazador de Sueños elaboramos "
+        "Bienvenido a nuestro portal B2B exclusivo. En Cazador de Sueño Cigars SRL elaboramos "
         "puros premium 100% hechos a mano por maestros tabaqueros en la República "
         "Dominicana, listos para la exportación global con facilidades comerciales y RNC válido."
     ),
     "en": (
-        "Welcome to our exclusive B2B portal. At Cazador de Sueños, we craft 100% handmade "
+        "Welcome to our exclusive B2B portal. At Cazador de Sueño Cigars SRL, we craft 100% handmade "
         "premium cigars by master torcedores in the Dominican Republic, ready for global "
         "export with full commercial support and a valid RNC."
     ),
     "fr": (
-        "Bienvenue sur notre portail B2B réservé aux professionnels. Chez Cazador de Sueños, "
+        "Bienvenue sur notre portail B2B réservé aux professionnels. Chez Cazador de Sueño Cigars SRL, "
         "nous fabriquons des cigares premium 100 % faits main par des maîtres torcedores en "
         "République dominicaine, prêts pour l'exportation internationale avec accompagnement "
         "commercial et RNC en règle."
     ),
     "pt": (
-        "Bem-vindo ao nosso portal B2B exclusivo. Na Cazador de Sueños elaboramos charutos "
+        "Bem-vindo ao nosso portal B2B exclusivo. Na Cazador de Sueño Cigars SRL elaboramos charutos "
         "premium 100 % artesanais, feitos por mestres torcedores na República Dominicana, "
         "prontos para exportação global com apoio comercial e RNC válido."
     ),
@@ -512,8 +512,8 @@ def build(lang):
         rightMargin=16 * mm,
         topMargin=18 * mm,
         bottomMargin=18 * mm,
-        title=f"Cazador de Sueños — {copy['catalog']}",
-        author="Cazador de Sueños Cigar SRL",
+        title=f"Cazador de Sueño Cigars SRL — {copy['catalog']}",
+        author="Cazador de Sueño Cigars SRL",
     )
     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="main")
     doc.addPageTemplates(
@@ -527,7 +527,7 @@ def build(lang):
         Spacer(1, 48 * mm),
         Paragraph(copy["catalog"], sheet["coverTitle"]),
         Spacer(1, 3 * mm),
-        Paragraph("Cazador de Sueños Cigar SRL", sheet["coverSub"]),
+        Paragraph("Cazador de Sueño Cigars SRL", sheet["coverSub"]),
         Spacer(1, 12 * mm),
         Paragraph(WELCOME[lang], sheet["welcome"]),
         NextPageTemplate("light"),

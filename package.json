@@ -1,7 +1,7 @@
 {
   "name": "cazador-sueno-web",
   "version": "2.0.0",
-  "description": "E-commerce Cazador de Sueños — checkout de una página, CardNET y envío internacional DHL",
+  "description": "E-commerce Cazador de Sueño Cigars SRL — checkout de una página, CardNET y envío internacional DHL",
   "main": "server/commerce/server.js",
   "scripts": {
     "start": "node server/commerce/server.js",

@@ -1,6 +1,6 @@
 /**
  * Configuración global de producción.
- * Claves Stripe: https://dashboard.stripe.com/apikeys
+ * Las claves de PayPal y CardNET viven en el entorno del servidor, nunca aquí.
  */
 const APP_CONFIG = {
   currency: 'USD',
@@ -14,20 +14,15 @@ const APP_CONFIG = {
     ordersStorageKey: 'cazador_sueno_orders',
   },
 
-  stripe: {
-    publishableKey: 'pk_test_REEMPLAZA_CON_TU_CLAVE_PUBLICA',
-    apiBaseUrl: '/api',
-  },
-
   bankTransfer: {
     currency: 'USD',
     referencePrefix: 'CS-',
-    email: 'pagos@cazadorsueno.com',
+    email: 'cazadordesueno1@gmail.com',
     proofDeadlineHours: 48,
     instructions:
       'Realiza la transferencia e incluye la referencia exacta del pedido en el concepto/descripción. Envía el comprobante al correo indicado dentro de 48 horas para activar el envío. El pedido se procesa al registrar la transferencia.',
     beneficiary: {
-      name: 'Cazador de Sueños Sigar SRL',
+      name: 'Cazador de Sueño Cigars SRL',
       address: 'Calle El Conde No. 102, Zona Colonial, Santo Domingo 10210, República Dominicana',
       taxId: 'RNC 1-31-98765-4',
     },
@@ -52,7 +47,7 @@ const APP_CONFIG = {
   },
 
   contact: {
-    email: 'ventas@cazadorsueno.com',
+    email: 'cazadordesueno1@gmail.com',
     phone: '+1 (809) 464-5016',
   },
 

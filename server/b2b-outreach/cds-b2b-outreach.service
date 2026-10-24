@@ -1,5 +1,5 @@
 [Unit]
-Description=Cazador de Sueños — aviso B2B a Telegram (cola de prospectos)
+Description=Cazador de Sueño Cigars SRL — aviso B2B a Telegram (cola de prospectos)
 After=network-online.target
 Wants=network-online.target
 StartLimitIntervalSec=300

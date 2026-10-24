@@ -51,11 +51,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-function isStripeConfigured() {
-  const key = APP_CONFIG?.stripe?.publishableKey || '';
-  return key.startsWith('pk_') && !/REEMPLAZA|PLACEHOLDER|XXX/i.test(key);
-}
-
 function isSandboxCheckoutEnabled() {
   return APP_CONFIG?.sandbox?.enabled === true && APP_CONFIG?.sandbox?.allowMockCheckout === true;
 }
@@ -68,7 +63,6 @@ if (typeof module !== 'undefined' && module.exports) {
     $$,
     showToast,
     escapeHtml,
-    isStripeConfigured,
     isSandboxCheckoutEnabled,
   };
 }

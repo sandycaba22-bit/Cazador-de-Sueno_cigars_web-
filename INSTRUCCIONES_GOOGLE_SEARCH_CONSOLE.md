@@ -1,10 +1,10 @@
 # Instrucciones para Configurar Google Search Console
-## Cazador de Sueños Cigars SRL
+## Cazador de Sueño Cigars SRL
 
 ### 1. Crear Cuenta en Google Search Console
 
 1. Visita [Google Search Console](https://search.google.com/search-console)
-2. Inicia sesión con tu cuenta de Google (recomendado usar cuenta corporativa de Cazador de Sueños Cigars SRL)
+2. Inicia sesión con tu cuenta de Google (recomendado usar cuenta corporativa de Cazador de Sueño Cigars SRL)
 3. Haz clic en "Agregar propiedad" (Add property)
 
 ### 2. Verificar la Propiedad del Sitio
@@ -69,7 +69,7 @@ Repite el proceso de verificación para:
 ### 7. Palabras Clave Estratégicas Implementadas
 
 **Marca:**
-- Cazador de Sueños Cigars SRL
+- Cazador de Sueño Cigars SRL
 
 **Ubicación/Origen:**
 - Cerro Angola de Rincón de Piedra

@@ -1,5 +1,5 @@
 /**
- * CAZADOR DE SUEÑOS CIGARS - Panel Administrativo
+ * Cazador de Sueño Cigars SRL - Panel Administrativo
  * Autenticación, calculadora de costos y gestión de pedidos
  */
 

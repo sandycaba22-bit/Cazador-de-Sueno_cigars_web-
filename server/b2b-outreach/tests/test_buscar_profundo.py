@@ -65,10 +65,10 @@ class TestOverpassWay(unittest.TestCase):
         el = {
             "type": "way",
             "id": 42,
-            "center": {"lat": 12.5, "lon": -69.9},
-            "tags": {"name": "Aruba Humidor Lounge", "shop": "tobacco", "phone": "+297 000"},
+            "center": {"lat": 25.76, "lon": -80.19},
+            "tags": {"name": "Miami Humidor Lounge", "shop": "tobacco", "phone": "+13055550100"},
         }
-        lead = _elemento_a_lead(el, "Aruba")
+        lead = _elemento_a_lead(el, "Florida")
         self.assertIsNotNone(lead)
         self.assertEqual(lead["place_id"], "osm/way/42")
 
@@ -78,8 +78,8 @@ class TestOverpassWay(unittest.TestCase):
                 {
                     "type": "way",
                     "id": 7,
-                    "center": {"lat": 12.5, "lon": -69.9},
-                    "tags": {"name": "Tabak Aruba", "shop": "cigar"},
+                    "center": {"lat": 18.46, "lon": -66.11},
+                    "tags": {"name": "San Juan Cigars", "shop": "cigar"},
                 }
             ]
         }
@@ -87,8 +87,10 @@ class TestOverpassWay(unittest.TestCase):
         def fake_fetch(_query: str, rotar_desde: int = 0) -> list[dict]:
             return sample["elements"]
 
-        with patch("b2b.osm_places._fetch_overpass", fake_fetch):
-            leads, llamadas, meta = buscar_en_pais_osm("Aruba", ["tienda"], 5)
+        with patch("b2b.osm_places._fetch_overpass", fake_fetch), patch(
+            "b2b.osm_places._pausa_entre_consultas"
+        ):
+            leads, llamadas, meta = buscar_en_pais_osm("Puerto Rico", ["tienda"], 5)
         self.assertGreaterEqual(llamadas, 1)
         self.assertEqual(meta.get("ways"), 1)
         self.assertGreaterEqual(len(leads), 1)

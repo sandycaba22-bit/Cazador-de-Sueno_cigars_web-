@@ -1,4 +1,4 @@
-# Despliegue en Producción — Cazador de Sueños Cigars
+# Despliegue en Producción — Cazador de Sueño Cigars SRL
 
 **Dominio:** `www.cazadordesuenocigars.com` (canónico)  
 **Servidor:** Google Cloud Compute Engine (VM)  
@@ -336,7 +336,7 @@ sudo nano /etc/cazador-de-suenos/ai-sommelier.env
 # GEMINI_MODEL=gemini-2.5-flash
 # HOUSE_WHATSAPP=+1 809-464-5016
 # HOUSE_WHATSAPP_E164=18094645016
-# HOUSE_EMAIL=cazadordesueno2024@gmail.com
+# HOUSE_EMAIL=cazadordesueno1@gmail.com
 # LOG_REPLIES=true
 # PORT=8787
 # HOST=127.0.0.1

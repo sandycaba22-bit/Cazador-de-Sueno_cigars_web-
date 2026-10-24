@@ -45,7 +45,7 @@ CARGO_VP = {
     "de": "Vice President, Sales",
     "it": "Vice President, Sales",
 }
-EMPRESA_FIRMA = "Cazador de Sueños Cigar SRL"
+EMPRESA_FIRMA = "Cazador de Sueño Cigars SRL"
 NOMBRE_VP = "Yaniris Agustina Ureña"
 
 
@@ -56,7 +56,7 @@ def _firma(idioma: str) -> tuple[str, bool]:
         CARGO_VP.get(idioma, CARGO_VP["en"]),
         EMPRESA_FIRMA,
     ]
-    email = os.getenv("FIRMA_EMAIL", "").strip()
+    email = os.getenv("FIRMA_EMAIL", "cazadordesueno1@gmail.com").strip()
     telefono = os.getenv("FIRMA_TELEFONO", "").strip()
     if email:
         lineas.append(email)
@@ -251,7 +251,7 @@ def borrador_prospecto(
     if idioma == "es":
         cuerpo = (
             f"Saludos, equipo de {nombre_local}.\n\n"
-            "Somos Cazador de Sueños Cigar SRL, fábrica en Santiago de los Caballeros, "
+            "Somos Cazador de Sueño Cigars SRL, fábrica en Santiago de los Caballeros, "
             "República Dominicana. Elaboramos puros premium 100% hechos a mano.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -261,7 +261,7 @@ def borrador_prospecto(
     elif idioma == "fr":
         cuerpo = (
             f"Bonjour l'équipe de {nombre_local},\n\n"
-            "Nous sommes Cazador de Sueños Cigar SRL, manufacture à Santiago de los Caballeros, "
+            "Nous sommes Cazador de Sueño Cigars SRL, manufacture à Santiago de los Caballeros, "
             "République dominicaine. Cigares premium 100% faits main.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -271,7 +271,7 @@ def borrador_prospecto(
     elif idioma == "nl":
         cuerpo = (
             f"Hallo team van {nombre_local},\n\n"
-            "Wij zijn Cazador de Sueños Cigar SRL, fabriek in Santiago de los Caballeros, "
+            "Wij zijn Cazador de Sueño Cigars SRL, fabriek in Santiago de los Caballeros, "
             "Dominicaanse Republiek. Premium sigaren, 100% handgemaakt.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -281,7 +281,7 @@ def borrador_prospecto(
     elif idioma == "pt":
         cuerpo = (
             f"Olá, equipa da {nombre_local},\n\n"
-            "Somos a Cazador de Sueños Cigar SRL, fábrica em Santiago de los Caballeros, "
+            "Somos a Cazador de Sueño Cigars SRL, fábrica em Santiago de los Caballeros, "
             "República Dominicana. Charutos premium 100% feitos à mão.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -291,7 +291,7 @@ def borrador_prospecto(
     else:
         cuerpo = (
             f"Hello {nombre_local} team,\n\n"
-            "We are Cazador de Sueños Cigar SRL, a factory in Santiago de los Caballeros, "
+            "We are Cazador de Sueño Cigars SRL, a factory in Santiago de los Caballeros, "
             "Dominican Republic. Premium cigars, 100% handmade.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -370,97 +370,75 @@ def _validar(texto: str) -> str:
     return texto
 
 
-def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
-    """Plantilla corta para WhatsApp / Instagram (sin línea de STOP)."""
-    nombre = (nombre_local or "").strip() or "there"
+def asunto_correo(nombre_local: str, idioma: str) -> str:
+    nombre = (nombre_local or "").strip() or "your shop"
     idioma = idioma if idioma in MUESTRAS else "en"
+    asuntos = {
+        "es": f"Puros dominicanos para {nombre}",
+        "en": f"Handmade Dominican cigars for {nombre}",
+        "fr": f"Cigares dominicains pour {nombre}",
+        "nl": f"Dominicaanse sigaren voor {nombre}",
+        "pt": f"Charutos dominicanos para {nombre}",
+    }
+    return asuntos.get(idioma, asuntos["en"])
+
+
+def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
+    """WhatsApp / Instagram: presentación breve, catálogo PDF y muestra."""
+    nombre = (nombre_local or "").strip() or "there"
     catalogo, aviso = _catalogo(idioma)
     t = tipo_en_idioma(tipo, idioma)
-    muestras = MUESTRAS[idioma]
-    textos = {
-        "es": (
-            f"¡Hola, equipo de {nombre}! Soy Yaniris Ureña, vicepresidenta de ventas de Cazador de Sueños "
-            "Cigar, fábrica de puros premium hechos a mano en Santiago, República Dominicana. "
-            f"Nos encantaría tener nuestros cigarros en su {t}.\n"
-            f"{aviso}Catálogo mayorista: {catalogo}\n{muestras} ¿Conversamos?"
-        ),
-        "en": (
-            f"Hello {nombre} team! I'm Yaniris Ureña, VP of Sales at Cazador de Sueños Cigar, a handmade "
-            "premium cigar factory in Santiago, Dominican Republic. "
-            f"We'd love to see our cigars in your {t}.\n"
-            f"{aviso}Wholesale catalog: {catalogo}\n{muestras} Would you be open to a quick chat?"
-        ),
-        "fr": (
-            f"Bonjour l'équipe {nombre} ! Je suis Yaniris Ureña, vice-présidente des ventes de Cazador de "
-            "Sueños Cigar, manufacture de cigares premium roulés à la main à Santiago, République dominicaine. "
-            f"Nous aimerions proposer nos cigares dans votre {t}.\n"
-            f"{aviso}Catalogue grossiste : {catalogo}\n{muestras} Pouvons-nous en parler ?"
-        ),
-        "nl": (
-            f"Hallo team {nombre}! Ik ben Yaniris Ureña, VP Sales bij Cazador de Sueños Cigar, fabriek van "
-            "handgemaakte premium sigaren in Santiago, Dominicaanse Republiek. "
-            f"We zien onze sigaren graag in uw {t}.\n"
-            f"{aviso}Groothandelscatalogus: {catalogo}\n{muestras} Zullen we even bellen?"
-        ),
-        "pt": (
-            f"Olá, equipa {nombre}! Sou Yaniris Ureña, vice-presidente de vendas da Cazador de Sueños Cigar, "
-            "fábrica de charutos premium feitos à mão em Santiago, República Dominicana. "
-            f"Gostaríamos de ter os nossos charutos na sua {t}.\n"
-            f"{aviso}Catálogo grossista: {catalogo}\n{muestras} Podemos conversar?"
-        ),
-    }
-    return _validar(textos[idioma])
 
+    if idioma == "es":
+        return _validar(
+            f"Saludos, equipo de {nombre}.\n"
+            f"Somos Cazador de Sueño Cigars SRL, fábrica boutique de puros premium hechos a mano en Santiago, "
+            f"República Dominicana. Nos gustaría presentar nuestra línea a su {t}.\n"
+            f"{aviso}Catálogo mayorista: {catalogo}\n"
+            "Ofrecemos una muestra gratuita (free sample) para evaluación. ¿Conversamos?\n"
+            f"Atentamente,\n{NOMBRE_VP} - {CARGO_VP['es']}"
+        )
+    if idioma == "fr":
+        return _validar(
+            f"Bonjour l'équipe de {nombre},\n"
+            f"Nous sommes Cazador de Sueño Cigars SRL, manufacture de cigares faits main à Santiago, "
+            f"République dominicaine. Nous souhaitons présenter notre gamme à votre {t}.\n"
+            f"{aviso}Catalogue grossiste : {catalogo}\n"
+            "Un échantillon gratuit est disponible pour évaluation. Pouvons-nous échanger ?\n"
+            f"Cordialement,\n{NOMBRE_VP} - {CARGO_VP['fr']}"
+        )
+    
+    texto = (
+        f"Hello {nombre} team,\n"
+        f"We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {tipo_en_idioma(tipo, 'en')}.\n"
+        f"{aviso}Wholesale Catalog: {catalogo}\n"
+        "We're happy to provide a free sample for your consideration. Open to a brief chat?\n"
+        "Best,\n"
+        "Yaniris Agustina Ureña - VP of Sales"
+    )
+    return texto
 
 def borrador_correo(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """Versión correo: asunto, firma de la VP y línea de STOP (solo en correo)."""
     nombre = (nombre_local or "").strip() or "there"
-    idioma = idioma if idioma in MUESTRAS else "en"
-    catalogo, aviso = _catalogo(idioma)
-    t = tipo_en_idioma(tipo, idioma)
-    muestras = MUESTRAS[idioma]
-    firma = f"{NOMBRE_VP}\n{CARGO_VP.get(idioma, CARGO_VP['en'])}\n{EMPRESA_FIRMA}\n{EMAIL_VP_VENTAS}"
-    opt = OPT_OUT.get(idioma, OPT_OUT["en"])
-    textos = {
-        "es": (
-            f"Asunto: Puros dominicanos hechos a mano para {nombre}\n\n"
-            f"Hola, equipo de {nombre}:\n\n"
-            "Somos Cazador de Sueños Cigar SRL, fábrica en Santiago de los Caballeros, República Dominicana. "
-            f"Elaboramos puros premium 100% hechos a mano y queremos explorar colocar nuestra línea en su {t}.\n\n"
-            f"{aviso}Catálogo mayorista: {catalogo}\n{muestras} ¿Les parece una llamada breve?"
-        ),
-        "en": (
-            f"Subject: Handmade Dominican cigars for {nombre}\n\n"
-            f"Hello {nombre} team,\n\n"
-            "We are Cazador de Sueños Cigar SRL, a cigar factory in Santiago de los Caballeros, Dominican "
-            f"Republic, making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
-            f"{aviso}Wholesale catalog: {catalogo}\n{muestras} Would a short call work for you?"
-        ),
-        "fr": (
-            f"Objet : Cigares dominicains roulés à la main pour {nombre}\n\n"
-            f"Bonjour l'équipe {nombre},\n\n"
-            "Nous sommes Cazador de Sueños Cigar SRL, manufacture à Santiago de los Caballeros, République "
-            "dominicaine, spécialisée dans les cigares premium 100 % faits main. Nous souhaitons proposer notre "
-            f"ligne pour votre {t}.\n\n"
-            f"{aviso}Catalogue grossiste : {catalogo}\n{muestras} Un court appel vous conviendrait-il ?"
-        ),
-        "nl": (
-            f"Onderwerp: Handgemaakte Dominicaanse sigaren voor {nombre}\n\n"
-            f"Hallo team {nombre},\n\n"
-            "Wij zijn Cazador de Sueños Cigar SRL, fabriek in Santiago de los Caballeros, Dominicaanse "
-            f"Republiek, met 100% handgemaakte premium sigaren. We bieden onze lijn graag aan voor uw {t}.\n\n"
-            f"{aviso}Groothandelscatalogus: {catalogo}\n{muestras} Past een kort gesprek?"
-        ),
-        "pt": (
-            f"Assunto: Charutos dominicanos feitos à mão para {nombre}\n\n"
-            f"Olá, equipa {nombre},\n\n"
-            "Somos a Cazador de Sueños Cigar SRL, fábrica em Santiago de los Caballeros, República Dominicana, "
-            f"com charutos premium 100% feitos à mão. Queremos colocar a nossa linha na sua {t}.\n\n"
-            f"{aviso}Catálogo grossista: {catalogo}\n{muestras} Uma chamada breve funciona para si?"
-        ),
-    }
-    return _validar(f"{textos[idioma]}\n\n{firma}\n\n{opt}")
-
+    catalogo, aviso = _catalogo("en")
+    t = tipo_en_idioma(tipo, "en")
+    
+    texto = (
+        f"Subject: Handmade Dominican cigars for {nombre}\n\n"
+        f"Hello {nombre} team,\n\n"
+        "We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
+        f"making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
+        f"Wholesale catalog: {catalogo}\n"
+        "A free sample is available for evaluation. Would a short call work for you?\n\n"
+        "Best regards,\n"
+        "Yaniris Agustina Ureña\n"
+        "Vice President, Sales\n"
+        "Cazador de Sueño Cigars SRL\n"
+        "cazadordesueno1@gmail.com\n\n"
+        "If you prefer not to receive further messages, reply STOP."
+    )
+    return _validar(texto)
 
 def presentacion_prospecto_telegram(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """Compatibilidad: versión correo (firma VP + catálogo + STOP)."""
@@ -505,61 +483,84 @@ def generar_tarjeta_telegram(
     sem_nombre, sem_etiqueta = semaforo_aduana(dificultad)
     tipo = meta.get("tipo") or meta.get("tipo_negocio") or "tienda"
     sin_correo = bool(meta.get("sin_correo_publico")) or not (correo or "").strip()
-    cat = resolver_catalogo_pdf(idioma)
-    draft = borrador_prospecto(idioma, nombre_local, tipo, sin_correo)
-    correo_txt = (correo or "").strip() or "sin correo publicado, contactar por teléfono o web"
-    telefono = (meta.get("telefono") or "").strip() or "—"
-    direccion = (meta.get("direccion") or "").strip() or "—"
-    notas_internas: list[str] = []
-    aduana = _nota_interna_aduana(entry)
-    if aduana:
-        notas_internas.append(aduana)
-    if cat.nota_interna:
-        notas_internas.append(cat.nota_interna)
-    nota_interna = " · ".join(dict.fromkeys(notas_internas))
+    
+    # Requerimiento 1: Redacción B2B Corta y Directa
+    draft = borrador_corto(nombre_local, idioma, tipo)
+    
+    correo_txt = (correo or "").strip()
+    telefono = (meta.get("telefono") or "").strip()
+    ciudad = (meta.get("ciudad") or pais.strip()).strip()
+    direccion = (meta.get("direccion") or "").strip()
+    
+    estado_contacto = []
+    if telefono:
+        estado_contacto.append("📞 Teléfono OK")
+    if correo_txt:
+        estado_contacto.append("✉️ Correo OK")
+    if not estado_contacto:
+        estado_contacto.append("⚠️ Sin contacto directo")
+    estado_contacto_str = " | ".join(estado_contacto)
 
+    # Requerimiento 3: Tarjeta Limpia
     texto = (
-        "Cazador de Sueños · prospecto B2B\n"
-        f"Nombre: {nombre_local.strip()}\n"
-        f"Tipo: {tipo}\n"
-        f"País: {pais.strip()}\n"
-        f"Idioma borrador: {idioma}"
-        + (f" ({idioma_fuente})" if idioma_fuente else "")
-        + "\n"
-        f"Aduana: {sem_etiqueta} ({meta.get('estado_reglas') or (entry or {}).get('estado', 'preliminar')})\n"
-        f"Teléfono: {telefono}\n"
-        f"Correo: {correo_txt}\n"
-        f"Web: {web.strip()}\n"
-        f"Dirección: {direccion}\n"
+        "Cazador de Sueño Cigars SRL · Prospecto B2B\n"
+        f"Negocio: {nombre_local.strip()}\n"
+        f"Tipo: {tipo.title()}\n"
+        f"Ciudad/País: {ciudad}\n"
+        f"Contacto: {estado_contacto_str}\n"
     )
-    if meta.get("fuente_correo"):
-        texto += f"Fuente correo: {meta['fuente_correo']}\n"
-    if nota_interna:
-        texto += f"NOTA INTERNA (no enviar al prospecto): {nota_interna}\n"
-    texto += "\nBorrador listo:\n" + draft
+    texto += "\nBorrador (3-4 líneas):\n" + draft
+    if sin_correo:
+        texto += "\nNota: sin correo publicado; confirmar otro canal de contacto."
 
     markdown = (
-        "*Cazador de Sueños · prospecto B2B*\n"
-        f"*Nombre:* {md_escape(nombre_local.strip())}\n"
-        f"*Tipo:* {md_escape(tipo)}\n"
-        f"*País:* {md_escape(pais.strip())}\n"
-        f"*Idioma:* {md_escape(idioma)}"
-        + (f" _({md_escape(idioma_fuente)})_" if idioma_fuente else "")
-        + "\n"
-        f"*Aduana:* {md_escape(sem_etiqueta)}\n"
-        f"*Teléfono:* {md_escape(telefono)}\n"
-        f"*Correo:* {md_escape(correo_txt)}\n"
-        f"*Web:* {md_escape(web.strip())}\n"
-        f"*Dirección:* {md_escape(direccion)}\n"
+        "*Cazador de Sueño Cigars SRL · Prospecto B2B*\n"
+        f"*Negocio:* {md_escape(nombre_local.strip())}\n"
+        f"*Tipo:* {md_escape(tipo.title())}\n"
+        f"*Ciudad/País:* {md_escape(ciudad)}\n"
+        f"*Contacto:* {md_escape(estado_contacto_str)}\n"
     )
-    if nota_interna:
-        markdown += f"*Nota interna:* {md_escape(nota_interna)}\n"
-    markdown += "\n*Borrador listo:*\n```\n" + code_escape(draft) + "\n```"
+    markdown += "\n*Borrador sugerido:*\n```\n" + code_escape(draft) + "\n```"
 
-    return {
+    # Requerimiento 2: Botones Interactivos de Acción (Inline Keyboards)
+    import urllib.parse
+    
+    botones = []
+    
+    if telefono:
+        # Limpiar número de teléfono (quitar espacios, guiones, paréntesis)
+        tel_limpio = __import__('re').sub(r"[^\d+]", "", telefono)
+        if not tel_limpio.startswith("+"):
+            tel_limpio = "+" + tel_limpio
+            
+        mensaje_wa = urllib.parse.quote(draft)
+        wa_url = f"https://wa.me/{tel_limpio}?text={mensaje_wa}"
+        botones.append([{"text": "📲 Enviar WhatsApp", "url": wa_url}])
+        
+    if correo_txt:
+        asunto = asunto_correo(nombre_local, idioma)
+        # Usar borrador_correo para el email que es más formal
+        draft_correo = borrador_correo(nombre_local, idioma, tipo)
+        asunto_q = urllib.parse.quote(asunto)
+        body_q = urllib.parse.quote(draft_correo)
+        mailto_url = f"mailto:{correo_txt}?subject={asunto_q}&body={body_q}"
+        botones.append([{"text": "✉️ Enviar Correo", "url": mailto_url}])
+        
+    if direccion or nombre_local:
+        query = urllib.parse.quote(f"{nombre_local} {ciudad}".strip())
+        maps_url = f"https://www.google.com/maps/search/?api=1&query={query}"
+        botones.append([{"text": "📍 Google Maps", "url": maps_url}])
+
+    reply_markup = {"inline_keyboard": botones} if botones else None
+
+    paquete = {
         "markdown": markdown,
         "texto": texto,
         "idioma": idioma,
         "semaforo": sem_nombre,
         "borrador": draft,
     }
+    if reply_markup:
+        paquete["reply_markup"] = reply_markup
+        
+    return paquete

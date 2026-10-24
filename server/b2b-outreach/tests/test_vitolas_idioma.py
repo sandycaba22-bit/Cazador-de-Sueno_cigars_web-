@@ -23,11 +23,11 @@ class TestVitolasCoherenciaIdioma(unittest.TestCase):
 
     def test_borradores_por_pais(self):
         casos = (
-            ("Angola", "pt"),
-            ("Cape Verde", "pt"),
-            ("Senegal", "fr"),
-            ("Aruba", "en"),
-            ("Dominican Republic", "es"),
+            ("Florida", "en"),
+            ("Texas", "en"),
+            ("California", "en"),
+            ("Jamaica", "en"),
+            ("Puerto Rico", "es"),
         )
         for pais, idioma_esperado in casos:
             idioma = idioma_para_pais(pais)

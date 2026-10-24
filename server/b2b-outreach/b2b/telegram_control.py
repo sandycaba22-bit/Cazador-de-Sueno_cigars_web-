@@ -12,6 +12,39 @@ from b2b.paths import state_file
 
 CONTROL_PATH = state_file("telegram_control.json")
 
+USPS_ESTADOS = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
+    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
+    "DC": "District of Columbia", "FL": "Florida", "GA": "Georgia", "HI": "Hawaii",
+    "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
+    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+    "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi",
+    "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada",
+    "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York",
+    "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
+    "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
+    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
+    "VT": "Vermont", "VA": "Virginia", "WA": "Washington", "WV": "West Virginia",
+    "WI": "Wisconsin", "WY": "Wyoming",
+}
+MERCADOS_ACTIVOS = {nombre.casefold(): nombre for nombre in USPS_ESTADOS.values()}
+MERCADOS_ACTIVOS.update({"puerto rico": "Puerto Rico", "jamaica": "Jamaica"})
+
+
+def mercado_canonico(nombre: str) -> str:
+    nombre = (nombre or "").strip()
+    return USPS_ESTADOS.get(nombre.upper()) or MERCADOS_ACTIVOS.get(nombre.casefold(), "")
+
+
+def _pendientes_activos() -> dict:
+    from b2b.telegram_gestion import _load_pendientes
+
+    return {
+        key: {**lead, "pais": mercado_canonico(lead.get("pais"))}
+        for key, lead in _load_pendientes().items()
+        if isinstance(lead, dict) and mercado_canonico(lead.get("pais"))
+    }
+
 
 def _load() -> dict:
     if not CONTROL_PATH.is_file():
@@ -134,7 +167,7 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
 
 
 def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
-    """Lee updates: /pausa, /seguir y botones Enviado/Descartar."""
+    """Lee updates: /pausa, /seguir, /estado, /stats, /pendientes y botones Enviado/Descartar."""
     data = _load()
     offset = int(data.get("update_offset") or 0)
     url = f"https://api.telegram.org/bot{token}/getUpdates?timeout=1&limit=10&offset={offset}"
@@ -159,11 +192,47 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
         cid = str(msg.get("chat", {}).get("id", ""))
         if cid != str(chat_id):
             continue
+            
         if text in ("/pausa", "pausa"):
             set_pausado(True)
             acks.append("⏸ Búsqueda Telegram pausada (/seguir para reanudar).")
         elif text in ("/seguir", "seguir", "/resume"):
             set_pausado(False)
             acks.append("▶️ Envíos Telegram reanudados.")
+        elif text == "/pendientes":
+            pend = _pendientes_activos()
+            acks.append(f"📋 Tienes {len(pend)} leads pendientes (mercados retirados excluidos).")
+        elif text == "/stats":
+            pend = _pendientes_activos()
+            stats = {}
+            for p in pend.values():
+                pais = p.get("pais", "Unknown")
+                stats[pais] = stats.get(pais, 0) + 1
+            if not stats:
+                acks.append("📊 No hay leads pendientes.")
+            else:
+                lineas = ["📊 Pendientes por estado (excluye retirados):"]
+                for p, c in sorted(stats.items(), key=lambda x: x[1], reverse=True):
+                    lineas.append(f"- {p}: {c}")
+                acks.append("\n".join(lineas))
+        elif text.startswith("/estado "):
+            estado_req = text.replace("/estado ", "").strip().lower()
+            objetivo = mercado_canonico(estado_req)
+            pend = _pendientes_activos()
+            matches = [
+                p.get("nombre", "Unknown") for p in pend.values()
+                if objetivo and p["pais"] == objetivo
+            ]
+            if not matches:
+                acks.append(f"🔍 No hay leads pendientes para el estado '{estado_req.upper()}'.")
+            else:
+                lineas = [f"📍 Leads pendientes en {estado_req.upper()} ({len(matches)}):"]
+                for m in matches[:20]: # limit to 20 so telegram doesn't complain about message size
+                    lineas.append(f"- {m}")
+                if len(matches) > 20:
+                    lineas.append(f"... y {len(matches)-20} más.")
+                acks.append("\n".join(lineas))
+
     _save(data)
     return acks
+

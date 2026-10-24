@@ -1,5 +1,5 @@
 /**
- * Cazador de Sueños — Intro de ultra lujo (8 segundos exactos)
+ * Cazador de Sueño Cigars SRL — Intro de ultra lujo (8 segundos exactos)
  */
 (function () {
   'use strict';

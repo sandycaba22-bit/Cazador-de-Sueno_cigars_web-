@@ -3,12 +3,12 @@
  */
 
 function getWhatsAppPhone() {
-  return (APP_CONFIG.whatsapp?.phone || '18095550198').replace(/\D/g, '');
+  return (APP_CONFIG.whatsapp?.phone || '18094645016').replace(/\D/g, '');
 }
 
 function buildWhatsAppOrderMessage(order, summary) {
   const lines = [
-    '🛒 *Pedido — Cazador de Sueños*',
+    '🛒 *Pedido — Cazador de Sueño Cigars SRL*',
     '',
     order.reference ? `Referencia: ${order.reference}` : '',
     `Cliente: ${order.customer?.fullName || ''}`,

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Limpieza total del servidor — Cazador de Sueños Cigars
+# Limpieza total del servidor — Cazador de Sueño Cigars SRL
 # Ejecutar en la VM de Google Cloud: bash cleanup-server.sh
 set -euo pipefail
 

@@ -1,52 +1,387 @@
 {
-  "zonas_orden": ["caribe", "centroamerica", "usa", "canada", "europa", "resto"],
+  "zonas_orden": [
+    "florida",
+    "texas",
+    "new_york",
+    "california",
+    "nevada",
+    "georgia",
+    "carolinas",
+    "illinois",
+    "new_jersey",
+    "resto"
+  ],
   "paises": [
-    {"pais": "Aruba", "iso3166": "AW", "idioma": "nl", "zona": "caribe", "prioridad": 1},
-    {"pais": "Curacao", "iso3166": "CW", "idioma": "nl", "zona": "caribe", "prioridad": 2},
-    {"pais": "Sint Maarten", "iso3166": "SX", "idioma": "en", "zona": "caribe", "prioridad": 3},
-    {"pais": "Saint Martin", "iso3166": "MF", "idioma": "fr", "zona": "caribe", "prioridad": 4},
-    {"pais": "Bahamas", "iso3166": "BS", "idioma": "en", "zona": "caribe", "prioridad": 5},
-    {"pais": "Cayman Islands", "iso3166": "KY", "idioma": "en", "zona": "caribe", "prioridad": 6},
-    {"pais": "Turks and Caicos Islands", "iso3166": "TC", "idioma": "en", "zona": "caribe", "prioridad": 6},
-    {"pais": "Jamaica", "iso3166": "JM", "idioma": "en", "zona": "caribe", "prioridad": 7},
-    {"pais": "Barbados", "iso3166": "BB", "idioma": "en", "zona": "caribe", "prioridad": 8},
-    {"pais": "Trinidad and Tobago", "iso3166": "TT", "idioma": "en", "zona": "caribe", "prioridad": 9},
-    {"pais": "Puerto Rico", "iso3166": "PR", "idioma": "es", "zona": "caribe", "prioridad": 10},
-    {"pais": "US Virgin Islands", "iso3166": "VI", "idioma": "en", "zona": "caribe", "prioridad": 11},
-    {"pais": "Guadeloupe", "iso3166": "GP", "idioma": "fr", "zona": "caribe", "prioridad": 12},
-    {"pais": "Martinique", "iso3166": "MQ", "idioma": "fr", "zona": "caribe", "prioridad": 13},
-    {"pais": "French Guiana", "iso3166": "GF", "idioma": "fr", "zona": "caribe", "prioridad": 14},
-    {"pais": "Haiti", "iso3166": "HT", "idioma": "fr", "zona": "caribe", "prioridad": 15},
-    {"pais": "Dominican Republic", "iso3166": "DO", "idioma": "es", "zona": "caribe", "prioridad": 16},
-    {"pais": "Panama", "iso3166": "PA", "idioma": "es", "zona": "centroamerica", "prioridad": 20},
-    {"pais": "Costa Rica", "iso3166": "CR", "idioma": "es", "zona": "centroamerica", "prioridad": 21},
-    {"pais": "Guatemala", "iso3166": "GT", "idioma": "es", "zona": "centroamerica", "prioridad": 22},
-    {"pais": "Honduras", "iso3166": "HN", "idioma": "es", "zona": "centroamerica", "prioridad": 23},
-    {"pais": "El Salvador", "iso3166": "SV", "idioma": "es", "zona": "centroamerica", "prioridad": 24},
-    {"pais": "Nicaragua", "iso3166": "NI", "idioma": "es", "zona": "centroamerica", "prioridad": 25},
-    {"pais": "Belize", "iso3166": "BZ", "idioma": "en", "zona": "centroamerica", "prioridad": 26},
-    {"pais": "United States", "iso3166": "US", "idioma": "en", "zona": "usa", "prioridad": 30},
-    {"pais": "Canada", "iso3166": "CA", "idioma": "en", "zona": "canada", "prioridad": 40},
-    {"pais": "United Kingdom", "iso3166": "GB", "idioma": "en", "zona": "europa", "prioridad": 50},
-    {"pais": "France", "iso3166": "FR", "idioma": "fr", "zona": "europa", "prioridad": 51},
-    {"pais": "Germany", "iso3166": "DE", "idioma": "de", "zona": "europa", "prioridad": 52},
-    {"pais": "Netherlands", "iso3166": "NL", "idioma": "nl", "zona": "europa", "prioridad": 53},
-    {"pais": "Spain", "iso3166": "ES", "idioma": "es", "zona": "europa", "prioridad": 54},
-    {"pais": "Portugal", "iso3166": "PT", "idioma": "pt", "zona": "europa", "prioridad": 55},
-    {"pais": "Italy", "iso3166": "IT", "idioma": "it", "zona": "europa", "prioridad": 56},
-    {"pais": "Switzerland", "iso3166": "CH", "idioma": "de", "zona": "europa", "prioridad": 57},
-    {"pais": "Belgium", "iso3166": "BE", "idioma": "nl", "zona": "europa", "prioridad": 58},
-    {"pais": "Malta", "iso3166": "MT", "idioma": "en", "zona": "europa", "prioridad": 59},
-    {"pais": "Cyprus", "iso3166": "CY", "idioma": "en", "zona": "europa", "prioridad": 60},
-    {"pais": "Mexico", "iso3166": "MX", "idioma": "es", "zona": "resto", "prioridad": 70},
-    {"pais": "Brazil", "iso3166": "BR", "idioma": "pt", "zona": "resto", "prioridad": 71},
-    {"pais": "Argentina", "iso3166": "AR", "idioma": "es", "zona": "resto", "prioridad": 72},
-    {"pais": "Chile", "iso3166": "CL", "idioma": "es", "zona": "resto", "prioridad": 73},
-    {"pais": "Colombia", "iso3166": "CO", "idioma": "es", "zona": "resto", "prioridad": 74},
-    {"pais": "South Africa", "iso3166": "ZA", "idioma": "en", "zona": "resto", "prioridad": 80},
-    {"pais": "United Arab Emirates", "iso3166": "AE", "idioma": "en", "zona": "resto", "prioridad": 81},
-    {"pais": "Singapore", "iso3166": "SG", "idioma": "en", "zona": "resto", "prioridad": 82},
-    {"pais": "Japan", "iso3166": "JP", "idioma": "en", "zona": "resto", "prioridad": 83},
-    {"pais": "Australia", "iso3166": "AU", "idioma": "en", "zona": "resto", "prioridad": 84}
+    {
+      "pais": "Florida",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "florida",
+      "prioridad": 1
+    },
+    {
+      "pais": "Texas",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "texas",
+      "prioridad": 2
+    },
+    {
+      "pais": "New York",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "new_york",
+      "prioridad": 3
+    },
+    {
+      "pais": "California",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "california",
+      "prioridad": 4
+    },
+    {
+      "pais": "Nevada",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "nevada",
+      "prioridad": 5
+    },
+    {
+      "pais": "Georgia",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "georgia",
+      "prioridad": 6
+    },
+    {
+      "pais": "North Carolina",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "carolinas",
+      "prioridad": 7
+    },
+    {
+      "pais": "South Carolina",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "carolinas",
+      "prioridad": 8
+    },
+    {
+      "pais": "Illinois",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "illinois",
+      "prioridad": 9
+    },
+    {
+      "pais": "New Jersey",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "new_jersey",
+      "prioridad": 10
+    },
+    {
+      "pais": "Pennsylvania",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 11
+    },
+    {
+      "pais": "Ohio",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 12
+    },
+    {
+      "pais": "Michigan",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 13
+    },
+    {
+      "pais": "Virginia",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 14
+    },
+    {
+      "pais": "Washington",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 15
+    },
+    {
+      "pais": "Massachusetts",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 16
+    },
+    {
+      "pais": "Arizona",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 17
+    },
+    {
+      "pais": "Colorado",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 18
+    },
+    {
+      "pais": "Maryland",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 19
+    },
+    {
+      "pais": "Indiana",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 20
+    },
+    {
+      "pais": "Missouri",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 21
+    },
+    {
+      "pais": "Wisconsin",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 22
+    },
+    {
+      "pais": "Minnesota",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 23
+    },
+    {
+      "pais": "Tennessee",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 24
+    },
+    {
+      "pais": "Alabama",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 25
+    },
+    {
+      "pais": "Louisiana",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 26
+    },
+    {
+      "pais": "Kentucky",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 27
+    },
+    {
+      "pais": "Oregon",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 28
+    },
+    {
+      "pais": "Oklahoma",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 29
+    },
+    {
+      "pais": "Connecticut",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 30
+    },
+    {
+      "pais": "Utah",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 31
+    },
+    {
+      "pais": "Iowa",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 32
+    },
+    {
+      "pais": "Arkansas",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 33
+    },
+    {
+      "pais": "Mississippi",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 34
+    },
+    {
+      "pais": "Kansas",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 35
+    },
+    {
+      "pais": "New Mexico",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 36
+    },
+    {
+      "pais": "Nebraska",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 37
+    },
+    {
+      "pais": "Idaho",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 38
+    },
+    {
+      "pais": "West Virginia",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 39
+    },
+    {
+      "pais": "Hawaii",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 40
+    },
+    {
+      "pais": "New Hampshire",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 41
+    },
+    {
+      "pais": "Maine",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 42
+    },
+    {
+      "pais": "Rhode Island",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 43
+    },
+    {
+      "pais": "Montana",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 44
+    },
+    {
+      "pais": "Delaware",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 45
+    },
+    {
+      "pais": "South Dakota",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 46
+    },
+    {
+      "pais": "North Dakota",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 47
+    },
+    {
+      "pais": "Alaska",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 48
+    },
+    {
+      "pais": "Vermont",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 49
+    },
+    {
+      "pais": "Wyoming",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 50
+    },
+    {
+      "pais": "District of Columbia",
+      "iso3166": "US",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 51
+    },
+    {
+      "pais": "Puerto Rico",
+      "iso3166": "PR",
+      "idioma": "es",
+      "zona": "resto",
+      "prioridad": 52
+    },
+    {
+      "pais": "Jamaica",
+      "iso3166": "JM",
+      "idioma": "en",
+      "zona": "resto",
+      "prioridad": 53
+    }
   ]
 }

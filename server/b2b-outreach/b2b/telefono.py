@@ -26,7 +26,11 @@ def _iso(pais: str) -> str:
     try:
         return _iso_para_pais(pais)
     except ValueError:
-        return ""
+        from b2b.paises_cola import entry_por_pais
+
+        # Los estados tienen su ISO nacional en la cola de mercados activos.
+        entry = entry_por_pais(pais) or {}
+        return (entry.get("iso3166") or "").strip().upper()
 
 
 def internacional(pais: str, numero: str) -> str:
