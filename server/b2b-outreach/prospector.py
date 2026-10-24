@@ -17,6 +17,7 @@ from b2b.country_rules import (
     paises_prioridad_busqueda,
     paises_prioridad_inicial,
 )
+from b2b.mercados import como_reglas, mercado_por_nombre, resolver_cursor
 from b2b.idioma import idioma_para_lead
 from b2b.lead_score import califica_lead, priorizar_leads_contacto, puntaje_minimo, puntuar_lead
 from b2b.leads_store import en_lista_no_contactar, marcar_visto, ya_visto
@@ -60,10 +61,11 @@ def _slug(texto: str) -> str:
 
 def resolver_pais_objetivo(pais_cli: str | None) -> dict:
     if pais_cli and pais_cli.strip():
-        entry = buscar_pais(pais_cli)
-        if entry is None:
-            raise ValueError(f"País no configurado en country_rules.json: {pais_cli}")
-        return entry
+        mercado = mercado_por_nombre(pais_cli, solo_activos=True)
+        if mercado is None:
+            raise ValueError(f"Mercado no activo en config/mercados.json: {pais_cli}")
+        entry = buscar_pais(mercado["nombre"])
+        return entry if entry else como_reglas(mercado)
     lista = paises_prioridad_inicial()
     if lista:
         return lista[0]
@@ -340,6 +342,8 @@ def prospectar_un_pais(
     fuente: str = "",
     modo_global: bool = False,
     notificar_telegram_buscar: bool | None = None,
+    desde_consulta: int = 0,
+    persistir_cursor: bool = False,
 ) -> dict:
     pais = reglas["pais"]
     tipos = _tipos_busqueda()
@@ -355,6 +359,8 @@ def prospectar_un_pais(
             tipo_filtro=tipo_filtro,
             fuente=fuente,
             modo_global=modo_global,
+            desde_consulta=desde_consulta,
+            persistir_cursor=persistir_cursor,
         )
     except PresupuestoPlacesAgotado:
         registrar_presupuesto_agotado()
@@ -582,7 +588,24 @@ def _prospectar(
             tipo_filtro=tipo_filtro,
         )
 
-    zona = os.getenv("B2B_ZONA_BUSQUEDA", "caribe")
+    zona = os.getenv("B2B_ZONA_BUSQUEDA", "usa")
+    if not simulado and fuente == "google":
+        from b2b.places import google_disponible
+        from b2b.telegram_buscar import notificar_buscar
+
+        if not google_disponible():
+            notificar_buscar(
+                "⛔ Google Places: falta GOOGLE_PLACES_API_KEY. No busco sin Places.",
+                simulado=False,
+            )
+            return {
+                "pais": "sin_clave",
+                "encolados": 0,
+                "leads": 0,
+                "llamadas": 0,
+                "fuente": fuente,
+                "error": "sin GOOGLE_PLACES_API_KEY",
+            }
     if pais_cli and pais_cli.strip():
         reglas = resolver_pais_objetivo(pais_cli)
         out = prospectar_un_pais(
@@ -612,12 +635,6 @@ def _prospectar(
                 cero=_diagnostico_cero([out]) if enc == 0 else None,
             )
         return out
-    if _islas_agotadas_en_google(fuente, zona):
-        print("Islas ya buscadas en Google este mes: paso a la rotación global.", file=sys.stderr)
-        registrar_evento({"evento": "rotacion_global", "zona": zona, "fuente": fuente})
-        return prospectar_turno_global(
-            None, max_leads, inbox, simulado=simulado, solo_listar=solo_listar, tipo_filtro=tipo_filtro
-        )
     return prospectar_prioridad_inicial(
         max_leads, inbox, simulado, solo_listar, tipo_filtro, fuente=fuente, zona=zona
     )
@@ -728,7 +745,7 @@ def prospectar_prioridad_inicial(
 ) -> dict:
     paises = paises_prioridad_busqueda(zona)
     if not paises:
-        raise ValueError("Lista de países vacía para la zona de búsqueda (country_rules.json)")
+        raise ValueError("Lista de mercados vacía (config/mercados.json, activo=true)")
     max_paises = _max_paises_por_pasada()
     if not fuente:
         fuente = "simulado" if simulado else resolver_fuente_leads()
@@ -742,9 +759,11 @@ def prospectar_prioridad_inicial(
     contacto_por_isla: dict[str, int] = {}
     detalle_islas: dict[str, dict] = {}
     stats_corrida: list[dict] = []
-    for reglas in paises:
-        if paises_usados >= max_paises:
-            break
+    mercado_actual, consulta_idx = resolver_cursor()
+    inicio_nombre = mercado_actual["nombre"]
+    por_nombre = {p["pais"]: p for p in paises}
+    while paises_usados < max_paises:
+        reglas = por_nombre.get(mercado_actual["nombre"]) or como_reglas(mercado_actual)
         if solo_listar:
             restante = max_leads
         else:
@@ -760,6 +779,8 @@ def prospectar_prioridad_inicial(
             solo_listar,
             tipo_filtro,
             fuente=fuente,
+            desde_consulta=consulta_idx,
+            persistir_cursor=not simulado,
         )
         paises_usados += 1
         stats_corrida.append(stats)
@@ -780,8 +801,19 @@ def prospectar_prioridad_inicial(
         _telegram_tras_isla(stats, simulado, solo_listar)
         if stats.get("isla_fallida"):
             islas_fallidas.append(nombre_isla)
-        if stats.get("presupuesto_agotado"):
+        if stats.get("presupuesto_agotado") or fs.get("presupuesto_agotado"):
             presupuesto_agotado = True
+            break
+        if stats.get("error") or fs.get("google_error") or fs.get("google_omitido"):
+            break
+        if simulado:
+            if paises_usados >= len(paises):
+                break
+            mercado_actual = {"nombre": paises[paises_usados]["pais"]}
+            consulta_idx = 0
+            continue
+        mercado_actual, consulta_idx = resolver_cursor()
+        if mercado_actual["nombre"] == inicio_nombre and consulta_idx == 0 and paises_usados > 0:
             break
         if fuente in ("osm", "google", "ambas") and not simulado:
             restantes = max_paises - paises_usados
@@ -791,10 +823,10 @@ def prospectar_prioridad_inicial(
 
     if islas_fallidas:
         print(
-            "Islas sin respuesta Overpass (reintentar): " + ", ".join(islas_fallidas),
+            "Mercados sin respuesta (reintentar): " + ", ".join(islas_fallidas),
             file=sys.stderr,
         )
-    zona_label = (zona or os.getenv("B2B_ZONA_BUSQUEDA", "caribe") or "caribe").strip()
+    zona_label = (zona or os.getenv("B2B_ZONA_BUSQUEDA", "usa") or "usa").strip()
     if not solo_listar:
         avisar_resumen_barrido(
             total_encolados,

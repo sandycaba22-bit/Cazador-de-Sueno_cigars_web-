@@ -15,6 +15,11 @@ from b2b import budget
 from b2b.contacto_web import normalizar_canales
 from b2b.country_rules import buscar_pais
 from b2b.logging_ops import registrar_evento, registrar_presupuesto_agotado
+from b2b.mercados import (
+    guardar_cursor,
+    mercado_por_nombre,
+    siguiente_mercado,
+)
 from b2b.paths import FIXTURES, state_file
 from b2b.telefono import internacional
 
@@ -107,7 +112,7 @@ def _slug(pais: str) -> str:
 def _api_key() -> str:
     key = os.getenv("GOOGLE_PLACES_API_KEY", "").strip()
     if not key:
-        raise RuntimeError("Falta GOOGLE_PLACES_API_KEY; se usa OpenStreetMap.")
+        raise RuntimeError("Falta GOOGLE_PLACES_API_KEY; no se busca sin Google Places.")
     return key
 
 
@@ -326,7 +331,10 @@ def motivo_descarte_google(raw: dict, lead: dict) -> str:
     if estado != "OPERATIONAL":
         return f"Google: {estado}"
     nombre = lead.get("nombre") or ""
-    web = lead.get("web") or raw.get("websiteUri") or ""
+    web = lead.get("web") or ""
+    telefono = (lead.get("telefono") or lead.get("telefono_internacional") or "").strip()
+    if not telefono and not (web or "").strip():
+        return "sin teléfono ni web"
     if not _es_negocio_b2b(nombre, web):
         return "perfil personal"
     from b2b.nombres_busqueda import clasificar_aceptacion, contiene_fuerte, texto_nombre_web
@@ -345,18 +353,21 @@ def motivo_descarte_google(raw: dict, lead: dict) -> str:
 
 
 def consultas_google(pais: str, tipos: list[str]) -> list[tuple[str, str, str]]:
-    """(tipo, idioma, texto) por estado/ciudad: '{término} in {ciudad}, {estado}'."""
-    entry = buscar_pais(pais) or {}
-    ciudades = list(entry.get("ciudades") or [])
+    """(tipo, idioma, texto) por estado/ciudad. Mercado inactivo o desconocido: lista vacía."""
+    mercado = mercado_por_nombre(pais, solo_activos=True)
+    if mercado is None:
+        return []
+    ciudades = list(mercado.get("ciudades") or [])
     tipos_ok = set(tipos) if tipos else {"tienda", "lounge"}
     out: list[tuple[str, str, str]] = []
+    nombre = mercado.get("nombre") or pais
     if not ciudades:
-        ciudades = [entry.get("pais") or pais]
-    for tipo, idioma, termino in TERMINOS_GOOGLE:
+        ciudades = [nombre]
+    for tipo, _idioma, termino in TERMINOS_GOOGLE:
         if tipo not in tipos_ok:
             continue
         for ciudad in ciudades:
-            consulta = f"{termino} in {ciudad}, {entry.get('pais') or pais}"
+            consulta = f"{termino} in {ciudad}, {nombre}"
             out.append((tipo, "en", consulta))
     return out
 
@@ -434,14 +445,40 @@ def _orden_calidad(lead: dict) -> tuple:
     return (0 if (mail or tel) else 1, -mail, -tel, -rating, -reviews, lead.get("nombre") or "")
 
 
-def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, dict]:
-    """Google Places (New) por isla y tipo. Devuelve leads OPERATIONAL ordenados, llamadas, stats."""
+def _avanzar_cursor(pais: str, idx: int, total: int) -> None:
+    siguiente_idx = idx + 1
+    if siguiente_idx >= total:
+        nxt = siguiente_mercado(pais)
+        guardar_cursor((nxt or {}).get("nombre") or pais, 0)
+    else:
+        guardar_cursor(pais, siguiente_idx)
+
+
+def buscar_google_pais(
+    pais: str,
+    tipos: list[str],
+    *,
+    desde_consulta: int = 0,
+    persistir_cursor: bool = False,
+) -> tuple[list[dict], int, dict]:
+    """Google Places (New) por estado/ciudad. Devuelve leads OPERATIONAL, llamadas, stats."""
     cache = _load_cache()
-    stats: dict = {"google": 0, "google_llamadas": 0, "google_cache": 0, "descartes": []}
+    stats: dict = {"google": 0, "google_llamadas": 0, "google_cache": 0, "descartes": [], "pais": pais}
     vistos: dict[str, tuple[dict, str]] = {}
+    telefonos_vistos: set[str] = set()
     llamadas = 0
     crudo_logueado = False
-    for tipo, idioma, consulta in consultas_google(pais, tipos):
+    consultas = consultas_google(pais, tipos)
+    stats["consultas_total"] = len(consultas)
+    stats["consulta_inicio"] = max(0, desde_consulta)
+    if persistir_cursor and not consultas:
+        nxt = siguiente_mercado(pais)
+        guardar_cursor((nxt or {}).get("nombre") or pais, 0)
+        stats["mercado_omitido"] = "inactivo"
+        return [], 0, stats
+    for idx, (tipo, idioma, consulta) in enumerate(consultas):
+        if idx < desde_consulta:
+            continue
         clave = _clave_busqueda(pais, consulta)
         hit = cache["busquedas"].get(clave)
         if hit is not None:
@@ -450,20 +487,28 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
         else:
             if _GOOGLE_DESACTIVADO:
                 stats["google_omitido"] = _GOOGLE_DESACTIVADO.get("motivo", "")
+                if persistir_cursor:
+                    guardar_cursor(pais, idx)
                 break
             motivo = budget.motivo_bloqueo()
             if motivo:
                 stats["presupuesto_agotado"] = motivo
+                if persistir_cursor:
+                    guardar_cursor(pais, idx)
                 _avisar_tope(motivo)
                 break
             try:
                 raws = _post_search(consulta, idioma)
             except PresupuestoPlacesAgotado as error:
                 stats["presupuesto_agotado"] = str(error)
+                if persistir_cursor:
+                    guardar_cursor(pais, idx)
                 _avisar_tope(str(error))
                 break
             except GooglePlacesError as error:
                 stats["google_error"] = _sin_clave(str(error))[:300]
+                if persistir_cursor:
+                    guardar_cursor(pais, idx)
                 _avisar_error(error)
                 break
             llamadas += 1
@@ -485,6 +530,8 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
             pid = raw.get("id") or raw.get("place_id") or ""
             if pid and pid not in vistos:
                 vistos[pid] = (raw, tipo)
+        if persistir_cursor:
+            _avanzar_cursor(pais, idx, len(consultas))
 
     leads: list[dict] = []
     for raw, tipo in vistos.values():
@@ -497,6 +544,15 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
                  "fuente": "google_places", "maps_url": lead.get("maps_url", "")}
             )
             continue
+        tel = re.sub(r"\D", "", lead.get("telefono_internacional") or lead.get("telefono") or "")
+        if tel and tel in telefonos_vistos:
+            stats["descartes"].append(
+                {"nombre": lead["nombre"], "motivo": "duplicado teléfono", "etapa": "google_dedupe",
+                 "fuente": "google_places", "maps_url": lead.get("maps_url", "")}
+            )
+            continue
+        if tel:
+            telefonos_vistos.add(tel)
         leads.append(lead)
     leads.sort(key=_orden_calidad)
     stats["google"] = len(leads)
@@ -541,12 +597,20 @@ def _buscar_osm(pais, tipos, limite, tipo_filtro, modo_global) -> tuple[list[dic
     return recolectar_leads_pais(pais, tipos, limite, tipo_filtro=tipo_filtro, simulado=False)
 
 
-def _buscar_google_seguro(pais: str, tipos: list[str]) -> tuple[list[dict], int, dict]:
+def _buscar_google_seguro(
+    pais: str,
+    tipos: list[str],
+    *,
+    desde_consulta: int = 0,
+    persistir_cursor: bool = False,
+) -> tuple[list[dict], int, dict]:
     if not google_disponible():
         motivo = _GOOGLE_DESACTIVADO.get("motivo") or "sin GOOGLE_PLACES_API_KEY"
         return [], 0, {"google_omitido": motivo, "descartes": []}
     try:
-        return buscar_google_pais(pais, tipos)
+        return buscar_google_pais(
+            pais, tipos, desde_consulta=desde_consulta, persistir_cursor=persistir_cursor
+        )
     except RuntimeError as error:
         msg = _sin_clave(str(error))[:300]
         registrar_evento({"evento": "google_places_error", "pais": pais, "error": msg})
@@ -561,6 +625,8 @@ def buscar_en_pais(
     tipo_filtro: str = "",
     fuente: str = "",
     modo_global: bool = False,
+    desde_consulta: int = 0,
+    persistir_cursor: bool = False,
 ) -> tuple[list[dict], int, dict]:
     """
     fuente: osm | google (solo Google, nunca OSM) | ambas (Google primero + OSM).
@@ -579,7 +645,9 @@ def buscar_en_pais(
     if fuente not in ("google", "ambas"):
         return _buscar_osm(pais, tipos, limite, tipo_filtro, modo_global)
 
-    g_leads, g_llamadas, g_stats = _buscar_google_seguro(pais, tipos)
+    g_leads, g_llamadas, g_stats = _buscar_google_seguro(
+        pais, tipos, desde_consulta=desde_consulta, persistir_cursor=persistir_cursor
+    )
     g_descartes = list(g_stats.pop("descartes", []) or [])
     if fuente == "google":
         return g_leads, g_llamadas, {**g_stats, "descartes": g_descartes}

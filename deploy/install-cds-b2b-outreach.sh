@@ -124,14 +124,13 @@ _add_if_missing() {
     echo "Agregada $key a $ENV_FILE."
   fi
 }
-# El instalador anterior forzaba FUENTE_LEADS=osm en cada despliegue; se migra una vez a
-# "ambas" (sin clave sigue siendo solo OSM). Para fijar osm a mano, añade la línea
-# "# B2B_FUENTE_MANUAL" al archivo y el instalador no volverá a tocarla.
-if grep -qxE 'FUENTE_LEADS=osm' "$ENV_FILE" && ! grep -qE '^# B2B_FUENTE_MANUAL' "$ENV_FILE"; then
-  sed -i 's|^FUENTE_LEADS=osm$|FUENTE_LEADS=ambas|' "$ENV_FILE"
-  echo "FUENTE_LEADS: osm (puesto por el instalador anterior) -> ambas."
+# El instalador anterior podía dejar FUENTE_LEADS=osm o ambas. La fuente vigente es google.
+# Para fijar otra a mano, añade la línea "# B2B_FUENTE_MANUAL" y no se toca.
+if grep -qxE 'FUENTE_LEADS=(osm|ambas|auto)' "$ENV_FILE" && ! grep -qE '^# B2B_FUENTE_MANUAL' "$ENV_FILE"; then
+  sed -i 's|^FUENTE_LEADS=.*$|FUENTE_LEADS=google|' "$ENV_FILE"
+  echo "FUENTE_LEADS: valor anterior -> google."
 fi
-_add_if_missing FUENTE_LEADS ambas
+_add_if_missing FUENTE_LEADS google
 _add_if_missing GOOGLE_PLACES_API_KEY ""
 _add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_DAY 30
 _add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_MONTH 900

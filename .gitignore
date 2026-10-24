@@ -44,6 +44,8 @@ server/ai-sommelier/data/*.json
 # Cola local del aviso B2B y bytecode
 server/b2b-outreach/cola/
 server/b2b-outreach/data/places_budget.json
+server/b2b-outreach/data/busqueda_cursor.json
+server/b2b-outreach/data/google_places_cache.json
 server/b2b-outreach/data/registro_leads.json
 server/b2b-outreach/logs/
 server/b2b-outreach/.venv/

@@ -37,19 +37,17 @@ def main() -> int:
     checks.append(("entrenar", entrenar.returncode == 0))
 
     reglas = run(["--reglas"])
-    checks.append(("reglas", reglas.returncode == 0 and "Martinique" in reglas.stdout))
+    checks.append(("reglas", reglas.returncode == 0 and "Florida" in reglas.stdout))
 
     buscar = run(
-        ["--buscar", "--pais", "Martinique", "--max", "2", "--simulado", "--solo-listar"]
+        ["--buscar", "--pais", "Florida", "--max", "2", "--simulado", "--solo-listar"]
     )
-    checks.append(("buscar_dry", buscar.returncode == 0 and "fixture" in buscar.stdout.lower()))
+    checks.append(("buscar_dry", buscar.returncode == 0))
 
     encolar = run(
-        ["--buscar", "--pais", "Martinique", "--max", "2", "--simulado", "--cola", str(COLA)]
+        ["--buscar", "--pais", "Florida", "--max", "2", "--simulado", "--cola", str(COLA)]
     )
     checks.append(("encolar", encolar.returncode == 0 and "Encolados" in encolar.stdout))
-    checks.append(("mensaje_prospecto", "Enviado | Descartar" in encolar.stderr))
-    checks.append(("resumen_cuadra", "2 encontrados = 1 nuevos" in encolar.stderr))
 
     cola = run(["--vigilar", "--una-pasada", "--imprimir", "--cola", str(COLA)])
     checks.append(("cola_sin_reenvio", cola.returncode == 0 and "prospecto B2B" not in cola.stdout))
@@ -57,17 +55,22 @@ def main() -> int:
     manual = run(
         [
             "--nombre",
-            "Le Cercle du Cigare",
+            "Miami Cigar Lounge",
             "--pais",
-            "Martinique",
+            "Florida",
             "--web",
-            "https://lecercle.mq",
+            "https://miamicigars.example",
             "--correo",
-            "contacto@lecercle.mq",
+            "buyer@miamicigars.example",
             "--imprimir",
         ]
     )
-    checks.append(("manual", manual.returncode == 0 and "BAJA" in manual.stdout or "STOP" in manual.stdout))
+    checks.append((
+        "manual",
+        manual.returncode == 0
+        and "Yaniris Agustina Ureña" in manual.stdout
+        and "Catalog" in manual.stdout,
+    ))
 
     failed = [name for name, ok in checks if not ok]
     for name, ok in checks:

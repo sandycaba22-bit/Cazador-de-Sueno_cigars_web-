@@ -23,8 +23,9 @@ class TestPaisesCola(unittest.TestCase):
     def test_orden_florida_primero(self):
         fila = cargar_paises_cola()
         self.assertGreater(len(fila), 10)
-        self.assertEqual(fila[0].get("zona"), "florida")
         self.assertEqual(fila[0].get("pais"), "Florida")
+        self.assertEqual(fila[0].get("prioridad"), 1)
+        self.assertEqual(fila[-1].get("pais"), "Jamaica")
 
     def test_entries_activos(self):
         for pais, iso in (("Florida", "US"), ("Puerto Rico", "PR"), ("Jamaica", "JM")):

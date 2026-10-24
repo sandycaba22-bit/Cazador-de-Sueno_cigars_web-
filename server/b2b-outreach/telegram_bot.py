@@ -9,8 +9,8 @@
 # (python-dotenv y requests). El detalle de systemd y PM2 está en README.md.
 #
 # Prueba de humo, sin llamar a Telegram:
-#   python3 telegram_bot.py --nombre "Le Cercle du Cigare" --pais "Martinique" \
-#     --web "https://lecercle.mq" --correo "contacto@lecercle.mq" --imprimir
+#   python3 telegram_bot.py --nombre "Miami Cigar Lounge" --pais "Florida" \
+#     --web "https://miamicigars.example" --correo "buyer@miamicigars.example" --imprimir
 
 from __future__ import annotations
 
@@ -169,9 +169,8 @@ ANGULO_TIPO = {
     },
 }
 
-# Islas y territorios activos. Se prioriza ruta corta desde Santiago.
-# Se reducen a mercados vigentes: Puerto Rico y Jamaica.
-CARIBE = (
+# Mercados activos de islas grandes (prioridad baja frente a los 50 estados + DC).
+ISLAS_GRANDES = (
     "puerto rico",
     "jamaica",
 )
@@ -284,24 +283,24 @@ def detectar_idioma_por_pais(pais):
 
 
 def clasificar_mercado(pais):
-    """Prioriza el Caribe. No descarta el resto: lo marca como estándar."""
-    if _contains_any(pais.strip().lower(), CARIBE):
+    """Estados Unidos primero. Puerto Rico y Jamaica quedan con prioridad baja."""
+    if _contains_any(pais.strip().lower(), ISLAS_GRANDES):
         return {
-            "zona": "caribe",
-            "prioridad": "alta",
-            "orden": 0,
+            "zona": "islas",
+            "prioridad": "baja",
+            "orden": 2,
             "etiqueta": (
-                "Alta · Caribe, ruta corta desde Santiago. "
+                "Baja · después de los 50 estados + DC. "
                 "La importación la confirma el comprador."
             ),
         }
     return {
-        "zona": "internacional",
-        "prioridad": "estandar",
-        "orden": 1,
+        "zona": "usa",
+        "prioridad": "alta",
+        "orden": 0,
         "etiqueta": (
-            "Estándar · mercado internacional. "
-            "El comprador confirma licencia e impuestos de su país."
+            "Alta · Estados Unidos. "
+            "El comprador confirma licencia e impuestos de su estado."
         ),
     }
 
@@ -959,10 +958,10 @@ def main(argv=None):
         if not simulado and not buscar_global:
             fuente = resolver_fuente_leads()
             if fuente == "osm":
-                zona = os.getenv("B2B_ZONA_BUSQUEDA", "caribe")
+                zona = os.getenv("B2B_ZONA_BUSQUEDA", "usa")
                 print(
                     "Buscador: OpenStreetMap (gratis). "
-                    f"Zona: {zona} — tiendas EN cada país/isla, no cerca de tu servidor. "
+                    f"Zona: {zona} — tiendas EN cada estado/mercado activo. "
                     "Usa --simulado solo para pruebas.",
                     file=sys.stderr,
                 )
@@ -1012,7 +1011,7 @@ def main(argv=None):
         if not args.solo_listar and stats.get("encolados", 0) == 0 and stats.get("fuente") == "osm":
             print(
                 "OSM: 0 encolados (Overpass lento o sin tiendas en esos países). "
-                "Reintenta más tarde o prueba: --buscar Aruba --limite 9. "
+                "Reintenta más tarde o prueba: --buscar Florida --limite 9. "
                 "Fallos en cola/logs/ o logs/ del repo.",
                 file=sys.stderr,
             )

@@ -17,7 +17,7 @@ from b2b.osm_places import buscar_en_pais_osm
 class TestFuenteLeads(unittest.TestCase):
     def test_auto_sin_google_usa_osm(self):
         with patch.dict("os.environ", {"GOOGLE_PLACES_API_KEY": "", "FUENTE_LEADS": "auto"}, clear=False):
-            self.assertEqual(resolver_fuente_leads(), "osm")
+            self.assertEqual(resolver_fuente_leads(), "google")
 
     def test_simulado_forzado(self):
         with patch.dict("os.environ", {"GOOGLE_PLACES_API_KEY": "x", "FUENTE_LEADS": "auto"}, clear=False):

@@ -36,7 +36,8 @@ class TestPrioridadInicial(unittest.TestCase):
         self.assertEqual(len(mercados), 53)
         self.assertLess(prio.index("California"), prio.index("Wyoming"))
         self.assertEqual(prio[-1], "District of Columbia")
-        self.assertEqual(len(paises_prioridad_inicial()), len(prio))
+        self.assertEqual(len(prio), 51)
+        self.assertEqual(len(paises_prioridad_inicial()), 53)
 
     def test_busqueda_default_estados_configurados(self):
         islas = [p["pais"] for p in paises_prioridad_busqueda()]
@@ -44,7 +45,9 @@ class TestPrioridadInicial(unittest.TestCase):
         self.assertIn("Virginia", islas)
         self.assertNotIn("Nigeria", islas)
         self.assertIn("District of Columbia", islas)
-        self.assertEqual(islas, cargar_reglas()["prioridad_inicial"])
+        self.assertEqual(islas[-2], "Puerto Rico")
+        self.assertEqual(islas[-1], "Jamaica")
+        self.assertEqual(len(islas), 53)
 
     def test_tipos_incluyen_casino(self):
         tipos = cargar_reglas()["orden_tipos_negocio"]

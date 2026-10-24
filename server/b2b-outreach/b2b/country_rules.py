@@ -59,13 +59,6 @@ def imprimir_tabla_reglas() -> None:
 
 
 ALIASES = {
-    "sint maarten": "Sint Maarten",
-    "st maarten": "Sint Maarten",
-    "saint martin": "Saint Martin",
-    "st. maarten": "Sint Maarten",
-    "curaçao": "Curacao",
-    "curacao": "Curacao",
-    "curazao": "Curacao",
     "república dominicana": "Dominican Republic",
     "republica dominicana": "Dominican Republic",
     "usa": "United States",
@@ -77,44 +70,6 @@ ALIASES = {
     "eeuu": "United States",
     "canadá": "Canada",
     "canada": "Canada",
-    "islas caimán": "Cayman Islands",
-    "islas caiman": "Cayman Islands",
-    "cayman": "Cayman Islands",
-    "caimán": "Cayman Islands",
-    "caiman": "Cayman Islands",
-    "turks and caicos": "Turks and Caicos Islands",
-    "turks & caicos": "Turks and Caicos Islands",
-    "turcos y caicos": "Turks and Caicos Islands",
-    "islas turcas y caicos": "Turks and Caicos Islands",
-    "trinidad": "Trinidad and Tobago",
-    "trinidad y tobago": "Trinidad and Tobago",
-    "the bahamas": "Bahamas",
-    "martinica": "Martinique",
-    "guadalupe": "Guadeloupe",
-    "san martín": "Saint Martin",
-    "san martin": "Saint Martin",
-    "saint-martin": "Saint Martin",
-    "mauricio": "Mauritius",
-    "seychelles": "Seychelles",
-    "malta": "Malta",
-    "chipre": "Cyprus",
-    "costa de marfil": "Côte d'Ivoire",
-    "cote d'ivoire": "Côte d'Ivoire",
-    "ivory coast": "Côte d'Ivoire",
-    "cabo verde": "Cape Verde",
-    "senegal": "Senegal",
-    "nigeria": "Nigeria",
-    "ghana": "Ghana",
-    "sudáfrica": "South Africa",
-    "sudafrica": "South Africa",
-    "south africa": "South Africa",
-    "kenia": "Kenya",
-    "kenya": "Kenya",
-    "marruecos": "Morocco",
-    "morocco": "Morocco",
-    "angola": "Angola",
-    "haiti": "Haiti",
-    "haití": "Haiti",
 }
 
 
@@ -132,47 +87,31 @@ def buscar_pais(nombre: str) -> dict | None:
 
 
 def _nombres_prioridad_busqueda(zona: str | None = None) -> list[str]:
-    data = cargar_reglas()
-    zona = (zona or os.getenv("B2B_ZONA_BUSQUEDA", "caribe") or "caribe").strip().lower()
-    if zona in ("global", "todas", "all"):
-        return list(data.get("prioridad_inicial", []))
-    if zona in ("africa", "africa_europa", "afrika"):
-        return list(data.get("prioridad_africa_europa") or [])
-    caribe = data.get("prioridad_caribe")
-    if caribe:
-        return list(caribe)
-    return list(data.get("prioridad_inicial", []))
+    from b2b.mercados import nombres_activos
+
+    return nombres_activos()
 
 
 def _incluir_en_busqueda(entry: dict) -> bool:
-    if (os.getenv("B2B_OMITIR_MERCADO_LOCAL", "0") or "0").strip().lower() in (
-        "0",
-        "false",
-        "no",
-    ):
-        return True
-    territorio = (entry.get("territorio") or "").strip().lower()
-    return territorio != "local"
+    from b2b.mercados import mercado_activo
+
+    return mercado_activo(entry.get("pais") or "")
 
 
 def paises_prioridad_busqueda(zona: str | None = None) -> list[dict]:
-    """Orden de --buscar sin --pais (default: solo islas / Caribe)."""
+    """Orden de --buscar sin --pais: mercados activos (Florida primero)."""
+    from b2b.mercados import como_reglas, mercados_activos
+
     out: list[dict] = []
-    for nombre in _nombres_prioridad_busqueda(zona):
-        entry = buscar_pais(nombre)
-        if entry and _incluir_en_busqueda(entry):
-            out.append(entry)
+    for mercado in mercados_activos():
+        entry = buscar_pais(mercado["nombre"])
+        out.append(entry if entry else como_reglas(mercado))
     return out
 
 
 def paises_prioridad_inicial() -> list[dict]:
-    """Lista completa prioridad_inicial (tests y compat)."""
-    out: list[dict] = []
-    for nombre in cargar_reglas().get("prioridad_inicial", []):
-        entry = buscar_pais(nombre)
-        if entry:
-            out.append(entry)
-    return out
+    """Misma lista que la búsqueda: mercados activos por prioridad."""
+    return paises_prioridad_busqueda()
 
 
 def paises_ordenados_por_dificultad() -> list[dict]:

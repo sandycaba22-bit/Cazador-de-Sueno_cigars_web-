@@ -135,8 +135,7 @@ class TestComandosSimulados(unittest.TestCase):
             "pr": {"nombre": "San Juan Cigars", "pais": "Puerto Rico"},
             "jm": {"nombre": "Kingston Cigars", "pais": "Jamaica"},
         }
-        for i, pais in enumerate(("Aruba", "Martinica", "Turks and Caicos Islands",
-                                 "Islas Caimán", "Curazao", "French Guiana", "Caribe francés")):
+        for i, pais in enumerate(("Nigeria", "Canada", "Germany", "France")):
             self.pendientes[f"retirado{i}"] = {"nombre": f"Retirado {i}", "pais": pais}
         tg._save_pendientes(self.pendientes)
 
@@ -156,7 +155,7 @@ class TestComandosSimulados(unittest.TestCase):
         for linea in ("Florida: 2", "Texas: 1", "Puerto Rico: 1", "Jamaica: 1"):
             self.assertIn(linea, respuesta)
         self.assertNotIn("Retirado", respuesta)
-        self.assertNotIn("Aruba", respuesta)
+        self.assertNotIn("Nigeria", respuesta)
 
     def test_pendientes_excluye_retirados(self):
         self.assertIn("5 leads pendientes", self.comando("/pendientes")[0])
@@ -182,5 +181,5 @@ class TestComandosSimulados(unittest.TestCase):
             self.assertIn("USPS Cigars", self.comando(f"/estado {codigo}")[0])
 
     def test_estado_retirado_y_chat_no_autorizado(self):
-        self.assertIn("No hay leads", self.comando("/estado Aruba")[0])
+        self.assertIn("No hay leads", self.comando("/estado Nigeria")[0])
         self.assertEqual(self.comando("/stats", chat="99"), [])

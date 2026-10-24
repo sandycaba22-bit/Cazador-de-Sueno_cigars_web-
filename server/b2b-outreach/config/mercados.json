@@ -1,0 +1,498 @@
+{
+  "meta": {
+    "nota": "Mercados de búsqueda B2B. activo=false no se busca ni se manda a Claude. Para sumar un país: agrégalo aquí."
+  },
+  "mercados": [
+    {
+      "id": "florida",
+      "nombre": "Florida",
+      "activo": true,
+      "prioridad": 1,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": [
+        "Miami",
+        "Fort Lauderdale",
+        "West Palm Beach",
+        "Tampa",
+        "Ybor City",
+        "Orlando",
+        "Jacksonville",
+        "Naples",
+        "Key West",
+        "St. Petersburg",
+        "Sarasota",
+        "Tallahassee",
+        "Pensacola"
+      ]
+    },
+    {
+      "id": "texas",
+      "nombre": "Texas",
+      "activo": true,
+      "prioridad": 2,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Houston", "Dallas", "Austin", "San Antonio", "Fort Worth", "El Paso"]
+    },
+    {
+      "id": "new_york",
+      "nombre": "New York",
+      "activo": true,
+      "prioridad": 3,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["New York City", "Brooklyn", "Queens", "Manhattan", "Staten Island", "Bronx", "Buffalo", "Albany"]
+    },
+    {
+      "id": "california",
+      "nombre": "California",
+      "activo": true,
+      "prioridad": 4,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Los Angeles", "San Francisco", "San Diego", "San Jose", "Sacramento", "Fresno", "Beverly Hills"]
+    },
+    {
+      "id": "nevada",
+      "nombre": "Nevada",
+      "activo": true,
+      "prioridad": 5,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Las Vegas", "Henderson", "Reno", "Paradise"]
+    },
+    {
+      "id": "georgia",
+      "nombre": "Georgia",
+      "activo": true,
+      "prioridad": 6,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Atlanta", "Savannah", "Augusta", "Athens"]
+    },
+    {
+      "id": "north_carolina",
+      "nombre": "North Carolina",
+      "activo": true,
+      "prioridad": 7,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Charlotte", "Raleigh", "Greensboro", "Durham", "Asheville"]
+    },
+    {
+      "id": "south_carolina",
+      "nombre": "South Carolina",
+      "activo": true,
+      "prioridad": 8,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Charleston", "Columbia", "Myrtle Beach", "Greenville"]
+    },
+    {
+      "id": "illinois",
+      "nombre": "Illinois",
+      "activo": true,
+      "prioridad": 9,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Chicago", "Aurora", "Naperville", "Joliet"]
+    },
+    {
+      "id": "new_jersey",
+      "nombre": "New Jersey",
+      "activo": true,
+      "prioridad": 10,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Newark", "Jersey City", "Paterson", "Atlantic City", "Hoboken"]
+    },
+    {
+      "id": "pennsylvania",
+      "nombre": "Pennsylvania",
+      "activo": true,
+      "prioridad": 11,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Philadelphia", "Pittsburgh", "Allentown"]
+    },
+    {
+      "id": "ohio",
+      "nombre": "Ohio",
+      "activo": true,
+      "prioridad": 12,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Columbus", "Cleveland", "Cincinnati"]
+    },
+    {
+      "id": "michigan",
+      "nombre": "Michigan",
+      "activo": true,
+      "prioridad": 13,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Detroit", "Grand Rapids", "Warren"]
+    },
+    {
+      "id": "virginia",
+      "nombre": "Virginia",
+      "activo": true,
+      "prioridad": 14,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Virginia Beach", "Norfolk", "Chesapeake", "Richmond"]
+    },
+    {
+      "id": "washington",
+      "nombre": "Washington",
+      "activo": true,
+      "prioridad": 15,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Seattle", "Spokane", "Tacoma", "Vancouver"]
+    },
+    {
+      "id": "massachusetts",
+      "nombre": "Massachusetts",
+      "activo": true,
+      "prioridad": 16,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Boston", "Worcester", "Providence"]
+    },
+    {
+      "id": "arizona",
+      "nombre": "Arizona",
+      "activo": true,
+      "prioridad": 17,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Phoenix", "Tucson", "Mesa", "Chandler"]
+    },
+    {
+      "id": "colorado",
+      "nombre": "Colorado",
+      "activo": true,
+      "prioridad": 18,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Denver", "Colorado Springs", "Aurora"]
+    },
+    {
+      "id": "maryland",
+      "nombre": "Maryland",
+      "activo": true,
+      "prioridad": 19,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Baltimore", "Annapolis", "Frederick"]
+    },
+    {
+      "id": "indiana",
+      "nombre": "Indiana",
+      "activo": true,
+      "prioridad": 20,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Indianapolis", "Fort Wayne", "Evansville"]
+    },
+    {
+      "id": "missouri",
+      "nombre": "Missouri",
+      "activo": true,
+      "prioridad": 21,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Kansas City", "St. Louis", "Springfield"]
+    },
+    {
+      "id": "wisconsin",
+      "nombre": "Wisconsin",
+      "activo": true,
+      "prioridad": 22,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Milwaukee", "Madison", "Green Bay"]
+    },
+    {
+      "id": "minnesota",
+      "nombre": "Minnesota",
+      "activo": true,
+      "prioridad": 23,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Minneapolis", "St. Paul", "Rochester"]
+    },
+    {
+      "id": "tennessee",
+      "nombre": "Tennessee",
+      "activo": true,
+      "prioridad": 24,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Nashville", "Memphis", "Knoxville"]
+    },
+    {
+      "id": "alabama",
+      "nombre": "Alabama",
+      "activo": true,
+      "prioridad": 25,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Birmingham", "Montgomery", "Huntsville"]
+    },
+    {
+      "id": "louisiana",
+      "nombre": "Louisiana",
+      "activo": true,
+      "prioridad": 26,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["New Orleans", "Baton Rouge", "Shreveport"]
+    },
+    {
+      "id": "kentucky",
+      "nombre": "Kentucky",
+      "activo": true,
+      "prioridad": 27,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Louisville", "Lexington", "Bowling Green"]
+    },
+    {
+      "id": "oregon",
+      "nombre": "Oregon",
+      "activo": true,
+      "prioridad": 28,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Portland", "Salem", "Eugene"]
+    },
+    {
+      "id": "oklahoma",
+      "nombre": "Oklahoma",
+      "activo": true,
+      "prioridad": 29,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Oklahoma City", "Tulsa", "Norman"]
+    },
+    {
+      "id": "connecticut",
+      "nombre": "Connecticut",
+      "activo": true,
+      "prioridad": 30,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Bridgeport", "New Haven", "Stamford"]
+    },
+    {
+      "id": "utah",
+      "nombre": "Utah",
+      "activo": true,
+      "prioridad": 31,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Salt Lake City", "West Valley City", "Provo"]
+    },
+    {
+      "id": "iowa",
+      "nombre": "Iowa",
+      "activo": true,
+      "prioridad": 32,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Des Moines", "Cedar Rapids", "Davenport"]
+    },
+    {
+      "id": "arkansas",
+      "nombre": "Arkansas",
+      "activo": true,
+      "prioridad": 33,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Little Rock", "Fort Smith", "Fayetteville"]
+    },
+    {
+      "id": "mississippi",
+      "nombre": "Mississippi",
+      "activo": true,
+      "prioridad": 34,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Jackson", "Gulfport", "Southaven"]
+    },
+    {
+      "id": "kansas",
+      "nombre": "Kansas",
+      "activo": true,
+      "prioridad": 35,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Wichita", "Overland Park", "Kansas City"]
+    },
+    {
+      "id": "new_mexico",
+      "nombre": "New Mexico",
+      "activo": true,
+      "prioridad": 36,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Albuquerque", "Las Cruces", "Rio Rancho"]
+    },
+    {
+      "id": "nebraska",
+      "nombre": "Nebraska",
+      "activo": true,
+      "prioridad": 37,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Omaha", "Lincoln", "Bellevue"]
+    },
+    {
+      "id": "idaho",
+      "nombre": "Idaho",
+      "activo": true,
+      "prioridad": 38,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Boise", "Meridian", "Nampa"]
+    },
+    {
+      "id": "west_virginia",
+      "nombre": "West Virginia",
+      "activo": true,
+      "prioridad": 39,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Charleston", "Huntington", "Morgantown"]
+    },
+    {
+      "id": "hawaii",
+      "nombre": "Hawaii",
+      "activo": true,
+      "prioridad": 40,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Honolulu", "East Honolulu", "Pearl City"]
+    },
+    {
+      "id": "new_hampshire",
+      "nombre": "New Hampshire",
+      "activo": true,
+      "prioridad": 41,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Manchester", "Nashua", "Concord"]
+    },
+    {
+      "id": "maine",
+      "nombre": "Maine",
+      "activo": true,
+      "prioridad": 42,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Portland", "Lewiston", "Bangor"]
+    },
+    {
+      "id": "rhode_island",
+      "nombre": "Rhode Island",
+      "activo": true,
+      "prioridad": 43,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Providence", "Warwick", "Cranston"]
+    },
+    {
+      "id": "montana",
+      "nombre": "Montana",
+      "activo": true,
+      "prioridad": 44,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Billings", "Missoula", "Great Falls"]
+    },
+    {
+      "id": "delaware",
+      "nombre": "Delaware",
+      "activo": true,
+      "prioridad": 45,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Wilmington", "Dover", "Newark"]
+    },
+    {
+      "id": "south_dakota",
+      "nombre": "South Dakota",
+      "activo": true,
+      "prioridad": 46,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Sioux Falls", "Rapid City", "Aberdeen"]
+    },
+    {
+      "id": "north_dakota",
+      "nombre": "North Dakota",
+      "activo": true,
+      "prioridad": 47,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Fargo", "Bismarck", "Grand Forks"]
+    },
+    {
+      "id": "alaska",
+      "nombre": "Alaska",
+      "activo": true,
+      "prioridad": 48,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Anchorage", "Fairbanks", "Juneau"]
+    },
+    {
+      "id": "vermont",
+      "nombre": "Vermont",
+      "activo": true,
+      "prioridad": 49,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Burlington", "South Burlington", "Rutland"]
+    },
+    {
+      "id": "wyoming",
+      "nombre": "Wyoming",
+      "activo": true,
+      "prioridad": 50,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Cheyenne", "Casper", "Laramie"]
+    },
+    {
+      "id": "district_of_columbia",
+      "nombre": "District of Columbia",
+      "activo": true,
+      "prioridad": 51,
+      "idioma": "en",
+      "iso3166": "US",
+      "ciudades": ["Washington"]
+    },
+    {
+      "id": "puerto_rico",
+      "nombre": "Puerto Rico",
+      "activo": true,
+      "prioridad": 52,
+      "idioma": "es",
+      "iso3166": "PR",
+      "ciudades": ["San Juan", "Ponce", "Dorado", "Rincón", "Mayagüez"]
+    },
+    {
+      "id": "jamaica",
+      "nombre": "Jamaica",
+      "activo": true,
+      "prioridad": 53,
+      "idioma": "en",
+      "iso3166": "JM",
+      "ciudades": ["Kingston", "Montego Bay", "Negril", "Ocho Rios"]
+    }
+  ]
+}

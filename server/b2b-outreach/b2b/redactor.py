@@ -393,9 +393,9 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
         return _validar(
             f"Saludos, equipo de {nombre}.\n"
             f"Somos Cazador de Sueño Cigars SRL, fábrica boutique de puros premium hechos a mano en Santiago, "
-            f"República Dominicana. Nos gustaría presentar nuestra línea a su {t}.\n"
-            f"{aviso}Catálogo mayorista: {catalogo}\n"
-            "Ofrecemos una muestra gratuita (free sample) para evaluación. ¿Conversamos?\n"
+            f"República Dominicana. Les compartimos nuestro catálogo mayorista para su {t}.\n"
+            f"{aviso}Catálogo: {catalogo}\n"
+            "Ofrecemos una muestra gratuita para evaluación. ¿Les conectamos con el dueño?\n"
             f"Atentamente,\n{NOMBRE_VP} - {CARGO_VP['es']}"
         )
     if idioma == "fr":
@@ -407,35 +407,43 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
             "Un échantillon gratuit est disponible pour évaluation. Pouvons-nous échanger ?\n"
             f"Cordialement,\n{NOMBRE_VP} - {CARGO_VP['fr']}"
         )
-    
+
     texto = (
         f"Hello {nombre} team,\n"
-        f"We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {tipo_en_idioma(tipo, 'en')}.\n"
-        f"{aviso}Wholesale Catalog: {catalogo}\n"
-        "We're happy to provide a free sample for your consideration. Open to a brief chat?\n"
-        "Best,\n"
-        "Yaniris Agustina Ureña - VP of Sales"
+        f"We are Cazador de Sueño Cigars SRL, a boutique factory of handmade premium cigars in Santiago, "
+        f"Dominican Republic. Here is our wholesale catalog for your {tipo_en_idioma(tipo, 'en')}.\n"
+        f"{aviso}Catalog: {catalogo}\n"
+        "A free sample is available for evaluation. We can connect you with the owner.\n"
+        f"Best,\n{NOMBRE_VP} - {CARGO_VP['en']}"
     )
-    return texto
+    return _validar(texto)
 
 def borrador_correo(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """Versión correo: asunto, firma de la VP y línea de STOP (solo en correo)."""
     nombre = (nombre_local or "").strip() or "there"
-    catalogo, aviso = _catalogo("en")
-    t = tipo_en_idioma(tipo, "en")
-    
+    idioma = idioma if idioma in MUESTRAS else "en"
+    catalogo, aviso = _catalogo(idioma)
+    t = tipo_en_idioma(tipo, idioma)
+    if idioma == "es":
+        texto = (
+            f"Asunto: Puros dominicanos para {nombre}\n\n"
+            f"Saludos, equipo de {nombre}.\n\n"
+            "Somos Cazador de Sueño Cigars SRL, fábrica boutique de puros premium hechos a mano en Santiago de los "
+            f"Caballeros, República Dominicana. Les compartimos el catálogo mayorista para su {t}.\n\n"
+            f"{aviso}Catálogo: {catalogo}\n"
+            "Ofrecemos una muestra gratuita para evaluación. El dueño de la marca puede continuar la conversación.\n\n"
+            f"Atentamente,\n{_firma('es')[0]}\n\n"
+            "Si no desea recibir más mensajes, responda BAJA."
+        )
+        return _validar(texto)
     texto = (
         f"Subject: Handmade Dominican cigars for {nombre}\n\n"
         f"Hello {nombre} team,\n\n"
-        "We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
-        f"making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
-        f"Wholesale catalog: {catalogo}\n"
-        "A free sample is available for evaluation. Would a short call work for you?\n\n"
-        "Best regards,\n"
-        "Yaniris Agustina Ureña\n"
-        "Vice President, Sales\n"
-        "Cazador de Sueño Cigars SRL\n"
-        "cazadordesueno1@gmail.com\n\n"
+        "We are Cazador de Sueño Cigars SRL, a boutique factory of handmade premium cigars in Santiago de los "
+        f"Caballeros, Dominican Republic. Here is our wholesale catalog for your {t}.\n\n"
+        f"{aviso}Catalog: {catalogo}\n"
+        "A free sample is available for evaluation. The owner can continue the conversation from here.\n\n"
+        f"Best regards,\n{_firma('en')[0]}\n\n"
         "If you prefer not to receive further messages, reply STOP."
     )
     return _validar(texto)

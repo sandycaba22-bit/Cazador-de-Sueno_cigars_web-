@@ -1,31 +1,32 @@
 from __future__ import annotations
 
-import json
-
-from b2b.paths import data_file
+from b2b.mercados import mercado_por_nombre, mercados_activos
 
 
 def cargar_paises_cola() -> list[dict]:
-    path = data_file("paises_cola.json")
-    data = json.loads(path.read_text(encoding="utf-8"))
-    zonas = data.get("zonas_orden") or []
-    paises = list(data.get("paises") or [])
-    orden_zona = {z: i for i, z in enumerate(zonas)}
-
-    def key(row: dict) -> tuple:
-        return (
-            orden_zona.get(row.get("zona") or "resto", 99),
-            int(row.get("prioridad") or 999),
-            (row.get("pais") or "").lower(),
-        )
-
-    paises.sort(key=key)
-    return paises
+    """Cola de búsqueda: solo mercados con activo=true, por prioridad."""
+    return [
+        {
+            "pais": m["nombre"],
+            "iso3166": m.get("iso3166") or "",
+            "idioma": m.get("idioma") or "en",
+            "prioridad": m.get("prioridad") or 999,
+            "activo": True,
+            "ciudades": list(m.get("ciudades") or []),
+        }
+        for m in mercados_activos()
+    ]
 
 
 def entry_por_pais(nombre: str) -> dict | None:
-    nom = (nombre or "").strip().lower()
-    for row in cargar_paises_cola():
-        if (row.get("pais") or "").strip().lower() == nom:
-            return row
-    return None
+    m = mercado_por_nombre(nombre, solo_activos=True)
+    if m is None:
+        return None
+    return {
+        "pais": m["nombre"],
+        "iso3166": m.get("iso3166") or "",
+        "idioma": m.get("idioma") or "en",
+        "prioridad": m.get("prioridad") or 999,
+        "activo": True,
+        "ciudades": list(m.get("ciudades") or []),
+    }

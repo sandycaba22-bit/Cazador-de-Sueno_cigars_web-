@@ -5,14 +5,12 @@ import re
 # Prefijo internacional por ISO3166-1. Los del plan norteamericano (+1) traen el código de área
 # dentro del número nacional: "(242) 555-1234".
 NANP = {
-    "US", "CA", "PR", "VI", "BS", "JM", "BB", "KY", "TC", "TT", "SX", "DO", "AG", "LC", "VC",
-    "GD", "KN", "DM", "AI", "VG", "BM", "MS",
+    "US", "CA", "PR", "JM", "DO",
 }
 PREFIJOS = {
-    "AW": "297", "CW": "599", "BQ": "599", "MF": "590", "GP": "590", "BL": "590", "MQ": "596",
-    "GF": "594", "HT": "509", "PA": "507", "CR": "506", "CU": "53", "MX": "52", "CO": "57",
-    "MU": "230", "SC": "248", "MT": "356", "CY": "357", "NG": "234", "GH": "233", "ZA": "27",
-    "KE": "254", "SN": "221", "CI": "225", "MA": "212", "CV": "238", "AO": "244", "AE": "971",
+    "HT": "509", "PA": "507", "CR": "506", "CU": "53", "MX": "52", "CO": "57",
+    "NG": "234", "GH": "233", "ZA": "27",
+    "KE": "254", "SN": "221", "CI": "225", "MA": "212", "AE": "971",
     "GB": "44", "FR": "33", "DE": "49", "ES": "34", "IT": "39", "NL": "31", "BE": "32",
     "CH": "41", "PT": "351",
 }

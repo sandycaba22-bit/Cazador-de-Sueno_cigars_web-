@@ -38,7 +38,7 @@ class TestMotivosDescarte(unittest.TestCase):
             "id": 1,
             "tags": {"name": "Sunset Bar", "amenity": "bar"},
         }
-        self.assertEqual(_motivo_si_sin_lead(el, "Aruba"), "bar/café sin humidor")
+        self.assertEqual(_motivo_si_sin_lead(el, "Florida"), "bar/café sin humidor")
 
 
 class TestDuplicadoContra(unittest.TestCase):
@@ -89,14 +89,14 @@ class TestAuditoriaArchivo(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with patch("b2b.descartes.state_file", lambda name: Path(tmp) / name):
                 append_isla_en_archivo_diario(
-                    "Aruba",
+                    "Florida",
                     [{"nombre": "Vape Co", "motivo": "vape/smoke shop"}],
                     [],
                 )
                 files = list(Path(tmp).glob("descartados_*.json"))
                 self.assertEqual(len(files), 1)
                 data = json.loads(files[0].read_text(encoding="utf-8"))
-                self.assertIn("Aruba", data["islas"])
+                self.assertIn("Florida", data["islas"])
 
 
 if __name__ == "__main__":
