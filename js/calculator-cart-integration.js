@@ -1,5 +1,5 @@
 /**
- * CAZADOR DE SUEÑOS CIGARS - Sistema Integrado Calculadora + Carrito Premium
+ * Cazador de Sueño Cigars SRL - Sistema Integrado Calculadora + Carrito Premium
  * Fusión de calculadora interactiva con sistema de carrito estilo PedidosYa
  * Precios reales de config/products.json con estética premium
  */

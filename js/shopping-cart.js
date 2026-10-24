@@ -1,5 +1,5 @@
 /**
- * CAZADOR DE SUEÑOS CIGARS - Sistema de Carrito de Compras Premium
+ * Cazador de Sueño Cigars SRL - Sistema de Carrito de Compras Premium
  * Carrito funcional estilo PedidosYa con bloqueo post-pago y persistencia localStorage
  */
 

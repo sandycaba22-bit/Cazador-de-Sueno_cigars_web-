@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cazador de Sueños Cigars — configuración completa del servidor
+# Cazador de Sueño Cigars SRL — configuración completa del servidor
 # Ejecutar en la VM GCP vía SSH (usuario con sudo)
 
 set -euo pipefail

@@ -1,5 +1,5 @@
 /**
- * CAZADOR DE SUEÑOS CIGARS - Sistema de Internacionalización
+ * Cazador de Sueño Cigars SRL - Sistema de Internacionalización
  * Selector manual (ES/EN) + detección por país/IP + Preferencia en localStorage
  */
 

@@ -753,7 +753,7 @@ class TestIdiomaYPlantillas(unittest.TestCase):
         self.assertIn("reply STOP", correo)
         for texto in (corto, correo):
             self.assertIn("free sample", texto.lower())
-            self.assertIn("Cazador de Sueño", texto)
+            self.assertIn("Cazador de Sueño Cigars SRL", texto)
             self.assertIn("Yaniris Agustina Ureña", texto)
             self.assertNotIn("this week", texto.lower())
         self.assertIn("votre cave à cigares", borrador_corto("Cave", "fr", "tienda"))

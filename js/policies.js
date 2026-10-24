@@ -20,7 +20,7 @@ const CUSTOMS_DISCLAIMER = {
   id: 'customs_import_responsibility',
   title: 'Responsabilidad aduanera',
   checkoutText:
-    'Entiendo y acepto que soy el único responsable de cumplir con las normativas de importación, aranceles, impuestos o retenciones aduaneras de mi país de destino (Estados Unidos, Suiza, etc.). Cazador de Sueños Sigar SRL no se hace responsable por retenciones o impuestos aplicados en la aduana de destino',
+    'Entiendo y acepto que soy el único responsable de cumplir con las normativas de importación, aranceles, impuestos o retenciones aduaneras de mi país de destino (Estados Unidos, Suiza, etc.). Cazador de Sueño Cigars SRL no se hace responsable por retenciones o impuestos aplicados en la aduana de destino',
   filterBlockedReason:
     'Debes aceptar el descargo de responsabilidad aduanera para finalizar el pedido.',
 };

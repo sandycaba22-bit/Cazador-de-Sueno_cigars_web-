@@ -1,5 +1,5 @@
 /**
- * Cazador de Sueños — Sommelier de Cava
+ * Cazador de Sueño Cigars SRL — Sommelier de Cava
  * Widget flotante con streaming hacia /api/ai-sommelier
  */
 (function () {
@@ -15,7 +15,7 @@
   const I18N = {
     es: {
       fab: 'Sommelier de Cava — Asesor de la casa',
-      kicker: 'Cazador de Sueños',
+      kicker: 'Cazador de Sueño Cigars SRL',
       title: 'Sommelier de Cava',
       welcome: 'Bienvenido a la cava. Soy el maestro tabaquero de la casa. ¿Busca una recomendación de vitola, notas de cata, o representa a un distribuidor?',
       placeholder: 'Escriba su consulta…',
@@ -30,7 +30,7 @@
     },
     en: {
       fab: 'Cellar Sommelier — House advisor',
-      kicker: 'Cazador de Sueños',
+      kicker: 'Cazador de Sueño Cigars SRL',
       title: 'Cellar Sommelier',
       welcome: 'Welcome to the cellar. I am the house master blender. Are you looking for a vitola recommendation, tasting notes, or do you represent a distributor?',
       placeholder: 'Write your inquiry…',
@@ -45,7 +45,7 @@
     },
     fr: {
       fab: 'Sommelier de cave — Conseiller de la maison',
-      kicker: 'Cazador de Sueños',
+      kicker: 'Cazador de Sueño Cigars SRL',
       title: 'Sommelier de cave',
       welcome: 'Bienvenue dans la cave. Je suis le maître torcedor de la maison. Cherchez-vous une recommandation de vitola, des notes de dégustation, ou représentez-vous un distributeur ?',
       placeholder: 'Écrivez votre demande…',
@@ -60,7 +60,7 @@
     },
     de: {
       fab: 'Keller-Sommelier — Berater des Hauses',
-      kicker: 'Cazador de Sueños',
+      kicker: 'Cazador de Sueño Cigars SRL',
       title: 'Keller-Sommelier',
       welcome: 'Willkommen im Keller. Ich bin der Meisterblender des Hauses. Suchen Sie eine Vitola-Empfehlung, Verkostungsnotizen, oder vertreten Sie einen Distributor?',
       placeholder: 'Schreiben Sie Ihre Anfrage…',
@@ -75,7 +75,7 @@
     },
     ar: {
       fab: 'خبير القبو — مستشار الدار',
-      kicker: 'Cazador de Sueños',
+      kicker: 'Cazador de Sueño Cigars SRL',
       title: 'خبير القبو',
       welcome: 'أهلاً بك في القبو. أنا معلّم التبغ في الدار. هل تبحث عن توصية بفيتولا، أو ملاحظات تذوق، أم تمثل موزّعاً؟',
       placeholder: 'اكتب استفسارك…',
@@ -90,7 +90,7 @@
     },
     ru: {
       fab: 'Сомелье погреба — советник дома',
-      kicker: 'Cazador de Sueños',
+      kicker: 'Cazador de Sueño Cigars SRL',
       title: 'Сомелье погреба',
       welcome: 'Добро пожаловать в погреб. Я мастер-блендер дома. Вам нужна рекомендация витолы, дегустационные ноты или вы представляете дистрибьютора?',
       placeholder: 'Напишите ваш запрос…',
@@ -105,7 +105,7 @@
     },
     zh: {
       fab: '酒窖侍酒师 — 品牌顾问',
-      kicker: 'Cazador de Sueños',
+      kicker: 'Cazador de Sueño Cigars SRL',
       title: '酒窖侍酒师',
       welcome: '欢迎来到酒窖。我是本宅的调配大师。您是在寻找维托拉推荐、品鉴笔记，还是代表经销商？',
       placeholder: '请写下您的咨询…',

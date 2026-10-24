@@ -1,4 +1,4 @@
-# Bot B2B de Cazador de Sueños Cigar SRL
+# Bot B2B de Cazador de Sueño Cigars SRL
 #
 # Recibe un prospecto que tú ya tienes (local, país, web, correo), arma el
 # borrador en su idioma y te lo deja en tu Telegram. No busca locales, no
@@ -41,7 +41,7 @@ TELEGRAM_TIMEOUT = 20
 RETRY_STATUSES = {429, 500, 502, 503, 504}
 
 # Referencia de mostrador. Sitúa la casa. No afirma que un puro de
-# Cazador de Sueños sea el mismo blend ni que supere a esas marcas.
+# Cazador de Sueño Cigars SRL sea el mismo blend ni que supere a esas marcas.
 CASAS_REFERENCIA = (
     "Davidoff",
     "Arturo Fuente",
@@ -354,7 +354,7 @@ def borrador_prospecto(idioma, nombre_local, tipo_negocio="tienda", sin_correo_p
     if idioma == "fr":
         return (
             f"Bonjour l'équipe de {nombre_local},\n\n"
-            "Nous sommes Cazador de Sueños Cigar SRL, manufacture à "
+            "Nous sommes Cazador de Sueño Cigars SRL, manufacture à "
             f"{origen}.\n\n"
             f"{posicion}\n\n"
             f"{angulo}\n\n"
@@ -364,12 +364,12 @@ def borrador_prospecto(idioma, nombre_local, tipo_negocio="tienda", sin_correo_p
             f"{WHOLESALE_URL}\n\n"
             f"{baja}\n\n"
             "Cordialement,\n"
-            "L'équipe Cazador de Sueños"
+            "L'équipe Cazador de Sueño Cigars SRL"
         ) + nota_correo
     if idioma == "de":
         return (
             f"Hallo {nombre_local} Team,\n\n"
-            "wir sind Cazador de Sueños Cigar SRL, eine Manufaktur in "
+            "wir sind Cazador de Sueño Cigars SRL, eine Manufaktur in "
             f"{origen}.\n\n"
             f"{posicion}\n\n"
             f"{angulo}\n\n"
@@ -379,12 +379,12 @@ def borrador_prospecto(idioma, nombre_local, tipo_negocio="tienda", sin_correo_p
             f"{WHOLESALE_URL}\n\n"
             f"{baja}\n\n"
             "Mit freundlichen Grüßen\n"
-            "Cazador de Sueños"
+            "Cazador de Sueño Cigars SRL"
         ) + nota_correo
     if idioma == "it":
         return (
             f"Buongiorno team di {nombre_local},\n\n"
-            "siamo Cazador de Sueños Cigar SRL, una manifattura a "
+            "siamo Cazador de Sueño Cigars SRL, una manifattura a "
             f"{origen}.\n\n"
             f"{posicion}\n\n"
             f"{angulo}\n\n"
@@ -394,12 +394,12 @@ def borrador_prospecto(idioma, nombre_local, tipo_negocio="tienda", sin_correo_p
             f"{WHOLESALE_URL}\n\n"
             f"{baja}\n\n"
             "Cordiali saluti,\n"
-            "Il team Cazador de Sueños"
+            "Il team Cazador de Sueño Cigars SRL"
         ) + nota_correo
     if idioma == "es":
         return (
             f"Saludos, equipo de {nombre_local}.\n\n"
-            "Somos Cazador de Sueño, fábrica en "
+            "Somos Cazador de Sueño Cigars SRL, fábrica en "
             f"{origen}.\n\n"
             f"{posicion}\n\n"
             f"{angulo}\n\n"
@@ -413,7 +413,7 @@ def borrador_prospecto(idioma, nombre_local, tipo_negocio="tienda", sin_correo_p
         ) + nota_correo
     return (
         f"Hello {nombre_local} team,\n\n"
-        "we are Cazador de Sueño, a factory in "
+        "we are Cazador de Sueño Cigars SRL, a factory in "
         f"{origen}.\n\n"
         f"{posicion}\n\n"
         f"{angulo}\n\n"

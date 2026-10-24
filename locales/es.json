@@ -3,7 +3,7 @@
   "direction": "ltr",
   "translations": {
     "age_gate": {
-      "title": "Cazador de Sueños Cigars",
+      "title": "Cazador de Sueño Cigars SRL",
       "eyebrow": "Verificación de Edad",
       "text": "Este sitio contiene información sobre productos de tabaco reservados para mayores de edad. Confirme que tiene 21 años o más para continuar.",
       "enter": "Sí, tengo 21 años o más",
@@ -11,7 +11,7 @@
       "legal": "Al ingresar, usted confirma cumplir con la edad legal en su jurisdicción."
     },
     "header": {
-      "brand": "Cazador de Sueños",
+      "brand": "Cazador de Sueño Cigars SRL",
       "nav": {
         "legacy": "El Legado",
         "mastery": "Maestría",
@@ -37,7 +37,7 @@
     },
     "hero": {
       "eyebrow": "Cerro Angola · República Dominicana",
-      "title": "Cazador de Sueños",
+      "title": "Cazador de Sueño Cigars SRL",
       "subtitle": "Donde la tradición familiar se encuentra con la precisión científica.",
       "cta": "Descubrir la colección"
     },
@@ -80,7 +80,7 @@
     "mission_vision": {
       "label": "Nuestra Identidad",
       "title": "Misión, Visión y Valores",
-      "intro": "Cazador de Sueños Sigar SRL — Tradición, excelencia y compromiso",
+      "intro": "Cazador de Sueño Cigars SRL — Tradición, excelencia y compromiso",
       "mission": {
         "title": "Misión",
         "text": "Producir cigarros de alta calidad utilizando las mejores hojas de tabaco y procesos especializados, satisfaciendo las expectativas de nuestros clientes mediante la excelencia, la responsabilidad, el respeto por nuestros colaboradores y el desarrollo sostenible de la industria tabacalera."
@@ -92,13 +92,41 @@
       "values": {
         "title": "Valores",
         "items": [
-          {"key": "quality", "label": "Calidad", "text": "Mantener los más altos estándares en cada etapa de producción."},
-          {"key": "commitment", "label": "Compromiso", "text": "Cumplir responsablemente con clientes, colaboradores y socios."},
-          {"key": "tradition", "label": "Tradición", "text": "Preservar el legado y la cultura del arte de elaborar cigarros."},
-          {"key": "integrity", "label": "Integridad", "text": "Actuar con honestidad, ética y transparencia."},
-          {"key": "innovation", "label": "Innovación", "text": "Mejorar continuamente nuestros procesos y productos."},
-          {"key": "teamwork", "label": "Trabajo en equipo", "text": "Fomentar la colaboración y el respeto mutuo."},
-          {"key": "responsibility", "label": "Responsabilidad social y ambiental", "text": "Contribuir al bienestar de la comunidad y al cuidado del medio ambiente."}
+          {
+            "key": "quality",
+            "label": "Calidad",
+            "text": "Mantener los más altos estándares en cada etapa de producción."
+          },
+          {
+            "key": "commitment",
+            "label": "Compromiso",
+            "text": "Cumplir responsablemente con clientes, colaboradores y socios."
+          },
+          {
+            "key": "tradition",
+            "label": "Tradición",
+            "text": "Preservar el legado y la cultura del arte de elaborar cigarros."
+          },
+          {
+            "key": "integrity",
+            "label": "Integridad",
+            "text": "Actuar con honestidad, ética y transparencia."
+          },
+          {
+            "key": "innovation",
+            "label": "Innovación",
+            "text": "Mejorar continuamente nuestros procesos y productos."
+          },
+          {
+            "key": "teamwork",
+            "label": "Trabajo en equipo",
+            "text": "Fomentar la colaboración y el respeto mutuo."
+          },
+          {
+            "key": "responsibility",
+            "label": "Responsabilidad social y ambiental",
+            "text": "Contribuir al bienestar de la comunidad y al cuidado del medio ambiente."
+          }
         ]
       }
     },
@@ -130,7 +158,7 @@
     },
     "sommelier": {
       "fab_label": "Sommelier de Cava — Asesor de la casa",
-      "kicker": "Cazador de Sueños",
+      "kicker": "Cazador de Sueño Cigars SRL",
       "title": "Sommelier de Cava",
       "welcome": "Bienvenido a la cava. Soy el maestro tabaquero de la casa. ¿Busca una recomendación de vitola, notas de cata, o representa a un distribuidor?",
       "placeholder": "Escriba su consulta…",
@@ -145,7 +173,7 @@
     },
     "footer": {
       "tagline": "Fábrica ubicada en Santiago de los Caballeros, República Dominicana",
-      "copy": "© 2026 Cazador de Sueños Cigars. Todos los derechos reservados."
+      "copy": "© 2026 Cazador de Sueño Cigars SRL. Todos los derechos reservados."
     },
     "maestria": {
       "label": "Maestría",
@@ -155,7 +183,7 @@
       "chapter1": {
         "kicker": "El Origen · San José de las Matas",
         "title": "Aquí nace nuestra historia.",
-        "text": "En las tierras de República Dominicana, entre pinos, neblina y tierra fresca, comienza la memoria de Cazador de Sueños. No venimos de un despacho. Venimos de la montaña.",
+        "text": "En las tierras de República Dominicana, entre pinos, neblina y tierra fresca, comienza la memoria de Cazador de Sueño Cigars SRL. No venimos de un despacho. Venimos de la montaña.",
         "note": "Cordillera Central · República Dominicana"
       },
       "chapter2": {
@@ -192,12 +220,73 @@
         "kicker": "El Legado",
         "text1": "Todo comenzó en la región norte de la República Dominicana, donde un antepasado de nuestra familia dedicó su vida al cultivo y procesamiento del tabaco. Con el tiempo, logró dominar los secretos de la fermentación, un conocimiento valioso que transmitió a las siguientes generaciones como parte de un legado construido con esfuerzo, paciencia y pasión.",
         "text2": "A través de los años, cada generación aportó su experiencia, preservando las tradiciones y el amor por este noble oficio. Lo que comenzó como una enseñanza familiar se convirtió en una herencia que fortaleció nuestra identidad y nuestro compromiso con la calidad.",
-        "text3": "Inspirados por ese legado y guiados por el sueño de compartir nuestra pasión con el mundo, nació Cazador de Sueños Cigars. Nuestro nombre representa la perseverancia de quienes nunca dejaron de creer en sus ideales y trabajaron para convertirlos en realidad.",
+        "text3": "Inspirados por ese legado y guiados por el sueño de compartir nuestra pasión con el mundo, nació Cazador de Sueño Cigars SRL. Nuestro nombre representa la perseverancia de quienes nunca dejaron de creer en sus ideales y trabajaron para convertirlos en realidad.",
         "text4": "Hoy, cada cigarro que elaboramos es un homenaje a nuestros antepasados, a nuestra tierra y a los sueños que hicieron posible este camino. Más que una marca, somos la continuación de una historia familiar que sigue viva en cada hoja de tabaco y en cada experiencia que ofrecemos.",
-        "note": "Cazador de Sueños Sigar SRL"
+        "note": "Cazador de Sueño Cigars SRL"
       }
     },
     "vitolas": {
+      "brand": {
+        "pairing": {
+          "title": "Maridaje recomendado",
+          "spirit": "Destilado",
+          "coffee": "Café",
+          "bite": "Acompañante",
+          "moment": "Momento"
+        },
+        "pairings": {
+          "emperador": {
+            "spirit": "Ron dominicano añejo",
+            "coffee": "Café colado de Jarabacoa",
+            "bite": "Chocolate oscuro 70%",
+            "moment": "Tarde larga en la terraza"
+          },
+          "puro_habano": {
+            "spirit": "Whisky single malt de Speyside",
+            "coffee": "Café cortado",
+            "bite": "Nueces tostadas",
+            "moment": "Sobremesa tras una cena de carnes"
+          },
+          "exquisito": {
+            "spirit": "Coñac XO",
+            "coffee": "Espresso",
+            "bite": "Chocolate amargo con sal marina",
+            "moment": "Una celebración sin prisa"
+          },
+          "rango": {
+            "spirit": "Ron ámbar o vino Malbec",
+            "coffee": "Café americano",
+            "bite": "Almendras tostadas",
+            "moment": "Después del almuerzo"
+          },
+          "ligero": {
+            "spirit": "Whisky ahumado de Islay",
+            "coffee": "Espresso ristretto",
+            "bite": "Higos secos",
+            "moment": "Al cierre de la noche"
+          },
+          "sultan": {
+            "spirit": "Ron dominicano extra añejo",
+            "coffee": "Espresso doble",
+            "bite": "Cacao oscuro",
+            "moment": "Sobremesa tras una cena intensa"
+          }
+        },
+        "seal": {
+          "label": "Sello de origen",
+          "title": "Hecho a mano en República Dominicana",
+          "text": "Cada puro se tuerce a mano en nuestra fábrica de Santiago de los Caballeros y se revisa antes de salir hacia tu humidor.",
+          "place": "Santiago de los Caballeros · R.D."
+        },
+        "b2b": {
+          "label": "Mayoristas y exportación",
+          "title": "¿Tienes un lounge, tienda o distribuidora?",
+          "text": "Precios por volumen, catálogo mayorista y envío internacional. Escríbenos y te enviamos las condiciones.",
+          "cta": "Condiciones mayoristas",
+          "whatsapp": "WhatsApp de exportación"
+        },
+        "legal_age": "Venta exclusiva a mayores de 21 años. Fumar perjudica la salud."
+      },
       "back_to_catalog": "← Volver al catálogo",
       "gallery": {
         "single_cigar": "Cigarro individual",
@@ -223,7 +312,7 @@
         "badge": "El Primer Sueño",
         "section_label": "El Origen",
         "title": "El Emperador",
-        "subtitle": "El primer cigarro que nació en la fábrica Cazador de Sueños. Historia viva, herencia familiar y el sueño que lo inició todo.",
+        "subtitle": "El primer cigarro que nació en la fábrica Cazador de Sueño Cigars SRL. Historia viva, herencia familiar y el sueño que lo inició todo.",
         "concept_title": "El Concepto Único",
         "concept_text": "El cigarro fundacional de la fábrica, creado bajo el secreto de una fermentación especial de tabacos que me enseñó mi abuelo. No es una vitola más: es el punto de partida de toda una casa, el primer humo que dio nombre a un legado.",
         "seal": "Fermentación Especial",
@@ -470,7 +559,7 @@
       },
       "footer": {
         "eyebrow": "Contacto",
-        "copy": "© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador."
+        "copy": "© 2026 Cazador de Sueño Cigars SRL. Venta sujeta a regulaciones locales del importador."
       },
       "cart": {
         "title": "Tu carrito",
@@ -497,6 +586,15 @@
       }
     },
     "checkout": {
+      "trust": {
+        "secure_title": "Pago protegido",
+        "secure_text": "PayPal o transferencia directa a la cuenta de la fábrica. No guardamos datos de tarjeta.",
+        "humidity_title": "Empaque hermético",
+        "humidity_text": "Sellado con control de humedad para que tus puros lleguen como salieron del humidor.",
+        "origin_title": "Auténtico de fábrica",
+        "origin_text": "Torcido a mano en Santiago de los Caballeros, República Dominicana.",
+        "age": "Venta exclusiva a mayores de 21 años."
+      },
       "back": "← Seguir comprando",
       "secure": "Pago seguro",
       "lang": "Seleccionar idioma",
@@ -537,6 +635,7 @@
       "dec_aria": "Quitar uno",
       "inc_aria": "Añadir uno",
       "methods_empty": "No hay métodos de pago disponibles ahora mismo.",
+      "unavailable": "No disponible ahora",
       "cardnet_note": "Ventana segura de CardNET al confirmar.",
       "paypal_loading": "Cargando PayPal…",
       "paypal_aria": "Pagar con PayPal en USD",
@@ -554,8 +653,15 @@
         "reference_prefix": "Referencia:",
         "concept_use": "Usa la referencia en el concepto",
         "concept_and_email": " y envía el comprobante a",
-        "whatsapp_cta": "Enviar comprobante por WhatsApp"
+        "whatsapp_cta": "Enviar comprobante por WhatsApp",
+        "online": "Abrir banca en línea",
+        "copy": "Copiar",
+        "copied": "Copiado",
+        "copy_failed": "Copia manualmente",
+        "step_copy": "Copia el número de cuenta y abre tu banca en línea.",
+        "step_transfer": "Transfiere el total exacto en DOP o USD, según tu cuenta."
       },
+      "paypal_sandbox": "PayPal está en modo de prueba: no se cobra dinero real. Usa transferencia bancaria para comprar ahora.",
       "hints": {
         "cardnet": "Visa / Mastercard",
         "bank_transfer": "Banreservas · BHD",

@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Checkout seguro — Cazador de Sueños Cigars" />
+    <meta name="description" content="Checkout seguro — Cazador de Sueño Cigars SRL" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Finalizar compra — Cazador de Sueños</title>
+    <title>Finalizar compra — Cazador de Sueño Cigars SRL</title>
 
     <script src="js/language-detect-early.js"></script>
     <script>
@@ -33,10 +33,10 @@
     <main class="co" id="co-root">
       <header class="co__bar">
         <a class="co__back" href="index.html" data-i18n="checkout.back">← Seguir comprando</a>
-        <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueños Cigar SRL">
+        <a href="index.html" class="cds-brand co__brand" aria-label="Cazador de Sueño Cigars SRL">
           <img
             src="images/logo.png"
-            alt="Cazador de Sueños"
+            alt="Cazador de Sueño Cigars SRL"
             class="cds-brand__mark site-logo site-logo--compact"
             width="339"
             height="256"
@@ -122,6 +122,8 @@
               <p class="co-methods__loading" data-i18n="checkout.loading">Cargando…</p>
             </div>
             <div id="co-method-detail" class="co-method-detail" hidden></div>
+            <div id="paypal-button-container" class="co-paypal-buttons" aria-label="Pagar con PayPal en USD" hidden></div>
+            <p id="co-paypal-mode" class="co-note co-paypal-mode" role="note" hidden></p>
           </section>
 
           <section class="co-block co-block--legal co-block--compact">
@@ -164,6 +166,21 @@
               <li><span data-i18n="checkout.meta.boxes">Cajas</span><strong id="co-boxes">0</strong></li>
               <li><span data-i18n="checkout.meta.eta">Entrega</span><strong id="co-eta">—</strong></li>
             </ul>
+            <ul class="co-trust" aria-label="Garantías del pedido">
+              <li class="co-trust__item co-trust__item--secure">
+                <strong data-i18n="checkout.trust.secure_title">Pago protegido</strong>
+                <span data-i18n="checkout.trust.secure_text">PayPal o transferencia directa a la cuenta de la fábrica. No guardamos datos de tarjeta.</span>
+              </li>
+              <li class="co-trust__item co-trust__item--humidity">
+                <strong data-i18n="checkout.trust.humidity_title">Empaque hermético</strong>
+                <span data-i18n="checkout.trust.humidity_text">Sellado con control de humedad para que tus puros lleguen como salieron del humidor.</span>
+              </li>
+              <li class="co-trust__item co-trust__item--origin">
+                <strong data-i18n="checkout.trust.origin_title">Auténtico de fábrica</strong>
+                <span data-i18n="checkout.trust.origin_text">Torcido a mano en Santiago de los Caballeros, República Dominicana.</span>
+              </li>
+            </ul>
+            <p class="co-legal-age" data-i18n="checkout.trust.age">Venta exclusiva a mayores de 21 años.</p>
           </div>
         </aside>
       </div>
@@ -173,12 +190,12 @@
       <div class="container site-footer__inner">
         <div class="site-footer__brand">
           <p class="site-footer__eyebrow">Contacto</p>
-          <p class="site-footer__title">Cazador de Sueños Cigar SRL</p>
-          <p>© 2026 Cazador de Sueños Cigar SRL. Venta sujeta a regulaciones locales del importador.</p>
+          <p class="site-footer__title">Cazador de Sueño Cigars SRL</p>
+          <p>© 2026 Cazador de Sueño Cigars SRL. Venta sujeta a regulaciones locales del importador.</p>
         </div>
         <div class="site-footer__links" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
           <p class="site-footer__contact">
-            <a href="mailto:ventas@cazadordesuenocigars.com">ventas@cazadordesuenocigars.com</a>
+            <a href="mailto:cazadordesueno1@gmail.com">cazadordesueno1@gmail.com</a>
           </p>
           <p class="site-footer__b2b" style="margin:0;">
             <a href="wholesale.html" style="color: var(--color-gold-400); text-decoration: none; font-size: 0.9rem; font-family: var(--font-inter); letter-spacing: 0.05em; transition: color 0.3s ease;">
@@ -192,6 +209,7 @@
     <script src="js/page-visibility.js" defer></script>
     <script src="js/language-switcher.js" defer></script>
     <script src="js/config.js" defer></script>
+    <script src="js/bank-transfer-links.js" defer></script>
     <script src="js/policies.js" defer></script>
     <script src="js/catalog.js" defer></script>
     <script src="js/shipping.js" defer></script>
@@ -199,5 +217,6 @@
     <script src="js/cart-legacy-bridge.js" defer></script>
     <script src="js/cart.js" defer></script>
     <script src="js/checkout.js" defer></script>
+    <script src="js/checkout-assistant.js" defer></script>
   </body>
 </html>

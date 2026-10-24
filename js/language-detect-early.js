@@ -30,7 +30,7 @@
   document.documentElement.setAttribute('lang', currentLang);
   document.documentElement.setAttribute('dir', 'ltr');
 
-  const skipHidePages = /checkout\.html|order-confirmation\.html|cart-test\.html/i;
+  const skipHidePages = /checkout\.html|order-confirmation\.html/i;
   if (!skipHidePages.test(location.pathname)) {
     const style = document.createElement('style');
     style.textContent = 'body { visibility: hidden; }';

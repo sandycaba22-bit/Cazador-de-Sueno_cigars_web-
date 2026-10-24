@@ -1,5 +1,5 @@
 [Unit]
-Description=Cazador de Sueños — API de comercio (checkout, CardNET, PayPal, pedidos)
+Description=Cazador de Sueño Cigars SRL — API de comercio (checkout, CardNET, PayPal, pedidos)
 After=network.target
 Wants=network-online.target
 

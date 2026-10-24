@@ -1,5 +1,5 @@
 /**
- * CAZADOR DE SUEÑOS CIGARS - Arquitectura E-Commerce (INACTIVA)
+ * Cazador de Sueño Cigars SRL - Arquitectura E-Commerce (INACTIVA)
  * Esqueleto preparado para futura activación cuando se tenga cuenta bancaria corporativa
  * NO ACTIVO - Solo estructura preparada
  */
@@ -7,7 +7,7 @@
 const ECommerceSkeleton = (function() {
   // Configuración de pasarela de pagos (INACTIVA - Requiere cuenta bancaria)
   const paymentConfig = {
-    // INACTIVO: Esperando cuenta bancaria corporativa Cazador de Sueños Sigar SRL
+    // INACTIVO: Esperando cuenta bancaria corporativa Cazador de Sueño Cigars SRL
     stripe: {
       publicKey: null, // Se configurará cuando se tenga la cuenta
       secretKey: null  // Se configurará en backend
@@ -130,7 +130,7 @@ const ECommerceSkeleton = (function() {
   // Funciones de pasarela de pagos (INACTIVAS - Solo estructura)
   function initiatePayment(paymentMethod) {
     if (!cart.isActive) {
-      console.log('E-COMMERCE INACTIVO: Esperando cuenta bancaria corporativa Cazador de Sueños Sigar SRL');
+      console.log('E-COMMERCE INACTIVO: Esperando cuenta bancaria corporativa Cazador de Sueño Cigars SRL');
       return {
         success: false,
         message: 'E-commerce inactivo - Requiere configuración bancaria'
@@ -219,7 +219,7 @@ const ECommerceSkeleton = (function() {
       paymentConfigured: paymentConfig.stripe.publicKey || paymentConfig.paypal.clientId,
       message: cart.isActive ? 
         'E-commerce activo y listo' : 
-        'E-commerce inactivo - Requiere cuenta bancaria corporativa Cazador de Sueños Sigar SRL'
+        'E-commerce inactivo - Requiere cuenta bancaria corporativa Cazador de Sueño Cigars SRL'
     };
   }
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=Cazador de Sueños — buscador B2B (Google Places + OpenStreetMap de respaldo)
+Description=Cazador de Sueño Cigars SRL — buscador B2B (Google Places + OpenStreetMap de respaldo)
 After=network-online.target
 Wants=network-online.target
 

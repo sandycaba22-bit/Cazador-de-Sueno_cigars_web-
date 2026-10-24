@@ -15,7 +15,7 @@ FONT_NEW = (
 AGE_GATE = """  <div id="age-gate" class="age-gate" role="dialog" aria-labelledby="age-gate-title" aria-modal="true" aria-hidden="false">
     <div class="age-gate__splash">
       <p class="age-gate__label">Verificación de Edad</p>
-      <h1 class="age-gate__title" id="age-gate-title">Cazador de Sueños Cigars</h1>
+      <h1 class="age-gate__title" id="age-gate-title">Cazador de Sueño Cigars SRL</h1>
       <p class="age-gate__text">Este sitio contiene información sobre productos de tabaco reservados para mayores de edad. Confirme que tiene 21 años o más para continuar.</p>
       <div class="age-gate__actions">
         <button type="button" class="btn btn--primary age-gate__enter" id="age-enter">Sí, tengo 21 años o más</button>

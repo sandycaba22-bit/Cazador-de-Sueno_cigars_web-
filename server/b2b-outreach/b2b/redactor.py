@@ -45,7 +45,7 @@ CARGO_VP = {
     "de": "Vice President, Sales",
     "it": "Vice President, Sales",
 }
-EMPRESA_FIRMA = "Cazador de Sueños Cigar SRL"
+EMPRESA_FIRMA = "Cazador de Sueño Cigars SRL"
 NOMBRE_VP = "Yaniris Agustina Ureña"
 
 
@@ -56,7 +56,7 @@ def _firma(idioma: str) -> tuple[str, bool]:
         CARGO_VP.get(idioma, CARGO_VP["en"]),
         EMPRESA_FIRMA,
     ]
-    email = os.getenv("FIRMA_EMAIL", "").strip()
+    email = os.getenv("FIRMA_EMAIL", "cazadordesueno1@gmail.com").strip()
     telefono = os.getenv("FIRMA_TELEFONO", "").strip()
     if email:
         lineas.append(email)
@@ -251,7 +251,7 @@ def borrador_prospecto(
     if idioma == "es":
         cuerpo = (
             f"Saludos, equipo de {nombre_local}.\n\n"
-            "Somos Cazador de Sueños Cigar SRL, fábrica en Santiago de los Caballeros, "
+            "Somos Cazador de Sueño Cigars SRL, fábrica en Santiago de los Caballeros, "
             "República Dominicana. Elaboramos puros premium 100% hechos a mano.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -261,7 +261,7 @@ def borrador_prospecto(
     elif idioma == "fr":
         cuerpo = (
             f"Bonjour l'équipe de {nombre_local},\n\n"
-            "Nous sommes Cazador de Sueños Cigar SRL, manufacture à Santiago de los Caballeros, "
+            "Nous sommes Cazador de Sueño Cigars SRL, manufacture à Santiago de los Caballeros, "
             "République dominicaine. Cigares premium 100% faits main.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -271,7 +271,7 @@ def borrador_prospecto(
     elif idioma == "nl":
         cuerpo = (
             f"Hallo team van {nombre_local},\n\n"
-            "Wij zijn Cazador de Sueños Cigar SRL, fabriek in Santiago de los Caballeros, "
+            "Wij zijn Cazador de Sueño Cigars SRL, fabriek in Santiago de los Caballeros, "
             "Dominicaanse Republiek. Premium sigaren, 100% handgemaakt.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -281,7 +281,7 @@ def borrador_prospecto(
     elif idioma == "pt":
         cuerpo = (
             f"Olá, equipa da {nombre_local},\n\n"
-            "Somos a Cazador de Sueños Cigar SRL, fábrica em Santiago de los Caballeros, "
+            "Somos a Cazador de Sueño Cigars SRL, fábrica em Santiago de los Caballeros, "
             "República Dominicana. Charutos premium 100% feitos à mão.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -291,7 +291,7 @@ def borrador_prospecto(
     else:
         cuerpo = (
             f"Hello {nombre_local} team,\n\n"
-            "We are Cazador de Sueños Cigar SRL, a factory in Santiago de los Caballeros, "
+            "We are Cazador de Sueño Cigars SRL, a factory in Santiago de los Caballeros, "
             "Dominican Republic. Premium cigars, 100% handmade.\n\n"
             f"{bloque_cat}\n\n{angulo}\n\n"
             f"{linea_pdf}\n"
@@ -392,7 +392,7 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     if idioma == "es":
         return _validar(
             f"Saludos, equipo de {nombre}.\n"
-            f"Somos Cazador de Sueño, fábrica boutique de puros premium hechos a mano en Santiago, "
+            f"Somos Cazador de Sueño Cigars SRL, fábrica boutique de puros premium hechos a mano en Santiago, "
             f"República Dominicana. Nos gustaría presentar nuestra línea a su {t}.\n"
             f"{aviso}Catálogo mayorista: {catalogo}\n"
             "Ofrecemos una muestra gratuita (free sample) para evaluación. ¿Conversamos?\n"
@@ -401,7 +401,7 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     if idioma == "fr":
         return _validar(
             f"Bonjour l'équipe de {nombre},\n"
-            f"Nous sommes Cazador de Sueño, manufacture de cigares faits main à Santiago, "
+            f"Nous sommes Cazador de Sueño Cigars SRL, manufacture de cigares faits main à Santiago, "
             f"République dominicaine. Nous souhaitons présenter notre gamme à votre {t}.\n"
             f"{aviso}Catalogue grossiste : {catalogo}\n"
             "Un échantillon gratuit est disponible pour évaluation. Pouvons-nous échanger ?\n"
@@ -410,7 +410,7 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     
     texto = (
         f"Hello {nombre} team,\n"
-        f"We are Cazador de Sueño, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {tipo_en_idioma(tipo, 'en')}.\n"
+        f"We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {tipo_en_idioma(tipo, 'en')}.\n"
         f"{aviso}Wholesale Catalog: {catalogo}\n"
         "We're happy to provide a free sample for your consideration. Open to a brief chat?\n"
         "Best,\n"
@@ -427,14 +427,14 @@ def borrador_correo(nombre_local: str, idioma: str, tipo: str = "tienda") -> str
     texto = (
         f"Subject: Handmade Dominican cigars for {nombre}\n\n"
         f"Hello {nombre} team,\n\n"
-        "We are Cazador de Sueño, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
+        "We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
         f"making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
         f"Wholesale catalog: {catalogo}\n"
         "A free sample is available for evaluation. Would a short call work for you?\n\n"
         "Best regards,\n"
         "Yaniris Agustina Ureña\n"
         "Vice President, Sales\n"
-        "Cazador de Sueño\n"
+        "Cazador de Sueño Cigars SRL\n"
         "cazadordesueno1@gmail.com\n\n"
         "If you prefer not to receive further messages, reply STOP."
     )
@@ -503,7 +503,7 @@ def generar_tarjeta_telegram(
 
     # Requerimiento 3: Tarjeta Limpia
     texto = (
-        "Cazador de Sueños · Prospecto B2B\n"
+        "Cazador de Sueño Cigars SRL · Prospecto B2B\n"
         f"Negocio: {nombre_local.strip()}\n"
         f"Tipo: {tipo.title()}\n"
         f"Ciudad/País: {ciudad}\n"
@@ -514,7 +514,7 @@ def generar_tarjeta_telegram(
         texto += "\nNota: sin correo publicado; confirmar otro canal de contacto."
 
     markdown = (
-        "*Cazador de Sueños · Prospecto B2B*\n"
+        "*Cazador de Sueño Cigars SRL · Prospecto B2B*\n"
         f"*Negocio:* {md_escape(nombre_local.strip())}\n"
         f"*Tipo:* {md_escape(tipo.title())}\n"
         f"*Ciudad/País:* {md_escape(ciudad)}\n"

@@ -1,5 +1,5 @@
 /**
- * CAZADOR DE SUEÑOS CIGARS - Modal del Carrito de Compras
+ * Cazador de Sueño Cigars SRL - Modal del Carrito de Compras
  * UI del carrito lateral con diseño premium
  */
 

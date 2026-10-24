@@ -21,7 +21,7 @@ const HOUSE_WHATSAPP_E164 =
   process.env.HOUSE_WHATSAPP_E164 ||
   String(HOUSE_WHATSAPP_DISPLAY).replace(/\D/g, '') ||
   '18094645016';
-const HOUSE_EMAIL = process.env.HOUSE_EMAIL || 'cazadordesueno2024@gmail.com';
+const HOUSE_EMAIL = process.env.HOUSE_EMAIL || 'cazadordesueno1@gmail.com';
 const LOG_REPLIES = String(process.env.LOG_REPLIES || 'true').toLowerCase() !== 'false';
 
 const MAX_MESSAGE_CHARS = 2000;
@@ -200,7 +200,7 @@ function normalizeLead(lead, language, ip) {
 
 function whatsappUrlForLead(lead) {
   const lines = [
-    'Consulta B2B — Cazador de Sueños Cigars',
+    'Consulta B2B — Cazador de Sueño Cigars SRL',
     `Nombre: ${lead.nombre || '—'}`,
     `Empresa: ${lead.empresa || '—'}`,
     `País / ciudad: ${[lead.pais, lead.ciudad].filter(Boolean).join(', ') || '—'}`,

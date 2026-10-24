@@ -37,7 +37,7 @@ _deadline_isla: float | None = None
 
 USER_AGENT = os.getenv(
     "OSM_USER_AGENT",
-    "CazadorDeSuenosB2B/1.0 (B2B wholesale outreach; contact: ventas@cazadordesuenocigars.com)",
+    "CazadorDeSuenosB2B/1.0 (B2B wholesale outreach; contact: cazadordesueno1@gmail.com)",
 )
 ISO_PATH = data_file("osm_iso3166.json")
 

@@ -3,7 +3,7 @@
   "direction": "ltr",
   "translations": {
     "age_gate": {
-      "title": "Cazador de Sueños Cigars",
+      "title": "Cazador de Sueño Cigars SRL",
       "eyebrow": "年龄验证",
       "text": "本网站包含仅限法定年龄成人使用的烟草产品信息。请确认您已年满21岁方可继续。",
       "enter": "是的，我已年满21岁",
@@ -11,7 +11,7 @@
       "legal": "进入本网站即表示您确认符合您所在司法管辖区的法定年龄要求。"
     },
     "header": {
-      "brand": "Cazador de Sueños",
+      "brand": "Cazador de Sueño Cigars SRL",
       "nav": {
         "legacy": "传承",
         "mastery": "工艺",
@@ -37,7 +37,7 @@
     },
     "hero": {
       "eyebrow": "Cerro Angola · 多米尼加共和国",
-      "title": "Cazador de Sueños",
+      "title": "Cazador de Sueño Cigars SRL",
       "subtitle": "家族传统与科学精度的交汇之处。",
       "cta": "探索系列"
     },
@@ -80,7 +80,7 @@
     "mission_vision": {
       "label": "我们的身份",
       "title": "使命、愿景和价值观",
-      "intro": "Cazador de Sueños Sigar SRL — 传统、卓越和承诺",
+      "intro": "Cazador de Sueño Cigars SRL — 传统、卓越和承诺",
       "mission": {
         "title": "使命",
         "text": "使用最优质的烟叶和专业工艺生产高品质雪茄，通过卓越、责任、对员工的尊重以及烟草行业的可持续发展来满足客户的期望。"
@@ -92,13 +92,41 @@
       "values": {
         "title": "价值观",
         "items": [
-          {"key": "quality", "label": "质量", "text": "在生产每个阶段保持最高标准。"},
-          {"key": "commitment", "label": "承诺", "text": "负责任地满足客户、合作伙伴和员工的需求。"},
-          {"key": "tradition", "label": "传统", "text": "传承雪茄制作艺术的遗产和文化。"},
-          {"key": "integrity", "label": "诚信", "text": "以诚实、道德和透明的方式行事。"},
-          {"key": "innovation", "label": "创新", "text": "持续改进我们的工艺和产品。"},
-          {"key": "teamwork", "label": "团队合作", "text": "促进合作和相互尊重。"},
-          {"key": "responsibility", "label": "社会和环境责任", "text": "为社区福祉和环境保护做出贡献。"}
+          {
+            "key": "quality",
+            "label": "质量",
+            "text": "在生产每个阶段保持最高标准。"
+          },
+          {
+            "key": "commitment",
+            "label": "承诺",
+            "text": "负责任地满足客户、合作伙伴和员工的需求。"
+          },
+          {
+            "key": "tradition",
+            "label": "传统",
+            "text": "传承雪茄制作艺术的遗产和文化。"
+          },
+          {
+            "key": "integrity",
+            "label": "诚信",
+            "text": "以诚实、道德和透明的方式行事。"
+          },
+          {
+            "key": "innovation",
+            "label": "创新",
+            "text": "持续改进我们的工艺和产品。"
+          },
+          {
+            "key": "teamwork",
+            "label": "团队合作",
+            "text": "促进合作和相互尊重。"
+          },
+          {
+            "key": "responsibility",
+            "label": "社会和环境责任",
+            "text": "为社区福祉和环境保护做出贡献。"
+          }
         ]
       }
     },
@@ -130,7 +158,7 @@
     },
     "sommelier": {
       "fab_label": "酒窖侍酒师 — 品牌顾问",
-      "kicker": "Cazador de Sueños",
+      "kicker": "Cazador de Sueño Cigars SRL",
       "title": "酒窖侍酒师",
       "welcome": "欢迎来到酒窖。我是本宅的调配大师。您是在寻找维托拉推荐、品鉴笔记，还是代表经销商？",
       "placeholder": "请写下您的咨询…",
@@ -145,7 +173,7 @@
     },
     "footer": {
       "tagline": "工厂位于圣地亚哥·德洛斯卡瓦列罗斯，多米尼加共和国",
-      "copy": "© 2026 Cazador de Sueños Cigars. 版权所有。"
+      "copy": "© 2026 Cazador de Sueño Cigars SRL. 版权所有。"
     },
     "maestria": {
       "label": "工艺",
@@ -155,7 +183,7 @@
       "chapter1": {
         "kicker": "起源 · 圣何塞·德拉斯马塔斯",
         "title": "我们的故事从这里开始。",
-        "text": "在多米尼加共和国的土地上，在松树、雾气和新鲜土壤之间，Cazador de Sueños的记忆开始了。我们不是来自办公室。我们来自山脉。",
+        "text": "在多米尼加共和国的土地上，在松树、雾气和新鲜土壤之间，Cazador de Sueño Cigars SRL的记忆开始了。我们不是来自办公室。我们来自山脉。",
         "note": "中央山脉 · 多米尼加共和国"
       },
       "chapter2": {
@@ -192,12 +220,73 @@
         "kicker": "传承",
         "text1": "一切始于多米尼加共和国北部地区，我们家族的一位祖先在那里致力于烟草的种植和加工。随着时间的推移，他掌握了发酵的秘密，这是作为用努力、耐心和激情建立的传承的一部分传给后代的有价值知识。",
         "text2": "多年来，每一代人都贡献了他们的经验，保留了对这一高尚职业的传统和热爱。最初作为家庭教学的东西变成了加强我们身份和对质量承诺的传承。",
-        "text3": "受这一传承的启发，并受与世界分享我们激情的梦想的指引，Cazador de Sueños Cigars诞生了。我们的名字代表了那些从未停止相信自己的理想并努力将其变为现实的人的毅力。",
+        "text3": "受这一传承的启发，并受与世界分享我们激情的梦想的指引，Cazador de Sueño Cigars SRL诞生了。我们的名字代表了那些从未停止相信自己的理想并努力将其变为现实的人的毅力。",
         "text4": "今天，我们制作的每支雪茄都是对我们的祖先、对我们的土地和对使这条道路成为可能的梦想的致敬。不仅仅是一个品牌，我们是家族故事的延续，这个故事仍然活在每一片烟草叶中，在我们提供的每一次体验中。",
-        "note": "Cazador de Sueños Sigar SRL"
+        "note": "Cazador de Sueño Cigars SRL"
       }
     },
     "vitolas": {
+      "brand": {
+        "pairing": {
+          "title": "推荐搭配",
+          "spirit": "烈酒",
+          "coffee": "咖啡",
+          "bite": "佐餐",
+          "moment": "时刻"
+        },
+        "pairings": {
+          "emperador": {
+            "spirit": "多米尼加陈年朗姆酒",
+            "coffee": "哈拉巴科阿滴滤咖啡",
+            "bite": "70%黑巧克力",
+            "moment": "露台上的悠长午后"
+          },
+          "puro_habano": {
+            "spirit": "斯佩塞单一麦芽威士忌",
+            "coffee": "可塔朵咖啡",
+            "bite": "烤核桃",
+            "moment": "牛排晚餐之后"
+          },
+          "exquisito": {
+            "spirit": "XO干邑",
+            "coffee": "意式浓缩",
+            "bite": "海盐黑巧克力",
+            "moment": "从容的庆祝时刻"
+          },
+          "rango": {
+            "spirit": "琥珀朗姆酒或马尔贝克",
+            "coffee": "美式咖啡",
+            "bite": "烤杏仁",
+            "moment": "午餐之后"
+          },
+          "ligero": {
+            "spirit": "艾雷岛泥煤威士忌",
+            "coffee": "芮斯崔朵",
+            "bite": "无花果干",
+            "moment": "为夜晚收尾"
+          },
+          "sultan": {
+            "spirit": "多米尼加特级陈年朗姆酒",
+            "coffee": "双份意式浓缩",
+            "bite": "黑可可",
+            "moment": "丰盛晚餐之后"
+          }
+        },
+        "seal": {
+          "label": "原产地印记",
+          "title": "多米尼加共和国手工制作",
+          "text": "每支雪茄都在我们位于圣地亚哥-德洛斯卡瓦列罗斯的工厂手工卷制，并在发货前逐一检验。",
+          "place": "圣地亚哥-德洛斯卡瓦列罗斯 · 多米尼加"
+        },
+        "b2b": {
+          "label": "批发与出口",
+          "title": "您经营雪茄吧、门店或分销公司？",
+          "text": "批量价格、批发目录与国际配送。联系我们，我们将发送合作条件。",
+          "cta": "批发条件",
+          "whatsapp": "出口 WhatsApp"
+        },
+        "legal_age": "仅限21岁及以上成年人购买。吸烟有害健康。"
+      },
       "back_to_catalog": "← 返回目录",
       "gallery": {
         "single_cigar": "单支雪茄",
@@ -223,7 +312,7 @@
         "badge": "第一个梦想",
         "section_label": "起源",
         "title": "皇帝",
-        "subtitle": "Cazador de Sueños工厂诞生的第一支雪茄。活着的历史、家族传承和开启一切的梦想。",
+        "subtitle": "Cazador de Sueño Cigars SRL工厂诞生的第一支雪茄。活着的历史、家族传承和开启一切的梦想。",
         "concept_title": "独特概念",
         "concept_text": "工厂的创始雪茄，在我祖父教给我的特殊烟草发酵秘密下创造。它不仅仅是一个型号：它是整个品牌的起点，第一个为传承命名的烟雾。",
         "seal": "特殊发酵",
@@ -390,6 +479,27 @@
         },
         "mystique": "苏丹不要求时间：它要求注意。它是第六型号，最后的话语和品牌最多米尼加的 — 锡巴奥转化为烟雾、力量、传统。"
       }
+    },
+    "checkout": {
+      "trust": {
+        "secure_title": "安全支付",
+        "secure_text": "通过 PayPal 或直接转账至工厂账户。我们不保存任何银行卡信息。",
+        "humidity_title": "密封包装",
+        "humidity_text": "采用控湿密封包装，让雪茄抵达时如同刚离开保湿柜。",
+        "origin_title": "工厂正品",
+        "origin_text": "于多米尼加共和国圣地亚哥-德洛斯卡瓦列罗斯手工卷制。",
+        "age": "仅限21岁及以上成年人购买。"
+      },
+      "unavailable": "暂不可用",
+      "bank": {
+        "online": "打开网上银行",
+        "copy": "复制",
+        "copied": "已复制",
+        "copy_failed": "请手动复制",
+        "step_copy": "复制账号并打开您的网上银行。",
+        "step_transfer": "根据您的账户，以多米尼加比索或美元转账准确的总金额。"
+      },
+      "paypal_sandbox": "PayPal 处于测试模式：不会扣除真实款项。如需立即购买，请使用银行转账。"
     }
   }
 }

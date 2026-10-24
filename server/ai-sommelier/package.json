@@ -2,7 +2,7 @@
   "name": "cds-ai-sommelier",
   "private": true,
   "version": "1.0.0",
-  "description": "Endpoint seguro del sommelier virtual de Cazador de Sueños Cigars",
+  "description": "Endpoint seguro del sommelier virtual de Cazador de Sueño Cigars SRL",
   "main": "server.js",
   "engines": {
     "node": ">=18"

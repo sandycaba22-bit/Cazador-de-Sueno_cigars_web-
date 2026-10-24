@@ -1,4 +1,4 @@
-# Aviso B2B de Cazador de Sueños
+# Aviso B2B de Cazador de Sueño Cigars SRL
 
 El script recibe un prospecto que ya tienes y te deja en Telegram el borrador listo para enviar. El foco comercial es abrir con **El Sultán** y **Ligero 007** ante distribuidores, lounges y tiendas de puro premium.
 

@@ -163,7 +163,7 @@ function createCardnetGateway(cardnetConfig) {
         Amount: amountMinorUnits,
         Currency: currency,
         Capture: cardnetConfig.captureImmediately,
-        Description: `Cazador de Suenos ${ctx.orderReference}`.slice(0, 50),
+        Description: `Cazador de Sueño Cigars SRL ${ctx.orderReference}`.slice(0, 50),
         // Cierra la puerta a cobros duplicados si el cliente hace doble clic o
         // si la red corta la respuesta y el navegador reintenta.
         UniqueID: ctx.idempotencyKey,

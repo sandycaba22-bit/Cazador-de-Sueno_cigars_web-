@@ -41,7 +41,7 @@
         <header class="ca__head">
           <div class="ca__head-mark" aria-hidden="true">CS</div>
           <div>
-            <p class="ca__head-kicker">Cazador de Sueños</p>
+            <p class="ca__head-kicker">Cazador de Sueño Cigars SRL</p>
             <strong>Concierge de pago</strong>
             <small>Transferencia, PayPal o envío — sin datos de tarjeta</small>
           </div>
@@ -218,8 +218,9 @@
    */
   window.addEventListener('checkout:error', (event) => {
     lastError = (event.detail && event.detail.message) || '';
-    if (opened) return;
-    document.getElementById('ca-dot').hidden = false;
+    const dot = document.getElementById('ca-dot');
+    if (opened || !dot) return;
+    dot.hidden = false;
     renderChips(['¿Por qué falló mi pago?', 'Quiero pagar por transferencia']);
   });
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=Cazador de Sueños — AI Sommelier (Gemini)
+Description=Cazador de Sueño Cigars SRL — AI Sommelier (Gemini)
 After=network.target
 
 [Service]
