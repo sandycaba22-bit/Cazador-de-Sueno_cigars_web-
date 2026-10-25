@@ -377,7 +377,9 @@ body[data-page="wholesale"] .age-gate__actions .btn {
   color: rgba(248, 245, 239, 0.7);
 }
 
-.b2b-access input[type="text"] {
+.b2b-access input[type="text"],
+.b2b-access input[type="email"],
+.b2b-access input[type="tel"] {
   width: 100%;
   min-width: 0;
   min-height: 2.8rem;

@@ -193,6 +193,18 @@
     }
   }
 
+  function registrarSolicitud(body) {
+    try {
+      fetch('/api/commerce/wholesale/solicitud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).catch(function () { /* el portal no depende de la nube */ });
+    } catch (error) {
+      /* navegador sin fetch */
+    }
+  }
+
   function ageAccepted() {
     return document.cookie.indexOf('cds_age_gate=accepted') !== -1;
   }
@@ -614,6 +626,13 @@
       board.hidden = false;
       panel.setAttribute('aria-labelledby', 'wholesale-board-title');
       renderTable();
+      registrarSolicitud({
+        tipo: 'acceso',
+        empresa: company,
+        pais: country,
+        correo: doc.getElementById('wholesale-email').value.trim(),
+        telefono: doc.getElementById('wholesale-phone').value.trim(),
+      });
       doc.getElementById('wholesale-download').focus();
     });
 
@@ -644,6 +663,20 @@
       var message = orderMessage(quote, lang);
       send.hidden = false;
       send.href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(message);
+      var access = readAccess() || {};
+      registrarSolicitud({
+        tipo: 'cotizacion',
+        empresa: access.company || '',
+        pais: access.country || '',
+        correo: doc.getElementById('wholesale-email') ? doc.getElementById('wholesale-email').value.trim() : '',
+        telefono: doc.getElementById('wholesale-phone') ? doc.getElementById('wholesale-phone').value.trim() : '',
+        volumen: quote.units,
+        tier: quote.tier.id,
+        totalUsd: quote.total,
+        vitolas: quote.lines.filter(function (line) { return line.qty > 0; }).map(function (line) {
+          return { id: line.product.id, qty: line.qty };
+        }),
+      });
       send.focus();
     });
 

@@ -123,6 +123,35 @@ def _telegram_post(token: str, method: str, payload: dict) -> dict | None:
         return None
 
 
+def _cerrar_botones(token: str, chat_id: str, cb: dict) -> None:
+    cb_id = cb.get("id")
+    if cb_id:
+        _telegram_post(token, "answerCallbackQuery", {"callback_query_id": cb_id})
+    msg_id = (cb.get("message") or {}).get("message_id")
+    if msg_id:
+        _telegram_post(
+            token,
+            "editMessageReplyMarkup",
+            {"chat_id": chat_id, "message_id": msg_id, "reply_markup": {"inline_keyboard": []}},
+        )
+
+
+def _manejar_solicitud_precio(token: str, chat_id: str, cb: dict, data: str) -> str | None:
+    cid = str((cb.get("message") or {}).get("chat", {}).get("id", ""))
+    if cid != str(chat_id):
+        return None
+    estado = "aprobado" if data.startswith("b2ba:") else "rechazado"
+    solicitud_id = data.split(":", 1)[-1]
+    from b2b.supabase_client import actualizar_solicitud
+
+    guardado = actualizar_solicitud(solicitud_id, estado)
+    _cerrar_botones(token, chat_id, cb)
+    etiqueta = "✅ Acceso aprobado" if estado == "aprobado" else "🗑 Acceso rechazado"
+    if not guardado:
+        return f"{etiqueta} ({solicitud_id}). Supabase no confirmó el cambio."
+    return f"{etiqueta} ({solicitud_id})."
+
+
 def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
     from b2b.telegram_gestion import (
         agregar_no_contactar,
@@ -132,6 +161,8 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
     )
 
     data = (cb.get("data") or "").strip()
+    if data.startswith("b2ba:") or data.startswith("b2bx:"):
+        return _manejar_solicitud_precio(token, chat_id, cb, data)
     if not data.startswith("b2b"):
         return None
     cid = str((cb.get("message") or {}).get("chat", {}).get("id", ""))

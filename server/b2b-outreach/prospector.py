@@ -254,6 +254,13 @@ def encolar(
             res[categoria].append({"nombre": nombre, "archivo": path.name})
             if marcar:
                 marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
+                if not simulado:
+                    try:
+                        from b2b.supabase_client import guardar_lead_b2b
+
+                        guardar_lead_b2b(payload)
+                    except Exception as exc:
+                        registrar_evento({"evento": "supabase_lead_fallo", "error": str(exc)[:200]})
                 escritos.append(path)
                 if failed_previo is not None and failed_previo.is_file():
                     try:

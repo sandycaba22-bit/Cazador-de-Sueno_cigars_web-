@@ -20,6 +20,7 @@ const { parseCheckoutInput } = require('./validation');
 const { createGatewayRegistry } = require('./gateways');
 const { createOrdersStore } = require('./orders-store');
 const { createRateLimiter } = require('./rate-limit');
+const { normalizarSolicitud, guardarSolicitud, avisarTelegram } = require('./wholesale-b2b');
 
 const { APP_CONFIG } = require('../../js/config');
 const { getCountryList } = require('../../js/shipping');
@@ -76,6 +77,11 @@ function createCommerceApp({ config, logger, store, gateways }) {
     max: config.rateLimit.maxPayments,
     name: 'payments',
   });
+  const limitWholesale = createRateLimiter({
+    windowMs: config.rateLimit.windowMs,
+    max: 12,
+    name: 'wholesale',
+  });
 
   const router = createRouter();
 
@@ -112,6 +118,20 @@ function createCommerceApp({ config, logger, store, gateways }) {
       maxBoxesPerShipment: 10,
       contact: { whatsapp: config.contact.whatsapp, email: config.contact.email },
     });
+  });
+
+  router.post(`${BASE}/wholesale/solicitud`, async (ctx) => {
+    limitWholesale(ctx.clientIp);
+    const fila = normalizarSolicitud(await readJsonBody(ctx.req));
+    const guardada = await guardarSolicitud(fila);
+    const avisada = await avisarTelegram(fila);
+    ctx.log.info('wholesale.solicitud', {
+      id: fila.id,
+      tipo: fila.tipo,
+      guardada,
+      avisada,
+    });
+    sendJson(ctx.res, 202, { id: fila.id, guardada, avisada });
   });
 
   // ------------------------------------------------------------ cotización
