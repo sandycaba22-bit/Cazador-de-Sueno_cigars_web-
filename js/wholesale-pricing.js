@@ -1,20 +1,16 @@
 /**
  * Lista FOB y escalas de volumen del portal mayorista.
  *
- * Referencia de exportación (casas dominicanas de volumen, estilo La Aurora
- * o Davidoff): el FOB de distribuidor suele acercarse a la mitad del PVP,
- * pero con mínimos muy por encima de 2,000 puros, así el flete interno,
- * el empaque y el timbre se diluyen.
+ * Para sumar una vitola basta con agregar un objeto a LINES. La tabla,
+ * la calculadora, el PDF y el pedido leen ese arreglo: la cuenta no
+ * cambia. active: false deja la línea fuera (El Rango, stock limitado)
+ * sin borrarla del catálogo mayorista.
  *
- * Aquí el pedido de entrada empieza en 2,000 unidades. Para no dejar el
- * margen por debajo de producción + empaque + timbre + flete hasta el punto
- * FOB, la base (tier 1) es el 62% del precio de caja publicado dividido
- * entre los puros de esa caja. No se usa el puro suelto de la tienda:
- * El Sultán sale más caro en caja que suelto, y el mayorista recibe empaque.
- *
- * Tier 2 (5,000–9,999): −6% sobre esa base.
- * Tier 3 (10,000+): −10% sobre esa base (queda ~56% del PVP de caja).
- * El descuento sale del total de unidades del pedido, no de cada vitola.
+ * La base de entrada sigue en el 62% del precio de caja publicado
+ * dividido entre los puros de esa caja. Cubre producción, empaque,
+ * timbre y el flete hasta el punto FOB. El puro suelto de tienda no
+ * se usa. El descuento es del pedido completo y baja en escalones:
+ * 5,000 −7%, 10,000 −12%, 20,000 −16%.
  */
 (function (root, factory) {
   var api = factory();
@@ -35,16 +31,29 @@
     }
   }
 })(typeof window !== 'undefined' ? window : globalThis, function () {
-  var MOQ = 2000;
-  var TIER_2_MIN = 5000;
-  var TIER_3_MIN = 10000;
   var ENTRY_RATIO = 0.62;
-  var TIER_2_OFF = 0.06;
-  var TIER_3_OFF = 0.1;
   var ACCESS_KEY = 'cds_wholesale_access';
   var WHATSAPP = '18094645016';
 
-  var SPECS = [
+  /**
+   * Escalas de volumen. Un objeto nuevo aquí crea columna, ficha,
+   * precio y línea del PDF. off es el descuento sobre la base.
+   * min es inclusivo; max es inclusivo, o null si no hay techo.
+   */
+  var VOLUME_TIERS = [
+    { id: 1, min: 2000, max: 4999, off: 0 },
+    { id: 2, min: 5000, max: 9999, off: 0.07 },
+    { id: 3, min: 10000, max: 19999, off: 0.12 },
+    { id: 4, min: 20000, max: null, off: 0.16 },
+  ];
+
+  var MOQ = VOLUME_TIERS[0].min;
+
+  /**
+   * Vitolas del mayorista. active: false no entra en precios ni en
+   * el pedido; unavailableKey explica el motivo, en los dos idiomas.
+   */
+  var LINES = [
     {
       id: 'sultan',
       name: 'El Sultán',
@@ -77,7 +86,31 @@
       fallbackBox: 280,
       unitsPerBox: 20,
     },
+    {
+      id: 'exquisito',
+      name: 'El Exquisito',
+      nameEn: 'The Exquisite',
+      format: 'Gran Toro 58×6',
+      fallbackBox: 270,
+      unitsPerBox: 20,
+    },
+    {
+      id: 'rango',
+      name: 'El Rango',
+      nameEn: 'El Rango',
+      format: 'Doble Perfecto 60×4½',
+      fallbackBox: 160,
+      unitsPerBox: 10,
+      active: false,
+      unavailableKey: 'line.rango',
+    },
   ];
+
+  function activeLines() {
+    return LINES.filter(function (line) {
+      return line.active !== false;
+    });
+  }
 
   function money(value) {
     return Math.round(value * 100 + 1e-8) / 100;
@@ -98,11 +131,15 @@
   }
 
   function buildProducts() {
-    return SPECS.map(function (spec) {
+    return activeLines().map(function (spec) {
       var retail = findRetail(spec.id);
       var box = retail && typeof retail.pricePerBox === 'number' ? retail.pricePerBox : spec.fallbackBox;
       var units = retail && retail.unitsPerBox ? retail.unitsPerBox : spec.unitsPerBox;
       var base = money((box / units) * ENTRY_RATIO);
+      var prices = {};
+      VOLUME_TIERS.forEach(function (tier) {
+        prices[tier.id] = money(base * (1 - tier.off));
+      });
       return {
         id: spec.id,
         name: spec.name,
@@ -110,30 +147,29 @@
         format: spec.format,
         unitsPerBox: units,
         packagedRetail: money(box / units),
-        base: base,
-        tier2: money(base * (1 - TIER_2_OFF)),
-        tier3: money(base * (1 - TIER_3_OFF)),
+        base: prices[VOLUME_TIERS[0].id],
+        prices: prices,
       };
     });
   }
 
   function tierForUnits(units) {
     var total = Math.floor(Number(units) || 0);
-    if (total < MOQ) {
-      return { id: 0, discount: 0, eligible: false, min: MOQ, max: MOQ - 1 };
+    var first = VOLUME_TIERS[0];
+    if (total < first.min) {
+      return { id: 0, discount: 0, eligible: false, min: first.min, max: first.min - 1 };
     }
-    if (total >= TIER_3_MIN) {
-      return { id: 3, discount: TIER_3_OFF, eligible: true, min: TIER_3_MIN, max: null };
+    for (var i = VOLUME_TIERS.length - 1; i >= 0; i -= 1) {
+      var tier = VOLUME_TIERS[i];
+      if (total >= tier.min) {
+        return { id: tier.id, discount: tier.off, eligible: true, min: tier.min, max: tier.max };
+      }
     }
-    if (total >= TIER_2_MIN) {
-      return { id: 2, discount: TIER_2_OFF, eligible: true, min: TIER_2_MIN, max: TIER_3_MIN - 1 };
-    }
-    return { id: 1, discount: 0, eligible: true, min: MOQ, max: TIER_2_MIN - 1 };
+    return { id: first.id, discount: first.off, eligible: true, min: first.min, max: first.max };
   }
 
   function priceForTier(product, tierId) {
-    if (tierId === 2) return product.tier2;
-    if (tierId === 3) return product.tier3;
+    if (product.prices && product.prices[tierId] != null) return product.prices[tierId];
     return product.base;
   }
 
@@ -216,6 +252,36 @@
     return rgb + ' rg BT /F1 ' + size + ' Tf 1 0 0 1 ' + x + ' ' + y + ' Tm (' + pdfText(text) + ') Tj ET\n';
   }
 
+  function pdfInt(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function tierColumnLabel(tier) {
+    if (tier.max == null) return pdfInt(tier.min) + '+';
+    return pdfInt(tier.min) + '-' + pdfInt(tier.max);
+  }
+
+  function pdfColumns(count) {
+    var cols = [48, 146];
+    var start = 262;
+    var end = 536;
+    var slots = Math.max(count - 2, 1);
+    for (var i = 0; i < slots; i += 1) {
+      cols.push(Math.round(start + ((end - start) * i) / Math.max(slots - 1, 1)));
+    }
+    return cols;
+  }
+
+  function tierScheduleLine(tier, lang) {
+    var band = tier.max == null
+      ? tr('tier.open', { min: pdfInt(tier.min) }, lang)
+      : tr('tier.between', { min: pdfInt(tier.min), max: pdfInt(tier.max) }, lang);
+    var detail = tier.off
+      ? tr('tier.offShort', { pct: String(Math.round(tier.off * 100)) }, lang)
+      : tr('tier.baseShort', null, lang);
+    return band + ': ' + detail + '.';
+  }
+
   function buildPricePdf(lang) {
     var products = buildProducts();
     var code = lang === 'en' ? 'en' : 'es';
@@ -229,33 +295,36 @@
     var headers = [
       tr('pdf.colVitola', null, code),
       tr('pdf.colFormat', null, code),
-      '2,000-4,999',
-      '5,000-9,999',
-      '10,000+',
-    ];
-    var cols = [48, 168, 300, 400, 498];
+    ].concat(VOLUME_TIERS.map(function (tier) {
+      return tierColumnLabel(tier);
+    }));
+    var cols = pdfColumns(headers.length);
     var y = 710;
     headers.forEach(function (label, index) {
-      ops += pdfLine(cols[index], y, 9, '0.45 0.34 0.16', label);
+      ops += pdfLine(cols[index], y, 8, '0.45 0.34 0.16', label);
     });
     ops += '0.77 0.64 0.35 RG 48 ' + (y - 6) + ' m 547 ' + (y - 6) + ' l S\n';
 
+    var rowGap = 26;
     products.forEach(function (product, index) {
-      var rowY = 678 - index * 36;
+      var rowY = 678 - index * rowGap;
       var ink = '0.12 0.1 0.08';
-      ops += pdfLine(cols[0], rowY, 11, ink, code === 'en' ? product.nameEn : product.name);
-      ops += pdfLine(cols[1], rowY, 10, ink, product.format);
-      ops += pdfLine(cols[2], rowY, 11, ink, '$' + product.base.toFixed(2));
-      ops += pdfLine(cols[3], rowY, 11, ink, '$' + product.tier2.toFixed(2));
-      ops += pdfLine(cols[4], rowY, 11, ink, '$' + product.tier3.toFixed(2));
-      ops += '0.8 0.76 0.7 RG 48 ' + (rowY - 10) + ' m 547 ' + (rowY - 10) + ' l S\n';
+      ops += pdfLine(cols[0], rowY, 10, ink, code === 'en' ? product.nameEn : product.name);
+      ops += pdfLine(cols[1], rowY, 9, ink, product.format);
+      VOLUME_TIERS.forEach(function (tier, tierIndex) {
+        ops += pdfLine(cols[tierIndex + 2], rowY, 10, ink, '$' + priceForTier(product, tier.id).toFixed(2));
+      });
+      ops += '0.8 0.76 0.7 RG 48 ' + (rowY - 8) + ' m 547 ' + (rowY - 8) + ' l S\n';
     });
 
-    var notes = ['pdf.note1', 'pdf.note2', 'pdf.note3', 'pdf.note4', 'pdf.note5', 'pdf.note6', 'pdf.note7'].map(function (key) {
+    var notes = VOLUME_TIERS.map(function (tier) {
+      return tierScheduleLine(tier, code);
+    }).concat(['pdf.note1', 'pdf.note3', 'pdf.shipping', 'pdf.note4', 'pdf.paused', 'pdf.note6', 'pdf.note7'].map(function (key) {
       return tr(key, null, code);
-    });
+    }));
+    var noteY = 678 - products.length * rowGap - 18;
     notes.forEach(function (line, index) {
-      ops += pdfLine(48, 500 - index * 18, 10, '0.2 0.16 0.12', line);
+      ops += pdfLine(48, noteY - index * 16, 9, '0.2 0.16 0.12', line);
     });
 
     var objects = [
@@ -330,6 +399,9 @@
     var lastFocus = null;
     var lastQuote = null;
 
+    ensureCatalog();
+    renderTable();
+
     function orderMessage(quote, lang) {
       var access = readAccess();
       var summary = quote.lines
@@ -356,25 +428,114 @@
       return lang === 'en' ? product.nameEn : product.name;
     }
 
+    function ensureCatalog() {
+      var tierHost = doc.querySelector('[data-wholesale-tiers]');
+      if (tierHost && !tierHost.childElementCount) {
+        VOLUME_TIERS.forEach(function (tier) {
+          var article = doc.createElement('article');
+          article.className = 'b2b-tier';
+          article.setAttribute('data-tier-chip', String(tier.id));
+          var title = doc.createElement('strong');
+          var text = doc.createElement('span');
+          article.appendChild(title);
+          article.appendChild(text);
+          tierHost.appendChild(article);
+        });
+      }
+
+      var headRow = doc.querySelector('.b2b-price-table thead tr');
+      if (headRow) {
+        VOLUME_TIERS.forEach(function (tier) {
+          if (headRow.querySelector('[data-tier-col="' + tier.id + '"]')) return;
+          var cell = doc.createElement('th');
+          cell.scope = 'col';
+          cell.setAttribute('data-tier-col', String(tier.id));
+          headRow.appendChild(cell);
+        });
+      }
+
+      var tbody = doc.querySelector('.b2b-price-table tbody');
+      var grid = orderForm.querySelector('.b2b-order__grid');
+      activeLines().forEach(function (spec) {
+        if (tbody && !tbody.querySelector('[data-wholesale-row="' + spec.id + '"]')) {
+          var row = doc.createElement('tr');
+          row.setAttribute('data-wholesale-row', spec.id);
+          var nameCell = doc.createElement('th');
+          nameCell.scope = 'row';
+          nameCell.setAttribute('data-col', 'name');
+          var formatCell = doc.createElement('td');
+          formatCell.setAttribute('data-col', 'format');
+          row.appendChild(nameCell);
+          row.appendChild(formatCell);
+          VOLUME_TIERS.forEach(function (tier) {
+            var priceCell = doc.createElement('td');
+            priceCell.setAttribute('data-col', 'tier' + tier.id);
+            priceCell.setAttribute('data-tier-col', String(tier.id));
+            row.appendChild(priceCell);
+          });
+          tbody.appendChild(row);
+        }
+        if (grid && !grid.querySelector('[data-qty="' + spec.id + '"]')) {
+          var label = doc.createElement('label');
+          label.setAttribute('data-qty-label', spec.id);
+          var name = doc.createElement('span');
+          name.setAttribute('data-qty-name', '');
+          var input = doc.createElement('input');
+          input.type = 'number';
+          input.min = '0';
+          input.step = '1';
+          input.inputMode = 'numeric';
+          input.value = '0';
+          input.setAttribute('data-qty', spec.id);
+          label.appendChild(name);
+          label.appendChild(input);
+          grid.appendChild(label);
+        }
+      });
+    }
+
     function renderTable() {
       var lang = langOf(doc);
       var products = buildProducts();
+      VOLUME_TIERS.forEach(function (tier) {
+        var pct = Math.round(tier.off * 100);
+        var chip = doc.querySelector('[data-tier-chip="' + tier.id + '"]');
+        if (chip) {
+          chip.querySelector('strong').textContent = tier.off
+            ? tr('tier.chipTitleOff', { id: tier.id, pct: pct }, lang)
+            : tr('tier.chipTitleBase', { id: tier.id }, lang);
+          var band = tier.max == null
+            ? tr('tier.open', { min: formatInt(tier.min, lang) }, lang)
+            : tr('tier.between', { min: formatInt(tier.min, lang), max: formatInt(tier.max, lang) }, lang);
+          var detail = tier.off
+            ? tr('tier.chipOff', { pct: pct }, lang)
+            : tr('tier.chipBase', null, lang);
+          chip.querySelector('span').textContent = band + '. ' + detail;
+        }
+        var head = doc.querySelector('.b2b-price-table thead [data-tier-col="' + tier.id + '"]');
+        if (head) {
+          head.textContent = tier.off
+            ? tr('tier.colOff', { pct: pct }, lang)
+            : tr('tier.colBase', null, lang);
+        }
+      });
       products.forEach(function (product) {
         var row = doc.querySelector('[data-wholesale-row="' + product.id + '"]');
-        if (!row) return;
-        var nameCell = row.querySelector('[data-col="name"]');
-        var formatCell = row.querySelector('[data-col="format"]');
-        if (nameCell) nameCell.textContent = productName(product, lang);
-        if (formatCell) formatCell.textContent = product.format;
-        row.querySelector('[data-col="tier1"]').textContent = formatUsd(product.base, lang);
-        row.querySelector('[data-col="tier2"]').textContent = formatUsd(product.tier2, lang);
-        row.querySelector('[data-col="tier3"]').textContent = formatUsd(product.tier3, lang);
+        if (row) {
+          row.querySelector('[data-col="name"]').textContent = productName(product, lang);
+          row.querySelector('[data-col="format"]').textContent = product.format;
+          VOLUME_TIERS.forEach(function (tier) {
+            row.querySelector('[data-col="tier' + tier.id + '"]').textContent = formatUsd(priceForTier(product, tier.id), lang);
+          });
+        }
+        var qtyName = orderForm.querySelector('[data-qty-label="' + product.id + '"] [data-qty-name]');
+        if (qtyName) qtyName.textContent = productName(product, lang);
       });
     }
 
     function readQuantities() {
       var quantities = {};
-      SPECS.forEach(function (spec) {
+      activeLines().forEach(function (spec) {
         var input = orderForm.querySelector('[data-qty="' + spec.id + '"]');
         quantities[spec.id] = input ? input.value : 0;
       });
@@ -549,8 +710,8 @@
 
   return {
     MOQ: MOQ,
-    TIER_2_MIN: TIER_2_MIN,
-    TIER_3_MIN: TIER_3_MIN,
+    VOLUME_TIERS: VOLUME_TIERS,
+    LINES: LINES,
     ENTRY_RATIO: ENTRY_RATIO,
     buildProducts: buildProducts,
     tierForUnits: tierForUnits,

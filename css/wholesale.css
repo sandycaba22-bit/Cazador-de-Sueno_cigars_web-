@@ -412,9 +412,36 @@ body[data-page="wholesale"] .age-gate__actions .btn {
   font-size: 0.88rem;
 }
 
+.b2b-fob-note {
+  margin: 1.15rem auto 0;
+  max-width: 42rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 10px;
+  background: rgba(212, 175, 55, 0.12);
+  color: #f6ead0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.b2b-sheet .b2b-fob-note {
+  margin: 0 0 1rem;
+  max-width: none;
+  text-align: start;
+}
+
+.b2b-limited {
+  margin: 0;
+  color: rgba(248, 245, 239, 0.72);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
 .b2b-tiers {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   gap: 0.7rem;
   margin: 0 0 1rem;
 }
@@ -457,7 +484,7 @@ body[data-page="wholesale"] .age-gate__actions .btn {
 .b2b-price-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 640px;
+  min-width: 760px;
   font-size: 0.92rem;
 }
 
@@ -575,7 +602,7 @@ body[data-page="wholesale"] .age-gate__actions .btn {
   }
 
   .b2b-tiers {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   }
 
   .b2b-order__grid {

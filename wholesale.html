@@ -138,6 +138,8 @@
               >Consultas de mayoristas</a>
             </div>
 
+            <p class="b2b-fob-note" data-i18n="shipping.note">Los precios mostrados son de fábrica (FOB). El costo de envío se cobra por separado.</p>
+
             <p class="b2b-text b2b-sales">
               <span data-i18n="sales.label">Correo de ventas:</span>
               <a href="mailto:cazadordesueno1@gmail.com">cazadordesueno1@gmail.com</a>
@@ -193,73 +195,25 @@
           <section data-wholesale-board hidden>
             <h2 id="wholesale-board-title" class="b2b-sheet__title" data-i18n="board.title">📊 Precios para mayorista</h2>
             <p class="b2b-sheet__lead" data-i18n="board.lead">
-              USD por puro, FOB República Dominicana. Incluyen producción, empaque de exportación y timbre. El flete internacional y los aranceles del destino se cotizan aparte.
+              USD por puro. Incluyen producción, empaque de exportación y timbre.
             </p>
-            <div class="b2b-tiers">
-              <article class="b2b-tier" data-tier-chip="1">
-                <strong data-i18n="tier1.title">Tier 1 · Mínimo</strong>
-                <span data-i18n="tier1.text">2,000 a 4,999 unidades. Precio base de entrada.</span>
-              </article>
-              <article class="b2b-tier" data-tier-chip="2">
-                <strong data-i18n="tier2.title">Tier 2 · −6%</strong>
-                <span data-i18n="tier2.text">5,000 a 9,999 unidades. 6% de descuento sobre la base.</span>
-              </article>
-              <article class="b2b-tier" data-tier-chip="3">
-                <strong data-i18n="tier3.title">Tier 3 · −10%</strong>
-                <span data-i18n="tier3.text">10,000 unidades o más. 10% de descuento sobre la base.</span>
-              </article>
-            </div>
+            <p class="b2b-fob-note" data-i18n="shipping.note">Los precios mostrados son de fábrica (FOB). El costo de envío se cobra por separado.</p>
+            <div class="b2b-tiers" data-wholesale-tiers></div>
             <div class="b2b-price-wrap">
               <table class="b2b-price-table">
                 <thead>
                   <tr>
                     <th scope="col" data-i18n="table.vitola">Vitola</th>
                     <th scope="col" data-i18n="table.format">Formato</th>
-                    <th scope="col" data-tier-col="1" data-i18n="table.base">Base</th>
-                    <th scope="col" data-tier-col="2">−6%</th>
-                    <th scope="col" data-tier-col="3">−10%</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr data-wholesale-row="sultan">
-                    <th scope="row" data-col="name">El Sultán</th>
-                    <td data-col="format"></td>
-                    <td data-col="tier1" data-tier-col="1"></td>
-                    <td data-col="tier2" data-tier-col="2"></td>
-                    <td data-col="tier3" data-tier-col="3"></td>
-                  </tr>
-                  <tr data-wholesale-row="ligero">
-                    <th scope="row" data-col="name">Ligero 007</th>
-                    <td data-col="format"></td>
-                    <td data-col="tier1" data-tier-col="1"></td>
-                    <td data-col="tier2" data-tier-col="2"></td>
-                    <td data-col="tier3" data-tier-col="3"></td>
-                  </tr>
-                  <tr data-wholesale-row="emperador">
-                    <th scope="row" data-col="name">El Emperador</th>
-                    <td data-col="format"></td>
-                    <td data-col="tier1" data-tier-col="1"></td>
-                    <td data-col="tier2" data-tier-col="2"></td>
-                    <td data-col="tier3" data-tier-col="3"></td>
-                  </tr>
-                  <tr data-wholesale-row="puro-habano">
-                    <th scope="row" data-col="name">Puro Habano</th>
-                    <td data-col="format"></td>
-                    <td data-col="tier1" data-tier-col="1"></td>
-                    <td data-col="tier2" data-tier-col="2"></td>
-                    <td data-col="tier3" data-tier-col="3"></td>
-                  </tr>
-                </tbody>
+                <tbody></tbody>
               </table>
             </div>
             <form id="wholesale-order-form" class="b2b-order">
               <p class="b2b-sheet__note" data-i18n="order.note">Indica las unidades de cada vitola. El descuento sale del total del pedido. Menos de 2,000 unidades no se procesa.</p>
-              <div class="b2b-order__grid">
-                <label>El Sultán <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="sultan" /></label>
-                <label>Ligero 007 <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="ligero" /></label>
-                <label>El Emperador <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="emperador" /></label>
-                <label>Puro Habano <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="puro-habano" /></label>
-              </div>
+              <div class="b2b-order__grid"></div>
+              <p class="b2b-limited" data-i18n="line.rango">El Rango no está en la calculadora: stock limitado.</p>
               <p id="wholesale-moq-alert" class="b2b-moq-alert" role="alert" hidden></p>
               <div id="wholesale-quote" class="b2b-quote" hidden></div>
               <div class="b2b-sheet__actions">
