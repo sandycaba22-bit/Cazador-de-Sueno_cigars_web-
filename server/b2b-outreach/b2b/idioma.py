@@ -4,7 +4,7 @@ from b2b.country_rules import buscar_pais
 from b2b.website import web_confiable_para_idioma
 
 PAPIAMENTO_PAISES = {"aruba", "curacao", "curaçao"}
-IDIOMAS_BORRADOR = frozenset({"es", "en", "fr", "pt", "nl", "de", "it"})
+IDIOMAS_BORRADOR = frozenset({"es", "en", "fr", "pt", "nl", "de", "it", "zh"})
 
 # Idioma fijo del borrador por isla (gana a lo que diga la web del negocio).
 IDIOMA_ISLA = {
@@ -31,7 +31,12 @@ IDIOMA_ISLA = {
 def idioma_isla(pais: str) -> str:
     entry = buscar_pais(pais or "")
     nombre = (entry or {}).get("pais") or pais or ""
-    return IDIOMA_ISLA.get(nombre.strip().lower(), "")
+    fijo = IDIOMA_ISLA.get(nombre.strip().lower(), "")
+    if fijo:
+        return fijo
+    from b2b.mercados_exportacion import idioma_exportacion
+
+    return idioma_exportacion(nombre) or idioma_exportacion(pais or "")
 
 
 def idioma_para_lead(

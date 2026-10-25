@@ -24,6 +24,15 @@ OPT_OUT = {
     "de": "Wenn Sie keine weiteren Nachrichten wünschen, antworten Sie STOP.",
     "it": "Per non ricevere altri messaggi, risponda STOP.",
     "pt": "Se preferir não receber mais mensagens, responda STOP.",
+    "zh": "若不想再收到訊息，請回覆 STOP。",
+}
+
+AVISO_EDAD = {
+    "es": "La venta es solo para mayores de edad y negocios con licencia.",
+    "en": "Wholesale is for adults of legal age and licensed businesses only.",
+    "fr": "Vente réservée aux adultes et aux commerces titulaires d'une licence.",
+    "de": "Verkauf nur an Erwachsene und lizenzierte Unternehmen.",
+    "zh": "僅限成年人及持有許可的商家。",
 }
 
 MD_V2_SPECIAL = set(r"_*[]()~`>#+-=|{}.")
@@ -42,7 +51,8 @@ CARGO_VP = {
     "fr": "Vice-présidente, Ventes",
     "pt": "Vice-presidente, Vendas",
     "nl": "Vice President, Sales",
-    "de": "Vice President, Sales",
+    "de": "Vizepräsidentin, Vertrieb",
+    "zh": "銷售副總裁",
     "it": "Vice President, Sales",
 }
 EMPRESA_FIRMA = "Cazador de Sueño Cigars SRL"
@@ -342,21 +352,27 @@ def email_empresa() -> str:
 
 def linea_contacto(idioma: str) -> str:
     """Una línea con WhatsApp, correo y web de Cazador de Sueño para el borrador corto."""
-    etiqueta = {"es": "Contacto", "fr": "Contact", "pt": "Contato"}.get(idioma, "Contact")
+    etiqueta = {
+        "es": "Contacto", "fr": "Contact", "pt": "Contato", "de": "Kontakt", "zh": "聯絡",
+    }.get(idioma, "Contact")
     return f"{etiqueta}: WhatsApp {whatsapp_empresa()} · {email_empresa()} · {SITIO_WEB}"
 
 
 TIPO_IDIOMA = {
     "tienda": {"es": "tabaquería", "en": "cigar shop", "fr": "cave à cigares", "nl": "sigarenwinkel",
-               "pt": "tabacaria"},
+               "pt": "tabacaria", "de": "Zigarrenfachgeschäft", "zh": "雪茄專賣店"},
     "lounge": {"es": "lounge de cigarros", "en": "cigar lounge", "fr": "lounge cigare", "nl": "sigarenlounge",
-               "pt": "lounge de charutos"},
+               "pt": "lounge de charutos", "de": "Zigarrenlounge", "zh": "雪茄會所"},
     "distribuidor": {"es": "distribuidora", "en": "distribution business", "fr": "société de distribution",
-                     "nl": "distributiebedrijf", "pt": "distribuidora"},
-    "hotel": {"es": "hotel", "en": "hotel", "fr": "hôtel", "nl": "hotel", "pt": "hotel"},
-    "casino": {"es": "casino", "en": "casino", "fr": "casino", "nl": "casino", "pt": "casino"},
+                     "nl": "distributiebedrijf", "pt": "distribuidora", "de": "Zigarren-Großhandel",
+                     "zh": "雪茄批發商"},
+    "hotel": {"es": "hotel", "en": "hotel", "fr": "hôtel", "nl": "hotel", "pt": "hotel",
+              "de": "Hotel", "zh": "酒店"},
+    "casino": {"es": "casino", "en": "casino", "fr": "casino", "nl": "casino", "pt": "casino",
+               "de": "Casino", "zh": "賭場"},
     "duty_free": {"es": "tienda duty free", "en": "duty free shop", "fr": "boutique duty free",
-                  "nl": "duty-free winkel", "pt": "loja duty free"},
+                  "nl": "duty-free winkel", "pt": "loja duty free", "de": "Duty-Free-Geschäft",
+                  "zh": "免稅店"},
 }
 
 MUESTRAS = {
@@ -413,6 +429,7 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
             f"República Dominicana. Nos gustaría presentar nuestra línea a su {t}.\n"
             f"{aviso}Catálogo mayorista: {catalogo}\n"
             "Ofrecemos una muestra gratuita (free sample) para evaluación. ¿Conversamos?\n"
+            f"{AVISO_EDAD['es']}\n"
             f"{linea_contacto('es')}\n"
             f"Atentamente,\n{NOMBRE_VP} - {CARGO_VP['es']}"
         )
@@ -423,34 +440,119 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
             f"République dominicaine. Nous souhaitons présenter notre gamme à votre {t}.\n"
             f"{aviso}Catalogue grossiste : {catalogo}\n"
             "Un échantillon gratuit est disponible pour évaluation. Pouvons-nous échanger ?\n"
+            f"{AVISO_EDAD['fr']}\n"
             f"{linea_contacto('fr')}\n"
             f"Cordialement,\n{NOMBRE_VP} - {CARGO_VP['fr']}"
         )
-    
+    if idioma == "de":
+        return _validar(
+            f"Guten Tag, Team von {nombre},\n"
+            "wir sind Cazador de Sueño Cigars SRL, eine Manufaktur für handgerollte Premium-Zigarren "
+            f"in Santiago, Dominikanische Republik. Wir möchten unsere Linie Ihrem {t} vorstellen.\n"
+            f"{aviso}Großhandelskatalog: {catalogo}\n"
+            "Eine Handelsprobe steht lizenzierten Fachbetrieben zur Bewertung zur Verfügung.\n"
+            f"{AVISO_EDAD['de']}\n"
+            f"{linea_contacto('de')}\n"
+            f"Mit freundlichen Grüßen,\n{NOMBRE_VP} - {CARGO_VP['de']}"
+        )
+    if idioma == "zh":
+        return _validar(
+            f"{nombre} 團隊您好，\n"
+            "我們是 Cazador de Sueño Cigars SRL，多明尼加共和國聖地亞哥的精品手工雪茄工廠。"
+            f"希望向貴公司的{t}介紹我們的產品線。\n"
+            f"{aviso}批發目錄：{catalogo}\n"
+            "可向持牌商家提供樣品以供評估。\n"
+            f"{AVISO_EDAD['zh']}\n"
+            f"{linea_contacto('zh')}\n"
+            f"此致\n{NOMBRE_VP} - {CARGO_VP['zh']}"
+        )
+
     texto = (
         f"Hello {nombre} team,\n"
         f"We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {tipo_en_idioma(tipo, 'en')}.\n"
         f"{aviso}Wholesale Catalog: {catalogo}\n"
         "We're happy to provide a free sample for your consideration. Open to a brief chat?\n"
+        f"{AVISO_EDAD['en']}\n"
         f"{linea_contacto(idioma)}\n"
         "Best,\n"
         "Yaniris Agustina Ureña - VP of Sales"
     )
     return texto
 
+def _cuerpo_correo(idioma: str, nombre: str, tipo: str, catalogo: str, aviso: str) -> str:
+    t = tipo_en_idioma(tipo, idioma)
+    edad = AVISO_EDAD.get(idioma, AVISO_EDAD["en"])
+    baja = OPT_OUT.get(idioma, OPT_OUT["en"])
+    if idioma == "es":
+        return (
+            f"Asunto: Puros dominicanos para {nombre}\n\n"
+            f"Saludos, equipo de {nombre}.\n\n"
+            "Somos Cazador de Sueño Cigars SRL, fábrica de puros premium hechos a mano en Santiago "
+            f"de los Caballeros, República Dominicana. Queremos presentar nuestra línea a su {t}.\n\n"
+            f"{aviso}Catálogo mayorista: {catalogo}\n"
+            "Hay una muestra comercial para evaluación.\n"
+            f"{edad}\n\n"
+            "Atentamente,\n"
+            f"{NOMBRE_VP}\n{CARGO_VP['es']}\n{EMPRESA_FIRMA}\n"
+            f"{email_empresa()}\nWhatsApp {whatsapp_empresa()}\n{SITIO_WEB}\n\n{baja}"
+        )
+    if idioma == "fr":
+        return (
+            f"Objet : Cigares dominicains pour {nombre}\n\n"
+            f"Bonjour l'équipe de {nombre},\n\n"
+            "Nous sommes Cazador de Sueño Cigars SRL, manufacture de cigares premium faits main à "
+            f"Santiago de los Caballeros, République dominicaine. Nous souhaitons présenter notre gamme à votre {t}.\n\n"
+            f"{aviso}Catalogue grossiste : {catalogo}\n"
+            "Un échantillon commercial est disponible pour évaluation.\n"
+            f"{edad}\n\n"
+            "Cordialement,\n"
+            f"{NOMBRE_VP}\n{CARGO_VP['fr']}\n{EMPRESA_FIRMA}\n"
+            f"{email_empresa()}\nWhatsApp {whatsapp_empresa()}\n{SITIO_WEB}\n\n{baja}"
+        )
+    if idioma == "de":
+        return (
+            f"Betreff: Handgerollte dominikanische Zigarren für {nombre}\n\n"
+            f"Guten Tag, Team von {nombre},\n\n"
+            "wir sind Cazador de Sueño Cigars SRL, eine Manufaktur für handgerollte Premium-Zigarren "
+            "in Santiago de los Caballeros, Dominikanische Republik. Wir möchten unsere Linie "
+            f"Ihrem {t} vorstellen (Zigarren-Großhandel / Import).\n\n"
+            f"{aviso}Großhandelskatalog: {catalogo}\n"
+            "Eine Handelsprobe steht zur Bewertung bereit.\n"
+            f"{edad}\n\n"
+            "Mit freundlichen Grüßen,\n"
+            f"{NOMBRE_VP}\n{CARGO_VP['de']}\n{EMPRESA_FIRMA}\n"
+            f"{email_empresa()}\nWhatsApp {whatsapp_empresa()}\n{SITIO_WEB}\n\n{baja}"
+        )
+    return (
+        f"主旨：多明尼加手工雪茄 — {nombre}\n\n"
+        f"{nombre} 團隊您好，\n\n"
+        "我們是 Cazador de Sueño Cigars SRL，位於多明尼加共和國聖地亞哥的精品手工雪茄工廠。"
+        f"希望向貴公司的{t}提出出口合作。\n\n"
+        f"{aviso}批發目錄：{catalogo}\n"
+        "可提供樣品供持牌商家評估。\n"
+        f"{edad}\n\n"
+        "此致\n"
+        f"{NOMBRE_VP}\n{CARGO_VP['zh']}\n{EMPRESA_FIRMA}\n"
+        f"{email_empresa()}\nWhatsApp {whatsapp_empresa()}\n{SITIO_WEB}\n\n{baja}"
+    )
+
+
 def borrador_correo(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """Versión correo: asunto, firma de la VP y línea de STOP (solo en correo)."""
     nombre = (nombre_local or "").strip() or "there"
+    if idioma in {"es", "fr", "de", "zh"}:
+        catalogo, aviso = _catalogo(idioma)
+        return _validar(_cuerpo_correo(idioma, nombre, tipo, catalogo, aviso))
     catalogo, aviso = _catalogo("en")
     t = tipo_en_idioma(tipo, "en")
-    
     texto = (
         f"Subject: Handmade Dominican cigars for {nombre}\n\n"
         f"Hello {nombre} team,\n\n"
         "We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
         f"making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
         f"Wholesale catalog: {catalogo}\n"
-        "A free sample is available for evaluation. Would a short call work for you?\n\n"
+        "A free sample is available for evaluation. Would a short call work for you?\n"
+        f"{AVISO_EDAD['en']}\n\n"
         "Best regards,\n"
         "Yaniris Agustina Ureña\n"
         "Vice President, Sales\n"

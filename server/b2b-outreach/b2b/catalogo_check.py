@@ -25,7 +25,8 @@ AVISO_PDF_EN_INGLES = {
     "fr": "Le catalogue PDF est disponible en anglais :",
     "pt": "O catálogo PDF está disponível em inglês:",
     "nl": "The wholesale catalog PDF is available in English:",
-    "de": "The wholesale catalog PDF is available in English:",
+    "de": "Der Großhandelskatalog (PDF) liegt auf Englisch vor:",
+    "zh": "批發目錄 PDF 為英文：",
     "it": "The wholesale catalog PDF is available in English:",
 }
 
@@ -88,6 +89,8 @@ def _pdf_remoto_disponible(url: str) -> bool:
 
 
 def pdf_disponible(idioma: str) -> bool:
+    if (idioma or "en") not in IDIOMA_A_SUFIJO:
+        return False
     suffix = _suffix(idioma)
     if _pdf_local(suffix) is not None:
         return True

@@ -1,0 +1,32 @@
+{
+  "nota": "Cola de exportación. Canadá no entra. El envío al cliente no sale de este archivo: lo registra registro_control solo tras aprobación.",
+  "terminos": [
+    {"nivel": 1, "tipo": "distribuidor", "texto": "cigar distributor"},
+    {"nivel": 1, "tipo": "distribuidor", "texto": "tobacco importer wholesale"},
+    {"nivel": 1, "tipo": "duty_free", "texto": "duty free cigars"},
+    {"nivel": 1, "tipo": "duty_free", "texto": "airport cruise port duty free tobacco"},
+    {"nivel": 2, "tipo": "tienda", "texto": "cigar shop"},
+    {"nivel": 2, "tipo": "lounge", "texto": "cigar lounge"},
+    {"nivel": 2, "tipo": "hotel", "texto": "luxury hotel humidor"}
+  ],
+  "mercados": [
+    {"pais": "Puerto Rico", "iso3166": "PR", "idioma": "es", "fase": 1, "prioridad": 1, "activo": true, "ciudades": ["San Juan", "Ponce"]},
+    {"pais": "US Virgin Islands", "iso3166": "VI", "idioma": "en", "fase": 1, "prioridad": 2, "activo": true, "ciudades": ["Charlotte Amalie", "Christiansted"]},
+    {"pais": "Bahamas", "iso3166": "BS", "idioma": "en", "fase": 1, "prioridad": 3, "activo": true, "ciudades": ["Nassau"]},
+    {"pais": "Cayman Islands", "iso3166": "KY", "idioma": "en", "fase": 1, "prioridad": 4, "activo": true, "ciudades": ["George Town"]},
+    {"pais": "Turks and Caicos Islands", "iso3166": "TC", "idioma": "en", "fase": 1, "prioridad": 5, "activo": true, "ciudades": ["Providenciales"]},
+    {"pais": "Sint Maarten", "iso3166": "SX", "idioma": "en", "fase": 1, "prioridad": 6, "activo": true, "ciudades": ["Philipsburg"]},
+    {"pais": "Aruba", "iso3166": "AW", "idioma": "en", "fase": 1, "prioridad": 7, "activo": true, "ciudades": ["Oranjestad"]},
+    {"pais": "Curacao", "iso3166": "CW", "idioma": "en", "fase": 1, "prioridad": 8, "activo": true, "ciudades": ["Willemstad"]},
+    {"pais": "Barbados", "iso3166": "BB", "idioma": "en", "fase": 1, "prioridad": 9, "activo": true, "ciudades": ["Bridgetown"]},
+    {"pais": "Saint Barthelemy", "iso3166": "BL", "idioma": "fr", "fase": 1, "prioridad": 10, "activo": true, "ciudades": ["Gustavia"]},
+    {"pais": "Spain", "iso3166": "ES", "idioma": "es", "fase": 2, "prioridad": 1, "activo": true, "ciudades": ["Madrid", "Barcelona"]},
+    {"pais": "Germany", "iso3166": "DE", "idioma": "de", "fase": 2, "prioridad": 2, "activo": true, "ciudades": ["Berlin", "Hamburg", "Munich"]},
+    {"pais": "Switzerland", "iso3166": "CH", "idioma": "de", "fase": 2, "prioridad": 3, "activo": true, "ciudades": ["Zurich", "Basel"]},
+    {"pais": "United Kingdom", "iso3166": "GB", "idioma": "en", "fase": 2, "prioridad": 4, "activo": true, "ciudades": ["London"]},
+    {"pais": "United Arab Emirates", "iso3166": "AE", "idioma": "en", "fase": 2, "prioridad": 5, "activo": true, "ciudades": ["Dubai"]},
+    {"pais": "Hong Kong", "iso3166": "HK", "idioma": "zh", "fase": 2, "prioridad": 6, "activo": true, "ciudades": ["Hong Kong"]},
+    {"pais": "Macao", "iso3166": "MO", "idioma": "zh", "fase": 2, "prioridad": 7, "activo": true, "ciudades": ["Macao"]},
+    {"pais": "Panama", "iso3166": "PA", "idioma": "es", "fase": 2, "prioridad": 8, "activo": true, "zona": "Zona Libre de Colon", "ciudades": ["Colon"]}
+  ]
+}
