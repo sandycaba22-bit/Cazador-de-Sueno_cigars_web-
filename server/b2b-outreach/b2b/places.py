@@ -22,7 +22,7 @@ PLACES_URL = "https://places.googleapis.com/v1/places:searchText"
 FIELD_MASK = (
     "places.id,places.displayName,places.formattedAddress,"
     "places.nationalPhoneNumber,places.internationalPhoneNumber,"
-    "places.websiteUri,places.googleMapsUri,"
+    "places.websiteUri,places.googleMapsUri,places.location,"
     "places.rating,places.userRatingCount,places.businessStatus,places.types,nextPageToken"
 )
 PAGE_SIZE = 20

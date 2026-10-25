@@ -31,7 +31,7 @@ CLAVE_FALSA = "AIzaSyFAKE-test-key-0123456789abcdefghij"
 MASCARA_PEDIDA = (
     "places.id,places.displayName,places.formattedAddress,"
     "places.nationalPhoneNumber,places.internationalPhoneNumber,"
-    "places.websiteUri,places.googleMapsUri,"
+    "places.websiteUri,places.googleMapsUri,places.location,"
     "places.rating,places.userRatingCount,places.businessStatus,places.types,nextPageToken"
 )
 MAPS_EMPORIUM = (
