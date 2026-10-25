@@ -193,15 +193,33 @@
     }
   }
 
+  function avisarSolicitud(body, id) {
+    var payload = { tipo: body.tipo, empresa: body.empresa, pais: body.pais, correo: body.correo, telefono: body.telefono, volumen: body.volumen, tier: body.tier, totalUsd: body.totalUsd, vitolas: body.vitolas };
+    if (id) {
+      payload.id = id;
+      payload.avisoSolo = true;
+    }
+    fetch('/api/commerce/wholesale/solicitud', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(function () { /* el aviso de Telegram no bloquea la lista */ });
+  }
+
   function registrarSolicitud(body) {
     try {
-      fetch('/api/commerce/wholesale/solicitud', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      }).catch(function () { /* el portal no depende de la nube */ });
+      var cliente = window.CDSSupabase;
+      if (!cliente || typeof cliente.insertSolicitud !== 'function') {
+        avisarSolicitud(body, '');
+        return;
+      }
+      cliente.insertSolicitud(body).then(function (result) {
+        avisarSolicitud(body, result && result.ok ? result.id : '');
+      }).catch(function () {
+        avisarSolicitud(body, '');
+      });
     } catch (error) {
-      /* navegador sin fetch */
+      /* el portal sigue mostrando los precios */
     }
   }
 

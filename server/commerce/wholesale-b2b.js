@@ -42,6 +42,7 @@ function normalizarSolicitud(body) {
       httpStatus: 400,
     });
   }
+  const idCliente = /^[a-f0-9]{12}$/.test(String(data.id || '')) ? String(data.id) : '';
   const volumen = Number(data.volumen);
   const total = Number(data.totalUsd);
   const tier = Number(data.tier);
@@ -55,7 +56,8 @@ function normalizarSolicitud(body) {
         }))
     : [];
   return {
-    id: crypto.randomBytes(6).toString('hex'),
+    id: idCliente || crypto.randomBytes(6).toString('hex'),
+    avisoSolo: data.avisoSolo === true && Boolean(idCliente),
     tipo,
     empresa,
     pais: clip(data.pais, 80),

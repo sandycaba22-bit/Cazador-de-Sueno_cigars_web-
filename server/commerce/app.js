@@ -123,7 +123,9 @@ function createCommerceApp({ config, logger, store, gateways }) {
   router.post(`${BASE}/wholesale/solicitud`, async (ctx) => {
     limitWholesale(ctx.clientIp);
     const fila = normalizarSolicitud(await readJsonBody(ctx.req));
-    const guardada = await guardarSolicitud(fila);
+    const avisoSolo = fila.avisoSolo === true;
+    delete fila.avisoSolo;
+    const guardada = avisoSolo ? false : await guardarSolicitud(fila);
     const avisada = await avisarTelegram(fila);
     ctx.log.info('wholesale.solicitud', {
       id: fila.id,

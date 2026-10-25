@@ -48,5 +48,21 @@ create index if not exists solicitudes_precios_estado_idx
 alter table public.leads_b2b enable row level security;
 alter table public.solicitudes_precios enable row level security;
 
--- Sin políticas para anon/authenticated: el navegador no lee ni escribe.
--- El service role del servidor ignora RLS.
+revoke all on table public.leads_b2b from anon, authenticated;
+revoke all on table public.solicitudes_precios from anon, authenticated;
+grant insert on table public.solicitudes_precios to anon, authenticated;
+
+drop policy if exists solicitudes_precios_insert_public on public.solicitudes_precios;
+create policy solicitudes_precios_insert_public
+  on public.solicitudes_precios
+  for insert
+  to anon, authenticated
+  with check (
+    estado = 'pendiente'
+    and tipo in ('acceso', 'cotizacion')
+    and char_length(empresa) between 2 and 160
+    and id ~ '^[a-f0-9]{12}$'
+  );
+
+-- leads_b2b no tiene política para el navegador.
+-- La clave de servicio del bot ignora RLS.
