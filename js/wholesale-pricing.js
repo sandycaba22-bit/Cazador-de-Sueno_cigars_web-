@@ -1,16 +1,13 @@
 /**
- * Lista FOB y escalas de volumen del portal mayorista.
+ * Tarifario oficial FOB del portal mayorista.
  *
- * Para sumar una vitola basta con agregar un objeto a LINES. La tabla,
- * la calculadora, el PDF y el pedido leen ese arreglo: la cuenta no
- * cambia. active: false deja la línea fuera (El Rango, stock limitado)
- * sin borrarla del catálogo mayorista.
+ * Los precios de LINES son la lista publicada, no un porcentaje del
+ * PVP. Para sumar una vitola basta con agregar un objeto: la tabla,
+ * la calculadora, el PDF y el pedido leen ese arreglo. active: false
+ * deja la línea fuera (El Rango, stock limitado).
  *
- * La base de entrada sigue en el 62% del precio de caja publicado
- * dividido entre los puros de esa caja. Cubre producción, empaque,
- * timbre y el flete hasta el punto FOB. El puro suelto de tienda no
- * se usa. El descuento es del pedido completo y baja en escalones:
- * 5,000 −7%, 10,000 −12%, 20,000 −16%.
+ * MOQ 2,000. El tramo sale del total de unidades del pedido:
+ * 2,000–4,999 precio base, 5,000–9,999 tier 2, 10,000+ tier 3.
  */
 (function (root, factory) {
   var api = factory();
@@ -31,20 +28,17 @@
     }
   }
 })(typeof window !== 'undefined' ? window : globalThis, function () {
-  var ENTRY_RATIO = 0.62;
   var ACCESS_KEY = 'cds_wholesale_access';
   var WHATSAPP = '18094645016';
 
   /**
-   * Escalas de volumen. Un objeto nuevo aquí crea columna, ficha,
-   * precio y línea del PDF. off es el descuento sobre la base.
-   * min es inclusivo; max es inclusivo, o null si no hay techo.
+   * Escalas oficiales. off solo rotula la ficha (−6% y −10%).
+   * El importe de cada puro está en LINES.prices, ya redondeado.
    */
   var VOLUME_TIERS = [
     { id: 1, min: 2000, max: 4999, off: 0 },
-    { id: 2, min: 5000, max: 9999, off: 0.07 },
-    { id: 3, min: 10000, max: 19999, off: 0.12 },
-    { id: 4, min: 20000, max: null, off: 0.16 },
+    { id: 2, min: 5000, max: 9999, off: 0.06 },
+    { id: 3, min: 10000, max: null, off: 0.1 },
   ];
 
   var MOQ = VOLUME_TIERS[0].min;
@@ -56,50 +50,48 @@
   var LINES = [
     {
       id: 'sultan',
-      name: 'El Sultán',
-      nameEn: 'El Sultán',
-      format: 'Robusto 50×5',
-      fallbackBox: 148,
+      nameKey: 'product.sultan',
+      measureKey: 'product.sultan.measure',
       unitsPerBox: 20,
+      msrp: 7.4,
+      prices: { 1: 4, 2: 3.76, 3: 3.6 },
     },
     {
       id: 'ligero',
-      name: 'Ligero 007',
-      nameEn: 'Ligero 007',
-      format: 'Toro 58×5',
-      fallbackBox: 220,
+      nameKey: 'product.ligero',
+      measureKey: 'product.ligero.measure',
       unitsPerBox: 20,
-    },
-    {
-      id: 'emperador',
-      name: 'El Emperador',
-      nameEn: 'The Emperor',
-      format: 'Gran Toro 58×6',
-      fallbackBox: 240,
-      unitsPerBox: 20,
+      msrp: 11,
+      prices: { 1: 5.5, 2: 5.17, 3: 4.95 },
     },
     {
       id: 'puro-habano',
-      name: 'Puro Habano',
-      nameEn: 'Puro Habano',
-      format: 'Churchill 48×7',
-      fallbackBox: 280,
+      nameKey: 'product.habano',
+      measureKey: 'product.habano.measure',
       unitsPerBox: 20,
+      msrp: 14,
+      prices: { 1: 4.2, 2: 3.95, 3: 3.78 },
     },
     {
       id: 'exquisito',
-      name: 'El Exquisito',
-      nameEn: 'The Exquisite',
-      format: 'Gran Toro 58×6',
-      fallbackBox: 270,
+      nameKey: 'product.exquisito',
+      measureKey: 'product.exquisito.measure',
       unitsPerBox: 20,
+      msrp: 13.5,
+      prices: { 1: 5.8, 2: 5.45, 3: 5.22 },
+    },
+    {
+      id: 'emperador',
+      nameKey: 'product.emperador',
+      measureKey: 'product.emperador.measure',
+      unitsPerBox: 20,
+      msrp: 12,
+      prices: { 1: 5.2, 2: 4.89, 3: 4.68 },
     },
     {
       id: 'rango',
-      name: 'El Rango',
-      nameEn: 'El Rango',
-      format: 'Doble Perfecto 60×4½',
-      fallbackBox: 160,
+      nameKey: 'product.rango',
+      measureKey: 'product.rango.measure',
       unitsPerBox: 10,
       active: false,
       unavailableKey: 'line.rango',
@@ -116,39 +108,16 @@
     return Math.round(value * 100 + 1e-8) / 100;
   }
 
-  function findRetail(id) {
-    if (typeof getProductById === 'function') {
-      return getProductById(id);
-    }
-    if (typeof require === 'function') {
-      try {
-        return require('./catalog.js').getProductById(id);
-      } catch (error) {
-        return null;
-      }
-    }
-    return null;
-  }
-
   function buildProducts() {
     return activeLines().map(function (spec) {
-      var retail = findRetail(spec.id);
-      var box = retail && typeof retail.pricePerBox === 'number' ? retail.pricePerBox : spec.fallbackBox;
-      var units = retail && retail.unitsPerBox ? retail.unitsPerBox : spec.unitsPerBox;
-      var base = money((box / units) * ENTRY_RATIO);
-      var prices = {};
-      VOLUME_TIERS.forEach(function (tier) {
-        prices[tier.id] = money(base * (1 - tier.off));
-      });
       return {
         id: spec.id,
-        name: spec.name,
-        nameEn: spec.nameEn,
-        format: spec.format,
-        unitsPerBox: units,
-        packagedRetail: money(box / units),
-        base: prices[VOLUME_TIERS[0].id],
-        prices: prices,
+        nameKey: spec.nameKey,
+        measureKey: spec.measureKey,
+        unitsPerBox: spec.unitsPerBox,
+        msrp: spec.msrp,
+        base: spec.prices[VOLUME_TIERS[0].id],
+        prices: spec.prices,
       };
     });
   }
@@ -232,7 +201,7 @@
     á: '\\341', é: '\\351', í: '\\355', ó: '\\363', ú: '\\372',
     Á: '\\301', É: '\\311', Í: '\\315', Ó: '\\323', Ú: '\\332',
     ñ: '\\361', Ñ: '\\321', ü: '\\374', '¿': '\\277', '¡': '\\241',
-    '×': 'x', '—': '-', '–': '-',
+    '×': 'x', '—': '-', '–': '-', '″': '"', '′': "'",
   };
 
   function pdfText(value) {
@@ -254,11 +223,6 @@
 
   function pdfInt(value) {
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-
-  function tierColumnLabel(tier) {
-    if (tier.max == null) return pdfInt(tier.min) + '+';
-    return pdfInt(tier.min) + '-' + pdfInt(tier.max);
   }
 
   function pdfColumns(count) {
@@ -294,10 +258,12 @@
 
     var headers = [
       tr('pdf.colVitola', null, code),
-      tr('pdf.colFormat', null, code),
-    ].concat(VOLUME_TIERS.map(function (tier) {
-      return tierColumnLabel(tier);
-    }));
+      tr('pdf.colMeasure', null, code),
+      tr('pdf.colBase', null, code),
+      tr('pdf.colTier2', null, code),
+      tr('pdf.colTier3', null, code),
+      tr('pdf.colMsrp', null, code),
+    ];
     var cols = pdfColumns(headers.length);
     var y = 710;
     headers.forEach(function (label, index) {
@@ -309,11 +275,12 @@
     products.forEach(function (product, index) {
       var rowY = 678 - index * rowGap;
       var ink = '0.12 0.1 0.08';
-      ops += pdfLine(cols[0], rowY, 10, ink, code === 'en' ? product.nameEn : product.name);
-      ops += pdfLine(cols[1], rowY, 9, ink, product.format);
-      VOLUME_TIERS.forEach(function (tier, tierIndex) {
-        ops += pdfLine(cols[tierIndex + 2], rowY, 10, ink, '$' + priceForTier(product, tier.id).toFixed(2));
-      });
+      ops += pdfLine(cols[0], rowY, 9, ink, tr(product.nameKey, null, code));
+      ops += pdfLine(cols[1], rowY, 8, ink, tr(product.measureKey, null, code));
+      ops += pdfLine(cols[2], rowY, 10, ink, '$' + priceForTier(product, 1).toFixed(2));
+      ops += pdfLine(cols[3], rowY, 10, ink, '$' + priceForTier(product, 2).toFixed(2));
+      ops += pdfLine(cols[4], rowY, 10, ink, '$' + priceForTier(product, 3).toFixed(2));
+      ops += pdfLine(cols[5], rowY, 10, ink, '$' + Number(product.msrp).toFixed(2));
       ops += '0.8 0.76 0.7 RG 48 ' + (rowY - 8) + ' m 547 ' + (rowY - 8) + ' l S\n';
     });
 
@@ -425,7 +392,7 @@
     }
 
     function productName(product, lang) {
-      return lang === 'en' ? product.nameEn : product.name;
+      return tr(product.nameKey, null, lang);
     }
 
     function ensureCatalog() {
@@ -443,17 +410,6 @@
         });
       }
 
-      var headRow = doc.querySelector('.b2b-price-table thead tr');
-      if (headRow) {
-        VOLUME_TIERS.forEach(function (tier) {
-          if (headRow.querySelector('[data-tier-col="' + tier.id + '"]')) return;
-          var cell = doc.createElement('th');
-          cell.scope = 'col';
-          cell.setAttribute('data-tier-col', String(tier.id));
-          headRow.appendChild(cell);
-        });
-      }
-
       var tbody = doc.querySelector('.b2b-price-table tbody');
       var grid = orderForm.querySelector('.b2b-order__grid');
       activeLines().forEach(function (spec) {
@@ -462,15 +418,24 @@
           row.setAttribute('data-wholesale-row', spec.id);
           var nameCell = doc.createElement('th');
           nameCell.scope = 'row';
+          nameCell.className = 'is-text is-sticky';
           nameCell.setAttribute('data-col', 'name');
           var formatCell = doc.createElement('td');
+          formatCell.className = 'is-text';
           formatCell.setAttribute('data-col', 'format');
           row.appendChild(nameCell);
           row.appendChild(formatCell);
-          VOLUME_TIERS.forEach(function (tier) {
+          var baseCell = doc.createElement('td');
+          baseCell.setAttribute('data-col', 'tier1');
+          baseCell.setAttribute('data-tier-col', '1');
+          row.appendChild(baseCell);
+          var msrpCell = doc.createElement('td');
+          msrpCell.setAttribute('data-col', 'msrp');
+          row.appendChild(msrpCell);
+          [2, 3].forEach(function (tierId) {
             var priceCell = doc.createElement('td');
-            priceCell.setAttribute('data-col', 'tier' + tier.id);
-            priceCell.setAttribute('data-tier-col', String(tier.id));
+            priceCell.setAttribute('data-col', 'tier' + tierId);
+            priceCell.setAttribute('data-tier-col', String(tierId));
             row.appendChild(priceCell);
           });
           tbody.appendChild(row);
@@ -512,21 +477,16 @@
             : tr('tier.chipBase', null, lang);
           chip.querySelector('span').textContent = band + '. ' + detail;
         }
-        var head = doc.querySelector('.b2b-price-table thead [data-tier-col="' + tier.id + '"]');
-        if (head) {
-          head.textContent = tier.off
-            ? tr('tier.colOff', { pct: pct }, lang)
-            : tr('tier.colBase', null, lang);
-        }
       });
       products.forEach(function (product) {
         var row = doc.querySelector('[data-wholesale-row="' + product.id + '"]');
         if (row) {
           row.querySelector('[data-col="name"]').textContent = productName(product, lang);
-          row.querySelector('[data-col="format"]').textContent = product.format;
+          row.querySelector('[data-col="format"]').textContent = tr(product.measureKey, null, lang);
           VOLUME_TIERS.forEach(function (tier) {
             row.querySelector('[data-col="tier' + tier.id + '"]').textContent = formatUsd(priceForTier(product, tier.id), lang);
           });
+          row.querySelector('[data-col="msrp"]').textContent = formatUsd(product.msrp, lang);
         }
         var qtyName = orderForm.querySelector('[data-qty-label="' + product.id + '"] [data-qty-name]');
         if (qtyName) qtyName.textContent = productName(product, lang);
@@ -712,7 +672,6 @@
     MOQ: MOQ,
     VOLUME_TIERS: VOLUME_TIERS,
     LINES: LINES,
-    ENTRY_RATIO: ENTRY_RATIO,
     buildProducts: buildProducts,
     tierForUnits: tierForUnits,
     quoteOrder: quoteOrder,

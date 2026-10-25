@@ -203,13 +203,24 @@
               <table class="b2b-price-table">
                 <thead>
                   <tr>
-                    <th scope="col" data-i18n="table.vitola">Vitola</th>
-                    <th scope="col" data-i18n="table.format">Formato</th>
+                    <th class="is-text is-sticky" scope="col" rowspan="2" data-i18n="table.vitola">Vitola</th>
+                    <th class="is-text" scope="col" rowspan="2" data-i18n="table.measure">Medidas</th>
+                    <th scope="col" rowspan="2" data-tier-col="1">
+                      <span data-i18n="table.base">Precio base</span>
+                      <small data-i18n="table.baseRange">2,000–4,999</small>
+                    </th>
+                    <th scope="col" rowspan="2" data-i18n="table.msrp">MSRP sugerido</th>
+                    <th scope="col" colspan="2" data-i18n="table.volume">Tier por volumen</th>
+                  </tr>
+                  <tr>
+                    <th scope="col" data-tier-col="2" data-i18n="table.tier2">5,000–9,999</th>
+                    <th scope="col" data-tier-col="3" data-i18n="table.tier3">10,000+</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
+            <p class="b2b-price-scroll-hint" data-i18n="table.swipe">Desliza hacia los lados para ver todos los precios.</p>
             <form id="wholesale-order-form" class="b2b-order">
               <p class="b2b-sheet__note" data-i18n="order.note">Indica las unidades de cada vitola. El descuento sale del total del pedido. Menos de 2,000 unidades no se procesa.</p>
               <div class="b2b-order__grid"></div>

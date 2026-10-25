@@ -477,14 +477,24 @@ body[data-page="wholesale"] .age-gate__actions .btn {
 .b2b-price-wrap {
   overflow-x: auto;
   max-width: 100%;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.35rem;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.b2b-price-scroll-hint {
+  display: none;
+  margin: 0 0 1.1rem;
+  color: rgba(248, 245, 239, 0.62);
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
 .b2b-price-table {
   width: 100%;
-  border-collapse: collapse;
-  min-width: 760px;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 46rem;
   font-size: 0.92rem;
 }
 
@@ -494,13 +504,24 @@ body[data-page="wholesale"] .age-gate__actions .btn {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-align: right;
   white-space: nowrap;
+  vertical-align: bottom;
 }
 
-.b2b-price-table th:first-child,
-.b2b-price-table td:first-child,
-.b2b-price-table th:nth-child(2),
-.b2b-price-table td:nth-child(2) {
+.b2b-price-table .is-text {
   text-align: left;
+}
+
+.b2b-price-table .is-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #141414;
+  box-shadow: 8px 0 12px rgba(0, 0, 0, 0.22);
+}
+
+.b2b-price-table thead .is-sticky {
+  z-index: 2;
+  background: #1b1b1b;
 }
 
 .b2b-price-table thead th {
@@ -511,10 +532,26 @@ body[data-page="wholesale"] .age-gate__actions .btn {
   font-weight: 600;
 }
 
+.b2b-price-table thead th small {
+  display: block;
+  margin-top: 0.2rem;
+  color: rgba(228, 210, 174, 0.78);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
 .b2b-price-table td.is-active,
-.b2b-price-table th.is-active {
-  background: rgba(212, 175, 55, 0.14);
+.b2b-price-table th.is-active,
+.b2b-price-table .is-sticky.is-active {
+  background: #2c2618;
   color: #f8f5ef;
+}
+
+@media (max-width: 760px) {
+  .b2b-price-scroll-hint {
+    display: block;
+  }
 }
 
 .b2b-order {
