@@ -218,29 +218,21 @@
 
   function buildPricePdf(lang) {
     var products = buildProducts();
-    var es = lang !== 'en';
+    var code = lang === 'en' ? 'en' : 'es';
     var ops = '';
     ops += '0.05 0.07 0.12 rg 0 748 595 94 re f\n';
     ops += '0.77 0.64 0.35 rg 48 748 499 1.2 re f\n';
-    ops += pdfLine(48, 802, 11, '0.77 0.64 0.35', 'CAZADOR DE SUENO CIGARS SRL');
-    ops += pdfLine(
-      48,
-      776,
-      16,
-      '1 1 1',
-      es ? 'Precios para mayorista · FOB' : 'Wholesale prices · FOB'
-    );
-    ops += pdfLine(
-      48,
-      758,
-      9,
-      '0.85 0.8 0.7',
-      es ? 'USD por puro · Republica Dominicana' : 'USD per cigar · Dominican Republic'
-    );
+    ops += pdfLine(48, 802, 11, '0.77 0.64 0.35', tr('pdf.kicker', null, code));
+    ops += pdfLine(48, 776, 16, '1 1 1', tr('pdf.title', null, code));
+    ops += pdfLine(48, 758, 9, '0.85 0.8 0.7', tr('pdf.sub', null, code));
 
-    var headers = es
-      ? ['Vitola', 'Formato', '2,000-4,999', '5,000-9,999', '10,000+']
-      : ['Vitola', 'Format', '2,000-4,999', '5,000-9,999', '10,000+'];
+    var headers = [
+      tr('pdf.colVitola', null, code),
+      tr('pdf.colFormat', null, code),
+      '2,000-4,999',
+      '5,000-9,999',
+      '10,000+',
+    ];
     var cols = [48, 168, 300, 400, 498];
     var y = 710;
     headers.forEach(function (label, index) {
@@ -251,7 +243,7 @@
     products.forEach(function (product, index) {
       var rowY = 678 - index * 36;
       var ink = '0.12 0.1 0.08';
-      ops += pdfLine(cols[0], rowY, 11, ink, es ? product.name : product.nameEn);
+      ops += pdfLine(cols[0], rowY, 11, ink, code === 'en' ? product.nameEn : product.name);
       ops += pdfLine(cols[1], rowY, 10, ink, product.format);
       ops += pdfLine(cols[2], rowY, 11, ink, '$' + product.base.toFixed(2));
       ops += pdfLine(cols[3], rowY, 11, ink, '$' + product.tier2.toFixed(2));
@@ -259,25 +251,9 @@
       ops += '0.8 0.76 0.7 RG 48 ' + (rowY - 10) + ' m 547 ' + (rowY - 10) + ' l S\n';
     });
 
-    var notes = es
-      ? [
-          'Pedido minimo (MOQ): 2,000 unidades. Por debajo de ese volumen el pedido no se procesa.',
-          'De 2,000 a 4,999: precio base. De 5,000 a 9,999: 6% de descuento. Desde 10,000: 10%.',
-          'El descuento se calcula sobre el total de unidades del pedido y aplica a todas las vitolas.',
-          'FOB Republica Dominicana. Incluye produccion, empaque de exportacion y timbre.',
-          'El flete internacional y los aranceles del destino se cotizan aparte.',
-          'Cajas de exportacion: 20 puros. Consultas: cazadordesueno1@gmail.com',
-          'WhatsApp +1 809-464-5016',
-        ]
-      : [
-          'Minimum order (MOQ): 2,000 cigars. Orders below that volume cannot be processed.',
-          '2,000 to 4,999: base price. 5,000 to 9,999: 6% off. 10,000 and above: 10% off.',
-          'The discount is based on total cigars in the order and applies to every vitola.',
-          'FOB Dominican Republic. Includes production, export packaging and tax stamp.',
-          'International freight and destination duties are quoted separately.',
-          'Export boxes: 20 cigars. Inquiries: cazadordesueno1@gmail.com',
-          'WhatsApp +1 809-464-5016',
-        ];
+    var notes = ['pdf.note1', 'pdf.note2', 'pdf.note3', 'pdf.note4', 'pdf.note5', 'pdf.note6', 'pdf.note7'].map(function (key) {
+      return tr(key, null, code);
+    });
     notes.forEach(function (line, index) {
       ops += pdfLine(48, 500 - index * 18, 10, '0.2 0.16 0.12', line);
     });
@@ -310,15 +286,19 @@
     return bytes;
   }
 
+  function tr(key, vars, lang) {
+    var i18n = typeof CDSWholesaleI18n !== 'undefined' ? CDSWholesaleI18n : null;
+    if (i18n && typeof i18n.t === 'function') return i18n.t(key, vars, lang);
+    return key;
+  }
+
   function downloadPricePdf(lang) {
     var bytes = buildPricePdf(lang);
     var blob = new Blob([bytes], { type: 'application/pdf' });
     var url = URL.createObjectURL(blob);
     var link = document.createElement('a');
     link.href = url;
-    link.download = lang === 'en'
-      ? 'CazadorDeSuenos_Wholesale_Prices.pdf'
-      : 'CazadorDeSuenos_Precios_Mayorista.pdf';
+    link.download = tr('pdf.file', null, lang);
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -328,11 +308,10 @@
   }
 
   function langOf(doc) {
-    return doc.documentElement.classList.contains('lang-en') ? 'en' : 'es';
-  }
-
-  function copy(lang, es, en) {
-    return lang === 'en' ? en : es;
+    if (typeof CDSWholesaleI18n !== 'undefined' && typeof CDSWholesaleI18n.current === 'function') {
+      return CDSWholesaleI18n.current();
+    }
+    return doc.documentElement.lang === 'en' ? 'en' : 'es';
   }
 
   function mount(doc) {
@@ -349,6 +328,24 @@
     var send = doc.getElementById('wholesale-send');
     var panel = sheet.querySelector('.b2b-sheet__panel');
     var lastFocus = null;
+    var lastQuote = null;
+
+    function orderMessage(quote, lang) {
+      var access = readAccess();
+      var summary = quote.lines
+        .filter(function (line) { return line.qty > 0; })
+        .map(function (line) {
+          return productName(line.product, lang) + ': ' + line.qty + ' x $' + line.unit.toFixed(2);
+        })
+        .join('\n');
+      return tr('wa.order', {
+        company: access ? access.company : '',
+        summary: summary,
+        units: quote.units,
+        tier: quote.tier.id,
+        total: quote.total.toFixed(2),
+      }, lang);
+    }
 
     function resetSend() {
       send.hidden = true;
@@ -391,6 +388,7 @@
     }
 
     function showQuote(quote, lang) {
+      lastQuote = quote;
       clearTierHighlight();
       if (!quote.belowMoq) {
         doc.querySelectorAll('[data-tier-chip="' + quote.tier.id + '"], [data-tier-col="' + quote.tier.id + '"]').forEach(function (node) {
@@ -403,18 +401,16 @@
           return productName(line.product, lang) + ': ' + formatInt(line.qty, lang) + ' × ' + formatUsd(line.unit, lang);
         });
       var tierLabel = quote.belowMoq
-        ? copy(lang, 'Sin escala: por debajo del mínimo', 'No tier: below the minimum')
-        : copy(
-            lang,
-            'Escala ' + quote.tier.id + (quote.tier.discount ? ' · −' + Math.round(quote.tier.discount * 100) + '%' : ' · precio base'),
-            'Tier ' + quote.tier.id + (quote.tier.discount ? ' · −' + Math.round(quote.tier.discount * 100) + '%' : ' · base price')
-          );
+        ? tr('quote.below', null, lang)
+        : quote.tier.discount
+          ? tr('quote.tierOff', { id: quote.tier.id, pct: Math.round(quote.tier.discount * 100) }, lang)
+          : tr('quote.tierBase', { id: quote.tier.id }, lang);
       quoteBox.hidden = false;
       quoteBox.innerHTML =
         '<strong>' + tierLabel + '</strong>' +
-        '<span>' + copy(lang, 'Unidades', 'Units') + ': ' + formatInt(quote.units, lang) + '</span>' +
+        '<span>' + tr('quote.units', null, lang) + ': ' + formatInt(quote.units, lang) + '</span>' +
         (lines.length ? '<span>' + lines.join(' · ') + '</span>' : '') +
-        '<span>' + copy(lang, 'Total FOB', 'FOB total') + ': ' + formatUsd(quote.total, lang) + '</span>';
+        '<span>' + tr('quote.total', null, lang) + ': ' + formatUsd(quote.total, lang) + '</span>';
     }
 
     function hideAlert() {
@@ -428,15 +424,11 @@
       moqAlert.hidden = false;
       orderForm.classList.add('is-moq-blocked');
       orderForm.setAttribute('aria-invalid', 'true');
-      moqAlert.textContent = copy(
-        lang,
-        'Pedido por debajo del mínimo. El MOQ de exportación es de ' + formatInt(MOQ, lang) +
-          ' unidades. Este pedido suma ' + formatInt(quote.units, lang) +
-          ' (' + formatInt(quote.shortfall, lang) + ' por debajo) y no se puede procesar.',
-        'Order below the minimum. The export MOQ is ' + formatInt(MOQ, lang) +
-          ' cigars. This order totals ' + formatInt(quote.units, lang) +
-          ' (' + formatInt(quote.shortfall, lang) + ' short) and cannot be processed.'
-      );
+      moqAlert.textContent = tr('moq.alert', {
+        moq: formatInt(MOQ, lang),
+        units: formatInt(quote.units, lang),
+        short: formatInt(quote.shortfall, lang),
+      }, lang);
       moqAlert.scrollIntoView({ block: 'nearest' });
     }
 
@@ -482,11 +474,7 @@
       var confirmed = doc.getElementById('wholesale-confirm').checked;
       if (company.length < 2 || country.length < 2 || !confirmed) {
         accessError.hidden = false;
-        accessError.textContent = copy(
-          lang,
-          'Indica la razón social, el país y confirma que compras al por mayor.',
-          'Enter the company name, the country, and confirm you are buying wholesale.'
-        );
+        accessError.textContent = tr('access.error', null, lang);
         return;
       }
       accessError.hidden = true;
@@ -498,11 +486,7 @@
         }));
       } catch (error) {
         accessError.hidden = false;
-        accessError.textContent = copy(
-          lang,
-          'No se pudo guardar el acceso en este navegador.',
-          'This browser could not store the access confirmation.'
-        );
+        accessError.textContent = tr('access.saveError', null, lang);
         return;
       }
       accessPanel.hidden = true;
@@ -519,6 +503,7 @@
       var quote = quoteOrder(readQuantities());
       if (quote.units > 0) showQuote(quote, lang);
       else {
+        lastQuote = null;
         quoteBox.hidden = true;
         clearTierHighlight();
       }
@@ -535,26 +520,7 @@
         return;
       }
       hideAlert();
-      var access = readAccess();
-      var summary = quote.lines
-        .filter(function (line) { return line.qty > 0; })
-        .map(function (line) {
-          return productName(line.product, lang) + ': ' + line.qty + ' x $' + line.unit.toFixed(2);
-        })
-        .join('\n');
-      var message = copy(
-        lang,
-        'Pedido mayorista Cazador de Sueño Cigars SRL\nEmpresa: ' + (access ? access.company : '') +
-          '\n' + summary +
-          '\nUnidades: ' + quote.units +
-          '\nEscala: Tier ' + quote.tier.id +
-          '\nTotal FOB: $' + quote.total.toFixed(2),
-        'Wholesale order Cazador de Sueño Cigars SRL\nCompany: ' + (access ? access.company : '') +
-          '\n' + summary +
-          '\nUnits: ' + quote.units +
-          '\nTier: ' + quote.tier.id +
-          '\nFOB total: $' + quote.total.toFixed(2)
-      );
+      var message = orderMessage(quote, lang);
       send.hidden = false;
       send.href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(message);
       send.focus();
@@ -567,6 +533,17 @@
         return;
       }
       downloadPricePdf(langOf(doc));
+    });
+
+    doc.addEventListener('cds:wholesale-lang', function () {
+      renderTable();
+      if (!lastQuote || !lastQuote.units) return;
+      var lang = langOf(doc);
+      showQuote(lastQuote, lang);
+      if (!moqAlert.hidden) showMoqAlert(lastQuote, lang);
+      if (!send.hidden && !lastQuote.belowMoq) {
+        send.href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(orderMessage(lastQuote, lang));
+      }
     });
   }
 

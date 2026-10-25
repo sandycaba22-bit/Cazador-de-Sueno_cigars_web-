@@ -1,10 +1,11 @@
 /* Portal mayorista. El header de la portada usa line-height:0 para el logo
    de imagen; aquí el texto de marca necesita aire real y un lockup centrado. */
 
-.lang-es .only-en { display: none !important; }
-.lang-en .only-es { display: none !important; }
+html.i18n-pending body { visibility: hidden; }
+html.i18n-ready body { visibility: visible; }
 
 body[data-page="wholesale"] {
+  overflow-x: clip;
   background:
     radial-gradient(circle at top left, rgba(212, 175, 55, 0.1), transparent 26%),
     #121212;
@@ -19,63 +20,112 @@ body[data-page="wholesale"] .site-header.b2b-header {
 }
 
 body[data-page="wholesale"] .b2b-header__inner {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  justify-items: center;
   align-items: center;
-  width: min(100% - 2rem, 1120px);
+  gap: 0.35rem;
+  width: min(100% - 1.5rem, 1120px);
   margin: 0 auto;
-  min-height: 6.75rem;
-  padding: 1.4rem 1.25rem 1.25rem;
+  padding: 0.85rem 0.25rem 1.15rem;
+}
+
+body[data-page="wholesale"] .b2b-lang {
+  justify-self: end;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0.28rem;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
+  overflow: visible;
+}
+
+body[data-page="wholesale"] .b2b-lang__btn {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(248, 245, 239, 0.88);
+  min-height: 2.4rem;
+  padding: 0.4rem 0.9rem;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", Inter, "Segoe UI", sans-serif;
+  font-variant-emoji: emoji;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: visible;
+  cursor: pointer;
+}
+
+body[data-page="wholesale"] .b2b-lang__btn[aria-pressed="true"] {
+  background: #d4af37;
+  color: #14120e;
 }
 
 body[data-page="wholesale"] .b2b-header__brand {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.05rem;
+  gap: 0.45rem;
+  width: min(100%, 36rem);
   max-width: 100%;
+  margin: 0;
+  padding: 0.15rem 0.5rem 0.2rem;
   line-height: 1.35;
   color: #f8f5ef;
+  text-align: center;
   text-decoration: none;
 }
 
 body[data-page="wholesale"] .b2b-header__logo {
   display: block;
-  height: 5.15rem;
+  height: clamp(4.2rem, 14vw, 5.1rem);
   width: auto;
-  max-width: min(46vw, 8.5rem);
+  max-width: min(70vw, 9.5rem);
   object-fit: contain;
   object-position: center;
-  flex: 0 0 auto;
 }
 
 body[data-page="wholesale"] .b2b-header__copy {
   display: grid;
-  gap: 0.28rem;
+  justify-items: center;
+  gap: 0.3rem;
+  width: 100%;
   min-width: 0;
-  padding: 0.2rem 0.15rem 0.15rem 0;
+  padding: 0 0.35rem 0.1rem;
 }
 
 body[data-page="wholesale"] .b2b-header__name {
   display: block;
+  max-width: 100%;
   font-family: "Cinzel", Georgia, serif;
-  font-size: clamp(1rem, 2.5vw, 1.42rem);
+  font-size: clamp(0.95rem, 3.6vw, 1.45rem);
   font-weight: 600;
-  letter-spacing: 0.14em;
-  line-height: 1.35;
+  letter-spacing: 0.12em;
+  line-height: 1.45;
   text-transform: uppercase;
+  text-align: center;
   color: #f8f5ef;
+  padding: 0.12em 0.2em 0;
 }
 
 body[data-page="wholesale"] .b2b-header__sub {
   display: block;
+  max-width: 100%;
   font-family: Inter, "Segoe UI", sans-serif;
-  font-size: 0.68rem;
+  font-size: clamp(0.62rem, 2.1vw, 0.72rem);
   font-weight: 500;
-  letter-spacing: 0.22em;
-  line-height: 1.45;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
   text-transform: uppercase;
+  text-align: center;
   color: rgba(248, 245, 239, 0.62);
+  padding: 0 0.2em;
 }
 
 body[data-page="wholesale"] .hero.hero-premium.b2b-hero {
@@ -119,6 +169,12 @@ body[data-page="wholesale"] .b2b-text {
   line-height: 1.75;
   color: rgba(248, 245, 239, 0.78);
   margin-bottom: 2rem;
+  overflow-wrap: anywhere;
+}
+
+body[data-page="wholesale"] .b2b-sales a {
+  color: var(--color-gold-400, #d4af37);
+  overflow-wrap: anywhere;
 }
 
 body[data-page="wholesale"] .b2b-actions {
@@ -132,16 +188,19 @@ body[data-page="wholesale"] .b2b-actions {
 }
 
 body[data-page="wholesale"] .b2b-actions .btn {
-  flex: 1 1 220px;
-  max-width: 320px;
+  flex: 1 1 14rem;
+  width: auto;
+  max-width: 22rem;
   margin: 0;
   min-height: 3.4rem;
+  min-width: 0;
   padding: 0.85rem 1rem;
   font-size: 0.78rem;
   line-height: 1.35;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-align: center;
   white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 body[data-page="wholesale"] .b2b-features {
@@ -212,6 +271,14 @@ body[data-page="wholesale"] .age-gate__actions {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.75rem;
+}
+
+body[data-page="wholesale"] .age-gate__actions .btn {
+  width: auto;
+  max-width: 100%;
+  margin-top: 0;
+  min-width: min(100%, 14rem);
+  white-space: normal;
 }
 
 .b2b-sheet[hidden],
@@ -311,6 +378,8 @@ body[data-page="wholesale"] .age-gate__actions {
 }
 
 .b2b-access input[type="text"] {
+  width: 100%;
+  min-width: 0;
   min-height: 2.8rem;
   padding: 0.55rem 0.75rem;
   border-radius: 8px;
@@ -380,7 +449,9 @@ body[data-page="wholesale"] .age-gate__actions {
 
 .b2b-price-wrap {
   overflow-x: auto;
+  max-width: 100%;
   margin-bottom: 1.25rem;
+  -webkit-overflow-scrolling: touch;
 }
 
 .b2b-price-table {
@@ -447,6 +518,8 @@ body[data-page="wholesale"] .age-gate__actions {
 }
 
 .b2b-order input[type="number"] {
+  width: 100%;
+  min-width: 0;
   min-height: 2.7rem;
   padding: 0.45rem 0.65rem;
   border-radius: 8px;
@@ -486,38 +559,86 @@ body[data-page="wholesale"] .age-gate__actions {
 }
 
 .b2b-sheet__actions .btn {
-  margin: 0;
+  flex: 1 1 12rem;
   width: auto;
+  max-width: 100%;
+  margin: 0;
+  min-width: 0;
+  white-space: normal;
 }
 
-@media (max-width: 720px) {
-  body[data-page="wholesale"] .b2b-header__inner {
-    min-height: 0;
-    padding: 1.15rem 1rem 1rem;
-  }
-
-  body[data-page="wholesale"] .b2b-header__brand {
-    flex-direction: column;
-    gap: 0.45rem;
-    text-align: center;
-  }
-
-  body[data-page="wholesale"] .b2b-header__copy {
-    justify-items: center;
-    padding-right: 0;
-  }
-
-  body[data-page="wholesale"] .b2b-header__logo {
-    height: 4.4rem;
-  }
-
+@media (max-width: 900px) {
   body[data-page="wholesale"] .b2b-actions .btn {
     flex-basis: 100%;
-    max-width: none;
+    width: min(100%, 28rem);
+    max-width: 28rem;
   }
 
   .b2b-tiers {
     grid-template-columns: 1fr;
+  }
+
+  .b2b-order__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  body[data-page="wholesale"] .b2b-header__inner {
+    width: min(100% - 1rem, 1120px);
+    padding-top: 0.75rem;
+  }
+
+  body[data-page="wholesale"] .b2b-lang {
+    justify-self: center;
+  }
+
+  body[data-page="wholesale"] .b2b-header__name {
+    letter-spacing: 0.08em;
+  }
+
+  body[data-page="wholesale"] .b2b-header__sub {
+    letter-spacing: 0.1em;
+  }
+
+  body[data-page="wholesale"] .b2b-actions .btn,
+  body[data-page="wholesale"] .age-gate__actions .btn,
+  .b2b-sheet__actions .btn,
+  .b2b-access .btn {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+  }
+
+  .b2b-sheet {
+    padding: 0.5rem;
+  }
+
+  .b2b-sheet__panel {
+    width: 100%;
+    max-height: calc(100dvh - 1rem);
+    border-radius: 12px;
+  }
+
+  .b2b-sheet__scroll {
+    padding: 1rem 0.8rem 1.2rem;
+  }
+
+  .b2b-sheet__title {
+    margin-right: 0;
+  }
+
+  .b2b-sheet__actions {
+    flex-direction: column;
+  }
+
+  .b2b-order__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .b2b-access,
+  .b2b-access .btn {
+    max-width: none;
   }
 }
 

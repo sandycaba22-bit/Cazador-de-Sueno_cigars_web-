@@ -1,31 +1,50 @@
 <!DOCTYPE html>
-<html lang="en" id="html-root">
+<html lang="es" id="html-root">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Wholesale and Distributors - Cazador de Sueño Cigars SRL. Dominican premium cigars for international export."
+      content="Portal mayorista de Cazador de Sueño Cigars SRL. Puros premium de República Dominicana para exportación."
     />
-    <title>Wholesale & Distributors — Cazador de Sueño Cigars SRL</title>
-    
+    <title>Mayoristas y Distribuidores — Cazador de Sueño Cigars SRL</title>
     <script>
-      (function() {
-        // Age gate check (reuse existing)
-        var accepted = document.cookie.indexOf('cds_age_gate=accepted') !== -1;
-        if (!accepted) {
-          document.documentElement.classList.add('age-gate-pending');
+      (function () {
+        var stored = null;
+        try {
+          stored = localStorage.getItem('cds_wholesale_lang');
+        } catch (error) {
+          stored = null;
         }
-
-        // Auto-detect language seamlessly (Requirement 1)
-        var lang = navigator.language || navigator.userLanguage;
-        var isEs = lang.toLowerCase().indexOf('es') === 0;
-        var root = document.getElementById('html-root');
-        root.lang = isEs ? 'es' : 'en';
-        root.className = isEs ? 'lang-es' : 'lang-en';
+        var lang = stored === 'es' || stored === 'en' ? stored : '';
+        if (!lang) {
+          var list = navigator.languages && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language || navigator.userLanguage || 'en'];
+          lang = 'en';
+          for (var i = 0; i < list.length; i += 1) {
+            var code = String(list[i] || '').toLowerCase();
+            if (code.indexOf('es') === 0) {
+              lang = 'es';
+              break;
+            }
+            if (code.indexOf('en') === 0) {
+              lang = 'en';
+              break;
+            }
+          }
+        }
+        var root = document.documentElement;
+        root.lang = lang;
+        root.classList.add(lang === 'es' ? 'lang-es' : 'lang-en', 'i18n-pending');
+        if (document.cookie.indexOf('cds_age_gate=accepted') === -1) {
+          root.classList.add('age-gate-pending');
+        }
       })();
     </script>
-    
+    <style>
+      html.i18n-pending body { visibility: hidden; }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -38,28 +57,33 @@
     <link rel="stylesheet" href="css/wholesale.css" />
   </head>
   <body data-page="wholesale">
-    <!-- Reusing existing Age Gate -->
     <div class="age-gate" data-age-gate aria-hidden="true">
       <div class="age-gate__backdrop" aria-hidden="true"></div>
-      <section class="age-gate__dialog" role="dialog" aria-modal="true">
-        <p class="age-gate__eyebrow">Bienvenido / Welcome</p>
-        <h2 id="age-gate-title">Acceso exclusivo / Exclusive access</h2>
-        <p id="age-gate-description" class="age-gate__description">
-          <span class="only-es">Este sitio presenta productos de tabaco premium. Confirma que eres mayor de edad.</span>
-          <span class="only-en">This site features premium tobacco products. Please confirm you are of legal age.</span>
+      <section class="age-gate__dialog" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
+        <p class="age-gate__eyebrow" data-i18n="age.eyebrow">Bienvenido</p>
+        <h2 id="age-gate-title" data-i18n="age.title">Acceso exclusivo</h2>
+        <p id="age-gate-description" class="age-gate__description" data-i18n="age.text">
+          Este sitio presenta productos de tabaco premium. Confirma que eres mayor de edad.
         </p>
         <div class="age-gate__actions">
-          <button type="button" class="btn btn--primary" data-age-gate-accept>
-            <span class="only-es">Sí, soy mayor de edad</span>
-            <span class="only-en">Yes, I am of legal age</span>
+          <button type="button" class="btn btn--primary" data-age-gate-accept data-i18n="age.accept">
+            Sí, soy mayor de edad
           </button>
-          <button type="button" class="btn btn--secondary" data-age-gate-deny>No</button>
+          <button type="button" class="btn btn--secondary" data-age-gate-deny data-i18n="age.deny">No</button>
         </div>
       </section>
     </div>
 
     <header class="site-header b2b-header">
       <div class="b2b-header__inner">
+        <div class="b2b-lang" role="group" data-i18n-aria="lang.group" aria-label="Idioma">
+          <button type="button" class="b2b-lang__btn" data-set-lang="es" data-i18n="lang.es" aria-pressed="false">
+            🇩🇴 Español
+          </button>
+          <button type="button" class="b2b-lang__btn" data-set-lang="en" data-i18n="lang.en" aria-pressed="false">
+            🇺🇸 English
+          </button>
+        </div>
         <a href="index.html" class="b2b-header__brand" aria-label="Cazador de Sueño Cigars SRL">
           <img
             src="images/logo.png"
@@ -71,7 +95,7 @@
           />
           <span class="b2b-header__copy">
             <span class="b2b-header__name">Cazador de Sueño</span>
-            <span class="b2b-header__sub">Cigars SRL · República Dominicana</span>
+            <span class="b2b-header__sub" data-i18n="brand.sub">Cigars SRL · República Dominicana</span>
           </span>
         </a>
       </div>
@@ -79,73 +103,60 @@
 
     <main>
       <section class="hero hero-premium b2b-hero">
-        <!-- Background smoke effects from home -->
         <div class="hero__smoke hero__smoke--one" aria-hidden="true"></div>
         <div class="hero__smoke hero__smoke--two" aria-hidden="true"></div>
-        
         <div class="container">
           <div class="b2b-content">
-            
-            <h1 class="b2b-title">
-              <span class="only-en">Wholesale & Distributors</span>
-              <span class="only-es">Mayoristas y Distribuidores</span>
-            </h1>
-            
-            <p class="b2b-subtitle">Cazador de Sueño Cigars SRL</p>
-            
-            <p class="b2b-text only-en">
-              Welcome to our exclusive B2B portal. At Cazador de Sueño Cigars SRL, we craft 100% handmade premium cigars by master torcedores in the Dominican Republic, fully equipped for global export with complete commercial facilities.
-            </p>
-            
-            <p class="b2b-text only-es">
+            <h1 class="b2b-title" data-i18n="hero.title">Mayoristas y Distribuidores</h1>
+            <p class="b2b-subtitle" data-i18n="hero.brand">Cazador de Sueño Cigars SRL</p>
+            <p class="b2b-text" data-i18n="hero.lead">
               Bienvenido a nuestro portal B2B exclusivo. En Cazador de Sueño Cigars SRL elaboramos puros premium 100% hechos a mano por maestros tabaqueros en la República Dominicana, listos para la exportación global con facilidades comerciales y RNC válido.
             </p>
 
             <div class="b2b-actions">
-              <a href="catalogo/CazadorDeSuenos_Wholesale_EN.pdf" target="_blank" rel="noopener" download class="btn btn--secondary btn--lg only-en" data-b2b-catalog>
-                Download Catalog (PDF)
-              </a>
-              <button type="button" class="btn btn--secondary btn--lg only-en" data-wholesale-prices>
-                📊 WHOLESALE PRICES
-              </button>
-              <a href="https://wa.me/18094645016?text=Hello,%20I'm%20interested%20in%20wholesale%20opportunities%20with%20Cazador%20de%20Sue%C3%B1os." target="_blank" rel="noopener noreferrer" class="btn btn--primary btn--lg only-en" data-b2b-inquiry>
-                Wholesale Inquiries
-              </a>
-
-              <a href="catalogo/CazadorDeSuenos_Wholesale_ES.pdf" target="_blank" rel="noopener" download class="btn btn--secondary btn--lg only-es" data-b2b-catalog>
-                Descargar Catálogo (PDF)
-              </a>
-              <button type="button" class="btn btn--secondary btn--lg only-es" data-wholesale-prices>
+              <a
+                href="catalogo/CazadorDeSuenos_Wholesale_ES.pdf"
+                data-i18n="btn.catalog"
+                data-i18n-href="catalog.href"
+                data-b2b-catalog
+                target="_blank"
+                rel="noopener"
+                download
+                class="btn btn--secondary btn--lg"
+              >Descargar catálogo (PDF)</a>
+              <button type="button" class="btn btn--secondary btn--lg" data-wholesale-prices data-i18n="btn.prices">
                 📊 PRECIOS PARA MAYORISTA
               </button>
-              <a href="https://wa.me/18094645016?text=Hola,%20estoy%20interesado%20en%20oportunidades%20para%20mayoristas%20con%20Cazador%20de%20Sue%C3%B1os." target="_blank" rel="noopener noreferrer" class="btn btn--primary btn--lg only-es" data-b2b-inquiry>
-                Consultas de Mayoristas
-              </a>
+              <a
+                href="https://wa.me/18094645016?text=Hola,%20estoy%20interesado%20en%20oportunidades%20para%20mayoristas%20con%20Cazador%20de%20Sue%C3%B1os."
+                data-i18n="btn.inquiry"
+                data-i18n-href="inquiry.href"
+                data-b2b-inquiry
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn--primary btn--lg"
+              >Consultas de mayoristas</a>
             </div>
-            <p class="b2b-text only-en">Sales email: <a href="mailto:cazadordesueno1@gmail.com" style="color: var(--color-gold-400);">cazadordesueno1@gmail.com</a></p>
-            <p class="b2b-text only-es">Correo de ventas: <a href="mailto:cazadordesueno1@gmail.com" style="color: var(--color-gold-400);">cazadordesueno1@gmail.com</a></p>
+
+            <p class="b2b-text b2b-sales">
+              <span data-i18n="sales.label">Correo de ventas:</span>
+              <a href="mailto:cazadordesueno1@gmail.com">cazadordesueno1@gmail.com</a>
+            </p>
 
             <div class="b2b-features">
               <div class="b2b-feature">
-                <h3 class="only-en">Direct from Factory</h3>
-                <h3 class="only-es">Directo de Fábrica</h3>
-                <p class="only-en">Handcrafted in the Dominican Republic with generations of expertise.</p>
-                <p class="only-es">Hechos a mano en República Dominicana con generaciones de maestría.</p>
+                <h3 data-i18n="feature.factory.title">Directo de fábrica</h3>
+                <p data-i18n="feature.factory.text">Hechos a mano en República Dominicana con generaciones de maestría.</p>
               </div>
               <div class="b2b-feature">
-                <h3 class="only-en">Global Export</h3>
-                <h3 class="only-es">Exportación Global</h3>
-                <p class="only-en">Logistics ready for international shipping. Valid RNC and certifications.</p>
-                <p class="only-es">Logística lista para envíos internacionales. RNC al día y certificaciones.</p>
+                <h3 data-i18n="feature.export.title">Exportación global</h3>
+                <p data-i18n="feature.export.text">Logística lista para envíos internacionales. RNC al día y certificaciones.</p>
               </div>
               <div class="b2b-feature">
-                <h3 class="only-en">Premium Quality</h3>
-                <h3 class="only-es">Calidad Premium</h3>
-                <p class="only-en">Strict quality control on every single vitola before packaging.</p>
-                <p class="only-es">Estricto control de calidad en cada vitola antes de su empaque.</p>
+                <h3 data-i18n="feature.quality.title">Calidad premium</h3>
+                <p data-i18n="feature.quality.text">Estricto control de calidad en cada vitola antes de su empaque.</p>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -155,150 +166,114 @@
       <div class="b2b-sheet__backdrop" data-sheet-close></div>
       <div class="b2b-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="wholesale-sheet-title">
         <div class="b2b-sheet__bar">
-          <button type="button" class="b2b-sheet__close" data-sheet-close>
-            <span class="only-es">Cerrar</span>
-            <span class="only-en">Close</span>
-          </button>
+          <button type="button" class="b2b-sheet__close" data-sheet-close data-i18n="sheet.close">Cerrar</button>
         </div>
         <div class="b2b-sheet__scroll">
+          <section data-wholesale-access>
+            <h2 id="wholesale-sheet-title" class="b2b-sheet__title" data-i18n="access.title">Acceso a precios de mayorista</h2>
+            <p class="b2b-sheet__lead" data-i18n="access.lead">La lista FOB se muestra en esta sesión después de confirmar que compras al por mayor.</p>
+            <form id="wholesale-access-form" class="b2b-access">
+              <label>
+                <span data-i18n="access.company">Razón social</span>
+                <input id="wholesale-company" name="company" type="text" autocomplete="organization" required minlength="2" />
+              </label>
+              <label>
+                <span data-i18n="access.country">País</span>
+                <input id="wholesale-country" name="country" type="text" autocomplete="country-name" required minlength="2" />
+              </label>
+              <label class="b2b-access__check">
+                <input id="wholesale-confirm" name="confirm" type="checkbox" required />
+                <span data-i18n="access.confirm">Confirmo que soy comprador mayorista y mayor de edad.</span>
+              </label>
+              <p id="wholesale-access-error" class="b2b-field-error" hidden></p>
+              <button type="submit" class="btn btn--primary" data-i18n="access.submit">Ver lista de precios</button>
+            </form>
+          </section>
 
-        <section data-wholesale-access>
-          <h2 id="wholesale-sheet-title" class="b2b-sheet__title">
-            <span class="only-es">Acceso a precios de mayorista</span>
-            <span class="only-en">Wholesale price access</span>
-          </h2>
-          <p class="b2b-sheet__lead only-es">La lista FOB se muestra en esta sesión después de confirmar que compras al por mayor.</p>
-          <p class="b2b-sheet__lead only-en">The FOB list is shown for this session after you confirm you are buying wholesale.</p>
-          <form id="wholesale-access-form" class="b2b-access">
-            <label>
-              <span class="only-es">Razón social</span>
-              <span class="only-en">Company name</span>
-              <input id="wholesale-company" name="company" type="text" autocomplete="organization" required minlength="2" />
-            </label>
-            <label>
-              <span class="only-es">País</span>
-              <span class="only-en">Country</span>
-              <input id="wholesale-country" name="country" type="text" autocomplete="country-name" required minlength="2" />
-            </label>
-            <label class="b2b-access__check">
-              <input id="wholesale-confirm" name="confirm" type="checkbox" required />
-              <span class="only-es">Confirmo que soy comprador mayorista y mayor de edad.</span>
-              <span class="only-en">I confirm I am a wholesale buyer and of legal age.</span>
-            </label>
-            <p id="wholesale-access-error" class="b2b-field-error" hidden></p>
-            <button type="submit" class="btn btn--primary">
-              <span class="only-es">Ver lista de precios</span>
-              <span class="only-en">View price list</span>
-            </button>
-          </form>
-        </section>
-
-        <section data-wholesale-board hidden>
-          <h2 id="wholesale-board-title" class="b2b-sheet__title">
-            <span class="only-es">📊 Precios para mayorista</span>
-            <span class="only-en">📊 Wholesale prices</span>
-          </h2>
-          <p class="b2b-sheet__lead only-es">
-            USD por puro, FOB República Dominicana. Incluyen producción, empaque de exportación y timbre. El flete internacional y los aranceles del destino se cotizan aparte.
-          </p>
-          <p class="b2b-sheet__lead only-en">
-            USD per cigar, FOB Dominican Republic. Includes production, export packaging and tax stamp. International freight and destination duties are quoted separately.
-          </p>
-
-          <div class="b2b-tiers">
-            <article class="b2b-tier" data-tier-chip="1">
-              <strong class="only-es">Tier 1 · Mínimo</strong>
-              <strong class="only-en">Tier 1 · Minimum</strong>
-              <span class="only-es">2,000 a 4,999 unidades. Precio base de entrada.</span>
-              <span class="only-en">2,000 to 4,999 cigars. Entry base price.</span>
-            </article>
-            <article class="b2b-tier" data-tier-chip="2">
-              <strong>Tier 2 · −6%</strong>
-              <span class="only-es">5,000 a 9,999 unidades. 6% de descuento sobre la base.</span>
-              <span class="only-en">5,000 to 9,999 cigars. 6% off the base price.</span>
-            </article>
-            <article class="b2b-tier" data-tier-chip="3">
-              <strong>Tier 3 · −10%</strong>
-              <span class="only-es">10,000 unidades o más. 10% de descuento sobre la base.</span>
-              <span class="only-en">10,000 cigars or more. 10% off the base price.</span>
-            </article>
-          </div>
-
-          <div class="b2b-price-wrap">
-            <table class="b2b-price-table">
-              <thead>
-                <tr>
-                  <th scope="col"><span class="only-es">Vitola</span><span class="only-en">Vitola</span></th>
-                  <th scope="col"><span class="only-es">Formato</span><span class="only-en">Format</span></th>
-                  <th scope="col" data-tier-col="1"><span class="only-es">Base</span><span class="only-en">Base</span></th>
-                  <th scope="col" data-tier-col="2">−6%</th>
-                  <th scope="col" data-tier-col="3">−10%</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr data-wholesale-row="sultan">
-                  <th scope="row" data-col="name">El Sultán</th>
-                  <td data-col="format"></td>
-                  <td data-col="tier1" data-tier-col="1"></td>
-                  <td data-col="tier2" data-tier-col="2"></td>
-                  <td data-col="tier3" data-tier-col="3"></td>
-                </tr>
-                <tr data-wholesale-row="ligero">
-                  <th scope="row" data-col="name">Ligero 007</th>
-                  <td data-col="format"></td>
-                  <td data-col="tier1" data-tier-col="1"></td>
-                  <td data-col="tier2" data-tier-col="2"></td>
-                  <td data-col="tier3" data-tier-col="3"></td>
-                </tr>
-                <tr data-wholesale-row="emperador">
-                  <th scope="row" data-col="name">El Emperador</th>
-                  <td data-col="format"></td>
-                  <td data-col="tier1" data-tier-col="1"></td>
-                  <td data-col="tier2" data-tier-col="2"></td>
-                  <td data-col="tier3" data-tier-col="3"></td>
-                </tr>
-                <tr data-wholesale-row="puro-habano">
-                  <th scope="row" data-col="name">Puro Habano</th>
-                  <td data-col="format"></td>
-                  <td data-col="tier1" data-tier-col="1"></td>
-                  <td data-col="tier2" data-tier-col="2"></td>
-                  <td data-col="tier3" data-tier-col="3"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <form id="wholesale-order-form" class="b2b-order">
-            <p class="b2b-sheet__note only-es">Indica las unidades de cada vitola. El descuento sale del total del pedido. Menos de 2,000 unidades no se procesa.</p>
-            <p class="b2b-sheet__note only-en">Enter cigars per vitola. The discount uses the order total. Fewer than 2,000 cigars cannot be processed.</p>
-            <div class="b2b-order__grid">
-              <label>El Sultán <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="sultan" /></label>
-              <label>Ligero 007 <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="ligero" /></label>
-              <label>El Emperador <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="emperador" /></label>
-              <label>Puro Habano <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="puro-habano" /></label>
+          <section data-wholesale-board hidden>
+            <h2 id="wholesale-board-title" class="b2b-sheet__title" data-i18n="board.title">📊 Precios para mayorista</h2>
+            <p class="b2b-sheet__lead" data-i18n="board.lead">
+              USD por puro, FOB República Dominicana. Incluyen producción, empaque de exportación y timbre. El flete internacional y los aranceles del destino se cotizan aparte.
+            </p>
+            <div class="b2b-tiers">
+              <article class="b2b-tier" data-tier-chip="1">
+                <strong data-i18n="tier1.title">Tier 1 · Mínimo</strong>
+                <span data-i18n="tier1.text">2,000 a 4,999 unidades. Precio base de entrada.</span>
+              </article>
+              <article class="b2b-tier" data-tier-chip="2">
+                <strong data-i18n="tier2.title">Tier 2 · −6%</strong>
+                <span data-i18n="tier2.text">5,000 a 9,999 unidades. 6% de descuento sobre la base.</span>
+              </article>
+              <article class="b2b-tier" data-tier-chip="3">
+                <strong data-i18n="tier3.title">Tier 3 · −10%</strong>
+                <span data-i18n="tier3.text">10,000 unidades o más. 10% de descuento sobre la base.</span>
+              </article>
             </div>
-            <p id="wholesale-moq-alert" class="b2b-moq-alert" role="alert" hidden></p>
-            <div id="wholesale-quote" class="b2b-quote" hidden></div>
-            <div class="b2b-sheet__actions">
-              <button type="submit" class="btn btn--primary">
-                <span class="only-es">Procesar pedido</span>
-                <span class="only-en">Process order</span>
-              </button>
-              <button type="button" id="wholesale-download" class="btn btn--secondary">
-                <span class="only-es">Descargar lista (PDF)</span>
-                <span class="only-en">Download list (PDF)</span>
-              </button>
-              <a id="wholesale-send" class="btn btn--secondary" target="_blank" rel="noopener noreferrer" hidden>
-                <span class="only-es">Enviar pedido por WhatsApp</span>
-                <span class="only-en">Send order on WhatsApp</span>
-              </a>
+            <div class="b2b-price-wrap">
+              <table class="b2b-price-table">
+                <thead>
+                  <tr>
+                    <th scope="col" data-i18n="table.vitola">Vitola</th>
+                    <th scope="col" data-i18n="table.format">Formato</th>
+                    <th scope="col" data-tier-col="1" data-i18n="table.base">Base</th>
+                    <th scope="col" data-tier-col="2">−6%</th>
+                    <th scope="col" data-tier-col="3">−10%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-wholesale-row="sultan">
+                    <th scope="row" data-col="name">El Sultán</th>
+                    <td data-col="format"></td>
+                    <td data-col="tier1" data-tier-col="1"></td>
+                    <td data-col="tier2" data-tier-col="2"></td>
+                    <td data-col="tier3" data-tier-col="3"></td>
+                  </tr>
+                  <tr data-wholesale-row="ligero">
+                    <th scope="row" data-col="name">Ligero 007</th>
+                    <td data-col="format"></td>
+                    <td data-col="tier1" data-tier-col="1"></td>
+                    <td data-col="tier2" data-tier-col="2"></td>
+                    <td data-col="tier3" data-tier-col="3"></td>
+                  </tr>
+                  <tr data-wholesale-row="emperador">
+                    <th scope="row" data-col="name">El Emperador</th>
+                    <td data-col="format"></td>
+                    <td data-col="tier1" data-tier-col="1"></td>
+                    <td data-col="tier2" data-tier-col="2"></td>
+                    <td data-col="tier3" data-tier-col="3"></td>
+                  </tr>
+                  <tr data-wholesale-row="puro-habano">
+                    <th scope="row" data-col="name">Puro Habano</th>
+                    <td data-col="format"></td>
+                    <td data-col="tier1" data-tier-col="1"></td>
+                    <td data-col="tier2" data-tier-col="2"></td>
+                    <td data-col="tier3" data-tier-col="3"></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </form>
-        </section>
+            <form id="wholesale-order-form" class="b2b-order">
+              <p class="b2b-sheet__note" data-i18n="order.note">Indica las unidades de cada vitola. El descuento sale del total del pedido. Menos de 2,000 unidades no se procesa.</p>
+              <div class="b2b-order__grid">
+                <label>El Sultán <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="sultan" /></label>
+                <label>Ligero 007 <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="ligero" /></label>
+                <label>El Emperador <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="emperador" /></label>
+                <label>Puro Habano <input type="number" min="0" step="1" inputmode="numeric" value="0" data-qty="puro-habano" /></label>
+              </div>
+              <p id="wholesale-moq-alert" class="b2b-moq-alert" role="alert" hidden></p>
+              <div id="wholesale-quote" class="b2b-quote" hidden></div>
+              <div class="b2b-sheet__actions">
+                <button type="submit" class="btn btn--primary" data-i18n="order.process">Procesar pedido</button>
+                <button type="button" id="wholesale-download" class="btn btn--secondary" data-i18n="order.download">Descargar lista (PDF)</button>
+                <a id="wholesale-send" class="btn btn--secondary" target="_blank" rel="noopener noreferrer" hidden data-i18n="order.send">Enviar pedido por WhatsApp</a>
+              </div>
+            </form>
+          </section>
         </div>
       </div>
     </div>
 
+    <script src="js/wholesale-i18n.js"></script>
     <script src="js/catalog.js"></script>
     <script src="js/age-gate.js"></script>
     <script src="js/wholesale-pricing.js"></script>
