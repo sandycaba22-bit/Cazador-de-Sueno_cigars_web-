@@ -9,6 +9,7 @@ from pathlib import Path
 from b2b.contacto_web import numero_whatsapp
 from b2b.idioma import idioma_para_lead
 from b2b.lead_score import priorizar_leads_contacto
+from b2b.mapas import botones_mapa, google_maps_url
 from b2b.redactor import (
     CARGO_VP,
     EMAIL_VP_VENTAS,
@@ -17,6 +18,7 @@ from b2b.redactor import (
     OPT_OUT,
     asunto_correo,
     borrador_corto,
+    whatsapp_empresa,
 )
 from b2b.telegram_control import puede_enviar_telegram, pausa_entre_mensajes, registrar_envio_telegram
 from b2b.website import es_url_mapa
@@ -42,11 +44,7 @@ _RE_ZIP = re.compile(r"^\d{5}(-\d{4})?$")
 
 
 def _maps_url(lead: dict) -> str:
-    url = (lead.get("maps_url") or "").strip()
-    if url:
-        return url
-    web = (lead.get("web") or "").strip()
-    return web if es_url_mapa(web) else ""
+    return google_maps_url(lead)
 
 
 def ciudad_lead(lead: dict, pais: str = "") -> str:
@@ -81,11 +79,27 @@ def estado_contacto(lead: dict) -> str:
     return "Sin teléfono ni correo"
 
 
+MAX_URL_BOTON = 1900
+
+
 def link_whatsapp(lead: dict, borrador: str) -> str:
     num = numero_whatsapp(lead)
     if not num:
         return ""
-    return f"https://wa.me/{num}?text={urllib.parse.quote(borrador)}"
+    url = f"https://wa.me/{num}?text={urllib.parse.quote(borrador)}"
+    # Si el texto no cabe en un botón, se abre el chat sin texto (el borrador está en el mensaje).
+    return url if len(url) <= MAX_URL_BOTON else f"https://wa.me/{num}"
+
+
+def _whatsapp_visible(lead: dict) -> str:
+    """Línea 'WhatsApp: …' con el origen del número, sin inventar nada."""
+    publicado = re.sub(r"\D", "", lead.get("whatsapp") or "")
+    if len(publicado) >= 8:
+        return f"📲 WhatsApp: +{publicado} (publicado en su web)"
+    num = numero_whatsapp(lead)
+    if num:
+        return f"📲 WhatsApp: +{num} (número de Google; confirmar si es celular)"
+    return ""
 
 
 def _idioma_lead(lead: dict, pais: str) -> str:
@@ -99,7 +113,10 @@ def _idioma_lead(lead: dict, pais: str) -> str:
 
 def cuerpo_mailto(nombre: str, idioma: str, tipo: str) -> str:
     corto = borrador_corto(nombre, idioma, tipo)
-    firma = f"{NOMBRE_VP}\n{CARGO_VP.get(idioma, CARGO_VP['en'])}\n{EMPRESA_FIRMA}\n{EMAIL_VP_VENTAS}"
+    firma = (
+        f"{NOMBRE_VP}\n{CARGO_VP.get(idioma, CARGO_VP['en'])}\n{EMPRESA_FIRMA}\n"
+        f"{EMAIL_VP_VENTAS}\nWhatsApp {whatsapp_empresa()}"
+    )
     opt = OPT_OUT.get(idioma, OPT_OUT["en"])
     return f"{corto}\n\n{firma}\n\n{opt}"
 
@@ -113,7 +130,36 @@ def link_mailto(lead: dict, pais: str) -> str:
     idioma = _idioma_lead(lead, pais)
     asunto = urllib.parse.quote(asunto_correo(nombre, idioma))
     cuerpo = urllib.parse.quote(cuerpo_mailto(nombre, idioma, tipo))
-    return f"mailto:{correo}?subject={asunto}&body={cuerpo}"
+    url = f"mailto:{correo}?subject={asunto}&body={cuerpo}"
+    return url if len(url) <= MAX_URL_BOTON else f"mailto:{correo}?subject={asunto}"
+
+
+def _calificacion(lead: dict) -> str:
+    rating = lead.get("rating")
+    if rating in (None, ""):
+        return ""
+    resenas = lead.get("user_rating_count")
+    extra = f" ({resenas} reseñas)" if resenas not in (None, "") else ""
+    return f"⭐ {rating}{extra}"
+
+
+def datos_contacto(lead: dict) -> list[str]:
+    """Líneas con todo lo verificable del negocio; solo aparece lo que el lead realmente trae."""
+    lineas = []
+    for linea in (
+        _calificacion(lead),
+        f"🗺 {lead['direccion'].strip()}" if (lead.get("direccion") or "").strip() else "",
+        f"📞 Tel: {lead['telefono'].strip()}" if (lead.get("telefono") or "").strip() else "",
+        _whatsapp_visible(lead),
+        f"✉️ Correo: {lead['correo'].strip()}" if (lead.get("correo") or "").strip() else "",
+        f"🌐 Web: {lead['web'].strip()}" if (lead.get("web") or "").strip() else "",
+        f"📷 Instagram: {lead['instagram'].strip()}" if (lead.get("instagram") or "").strip() else "",
+        f"👍 Facebook: {lead['facebook'].strip()}" if (lead.get("facebook") or "").strip() else "",
+        f"📝 Formulario: {lead['formulario'].strip()}" if (lead.get("formulario") or "").strip() else "",
+    ):
+        if linea:
+            lineas.append(linea)
+    return lineas
 
 
 def mensaje_prospecto_completo(lead: dict, pais: str) -> str:
@@ -126,6 +172,7 @@ def mensaje_prospecto_completo(lead: dict, pais: str) -> str:
     partes = [
         f"🏪 {nombre}",
         f"📋 {etiqueta} · {ciudad}",
+        *datos_contacto(lead),
         f"📡 {estado_contacto(lead)}",
         "",
         corto,
@@ -137,22 +184,25 @@ def mensaje_prospecto_completo(lead: dict, pais: str) -> str:
 
 
 def teclado_prospecto(lead: dict, pais: str, token: str) -> dict:
-    acciones: list[dict] = []
     tipo = lead.get("tipo") or lead.get("tipo_negocio") or "tienda"
     idioma = _idioma_lead(lead, pais)
     corto = borrador_corto(lead.get("nombre") or "—", idioma, tipo)
     wa = link_whatsapp(lead, corto)
     mail = link_mailto(lead, pais)
-    maps = _maps_url(lead)
-    if wa:
-        acciones.append({"text": "📲 Enviar WhatsApp", "url": wa})
-    if mail:
-        acciones.append({"text": "✉️ Enviar Correo", "url": mail})
-    if maps:
-        acciones.append({"text": "📍 Google Maps", "url": maps})
+    web = (lead.get("web") or "").strip()
     filas: list[list[dict]] = []
-    if acciones:
-        filas.append(acciones)
+    contacto: list[dict] = []
+    if wa:
+        contacto.append({"text": "📲 Enviar WhatsApp", "url": wa})
+    if mail:
+        contacto.append({"text": "✉️ Enviar Correo", "url": mail})
+    if web.startswith(("http://", "https://")):
+        contacto.append({"text": "🌐 Ver web", "url": web})
+    if contacto:
+        filas.append(contacto)
+    mapas = botones_mapa(lead)
+    if mapas:
+        filas.append(mapas)
     filas.append(
         [
             {"text": "Enviado", "callback_data": f"b2be:{token}"},

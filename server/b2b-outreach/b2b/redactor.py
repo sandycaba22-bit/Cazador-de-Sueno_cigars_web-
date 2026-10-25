@@ -327,6 +327,23 @@ def code_escape(value):
 
 
 EMAIL_VP_VENTAS = "cazadordesueno1@gmail.com"
+WHATSAPP_EMPRESA = "+1 809-464-5016"
+SITIO_WEB = "www.cazadordesuenocigar.com"
+
+
+def whatsapp_empresa() -> str:
+    """Número de WhatsApp de la empresa; FIRMA_TELEFONO lo puede sobreescribir en el servidor."""
+    return os.getenv("FIRMA_TELEFONO", "").strip() or WHATSAPP_EMPRESA
+
+
+def email_empresa() -> str:
+    return os.getenv("FIRMA_EMAIL", "").strip() or EMAIL_VP_VENTAS
+
+
+def linea_contacto(idioma: str) -> str:
+    """Una línea con WhatsApp, correo y web de Cazador de Sueño para el borrador corto."""
+    etiqueta = {"es": "Contacto", "fr": "Contact", "pt": "Contato"}.get(idioma, "Contact")
+    return f"{etiqueta}: WhatsApp {whatsapp_empresa()} · {email_empresa()} · {SITIO_WEB}"
 
 
 TIPO_IDIOMA = {
@@ -396,6 +413,7 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
             f"República Dominicana. Nos gustaría presentar nuestra línea a su {t}.\n"
             f"{aviso}Catálogo mayorista: {catalogo}\n"
             "Ofrecemos una muestra gratuita (free sample) para evaluación. ¿Conversamos?\n"
+            f"{linea_contacto('es')}\n"
             f"Atentamente,\n{NOMBRE_VP} - {CARGO_VP['es']}"
         )
     if idioma == "fr":
@@ -405,6 +423,7 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
             f"République dominicaine. Nous souhaitons présenter notre gamme à votre {t}.\n"
             f"{aviso}Catalogue grossiste : {catalogo}\n"
             "Un échantillon gratuit est disponible pour évaluation. Pouvons-nous échanger ?\n"
+            f"{linea_contacto('fr')}\n"
             f"Cordialement,\n{NOMBRE_VP} - {CARGO_VP['fr']}"
         )
     
@@ -413,6 +432,7 @@ def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
         f"We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago, Dominican Republic. We craft 100% handmade premium cigars and would love to introduce our portfolio to your {tipo_en_idioma(tipo, 'en')}.\n"
         f"{aviso}Wholesale Catalog: {catalogo}\n"
         "We're happy to provide a free sample for your consideration. Open to a brief chat?\n"
+        f"{linea_contacto(idioma)}\n"
         "Best,\n"
         "Yaniris Agustina Ureña - VP of Sales"
     )
@@ -435,7 +455,9 @@ def borrador_correo(nombre_local: str, idioma: str, tipo: str = "tienda") -> str
         "Yaniris Agustina Ureña\n"
         "Vice President, Sales\n"
         "Cazador de Sueño Cigars SRL\n"
-        "cazadordesueno1@gmail.com\n\n"
+        f"{email_empresa()}\n"
+        f"WhatsApp {whatsapp_empresa()}\n"
+        f"{SITIO_WEB}\n\n"
         "If you prefer not to receive further messages, reply STOP."
     )
     return _validar(texto)
