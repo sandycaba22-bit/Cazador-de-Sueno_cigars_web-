@@ -86,6 +86,7 @@ def ya_visto(place_id: str = "", web: str = "") -> bool:
 ESTADOS_LEAD = (
     "nuevo",
     "aprobado",
+    "aprobado_simulado",
     "en_cola",
     "enviado",
     "respondio",

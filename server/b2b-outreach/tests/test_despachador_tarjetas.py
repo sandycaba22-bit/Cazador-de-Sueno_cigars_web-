@@ -136,6 +136,25 @@ class TestDespachador(unittest.TestCase):
         data = json.loads(path.read_text(encoding="utf-8"))
         self.assertFalse(data["telegram_notificado"])
 
+    def test_ya_gestionado_al_frente_no_bloquea(self):
+        import b2b.telegram_gestion as tg
+
+        primero = _escribir(self.inbox, 1, 5.0)
+        segundo = _escribir(self.inbox, 2, 4.9)
+        lead1 = json.loads(primero.read_text(encoding="utf-8"))
+        gest = self.cola / "data" / "gest.json"
+        gest.parent.mkdir(parents=True, exist_ok=True)
+        with patch.object(tg, "GESTION_PATH", gest):
+            tg.marcar_gestionado_telegram(lead1, "descartado")
+            sellar_tanda(self.inbox, 2)
+            self.assertEqual(despachar(self.cola, ahora=AHORA, enviar=self.enviar), 1)
+        self.assertEqual(self.enviados[0]["nombre"], "Cigar Shop 02")
+        data1 = json.loads(primero.read_text(encoding="utf-8"))
+        self.assertTrue(data1["telegram_notificado"])
+        self.assertEqual(data1.get("omitido_motivo"), "omitido")
+        data2 = json.loads(segundo.read_text(encoding="utf-8"))
+        self.assertTrue(data2["telegram_notificado"])
+
 
 if __name__ == "__main__":
     unittest.main()

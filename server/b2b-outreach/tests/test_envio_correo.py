@@ -6,7 +6,7 @@ import os
 import sys
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from pathlib import Path
 from unittest.mock import patch
@@ -45,6 +45,32 @@ def _lead(correo="info@primecigar.example", **extra):
     }
     base.update(extra)
     return base
+
+
+def _smtp_ok():
+    class _SMTP:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def ehlo(self):
+            pass
+
+        def starttls(self, context=None):
+            self.context = context
+
+        def login(self, user, password):
+            pass
+
+        def send_message(self, msg):
+            pass
+
+    return _SMTP
 
 
 class _Base(unittest.TestCase):
@@ -126,12 +152,13 @@ class TestMensaje(unittest.TestCase):
 
 class TestTopes(_Base):
     def test_alterna_cuentas_y_no_repite_dominio(self):
+        os.environ["B2B_ENVIO_REAL"] = "1"
         uno = elegir_cuenta(LUNES)
         self.assertEqual(uno["n"], 1)
         item = encolar_envio(_lead(), "tok1", ahora=LUNES)
         self.assertIsNotNone(item)
-        with patch("b2b.envio_correo.random.randint", return_value=2):
-            procesar_outbox(LUNES + __import__("datetime").timedelta(minutes=5))
+        with patch("smtplib.SMTP", _smtp_ok()), patch("b2b.envio_correo.random.randint", return_value=2):
+            procesar_outbox(LUNES + timedelta(minutes=5))
         dos = elegir_cuenta(LUNES)
         self.assertEqual(dos["n"], 2)
         ok, motivo = puede_enviar_correo(_lead("ventas@primecigar.example"), LUNES)
@@ -142,6 +169,7 @@ class TestTopes(_Base):
         self.assertEqual(tope_rampa(LUNES), 10)
 
     def test_una_cuenta_no_se_lleva_toda_la_rampa(self):
+        os.environ["CORREO_REMITENTE_2"] = ""
         os.environ["CORREO_CLAVE_2"] = ""
         os.environ["B2B_ENVIO_RAMPA"] = "30,30,30"
         os.environ["B2B_ENVIO_FECHA_INICIO"] = "2026-09-01"
@@ -165,7 +193,7 @@ class TestTopes(_Base):
             self.assertIsNotNone(encolar_envio(_lead("otro@tienda.example"), "tok-sim", ahora=LUNES))
         with patch("smtplib.SMTP") as smtp:
             self.assertFalse(envio_real())
-            procesar_outbox(LUNES + __import__("datetime").timedelta(minutes=5))
+            procesar_outbox(LUNES + timedelta(minutes=5))
         smtp.assert_not_called()
         eml = list(Path(os.environ["B2B_DATA_DIR"]).glob("outbox_simulado/*.eml"))
         self.assertEqual(len(eml), 1)
@@ -189,7 +217,7 @@ class TestTopes(_Base):
             def ehlo(self):
                 pass
 
-            def starttls(self):
+            def starttls(self, context=None):
                 pass
 
             def login(self, user, password):
@@ -202,8 +230,8 @@ class TestTopes(_Base):
         with patch("smtplib.SMTP", _SMTP), patch("telegram_bot.enviar_texto_telegram", side_effect=avisos.append), patch(
             "b2b.envio_correo.random.randint", return_value=2
         ):
-            procesar_outbox(LUNES + __import__("datetime").timedelta(minutes=5))
-            procesar_outbox(LUNES + __import__("datetime").timedelta(minutes=5))
+            procesar_outbox(LUNES + timedelta(minutes=5))
+            procesar_outbox(LUNES + timedelta(minutes=5))
         from b2b.envio_correo import _load
 
         self.assertIn("1", _load()["pausadas"])
@@ -223,6 +251,199 @@ class TestTopes(_Base):
         nuevo = datetime.fromisoformat(item["enviar_despues_de"])
         self.assertEqual(siguiente_habil(DOMINGO, "Florida", 9, 17).hour, 9)
         self.assertEqual(nuevo.astimezone(siguiente_habil(DOMINGO, "Florida").tzinfo).weekday(), 0)
+
+    def test_sin_clave_en_simulado_activa_y_motivos(self):
+        from b2b.envio_correo import cuentas_activas
+
+        os.environ["CORREO_CLAVE_1"] = ""
+        os.environ["CORREO_CLAVE_2"] = ""
+        os.environ["B2B_ENVIO_REAL"] = "0"
+        self.assertEqual(len(cuentas_activas()), 2)
+        ok, motivo = puede_enviar_correo(_lead("x@shop-sinclave.example"), LUNES)
+        self.assertTrue(ok)
+        os.environ["B2B_ENVIO_REAL"] = "1"
+        self.assertEqual(cuentas_activas(), [])
+        ok, motivo = puede_enviar_correo(_lead("y@shop-sinclave.example"), LUNES)
+        self.assertFalse(ok)
+        self.assertEqual(motivo, "sin cuenta de correo activa")
+        self.assertNotIn("tope", motivo)
+
+    def test_tope_solo_cuando_hay_cuentas_y_cupo_lleno(self):
+        from b2b.envio_correo import _load, _save
+
+        data = _load()
+        for i in range(10):
+            data["envios"].append({
+                "correo": f"ya{i}@tienda{i}.example",
+                "dominio": f"tienda{i}.example",
+                "cuenta": 1 if i % 2 == 0 else 2,
+                "dia": "2026-10-26",
+                "ok": True,
+                "cuando": LUNES.isoformat(),
+            })
+        _save(data)
+        ok, motivo = puede_enviar_correo(_lead("nuevo@otra.example"), LUNES, solo_si_hay_cupo_hoy=True)
+        self.assertFalse(ok)
+        self.assertEqual(motivo, "tope diario de envío")
+
+    def test_simulado_no_quema_lead(self):
+        from b2b.envio_correo import _load
+        from b2b.leads_store import estado_de_lead
+
+        correo = "mismo@local.example"
+        with patch("b2b.envio_correo.random.randint", return_value=2):
+            self.assertIsNotNone(encolar_envio(_lead(correo), "tok-sim2", ahora=LUNES))
+            procesar_outbox(LUNES + timedelta(minutes=5))
+        data = _load()
+        self.assertEqual(data["envios"], [])
+        self.assertEqual(len(data["simulados"]), 1)
+        self.assertEqual(estado_de_lead(_lead(correo)), "aprobado_simulado")
+        ok, _motivo = puede_enviar_correo(_lead(correo), LUNES)
+        self.assertTrue(ok)
+        os.environ["B2B_ENVIO_REAL"] = "1"
+        with patch("smtplib.SMTP", _smtp_ok()), patch("b2b.envio_correo.random.randint", return_value=2):
+            self.assertIsNotNone(encolar_envio(_lead(correo), "tok-real", ahora=LUNES))
+            self.assertEqual(procesar_outbox(LUNES + timedelta(minutes=5)), 1)
+        self.assertEqual(len(_load()["envios"]), 1)
+
+    def test_gmail_solo_bloquea_direccion_exacta(self):
+        os.environ["B2B_ENVIO_REAL"] = "1"
+        with patch("smtplib.SMTP", _smtp_ok()), patch("b2b.envio_correo.random.randint", return_value=2):
+            encolar_envio(_lead("dueño@gmail.com", web="https://a.example"), "tok-g1", ahora=LUNES)
+            procesar_outbox(LUNES + timedelta(minutes=5))
+        ok, motivo = puede_enviar_correo(_lead("otro@gmail.com", web="https://b.example"), LUNES)
+        self.assertTrue(ok, motivo)
+        ok2, motivo2 = puede_enviar_correo(_lead("dueño@gmail.com", web="https://c.example"), LUNES)
+        self.assertFalse(ok2)
+        self.assertIn("correo", motivo2)
+
+    def test_aprobar_15_con_rampa_10(self):
+        from b2b.envio_correo import items_en_cola
+        from b2b.zonas import ahora_local
+
+        os.environ["B2B_ENVIO_REAL"] = "1"
+        with patch("b2b.envio_correo.random.randint", return_value=2):
+            for i in range(15):
+                self.assertIsNotNone(
+                    encolar_envio(
+                        _lead(f"info{i}@shop{i}.example", web=f"https://shop{i}.example"),
+                        f"tok{i}",
+                        ahora=LUNES,
+                    )
+                )
+        hoy = []
+        manana = []
+        for _path, item in items_en_cola():
+            cuando = datetime.fromisoformat(item["enviar_despues_de"])
+            local = ahora_local(cuando, "Florida")
+            if local.date() == ahora_local(LUNES, "Florida").date():
+                hoy.append(item)
+            else:
+                manana.append(item)
+        self.assertEqual(len(hoy), 10)
+        self.assertEqual(len(manana), 5)
+        with patch("smtplib.SMTP", _smtp_ok()):
+            hechos = procesar_outbox(LUNES + timedelta(hours=3))
+        self.assertEqual(hechos, 10)
+        cuentas = []
+        archivo = Path(os.environ["B2B_QUEUE_DIR"]) / "outbox" / "archivo"
+        for path in sorted(archivo.glob("*.json")):
+            cuentas.append(json.loads(path.read_text(encoding="utf-8")).get("cuenta"))
+        self.assertEqual(cuentas.count(1), 5)
+        self.assertEqual(cuentas.count(2), 5)
+        martes = LUNES + timedelta(days=1)
+        for _path, item in items_en_cola():
+            item["enviar_despues_de"] = martes.isoformat()
+            _path.write_text(json.dumps(item), encoding="utf-8")
+        with patch("smtplib.SMTP", _smtp_ok()):
+            self.assertEqual(procesar_outbox(martes), 5)
+
+    def test_cuerpo_editado_cambia_cuenta_al_enviar(self):
+        from b2b.envio_correo import preparar_cuerpo
+
+        lead = _lead(
+            "edit@shop.example",
+            cuerpo_editado=(
+                "Hello team,\n\n"
+                "Contact uno@gmail.com please.\n\n"
+                "Cazador de Sueño Cigars SRL · Calle La Barranquita, Sector Las Minas, Calle 3, "
+                "Edificio 3, Santiago de los Caballeros, Dominican Republic\n"
+                "If you prefer not to receive further messages, reply STOP."
+            ),
+        )
+        _asunto, cuerpo, _v = preparar_cuerpo(lead, "dos@gmail.com")
+        self.assertIn("dos@gmail.com", cuerpo)
+        self.assertNotIn("uno@gmail.com", cuerpo)
+        self.assertIn("reply STOP", cuerpo)
+
+    def test_smtp_usa_contexto_ssl(self):
+        import ssl as _ssl
+
+        os.environ["B2B_ENVIO_REAL"] = "1"
+        seen = {}
+
+        class _SMTP:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def ehlo(self):
+                pass
+
+            def starttls(self, context=None):
+                seen["context"] = context
+
+            def login(self, user, password):
+                pass
+
+            def send_message(self, msg):
+                pass
+
+        with patch("smtplib.SMTP", _SMTP), patch("b2b.envio_correo.random.randint", return_value=2):
+            encolar_envio(_lead("ssl@shop.example"), "tok-ssl", ahora=LUNES)
+            procesar_outbox(LUNES + timedelta(minutes=5))
+        self.assertIsInstance(seen.get("context"), _ssl.SSLContext)
+
+    def test_fallo_archiva_y_avisa_una_vez(self):
+        os.environ["B2B_ENVIO_REAL"] = "1"
+        encolar_envio(_lead("fallo@shop.example"), "tok-fallo", ahora=LUNES)
+        avisos = []
+
+        class _SMTP:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def ehlo(self):
+                pass
+
+            def starttls(self, context=None):
+                pass
+
+            def login(self, user, password):
+                pass
+
+            def send_message(self, msg):
+                raise TimeoutError("smtp timeout")
+
+        with patch("smtplib.SMTP", _SMTP), patch("telegram_bot.enviar_texto_telegram", side_effect=avisos.append), patch(
+            "b2b.envio_correo.random.randint", return_value=2
+        ):
+            for i in range(3):
+                procesar_outbox(LUNES + timedelta(minutes=5 + i * 30))
+        archivo = Path(os.environ["B2B_QUEUE_DIR"]) / "outbox" / "archivo"
+        self.assertTrue((archivo / "tok-fallo.json").is_file())
+        self.assertEqual(len([a for a in avisos if "No pude enviar" in a]), 1)
 
 
 if __name__ == "__main__":

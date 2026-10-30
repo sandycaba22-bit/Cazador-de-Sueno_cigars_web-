@@ -138,9 +138,9 @@ def abiertas_ahora(ahora: datetime | None = None) -> dict:
 def hay_trabajo(inbox: Path, ahora: datetime | None = None) -> bool:
     if abiertas_ahora(ahora) or _candidatos(inbox):
         return True
-    from b2b.envio_correo import outbox_dir
+    from b2b.envio_correo import items_en_cola
 
-    return any(outbox_dir().glob("*.json"))
+    return bool(items_en_cola())
 
 
 def _liberar_caducadas(inbox: Path, ahora: datetime) -> None:
@@ -296,11 +296,11 @@ def _resumen_pendiente(inbox: Path) -> str:
 
 
 def texto_cola(inbox: Path) -> str:
-    from b2b.envio_correo import outbox_dir
+    from b2b.envio_correo import items_en_cola
 
     faltan = len(_candidatos(inbox))
     abiertas = len(abiertas_ahora())
-    en_correo = len(list(outbox_dir().glob("*.json")))
+    en_correo = len(items_en_cola())
     return f"📋 Por revisar: {faltan}. Abiertas: {abiertas}. En cola de correo: {en_correo}."
 
 
@@ -333,6 +333,13 @@ def despachar(
         if not fila:
             break
         path, lead = fila[0]
+        from b2b.telegram_gestion import puede_avisar_prospecto, tiene_medio_contacto, ya_gestionado_telegram
+
+        if ya_gestionado_telegram(lead) or not (puede_avisar_prospecto(lead) or tiene_medio_contacto(lead)):
+            lead["telegram_notificado"] = True
+            lead["omitido_motivo"] = "omitido"
+            _guardar(path, lead)
+            continue
         if int(data.get("forzar") or 0):
             data["forzar"] = 0
             _save(data)
