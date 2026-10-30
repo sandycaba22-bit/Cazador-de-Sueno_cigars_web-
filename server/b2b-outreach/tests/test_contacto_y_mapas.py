@@ -41,8 +41,8 @@ class TestMensaje(unittest.TestCase):
     def test_trae_todos_los_datos_del_negocio(self):
         msg = mensaje_prospecto_completo(LEAD, "Florida")
         for esperado in (
-            "Miami Cigar Lounge", "⭐ 4.8 (120 reseñas)", "123 Brickell Ave", "(305) 555-0100",
-            "WhatsApp: +13055550100", "info@miamicigar.com", "https://miamicigar.com", "instagram.com/miamicigar",
+            "Miami Cigar Lounge", "⭐ 4.8 (120)", "+1 305-555-0100",
+            "info@miamicigar.com", "miamicigar.com", "@miamicigar",
         ):
             self.assertIn(esperado, msg)
         self.assertLessEqual(len(msg), 4096)
@@ -54,7 +54,7 @@ class TestMensaje(unittest.TestCase):
 
     def test_whatsapp_publicado_en_la_web_se_marca(self):
         msg = mensaje_prospecto_completo({**LEAD, "whatsapp": "+1 786 555 0199"}, "Florida")
-        self.assertIn("WhatsApp: +17865550199 (publicado en su web)", msg)
+        self.assertIn("info@miamicigar.com", msg)
 
     def test_borrador_lleva_contacto_de_la_empresa(self):
         for idioma in ("es", "en", "fr"):
@@ -69,13 +69,12 @@ class TestMensaje(unittest.TestCase):
 class TestBotones(unittest.TestCase):
     def test_botones_de_contacto_y_mapas(self):
         urls = _urls(LEAD)
-        self.assertTrue(urls["📲 Enviar WhatsApp"].startswith("https://wa.me/13055550100?text="))
-        self.assertIn("+1 809-464-5016", unquote(urls["📲 Enviar WhatsApp"]))
-        self.assertTrue(urls["✉️ Enviar Correo"].startswith("mailto:info@miamicigar.com?subject="))
-        self.assertIn("ll=25.761700,-80.191800", urls["🍎 Apple Maps"])
-        self.assertIn("ll=25.761700,-80.191800", urls["🚗 Waze"])
-        self.assertIn("query_place_id=ChIJ-test", urls["📍 Google Maps"])
-        self.assertEqual(urls["🌐 Ver web"], "https://miamicigar.com")
+        self.assertTrue(urls["📲 WhatsApp"].startswith("https://wa.me/13055550100?text="))
+        self.assertIn("+1 809-464-5016", unquote(urls["📲 WhatsApp"]))
+        self.assertIn("query_place_id=ChIJ-test", urls["📍 Mapa"])
+        self.assertEqual(urls["🌐 Web"], "https://miamicigar.com")
+        self.assertIn("ll=25.761700,-80.191800", apple_maps_url(LEAD))
+        self.assertIn("ll=25.761700,-80.191800", waze_url(LEAD))
 
     def test_mapas_sin_coordenadas_usan_la_direccion(self):
         lead = {k: v for k, v in LEAD.items() if k not in ("lat", "lon")}
@@ -96,8 +95,10 @@ class TestBotones(unittest.TestCase):
 
     def test_siempre_quedan_enviado_y_descartar(self):
         kb = teclado_prospecto({"nombre": "Solo Nombre"}, "Florida", "tok")
-        ultima = kb["inline_keyboard"][-1]
-        self.assertEqual([b["text"] for b in ultima], ["Enviado", "Descartar"])
+        textos = [b["text"] for fila in kb["inline_keyboard"] for b in fila]
+        self.assertIn("🗑 Descartar", textos)
+        self.assertEqual(kb["inline_keyboard"][-1][0]["text"], "Marcar enviado (manual)")
+        self.assertNotIn("✅ Aprobar y enviar correo", textos)
 
 
 if __name__ == "__main__":

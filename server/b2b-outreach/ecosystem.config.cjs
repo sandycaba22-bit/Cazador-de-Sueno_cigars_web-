@@ -1,10 +1,10 @@
-// Configuración PM2 para el servidor de producción (rutas absolutas bajo
-// /var/www/html/server/b2b-outreach). Requiere .venv en esa ruta con dependencias
-// instaladas. En local ejecuta el bot a mano (python telegram_bot.py); no uses
-// este archivo salvo que reproduzcas las mismas rutas.
+// NO usar junto a systemd.
+// El lector de Telegram en el servidor es cds-b2b-outreach.service.
+// Si PM2 y systemd leen getUpdates a la vez, se roban las actualizaciones
+// y los botones dejan de responder. Si aparece en `pm2 list`:
+//   pm2 delete cds-b2b-outreach && pm2 save
 //
-// pm2 start ecosystem.config.cjs
-// No lances una segunda copia: los dos enviarían el mismo prospecto.
+// Este archivo queda solo como referencia de las rutas viejas. No lo arranques.
 
 module.exports = {
   apps: [
@@ -20,7 +20,7 @@ module.exports = {
       env: {
         B2B_QUEUE_DIR: "/var/www/html/server/b2b-outreach/cola",
         B2B_POLL_SECONDS: "15",
-        FUENTE_LEADS: "osm",
+        FUENTE_LEADS: "google",
         B2B_ZONA_BUSQUEDA: "caribe",
         OSM_SEGUNDA_PASADA: "0",
         B2B_OMITIR_MERCADO_LOCAL: "0",
@@ -30,13 +30,13 @@ module.exports = {
       name: "cds-b2b-buscar",
       script: "/var/www/html/server/b2b-outreach/telegram_bot.py",
       interpreter: "/var/www/html/server/b2b-outreach/.venv/bin/python",
-      args: "--buscar --limite 9",
+      args: "--buscar --limite 15",
       cwd: "/var/www/html/server/b2b-outreach",
       autorestart: false,
       cron_restart: "0 13 * * *",
       env: {
         B2B_QUEUE_DIR: "/var/www/html/server/b2b-outreach/cola",
-        FUENTE_LEADS: "osm",
+        FUENTE_LEADS: "google",
         B2B_ZONA_BUSQUEDA: "caribe",
         OSM_SEGUNDA_PASADA: "0",
         B2B_MAX_PAISES_POR_BUSCAR: "18",

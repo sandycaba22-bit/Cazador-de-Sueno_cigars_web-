@@ -13,7 +13,6 @@ WorkingDirectory=/var/www/html/server/b2b-outreach
 EnvironmentFile=/etc/cazador-de-suenos/b2b-outreach.env
 Environment=B2B_QUEUE_DIR=/var/lib/cazador-de-suenos/b2b-outreach
 Environment=B2B_POLL_SECONDS=15
-Environment=FUENTE_LEADS=osm
 ExecStart=/usr/bin/python3 /var/www/html/server/b2b-outreach/telegram_bot.py --vigilar
 Restart=on-failure
 RestartSec=15

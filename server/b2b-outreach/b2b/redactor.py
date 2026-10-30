@@ -403,17 +403,94 @@ def _validar(texto: str) -> str:
     return texto
 
 
-def asunto_correo(nombre_local: str, idioma: str) -> str:
-    nombre = (nombre_local or "").strip() or "your shop"
-    idioma = idioma if idioma in MUESTRAS else "en"
-    asuntos = {
-        "es": f"Puros dominicanos para {nombre}",
-        "en": f"Handmade Dominican cigars for {nombre}",
-        "fr": f"Cigares dominicains pour {nombre}",
-        "nl": f"Dominicaanse sigaren voor {nombre}",
-        "pt": f"Charutos dominicanos para {nombre}",
-    }
-    return asuntos.get(idioma, asuntos["en"])
+TOPE_ASUNTO = 70
+
+_ASUNTOS = {
+    "es": {
+        "A": "Puros dominicanos hechos a mano para {nombre}",
+        "B": "Puros boutique dominicanos — muestra mayorista para {nombre}",
+    },
+    "en": {
+        "A": "Handmade Dominican cigars for {nombre}",
+        "B": "Dominican boutique cigars — wholesale sample for {nombre}",
+    },
+}
+
+
+def plantilla_asunto(idioma: str, variante: str = "A") -> str:
+    tabla = _ASUNTOS["es"] if idioma == "es" else _ASUNTOS["en"]
+    return tabla["B"] if str(variante).upper() == "B" else tabla["A"]
+
+
+def asunto_con_tope(plantilla: str, nombre: str, tope: int = TOPE_ASUNTO) -> str:
+    """Recorta el nombre con … sin cortar a la mitad de una palabra. Tope 70."""
+    nombre = (nombre or "").strip() or "your shop"
+    if "{nombre}" not in plantilla:
+        texto = plantilla
+        return texto if len(texto) <= tope else texto[: tope - 1].rstrip() + "…"
+    prefijo, sufijo = plantilla.split("{nombre}", 1)
+    completo = f"{prefijo}{nombre}{sufijo}"
+    if len(completo) <= tope:
+        return completo
+    disponible = tope - len(prefijo) - len(sufijo) - 1
+    if disponible < 1:
+        base = completo[: tope - 1].rstrip()
+        if " " in base:
+            base = base.rsplit(" ", 1)[0]
+        return base.rstrip(" -—,") + "…"
+    trozo = nombre[:disponible].rstrip()
+    if len(trozo) < len(nombre) and " " in trozo:
+        cortado = trozo.rsplit(" ", 1)[0]
+        if cortado:
+            trozo = cortado
+    trozo = trozo.rstrip(" -—,")
+    return f"{prefijo}{trozo}…{sufijo}"
+
+
+def asunto_correo(nombre_local: str, idioma: str, variante: str = "A") -> str:
+    idioma_asunto = "es" if idioma == "es" else "en"
+    return asunto_con_tope(plantilla_asunto(idioma_asunto, variante), nombre_local)
+
+
+def direccion_postal(idioma: str) -> str:
+    """ES usa la dirección guardada. EN traduce el país si no hay versión inglesa."""
+    es = os.getenv("EMPRESA_DIRECCION_POSTAL", "").strip()
+    if idioma == "es":
+        return es
+    en = os.getenv("EMPRESA_DIRECCION_POSTAL_EN", "").strip()
+    if en:
+        return en
+    if not es:
+        return ""
+    return es.replace("República Dominicana", "Dominican Republic")
+
+
+def pie_correo(idioma: str) -> str:
+    """Dirección y una sola línea de baja, la del idioma del correo."""
+    idioma_dir = "es" if idioma == "es" else "en"
+    baja = OPT_OUT.get(idioma, OPT_OUT["en"])
+    direc = direccion_postal(idioma_dir)
+    if direc:
+        return f"{EMPRESA_FIRMA} · {direc}\n{baja}"
+    return baja
+
+
+def asegurar_pie(cuerpo: str, idioma: str) -> str:
+    """Si el texto editado no trae dirección o baja, las agrega antes de encolar."""
+    texto = (cuerpo or "").strip()
+    baja = OPT_OUT.get(idioma, OPT_OUT["en"])
+    idioma_dir = "es" if idioma == "es" else "en"
+    direc = direccion_postal(idioma_dir)
+    linea_dir = f"{EMPRESA_FIRMA} · {direc}" if direc else ""
+    if baja in texto:
+        texto = texto.replace(baja, "").rstrip()
+    if linea_dir and linea_dir in texto:
+        texto = texto.replace(linea_dir, "").rstrip()
+    partes = [texto] if texto else []
+    if linea_dir and direc not in texto:
+        partes.append(linea_dir)
+    partes.append(baja)
+    return "\n\n".join(p for p in partes if p)
 
 
 def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
@@ -537,32 +614,61 @@ def _cuerpo_correo(idioma: str, nombre: str, tipo: str, catalogo: str, aviso: st
     )
 
 
-def borrador_correo(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
-    """Versión correo: asunto, firma de la VP y línea de STOP (solo en correo)."""
+def borrador_correo(
+    nombre_local: str,
+    idioma: str,
+    tipo: str = "tienda",
+    *,
+    cuenta: str = "",
+    variante: str = "A",
+) -> str:
+    """Primer contacto: corto, un solo enlace, pie del idioma. El resto de idiomas cae a EN."""
     nombre = (nombre_local or "").strip() or "there"
-    if idioma in {"es", "fr", "de", "zh"}:
-        catalogo, aviso = _catalogo(idioma)
-        return _validar(_cuerpo_correo(idioma, nombre, tipo, catalogo, aviso))
-    catalogo, aviso = _catalogo("en")
-    t = tipo_en_idioma(tipo, "en")
-    texto = (
-        f"Subject: Handmade Dominican cigars for {nombre}\n\n"
-        f"Hello {nombre} team,\n\n"
-        "We are Cazador de Sueño Cigars SRL, a boutique cigar factory in Santiago de los Caballeros, Dominican Republic, "
-        f"making 100% handmade premium cigars. We would like to explore placing our line in your {t}.\n\n"
-        f"Wholesale catalog: {catalogo}\n"
-        "A free sample is available for evaluation. Would a short call work for you?\n"
-        f"{AVISO_EDAD['en']}\n\n"
-        "Best regards,\n"
-        "Yaniris Agustina Ureña\n"
-        "Vice President, Sales\n"
-        "Cazador de Sueño Cigars SRL\n"
-        f"{email_empresa()}\n"
-        f"WhatsApp {whatsapp_empresa()}\n"
-        f"{SITIO_WEB}\n\n"
-        "If you prefer not to receive further messages, reply STOP."
-    )
-    return _validar(texto)
+    idioma_cuerpo = "es" if idioma == "es" else "en"
+    t = tipo_en_idioma(tipo, idioma_cuerpo)
+    correo = (cuenta or "").strip() or email_empresa()
+    wa = whatsapp_empresa()
+    asunto = asunto_correo(nombre, idioma, variante)
+    if idioma_cuerpo == "es":
+        cuerpo = (
+            f"Asunto: {asunto}\n\n"
+            f"Hola, equipo de {nombre}:\n\n"
+            "Somos Cazador de Sueño Cigars SRL, una fábrica boutique en Santiago, "
+            "República Dominicana, de puros premium 100% hechos a mano. "
+            f"Queremos presentar nuestra línea a su {t}.\n\n"
+            f"Catálogo mayorista: {WHOLESALE_URL}\n"
+            "Podemos enviar una muestra gratis para su evaluación. "
+            "¿Les sirve una llamada breve o seguir por correo?\n\n"
+            "Atentamente,\n"
+            f"{NOMBRE_VP}\n"
+            f"{CARGO_VP['es']} · {EMPRESA_FIRMA}\n"
+            f"{correo} · WhatsApp {wa}"
+        )
+    else:
+        cuerpo = (
+            f"Subject: {asunto}\n\n"
+            f"Hello {nombre} team,\n\n"
+            "We are Cazador de Sueño Cigars SRL, a boutique factory in Santiago, "
+            "Dominican Republic, making 100% handmade premium cigars. "
+            f"We'd like to introduce our line to your {t}.\n\n"
+            f"Wholesale catalog: {WHOLESALE_URL}\n"
+            "We can send a free sample for your evaluation. "
+            "Would a short call or email exchange work?\n\n"
+            "Best regards,\n"
+            f"{NOMBRE_VP}\n"
+            f"{CARGO_VP['en']} · {EMPRESA_FIRMA}\n"
+            f"{correo} · WhatsApp {wa}"
+        )
+    return _validar(cuerpo + "\n\n" + pie_correo(idioma))
+
+
+def cuerpo_sin_asunto(nombre_local: str, idioma: str, tipo: str = "tienda", *, cuenta: str = "", variante: str = "A") -> str:
+    """El cuerpo que se envía, sin la línea Asunto/Subject."""
+    texto = borrador_correo(nombre_local, idioma, tipo, cuenta=cuenta, variante=variante)
+    lineas = texto.split("\n", 1)
+    if lineas and lineas[0].lower().startswith(("asunto:", "subject:")):
+        return lineas[1].lstrip("\n") if len(lineas) > 1 else ""
+    return texto
 
 def presentacion_prospecto_telegram(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """Compatibilidad: versión correo (firma VP + catálogo + STOP)."""

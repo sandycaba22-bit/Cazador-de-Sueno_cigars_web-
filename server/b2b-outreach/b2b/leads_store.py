@@ -83,6 +83,70 @@ def ya_visto(place_id: str = "", web: str = "") -> bool:
     return bool(dom and dom in data.get("dominios", []))
 
 
+ESTADOS_LEAD = (
+    "nuevo",
+    "aprobado",
+    "en_cola",
+    "enviado",
+    "respondio",
+    "reboto",
+    "baja",
+    "descartado",
+)
+
+
+def clave_lead(lead: dict) -> str:
+    nom = (lead.get("nombre") or "").strip().lower()
+    dom = _dominio(lead.get("web") or "")
+    correo = (lead.get("correo") or "").strip().lower()
+    return f"{nom}|{dom}|{correo}"
+
+
+def _estado_path() -> Path:
+    return state_file("leads_estado.json")
+
+
+def _load_estados() -> dict:
+    path = _estado_path()
+    if not path.is_file():
+        return {"leads": {}}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"leads": {}}
+    data.setdefault("leads", {})
+    return data
+
+
+def _save_estados(data: dict) -> None:
+    path = _estado_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def guardar_estado_lead(lead: dict, estado: str, **extra) -> None:
+    if estado not in ESTADOS_LEAD:
+        return
+    data = _load_estados()
+    leads = dict(data.get("leads") or {})
+    prev = dict(leads.get(clave_lead(lead)) or {})
+    prev.update({
+        "estado": estado,
+        "nombre": lead.get("nombre") or prev.get("nombre") or "",
+        "correo": (lead.get("correo") or prev.get("correo") or "").strip().lower(),
+        "web": lead.get("web") or prev.get("web") or "",
+    })
+    prev.update(extra)
+    leads[clave_lead(lead)] = prev
+    data["leads"] = leads
+    _save_estados(data)
+
+
+def estado_de_lead(lead: dict) -> str:
+    item = (_load_estados().get("leads") or {}).get(clave_lead(lead)) or {}
+    return item.get("estado") or "nuevo"
+
+
 def marcar_visto(place_id: str = "", web: str = "") -> None:
     data = _load_seen()
     ids = set(data.get("place_ids", []))

@@ -10,7 +10,7 @@ Group=www-data
 WorkingDirectory=/var/www/html/server/b2b-outreach
 EnvironmentFile=/etc/cazador-de-suenos/b2b-outreach.env
 Environment=B2B_QUEUE_DIR=/var/lib/cazador-de-suenos/b2b-outreach
-ExecStart=/usr/bin/python3 /var/www/html/server/b2b-outreach/telegram_bot.py --buscar --limite 9
+ExecStart=/bin/sh -c 'exec /usr/bin/python3 /var/www/html/server/b2b-outreach/telegram_bot.py --buscar --limite "${B2B_LEADS_POR_TANDA:-15}"'
 StandardOutput=journal
 StandardError=journal
 

@@ -9,7 +9,7 @@ from pathlib import Path
 from b2b.contacto_web import numero_whatsapp
 from b2b.idioma import idioma_para_lead
 from b2b.lead_score import priorizar_leads_contacto
-from b2b.mapas import botones_mapa, google_maps_url
+from b2b.mapas import google_maps_url
 from b2b.redactor import (
     CARGO_VP,
     EMAIL_VP_VENTAS,
@@ -20,7 +20,7 @@ from b2b.redactor import (
     borrador_corto,
     whatsapp_empresa,
 )
-from b2b.telegram_control import puede_enviar_telegram, pausa_entre_mensajes, registrar_envio_telegram
+from b2b.telegram_control import puede_enviar_telegram, registrar_envio_telegram
 from b2b.website import es_url_mapa
 from b2b.telegram_gestion import (
     puede_avisar_prospecto,
@@ -162,54 +162,211 @@ def datos_contacto(lead: dict) -> list[str]:
     return lineas
 
 
+def _web_corta(lead: dict) -> str:
+    web = (lead.get("web") or "").strip()
+    if not web.startswith(("http://", "https://")):
+        return ""
+    host = urllib.parse.urlparse(web).netloc.lower()
+    if host.startswith("www."):
+        host = host[4:]
+    return host
+
+
+def _instagram_corto(lead: dict) -> str:
+    raw = (lead.get("instagram") or "").strip()
+    if not raw:
+        return ""
+    hallado = re.search(r"instagram\.com/([^/?#]+)", raw, re.I)
+    if hallado:
+        return "@" + hallado.group(1).strip("/")
+    return raw if raw.startswith("@") else raw
+
+
+def _linea_verificacion(lead: dict, pais: str) -> str:
+    resumen = (lead.get("resumen_verificacion") or "").strip()
+    if resumen:
+        return f"✔ {resumen}"
+    partes = []
+    rating = lead.get("rating")
+    if rating not in (None, ""):
+        resenas = lead.get("user_rating_count")
+        extra = f" ({resenas})" if resenas not in (None, "") else ""
+        partes.append(f"⭐ {rating}{extra}")
+    if (lead.get("telefono") or "").strip():
+        partes.append("Tel")
+    if (lead.get("correo") or "").strip():
+        partes.append("Correo")
+    if partes:
+        return "✔ " + " · ".join(partes)
+    return ""
+
+
+def _rellenar_correo(lead: dict) -> None:
+    if lead.get("cuerpo_editado"):
+        lead["cuerpo"] = lead["cuerpo_editado"]
+        if not lead.get("asunto"):
+            from b2b.redactor import asunto_correo
+
+            lead["asunto"] = asunto_correo(
+                lead.get("nombre") or "",
+                lead.get("idioma") or "en",
+                lead.get("asunto_variante") or "A",
+            )
+        return
+    if lead.get("asunto") and lead.get("cuerpo"):
+        return
+    from b2b.envio_correo import preparar_cuerpo
+
+    idioma = lead.get("idioma") or "en"
+    lead.setdefault("idioma", idioma)
+    if not lead.get("asunto_variante"):
+        from b2b.telegram_gestion import token_callback
+
+        lead["asunto_variante"] = "A" if int(token_callback(lead), 16) % 2 == 0 else "B"
+    cuenta = ""
+    try:
+        from b2b.envio_correo import elegir_cuenta
+
+        elegida = elegir_cuenta()
+        if elegida:
+            cuenta = elegida["correo"]
+    except Exception:
+        cuenta = ""
+    asunto, cuerpo, variante = preparar_cuerpo(lead, cuenta)
+    lead["asunto"] = asunto
+    lead["cuerpo"] = cuerpo
+    lead["asunto_variante"] = variante
+
+
 def mensaje_prospecto_completo(lead: dict, pais: str) -> str:
     nombre = lead.get("nombre") or "—"
     tipo = lead.get("tipo") or lead.get("tipo_negocio") or "tienda"
-    etiqueta = TIPO_TARJETA.get((tipo or "").lower(), "Shop")
+    etiqueta = TIPO_TARJETA.get((tipo or "").lower(), (tipo or "Shop").title())
     ciudad = ciudad_lead(lead, pais) or pais
-    idioma = _idioma_lead(lead, pais)
-    corto = borrador_corto(nombre, idioma, tipo)
-    partes = [
-        f"🏪 {nombre}",
-        f"📋 {etiqueta} · {ciudad}",
-        *datos_contacto(lead),
-        f"📡 {estado_contacto(lead)}",
-        "",
-        corto,
-    ]
-    texto = "\n".join(partes)
+    lead.setdefault("idioma", _idioma_lead(lead, pais))
+    if (lead.get("correo") or "").strip():
+        try:
+            _rellenar_correo(lead)
+        except Exception:
+            pass
+    if not lead.get("ventana_envio"):
+        try:
+            from b2b.envio_correo import texto_ventana
+
+            lead["ventana_envio"] = texto_ventana(lead)
+        except Exception:
+            lead["ventana_envio"] = ""
+    lineas: list[str] = []
+    numero = lead.get("numero_tarjeta")
+    total = lead.get("tanda_total")
+    if numero and total:
+        cab = f"Tarjeta {numero} de {total}"
+        if lead.get("tanda_etiqueta"):
+            cab += f" · {lead['tanda_etiqueta']}"
+        lineas.append(cab)
+    lineas.append(f"🏪 {nombre}")
+    lineas.append(f"📋 {etiqueta} · {ciudad}")
+    verificacion = _linea_verificacion(lead, pais)
+    if verificacion:
+        lineas.append(verificacion)
+    telefono = (lead.get("telefono_internacional") or lead.get("telefono") or "").strip()
+    if telefono:
+        lineas.append(f"📞 {telefono}")
+    correo = (lead.get("correo") or "").strip()
+    if correo:
+        origen = ""
+        fuente = (lead.get("fuente_correo") or "").strip()
+        if fuente == "manual_telegram":
+            origen = " (lo pasaste por Telegram)"
+        elif fuente:
+            origen = " (publicado en su web)"
+        lineas.append(f"✉️ {correo}{origen}")
+    else:
+        lineas.append("Sin correo público")
+        lineas.append("Respóndeme a este mensaje con el correo del local y activo el botón.")
+    redes = []
+    web = _web_corta(lead)
+    insta = _instagram_corto(lead)
+    if web:
+        redes.append(f"🌐 {web}")
+    if insta:
+        redes.append(f"📷 {insta}")
+    if redes:
+        lineas.append(" · ".join(redes))
+    if lead.get("ventana_envio"):
+        lineas.append(f"🕘 {lead['ventana_envio']}")
+    if lead.get("asunto") or lead.get("cuerpo"):
+        lineas.append("────────────")
+        if lead.get("asunto"):
+            lineas.append(f"Asunto: {lead['asunto']}")
+            lineas.append("")
+        if lead.get("cuerpo"):
+            lineas.append(lead["cuerpo"])
+    texto = "\n".join(lineas)
     if len(texto) > LIMITE_TELEGRAM:
-        texto = texto[: LIMITE_TELEGRAM - 10] + "\n…"
+        texto = texto[: LIMITE_TELEGRAM - 1] + "…"
     return texto
 
 
+def texto_con_estado(texto: str, linea: str) -> str:
+    partes = (texto or "").split("\n", 1)
+    resto = partes[1] if len(partes) > 1 else ""
+    # Quita un estado previo pegado en la segunda línea.
+    if resto.startswith(("⏳", "📤", "⚠️", "🗑", "⏭")):
+        resto = resto.split("\n", 1)[1] if "\n" in resto else ""
+    return partes[0] + "\n" + linea + ("\n" + resto if resto else "")
+
+
 def teclado_prospecto(lead: dict, pais: str, token: str) -> dict:
+    from b2b.envio_correo import puede_enviar_correo
+
     tipo = lead.get("tipo") or lead.get("tipo_negocio") or "tienda"
     idioma = _idioma_lead(lead, pais)
     corto = borrador_corto(lead.get("nombre") or "—", idioma, tipo)
     wa = link_whatsapp(lead, corto)
-    mail = link_mailto(lead, pais)
     web = (lead.get("web") or "").strip()
+    mapa = _maps_url(lead)
     filas: list[list[dict]] = []
+    if (lead.get("correo") or "").strip() and puede_enviar_correo(lead)[0]:
+        filas.append([{"text": "✅ Aprobar y enviar correo", "callback_data": f"b2bs:{token}"}])
     contacto: list[dict] = []
     if wa:
-        contacto.append({"text": "📲 Enviar WhatsApp", "url": wa})
-    if mail:
-        contacto.append({"text": "✉️ Enviar Correo", "url": mail})
-    if web.startswith(("http://", "https://")):
-        contacto.append({"text": "🌐 Ver web", "url": web})
+        contacto.append({"text": "📲 WhatsApp", "url": wa})
+    if web.startswith(("http://", "https://")) and not es_url_mapa(web):
+        contacto.append({"text": "🌐 Web", "url": web})
+    if mapa:
+        contacto.append({"text": "📍 Mapa", "url": mapa})
     if contacto:
         filas.append(contacto)
-    mapas = botones_mapa(lead)
-    if mapas:
-        filas.append(mapas)
     filas.append(
         [
-            {"text": "Enviado", "callback_data": f"b2be:{token}"},
-            {"text": "Descartar", "callback_data": f"b2bd:{token}"},
+            {"text": "✏️ Editar texto", "callback_data": f"b2bt:{token}"},
+            {"text": "⏭ Más tarde", "callback_data": f"b2bl:{token}"},
+            {"text": "🗑 Descartar", "callback_data": f"b2bd:{token}"},
         ]
     )
+    filas.append([{"text": "Marcar enviado (manual)", "callback_data": f"b2be:{token}"}])
     return {"inline_keyboard": filas}
+
+
+def teclado_en_cola(lead: dict, token: str) -> dict:
+    filas: list[list[dict]] = [
+        [{"text": "↩️ Cancelar envío", "callback_data": f"b2bx:{token}"}],
+    ]
+    contacto: list[dict] = []
+    web = (lead.get("web") or "").strip()
+    mapa = _maps_url(lead)
+    if web.startswith(("http://", "https://")) and not es_url_mapa(web):
+        contacto.append({"text": "🌐 Web", "url": web})
+    if mapa:
+        contacto.append({"text": "📍 Mapa", "url": mapa})
+    if contacto:
+        filas.append(contacto)
+    return {"inline_keyboard": filas}
+
+
+def teclado_cerrado() -> dict:
+    return {"inline_keyboard": []}
 
 
 def _teclado_prospecto(token: str, lead: dict | None = None, pais: str = "") -> dict:
@@ -273,12 +430,14 @@ def enviar_prospecto_telegram(
     load_local_env()
     registrar_pendiente(token, lead, inbox_path)
     try:
-        enviar_mensaje_telegram(texto, reply_markup=teclado_prospecto(lead, pais, token))
+        message_id = enviar_mensaje_telegram(texto, reply_markup=teclado_prospecto(lead, pais, token))
     except Exception as exc:
         _registrar_fallo_telegram(lead, exc)
         return False
+    from b2b.telegram_gestion import actualizar_pendiente
+
+    actualizar_pendiente(token, message_id=message_id, texto_tarjeta=texto, cuerpo=lead.get("cuerpo") or "", asunto=lead.get("asunto") or "")
     registrar_envio_telegram()
-    pausa_entre_mensajes()
     return True
 
 

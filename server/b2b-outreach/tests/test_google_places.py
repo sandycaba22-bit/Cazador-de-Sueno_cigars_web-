@@ -558,20 +558,14 @@ class TestFlujoCompletoIsla(GoogleBase):
         c = stats["conteo"]
         self.assertEqual(c["encontrados"], 7)
         self.assertEqual(c["sin_clasificar"], 0)
-        self.assertEqual(c["descartados"], len(DESCARTES_FIXTURE))
-        self.assertEqual(c["nuevos"], 5)
+        self.assertEqual(c["descartados"], len(DESCARTES_FIXTURE) + 4)
+        self.assertEqual(c["nuevos"], 1)
         self.assertEqual(c["dudosos"], 1)
         self.assertEqual(c["sin_contacto"], 0)
         encolados = [json.loads(p.read_text(encoding="utf-8")) for p in inbox.glob("*.json")]
         self.assertEqual(
             sorted(e["nombre"] for e in encolados),
-            [
-                "Aruba Cigar Emporium",
-                "Eagle Beach Cigars",
-                "New Leaf Cigars",
-                "Palm Beach Cigar Lounge",
-                "Smoke Corner Tobacconist",
-            ],
+            ["Aruba Cigar Emporium"],
         )
         emporium = next(e for e in encolados if e["nombre"] == "Aruba Cigar Emporium")
         self.assertEqual(emporium["maps_url"], MAPS_EMPORIUM)
@@ -663,8 +657,7 @@ class TestMensajeTelegram(unittest.TestCase):
         for esperado in (
             "La Casa del Habano Miami",
             "Shop · Miami",
-            "Teléfono confirmado",
-            "your cigar shop",
+            "Sin correo público",
         ):
             self.assertIn(esperado, msg)
         self.assertIn("Brickell Mall", lead["direccion"])
@@ -692,11 +685,8 @@ class TestMensajeTelegram(unittest.TestCase):
         lead = self._lead_google(correo="info@casadelhabano.aw")
         msg = mensaje_prospecto_completo(lead, "Florida")
         botones = teclado_prospecto(lead, "Florida", "test")
-        urls = [b.get("url", "") for fila in botones["inline_keyboard"] for b in fila]
-        correo = next(unquote(url) for url in urls if url.startswith("mailto:"))
-        self.assertIn("info@casadelhabano.aw", correo)
-        self.assertIn("reply STOP", correo)
-        self.assertNotIn("STOP", msg)
+        self.assertIn("info@casadelhabano.aw", msg)
+        self.assertIn("reply STOP", msg)
 
     def test_sin_telefono_ni_web_entra_y_lo_dice_en_el_aviso(self):
         lead = places._normalizar_place(json.loads(FIXTURE.read_text(encoding="utf-8"))["places"][3], "Aruba")
@@ -704,7 +694,7 @@ class TestMensajeTelegram(unittest.TestCase):
         self.assertFalse(lead.get("telefono"))
         self.assertFalse(lead.get("web"))
         msg = mensaje_prospecto_completo(lead, "Florida")
-        self.assertIn("Sin teléfono ni correo", msg)
+        self.assertIn("Sin correo público", msg)
         botones = teclado_prospecto(lead, "Florida", "test")
         urls = [b.get("url", "") for fila in botones["inline_keyboard"] for b in fila]
         self.assertIn(lead["maps_url"], urls)

@@ -48,8 +48,7 @@ def main() -> int:
         ["--buscar", "--pais", "Martinique", "--max", "2", "--simulado", "--cola", str(COLA)]
     )
     checks.append(("encolar", encolar.returncode == 0 and "Encolados" in encolar.stdout))
-    checks.append(("mensaje_prospecto", "Enviado | Descartar" in encolar.stderr))
-    checks.append(("resumen_cuadra", "2 encontrados = 1 nuevos" in encolar.stderr))
+    checks.append(("sin_rafaga", "Enviado | Descartar" not in encolar.stderr))
 
     cola = run(["--vigilar", "--una-pasada", "--imprimir", "--cola", str(COLA)])
     checks.append(("cola_sin_reenvio", cola.returncode == 0 and "prospecto B2B" not in cola.stdout))

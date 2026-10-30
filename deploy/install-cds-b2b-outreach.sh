@@ -124,18 +124,39 @@ _add_if_missing() {
     echo "Agregada $key a $ENV_FILE."
   fi
 }
-# El instalador anterior forzaba FUENTE_LEADS=osm en cada despliegue; se migra una vez a
-# "ambas" (sin clave sigue siendo solo OSM). Para fijar osm a mano, añade la línea
-# "# B2B_FUENTE_MANUAL" al archivo y el instalador no volverá a tocarla.
+# El instalador anterior forzaba FUENTE_LEADS=osm. Se migra una vez a google.
+# Para dejar otro valor a mano, añade la línea "# B2B_FUENTE_MANUAL".
 if grep -qxE 'FUENTE_LEADS=osm' "$ENV_FILE" && ! grep -qE '^# B2B_FUENTE_MANUAL' "$ENV_FILE"; then
-  sed -i 's|^FUENTE_LEADS=osm$|FUENTE_LEADS=ambas|' "$ENV_FILE"
-  echo "FUENTE_LEADS: osm (puesto por el instalador anterior) -> ambas."
+  sed -i 's|^FUENTE_LEADS=osm$|FUENTE_LEADS=google|' "$ENV_FILE"
+  echo "FUENTE_LEADS: osm (puesto por el instalador anterior) -> google."
 fi
-_add_if_missing FUENTE_LEADS ambas
+_add_if_missing FUENTE_LEADS google
 _add_if_missing GOOGLE_PLACES_API_KEY ""
 _add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_DAY 30
 _add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_MONTH 900
 _add_if_missing GOOGLE_PLACES_MAX_CALLS_PER_RUN 15
+_add_if_missing B2B_ENVIO_REAL 0
+_add_if_missing SMTP_HOST smtp.gmail.com
+_add_if_missing SMTP_PORT 587
+_add_if_missing CORREO_REMITENTE_1 cazadordesueno1@gmail.com
+_add_if_missing CORREO_CLAVE_1 ""
+_add_if_missing CORREO_REMITENTE_2 cazadordesueno2024@gmail.com
+_add_if_missing CORREO_CLAVE_2 ""
+_add_if_missing IMAP_HOST imap.gmail.com
+_add_if_missing EMPRESA_NOMBRE_LEGAL "Cazador de Sueño Cigars SRL"
+_add_if_missing EMPRESA_DIRECCION_POSTAL "Calle La Barranquita, Sector Las Minas, Calle 3, Edificio 3, Santiago de los Caballeros, República Dominicana"
+_add_if_missing EMPRESA_DIRECCION_POSTAL_EN "Calle La Barranquita, Sector Las Minas, Calle 3, Edificio 3, Santiago de los Caballeros, Dominican Republic"
+_add_if_missing B2B_ENVIO_RAMPA 10,20,30
+_add_if_missing B2B_ENVIO_FECHA_INICIO 2026-11-02
+_add_if_missing B2B_ENVIO_HORA_INICIO 9
+_add_if_missing B2B_ENVIO_HORA_FIN 17
+_add_if_missing B2B_ENVIO_PAUSA_MIN 2
+_add_if_missing B2B_ENVIO_PAUSA_MAX 5
+_add_if_missing B2B_ENVIO_MAX_POR_CUENTA 15
+_add_if_missing B2B_LEADS_POR_TANDA 15
+_add_if_missing B2B_SEGUIMIENTO_DIAS 4,10
+_add_if_missing B2B_TARJETAS_ABIERTAS_MAX 2
+_add_if_missing B2B_TELEGRAM_POLL_SECONDS 3
 
 # El bot también lee $B2B_DIR/.env (rellena lo que en $ENV_FILE esté vacío); www-data debe poder leerlo.
 if [[ -f "$B2B_DIR/.env" ]]; then

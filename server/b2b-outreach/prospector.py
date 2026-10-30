@@ -33,7 +33,7 @@ from b2b.descartes import (
     entrada_sin_contacto,
     registrar_log_descartes_isla,
 )
-from b2b.telegram_buscar import avisar_isla_encontradas, avisar_isla_fallida, avisar_resumen_barrido
+from b2b.telegram_buscar import avisar_isla_fallida
 from b2b.calidad_lead import StatsCalidad, clasificar_lote
 from b2b.telegram_gestion import puede_avisar_prospecto, tiene_medio_contacto
 from b2b.contacto_web import extraer_contactos, normalizar_canales
@@ -164,6 +164,10 @@ def lead_a_inbox(lead: dict) -> dict:
         "business_status": lead.get("business_status") or "",
         "fuente": lead.get("fuente") or "",
         "telegram_notificado": bool(lead.get("telegram_notificado")),
+        "resumen_verificacion": lead.get("resumen_verificacion") or "",
+        "types": list(lead.get("types") or []),
+        "ciudad": lead.get("ciudad") or "",
+        "estado": lead.get("pais") or "",
     }
 
 
@@ -249,6 +253,20 @@ def encolar(
                     )
                 )
                 continue
+            if carpeta == inbox and not simulado:
+                from b2b.verificacion_local import verificar_local
+
+                ok_local, motivos, resumen = verificar_local(enriquecido, reglas.get("pais") or pais)
+                if not ok_local:
+                    res["descartados"].append(
+                        entrada_descarte(
+                            nombre,
+                            "; ".join(motivos) or "verificacion_local",
+                            etapa="verificacion_local",
+                        )
+                    )
+                    continue
+                enriquecido["resumen_verificacion"] = resumen
             payload = lead_a_inbox(enriquecido)
             path = _escribir_lead_cola(carpeta, payload)
             res[categoria].append({"nombre": nombre, "archivo": path.name})
@@ -267,49 +285,6 @@ def encolar(
                         failed_previo.unlink()
                     except OSError:
                         pass
-                if notificar_telegram_buscar and carpeta == inbox and puede_avisar_prospecto(payload):
-                    from b2b.telegram_control import procesar_comandos_chat, esta_pausado
-                    from b2b.telegram_prospecto import enviar_prospecto_telegram
-
-                    try:
-                        import os
-                        from telegram_bot import load_local_env
-
-                        load_local_env()
-                        token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
-                        chat = os.getenv("TELEGRAM_CHAT_ID", "").strip()
-                        if token and chat:
-                            for ack in procesar_comandos_chat(token, chat):
-                                from b2b.telegram_buscar import notificar_buscar
-
-                                notificar_buscar(ack, simulado=simulado)
-                    except Exception as exc:
-                        registrar_evento(
-                            {"evento": "telegram_comandos_fallo", "error": str(exc)[:400]}
-                        )
-                    if not esta_pausado():
-                        try:
-                            ok = enviar_prospecto_telegram(
-                                payload,
-                                reglas["pais"],
-                                simulado=simulado,
-                                inbox_path=str(path),
-                            )
-                        except Exception as exc:
-                            registrar_evento(
-                                {
-                                    "evento": "telegram_prospecto_fallo",
-                                    "nombre": payload.get("nombre") or "",
-                                    "error": str(exc)[:400],
-                                }
-                            )
-                            ok = False
-                        if ok:
-                            payload["telegram_notificado"] = True
-                            path.write_text(
-                                json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
-                                encoding="utf-8",
-                            )
             if _payload_tiene_contacto(payload):
                 con_contacto += 1
             time.sleep(0.05)
@@ -525,15 +500,6 @@ def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
     pais = str(stats.get("pais", ""))
     if stats.get("isla_fallida"):
         avisar_isla_fallida(pais, simulado=simulado)
-        return
-    if not stats.get("conteo"):
-        return
-    avisar_isla_encontradas(
-        pais,
-        stats["conteo"],
-        simulado=simulado,
-        descartes=stats.get("descartes") or [],
-    )
 
 
 def prospectar(
@@ -547,13 +513,6 @@ def prospectar(
 ) -> dict:
     import os
 
-    if not simulado and not solo_listar:
-        from b2b.telegram_prospecto import reintentar_avisos_cola
-
-        try:
-            reintentar_avisos_cola(inbox.parent)
-        except Exception as exc:
-            registrar_evento({"evento": "telegram_reintento_fallo", "error": str(exc)[:400]})
     if not simulado:
         return _prospectar(pais_cli, max_leads, inbox, simulado, solo_listar, tipo_filtro, buscar_global)
     previo = os.environ.get("B2B_SIMULADO")
@@ -599,25 +558,9 @@ def _prospectar(
             out["fuente"] = fuente
         _telegram_tras_isla(out, simulado, solo_listar)
         if not solo_listar:
-            enc = int(out.get("encolados", 0))
-            avisar_resumen_barrido(
-                enc,
-                {out["pais"]: enc} if enc else {},
-                {out["pais"]: int(out.get("con_contacto", 0))} if enc else {},
-                [out["pais"]] if out.get("isla_fallida") else [],
-                out["pais"],
-                simulado=simulado,
-                detalle_islas={
-                    out["pais"]: {
-                        **(out.get("fuente_stats") or {}),
-                        "encontrados": out.get("encontrados", 0),
-                        "web_enriquecidos": (out.get("fuente_stats") or {}).get(
-                            "web_enriquecidos", 0
-                        ),
-                    }
-                },
-                cero=_diagnostico_cero([out]) if enc == 0 else None,
-            )
+            from b2b.despachador_tarjetas import sellar_tanda
+
+            sellar_tanda(inbox, max_leads)
         return out
     if _islas_agotadas_en_google(fuente, zona):
         print("Islas ya buscadas en Google este mes: paso a la rotación global.", file=sys.stderr)
@@ -702,16 +645,6 @@ def prospectar_turno_global(
             if pausa > 0:
                 time.sleep(pausa)
         _telegram_tras_isla(out, simulado, solo_listar)
-        avisar_resumen_barrido(
-            int(out.get("encolados", 0)),
-            {out["pais"]: int(out.get("encolados", 0))} if out.get("encolados") else {},
-            {out["pais"]: int(out.get("con_contacto", 0))} if out.get("encolados") else {},
-            [out["pais"]] if out.get("isla_fallida") else [],
-            f"global:{out['pais']}",
-            simulado=simulado,
-            detalle_islas={out["pais"]: out.get("fuente_stats") or {}},
-            cero=_diagnostico_cero([out]) if int(out.get("encolados", 0)) == 0 else None,
-        )
     return out
 
 
@@ -803,16 +736,9 @@ def prospectar_prioridad_inicial(
         )
     zona_label = (zona or os.getenv("B2B_ZONA_BUSQUEDA", "caribe") or "caribe").strip()
     if not solo_listar:
-        avisar_resumen_barrido(
-            total_encolados,
-            encolados_por_isla,
-            contacto_por_isla,
-            islas_fallidas,
-            zona_label,
-            simulado=simulado,
-            detalle_islas=detalle_islas,
-            cero=_diagnostico_cero(stats_corrida) if total_encolados == 0 else None,
-        )
+        from b2b.despachador_tarjetas import sellar_tanda
+
+        sellar_tanda(inbox, max_leads)
     return {
         "pais": f"zona:{zona_label}",
         "encolados": total_encolados,

@@ -498,9 +498,9 @@ def _post_requests(url, payload, token):
     return response.json()
 
 
-def _enviar_payload(payload):
+def _enviar_payload(payload, metodo="sendMessage"):
     token, _chat_id = telegram_credentials()
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    url = f"https://api.telegram.org/bot{token}/{metodo}"
     ultimo = "Telegram no respondió."
     for intento in range(1, TELEGRAM_ATTEMPTS + 1):
         try:
@@ -527,7 +527,7 @@ def enviar_texto_telegram(texto: str) -> None:
     enviar_mensaje_telegram(texto)
 
 
-def enviar_mensaje_telegram(texto: str, reply_markup: dict | None = None) -> None:
+def enviar_mensaje_telegram(texto: str, reply_markup: dict | None = None) -> int | None:
     _, chat_id = telegram_credentials()
     payload = {
         "chat_id": chat_id,
@@ -536,7 +536,24 @@ def enviar_mensaje_telegram(texto: str, reply_markup: dict | None = None) -> Non
     }
     if reply_markup:
         payload["reply_markup"] = reply_markup
-    _enviar_payload(payload)
+    body = _enviar_payload(payload)
+    result = body.get("result") if isinstance(body, dict) else None
+    if isinstance(result, dict) and result.get("message_id") is not None:
+        return int(result["message_id"])
+    return None
+
+
+def editar_mensaje_telegram(message_id: int, texto: str, reply_markup: dict | None = None) -> None:
+    _, chat_id = telegram_credentials()
+    payload = {
+        "chat_id": chat_id,
+        "message_id": message_id,
+        "text": (texto or "")[:4096],
+        "disable_web_page_preview": True,
+    }
+    if reply_markup is not None:
+        payload["reply_markup"] = reply_markup
+    _enviar_payload(payload, "editMessageText")
 
 
 def enviar_alerta_telegram(paquete):
@@ -753,6 +770,62 @@ def pasar_cola(queue_dir, imprimir=False):
     return hechos
 
 
+def _pid_vivo(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
+def tomar_candado_lector() -> bool:
+    """Un solo proceso lee getUpdates. Si hay otro vivo, este no arranca."""
+    from b2b.paths import state_file
+
+    path = state_file("telegram_lector.lock")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        try:
+            pid = int((path.read_text(encoding="utf-8") or "0").strip() or "0")
+        except ValueError:
+            pid = 0
+        if pid and pid != os.getpid() and _pid_vivo(pid):
+            aviso = f"Otro lector de Telegram ya está activo (pid {pid}). No abro getUpdates."
+            print(aviso, file=sys.stderr)
+            try:
+                enviar_texto_telegram(f"⚠️ {aviso}")
+            except Exception as exc:
+                print(sanitizar_error(exc), file=sys.stderr)
+            return False
+    path.write_text(str(os.getpid()), encoding="utf-8")
+    return True
+
+
+def _avisar_poll_una_vez(texto: str) -> None:
+    from b2b.paths import state_file
+
+    path = state_file("poll_error_aviso.txt")
+    ahora = time.time()
+    ultimo = 0.0
+    if path.is_file():
+        try:
+            ultimo = float((path.read_text(encoding="utf-8") or "0").strip() or "0")
+        except ValueError:
+            ultimo = 0.0
+    if ahora - ultimo < 3600:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(str(ahora), encoding="utf-8")
+    try:
+        enviar_texto_telegram(f"⚠️ El lector de Telegram falló: {texto[:300]}")
+    except Exception:
+        pass
+
+
 def _poll_comandos_buscar():
     token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
     chat = os.getenv("TELEGRAM_CHAT_ID", "").strip()
@@ -764,18 +837,39 @@ def _poll_comandos_buscar():
 
         for ack in procesar_comandos_chat(token, chat):
             notificar_buscar(ack, simulado=False)
-    except Exception:
-        pass
+    except Exception as exc:
+        from b2b.logging_ops import registrar_evento
+
+        aviso = sanitizar_error(exc, token)
+        registrar_evento({"evento": "telegram_poll_fallo", "error": aviso})
+        print(f"No pude leer Telegram: {aviso}", file=sys.stderr)
+        _avisar_poll_una_vez(aviso)
 
 
 def vigilar(queue_dir, imprimir=False, una_pasada=False):
-    intervalo = segundos_de_espera()
+    if not tomar_candado_lector():
+        return
+    from b2b.despachador_tarjetas import despachar, hay_trabajo, intervalo_poll, resumen_si_toca
+    from b2b.envio_correo import procesar_outbox
+
     while True:
         _poll_comandos_buscar()
-        pasar_cola(queue_dir, imprimir=imprimir)
+        try:
+            despachar(queue_dir)
+            procesar_outbox()
+            resumen = resumen_si_toca(queue_dir)
+            if resumen:
+                if imprimir:
+                    print(resumen)
+                else:
+                    enviar_texto_telegram(resumen)
+        except Exception as exc:
+            from b2b.logging_ops import registrar_evento
+
+            registrar_evento({"evento": "vigilar_fallo", "error": sanitizar_error(exc)})
         if una_pasada:
             return
-        time.sleep(intervalo)
+        time.sleep(intervalo_poll(hay_trabajo(queue_dir / "inbox")))
 
 
 def _normalizar_argv(argv):
@@ -851,8 +945,14 @@ def construir_parser():
         "--limite",
         dest="max_leads",
         type=int,
-        default=9,
-        help="Máximo de prospectos por pasada de --buscar (9/día por defecto)",
+        default=max(1, int(os.getenv("B2B_LEADS_POR_TANDA", "15") or "15")),
+        help="Máximo de prospectos por pasada de --buscar (B2B_LEADS_POR_TANDA, 15)",
+    )
+    parser.add_argument(
+        "--probar-envio",
+        metavar="CORREO",
+        default="",
+        help="Envía o simula el correo de ejemplo con cada cuenta activa",
     )
     parser.add_argument(
         "--simulado",
@@ -922,6 +1022,13 @@ def main(argv=None):
         from b2b.country_rules import revisar_reglas_propuesta
 
         print(revisar_reglas_propuesta(args.revisar_reglas))
+        return 0
+
+    if getattr(args, "probar_envio", ""):
+        from b2b.envio_correo import probar_envio
+
+        for nota in probar_envio(args.probar_envio):
+            print(nota)
         return 0
 
     if args.test_telegram:

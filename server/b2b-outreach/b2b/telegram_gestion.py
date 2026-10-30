@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime, timedelta, timezone
 
 from b2b.leads_store import _dominio
 from b2b.paths import state_file
+
+_CADUCIDAD = timedelta(hours=48)
 
 GESTION_PATH = state_file("telegram_prospectos_gestionados.json")
 PENDIENTES_PATH = state_file("telegram_prospecto_pendientes.json")
@@ -67,19 +70,61 @@ def _save_pendientes(data: dict) -> None:
     PENDIENTES_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def _caducado(item: dict, ahora: datetime | None = None) -> bool:
+    marca = item.get("creado_en") or ""
+    if not marca:
+        return False
+    try:
+        creado = datetime.fromisoformat(marca)
+    except ValueError:
+        return False
+    if creado.tzinfo is None:
+        creado = creado.replace(tzinfo=timezone.utc)
+    ahora = ahora or datetime.now(timezone.utc)
+    return ahora - creado >= _CADUCIDAD
+
+
 def registrar_pendiente(token: str, lead: dict, inbox_path: str = "") -> None:
+    """Guarda el lead completo. La fecha de creación no se pisa si ya existía."""
     pend = _load_pendientes()
-    pend[token] = {
-        "nombre": lead.get("nombre") or "",
-        "web": lead.get("web") or "",
-        "pais": lead.get("pais") or "",
-        "inbox_path": inbox_path,
-    }
+    prev = pend.get(token) if isinstance(pend.get(token), dict) else {}
+    ahora = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    guardado = dict(lead)
+    guardado["inbox_path"] = inbox_path or prev.get("inbox_path") or ""
+    guardado["creado_en"] = prev.get("creado_en") or ahora
+    if not guardado.get("message_id") and prev.get("message_id"):
+        guardado["message_id"] = prev["message_id"]
+    for campo in ("asunto", "cuerpo", "texto_tarjeta", "estado_envio"):
+        if not guardado.get(campo) and prev.get(campo):
+            guardado[campo] = prev[campo]
+    pend[token] = guardado
+    _save_pendientes(pend)
+
+
+def actualizar_pendiente(token: str, **campos) -> None:
+    pend = _load_pendientes()
+    if token not in pend or not isinstance(pend[token], dict):
+        return
+    pend[token].update(campos)
     _save_pendientes(pend)
 
 
 def resolver_pendiente(token: str) -> dict | None:
-    return _load_pendientes().get(token)
+    item = _load_pendientes().get(token)
+    if not isinstance(item, dict) or _caducado(item):
+        return None
+    return item
+
+
+def pendiente_por_mensaje(message_id) -> tuple[str, dict] | tuple[None, None]:
+    if message_id in (None, ""):
+        return None, None
+    for token, item in _load_pendientes().items():
+        if not isinstance(item, dict) or _caducado(item):
+            continue
+        if item.get("message_id") == message_id:
+            return token, item
+    return None, None
 
 
 def quitar_pendiente(token: str) -> None:

@@ -152,49 +152,174 @@ def _manejar_solicitud_precio(token: str, chat_id: str, cb: dict, data: str) -> 
     return f"{etiqueta} ({solicitud_id})."
 
 
+def _answer(token: str, cb: dict, texto: str) -> None:
+    cb_id = cb.get("id")
+    if cb_id:
+        _telegram_post(
+            token,
+            "answerCallbackQuery",
+            {"callback_query_id": cb_id, "text": (texto or "")[:180]},
+        )
+
+
+def _editar_tarjeta(token: str, chat_id: str, message_id, texto: str, markup: dict | None) -> None:
+    if not message_id:
+        return
+    payload = {
+        "chat_id": chat_id,
+        "message_id": message_id,
+        "text": (texto or "")[:4096],
+        "disable_web_page_preview": True,
+    }
+    if markup is not None:
+        payload["reply_markup"] = markup
+    _telegram_post(token, "editMessageText", payload)
+
+
+def _lead_de_pendiente(pend: dict) -> dict:
+    lead = dict(pend)
+    lead.setdefault("nombre", pend.get("nombre") or "")
+    lead.setdefault("web", pend.get("web") or "")
+    lead.setdefault("pais", pend.get("pais") or "")
+    return lead
+
+
 def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
+    from b2b.despachador_tarjetas import anotar_decision, cerrar_tarjeta, posponer
+    from b2b.envio_correo import cancelar_envio, encolar_envio, puede_enviar_correo
+    from b2b.leads_store import guardar_estado_lead
     from b2b.telegram_gestion import (
+        actualizar_pendiente,
         agregar_no_contactar,
         marcar_gestionado_telegram,
-        quitar_pendiente,
         resolver_pendiente,
     )
+    from b2b.telegram_prospecto import teclado_cerrado, teclado_en_cola, teclado_prospecto, texto_con_estado
 
     data = (cb.get("data") or "").strip()
-    if data.startswith("b2ba:") or data.startswith("b2bx:"):
+    if data.startswith("b2ba:"):
+        return _manejar_solicitud_precio(token, chat_id, cb, data)
+    if data.startswith("b2bx:"):
+        tok = data.split(":", 1)[-1]
+        if cancelar_envio(tok):
+            _answer(token, cb, "Envío cancelado")
+            pend = resolver_pendiente(tok) or {}
+            lead = _lead_de_pendiente(pend)
+            texto = texto_con_estado(pend.get("texto_tarjeta") or lead.get("nombre") or "—", "↩️ Envío cancelado")
+            msg_id = (cb.get("message") or {}).get("message_id") or pend.get("message_id")
+            _editar_tarjeta(token, chat_id, msg_id, texto, teclado_prospecto(lead, lead.get("pais") or "", tok))
+            actualizar_pendiente(tok, estado_envio="cancelado", texto_tarjeta=texto)
+            return f"↩️ Cancelado: {lead.get('nombre') or '—'}"
         return _manejar_solicitud_precio(token, chat_id, cb, data)
     if not data.startswith("b2b"):
         return None
     cid = str((cb.get("message") or {}).get("chat", {}).get("id", ""))
     if cid != str(chat_id):
         return None
-    accion = "enviado" if data.startswith("b2be:") else "descartado" if data.startswith("b2bd:") else ""
     tok = data.split(":", 1)[-1] if ":" in data else ""
-    if not accion or not tok:
+    if not tok:
         return None
     pend = resolver_pendiente(tok) or {}
-    lead = {
-        "nombre": pend.get("nombre") or "",
-        "web": pend.get("web") or "",
-        "pais": pend.get("pais") or "",
-    }
-    marcar_gestionado_telegram(lead, accion)
-    if accion == "descartado":
-        agregar_no_contactar(lead["nombre"], lead["web"], motivo="telegram_descartar")
-    quitar_pendiente(tok)
-    cb_id = cb.get("id")
-    if cb_id:
-        _telegram_post(token, "answerCallbackQuery", {"callback_query_id": cb_id})
-    etiqueta = "✅ Enviado" if accion == "enviado" else "🗑 Descartado"
-    msg_id = (cb.get("message") or {}).get("message_id")
-    if msg_id:
-        _telegram_post(
-            token,
-            "editMessageReplyMarkup",
-            {"chat_id": chat_id, "message_id": msg_id, "reply_markup": {"inline_keyboard": []}},
+    lead = _lead_de_pendiente(pend)
+    msg_id = (cb.get("message") or {}).get("message_id") or pend.get("message_id")
+    base = pend.get("texto_tarjeta") or ""
+
+    if data.startswith("b2bs:"):
+        if pend.get("estado_envio") in ("en_cola", "enviado"):
+            _answer(token, cb, "Ya está en cola")
+            return None
+        ok, motivo = puede_enviar_correo(lead)
+        if not ok:
+            _answer(token, cb, motivo or "No se puede enviar")
+            return None
+        item = encolar_envio(lead, tok)
+        if not item:
+            _answer(token, cb, "No se encoló")
+            return None
+        _answer(token, cb, "En cola")
+        texto = texto_con_estado(base or lead.get("nombre") or "—", "⏳ En cola")
+        _editar_tarjeta(token, chat_id, msg_id, texto, teclado_en_cola(lead, tok))
+        actualizar_pendiente(tok, estado_envio="en_cola", texto_tarjeta=texto, cuerpo=item.get("cuerpo") or "")
+        guardar_estado_lead(lead, "aprobado")
+        anotar_decision(lead, "aprobadas")
+        cerrar_tarjeta(tok)
+        return None
+
+    if data.startswith("b2bt:"):
+        _answer(token, cb, "Respóndeme a este mensaje con el cuerpo nuevo")
+        actualizar_pendiente(tok, espera="cuerpo")
+        return "Respóndeme a este mensaje con el cuerpo nuevo"
+
+    if data.startswith("b2bl:"):
+        resultado = posponer(tok, pend.get("inbox_path") or "", )
+        if resultado == "limite":
+            _answer(token, cb, "Ya se pospuso 2 veces")
+            return "Ya se pospuso 2 veces. Aprueba o descarta."
+        _answer(token, cb, "Al final de la cola")
+        texto = texto_con_estado(base or lead.get("nombre") or "—", "⏭ Más tarde")
+        _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
+        actualizar_pendiente(tok, estado_envio="despues", texto_tarjeta=texto)
+        return None
+
+    if data.startswith("b2bd:"):
+        marcar_gestionado_telegram(lead, "descartado")
+        agregar_no_contactar(lead.get("nombre") or "", lead.get("web") or "", motivo="telegram_descartar")
+        guardar_estado_lead(lead, "descartado")
+        anotar_decision(lead, "descartadas")
+        cerrar_tarjeta(tok)
+        _answer(token, cb, "Descartado")
+        texto = texto_con_estado(base or (lead.get("nombre") or "—"), "🗑 Descartado")
+        _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
+        return f"🗑 Descartado: {lead.get('nombre') or '—'}"
+
+    if data.startswith("b2be:"):
+        marcar_gestionado_telegram(lead, "enviado")
+        guardar_estado_lead(lead, "enviado")
+        cerrar_tarjeta(tok)
+        _answer(token, cb, "Marcado enviado")
+        texto = texto_con_estado(base or (lead.get("nombre") or "—"), "📤 Marcado enviado (manual)")
+        _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
+        return f"✅ Enviado: {lead.get('nombre') or '—'}"
+    return None
+
+
+def _manejar_respuesta(token: str, chat_id: str, message_id, texto: str) -> str | None:
+    from b2b.envio_correo import correo_valido
+    from b2b.redactor import asegurar_pie
+    from b2b.telegram_gestion import actualizar_pendiente, pendiente_por_mensaje
+    from b2b.telegram_prospecto import mensaje_prospecto_completo, teclado_prospecto
+
+    tok, pend = pendiente_por_mensaje(message_id)
+    if not tok or not pend:
+        return None
+    lead = _lead_de_pendiente(pend)
+    bruto = (texto or "").strip()
+    if pend.get("espera") == "cuerpo" or (len(bruto) > 40 and "@" not in bruto.split()[0]):
+        idioma = lead.get("idioma") or "en"
+        cuerpo = asegurar_pie(bruto, idioma)
+        lead["cuerpo_editado"] = cuerpo
+        lead["cuerpo"] = cuerpo
+        lead["asunto"] = pend.get("asunto") or lead.get("asunto")
+        nuevo = mensaje_prospecto_completo(lead, lead.get("pais") or "")
+        _editar_tarjeta(token, chat_id, message_id, nuevo, teclado_prospecto(lead, lead.get("pais") or "", tok))
+        actualizar_pendiente(tok, cuerpo=cuerpo, cuerpo_editado=cuerpo, texto_tarjeta=nuevo, espera="")
+        return "Texto actualizado. La dirección y la baja quedan en el correo."
+    if correo_valido(bruto):
+        lead["correo"] = bruto
+        lead["fuente_correo"] = "manual_telegram"
+        lead["sin_correo_publico"] = False
+        nuevo = mensaje_prospecto_completo(lead, lead.get("pais") or "")
+        _editar_tarjeta(token, chat_id, message_id, nuevo, teclado_prospecto(lead, lead.get("pais") or "", tok))
+        actualizar_pendiente(
+            tok,
+            correo=bruto,
+            fuente_correo="manual_telegram",
+            texto_tarjeta=nuevo,
+            cuerpo=lead.get("cuerpo") or "",
+            asunto=lead.get("asunto") or "",
         )
-    nombre = lead.get("nombre") or "—"
-    return f"{etiqueta}: {nombre}"
+        return f"Correo guardado: {bruto}"
+    return None
 
 
 def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
@@ -219,17 +344,44 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
                 acks.append(ack)
             continue
         msg = upd.get("message") or {}
-        text = (msg.get("text") or "").strip().lower()
+        raw = (msg.get("text") or "").strip()
+        text = raw.lower()
         cid = str(msg.get("chat", {}).get("id", ""))
         if cid != str(chat_id):
             continue
-            
+        reply = msg.get("reply_to_message") or {}
+        if reply.get("message_id") and raw and not raw.startswith("/"):
+            ack = _manejar_respuesta(token, chat_id, reply.get("message_id"), raw)
+            if ack:
+                acks.append(ack)
+            continue
+
         if text in ("/pausa", "pausa"):
             set_pausado(True)
-            acks.append("⏸ Búsqueda Telegram pausada (/seguir para reanudar).")
+            acks.append("⏸ Tarjetas y envíos pausados (/seguir para reanudar).")
         elif text in ("/seguir", "seguir", "/resume"):
             set_pausado(False)
-            acks.append("▶️ Envíos Telegram reanudados.")
+            acks.append("▶️ Tarjetas y envíos reanudados.")
+        elif text in ("/cola",):
+            from b2b.despachador_tarjetas import texto_cola
+            from b2b.paths import queue_dir
+
+            cola = queue_dir() or state_file("x").parent
+            acks.append(texto_cola(cola))
+        elif text.startswith("/ritmo"):
+            from b2b.despachador_tarjetas import set_ritmo
+
+            partes = text.split()
+            if len(partes) == 2 and partes[1] in ("1", "2", "3"):
+                n = set_ritmo(int(partes[1]))
+                acks.append(f"Ritmo: {n} tarjeta(s) abierta(s).")
+            else:
+                acks.append("Usa /ritmo 1, /ritmo 2 o /ritmo 3.")
+        elif text in ("/siguiente",):
+            from b2b.despachador_tarjetas import forzar_siguiente
+
+            forzar_siguiente()
+            acks.append("Sale la siguiente tarjeta.")
         elif text == "/pendientes":
             pend = _pendientes_activos()
             acks.append(f"📋 Tienes {len(pend)} leads pendientes (mercados retirados excluidos).")

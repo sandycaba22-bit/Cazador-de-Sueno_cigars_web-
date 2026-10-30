@@ -59,15 +59,11 @@ class TestTelegramProspecto(unittest.TestCase):
         }
         msg = mensaje_prospecto_completo(lead, "Florida")
         self.assertIn("Test Shop", msg)
-        self.assertIn("Teléfono y correo confirmados", msg)
         self.assertIn("Yaniris Agustina Ureña", msg)
+        self.assertIn("reply STOP", msg)
         botones = teclado_prospecto(lead, "Florida", token_callback(lead))
         urls = [b.get("url", "") for fila in botones["inline_keyboard"] for b in fila]
         self.assertTrue(any(url.startswith("https://wa.me/13055550100?") for url in urls))
-        correo = next(unquote(url) for url in urls if url.startswith("mailto:"))
-        self.assertIn(EMAIL_VP_VENTAS, correo)
-        self.assertIn("reply STOP", correo)
-        self.assertNotIn("STOP", msg)
 
     def test_tiene_medio_web(self):
         self.assertTrue(tiene_medio_contacto({"web": "https://shop.example"}))

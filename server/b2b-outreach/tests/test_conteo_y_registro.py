@@ -227,12 +227,12 @@ class TestConteoIsla(unittest.TestCase):
         self.assertEqual(c["encontrados"], 8)
         self.assertEqual(c["sin_clasificar"], 0)
         self.assertEqual(c["repetidos"], 1)
-        self.assertEqual(c["descartados"], 2)
+        self.assertEqual(c["descartados"], 5)
         self.assertEqual(c["dudosos"], 1)
         self.assertEqual(c["sin_contacto"], 1)
-        self.assertEqual(c["encolados"], 2)
-        self.assertEqual(c["nuevos"], 2)
-        self.assertEqual(c["pendiente_limite"], 1)
+        self.assertEqual(c["encolados"], 0)
+        self.assertEqual(c["nuevos"], 0)
+        self.assertEqual(c["pendiente_limite"], 0)
         suma = sum(c[k] for k in prospector.CATEGORIAS_RESUMEN)
         self.assertEqual(suma, c["encontrados"])
 
@@ -244,7 +244,7 @@ class TestConteoIsla(unittest.TestCase):
         )
 
         texto = texto_conteo_isla("Jamaica", c, stats["descartes"])
-        self.assertIn("8 encontrados = 2 nuevos · 1 repetidos · 2 descartados · 1 dudosos", texto)
+        self.assertIn("8 encontrados = 0 nuevos · 1 repetidos · 5 descartados · 1 dudosos", texto)
         self.assertIn("1 sin contacto", texto)
         self.assertNotIn("sin clasificar", texto)
 
