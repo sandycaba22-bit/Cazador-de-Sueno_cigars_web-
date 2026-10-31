@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -505,6 +506,31 @@ def _telegram_tras_isla(stats: dict, simulado: bool, solo_listar: bool) -> None:
         avisar_isla_fallida(pais, simulado=simulado)
 
 
+def es_dia_busqueda(ahora: datetime | None = None) -> bool:
+    """Lunes–sábado en Santo Domingo. Domingo no busca (el envío de correo sigue Lun–Vie en zonas.py)."""
+    from b2b.zonas import tz
+
+    zona = tz("America/Santo_Domingo")
+    if ahora is None:
+        local = datetime.now(zona)
+    elif ahora.tzinfo is None:
+        local = ahora.replace(tzinfo=timezone.utc).astimezone(zona)
+    else:
+        local = ahora.astimezone(zona)
+    return local.weekday() < 6  # 0=lun … 5=sáb; 6=domingo
+
+
+def _stats_domingo() -> dict:
+    return {
+        "encolados": 0,
+        "pais": "",
+        "llamadas": 0,
+        "fuente": "",
+        "motivo": "domingo",
+        "modo": "pausado_domingo",
+    }
+
+
 def prospectar(
     pais_cli: str | None,
     max_leads: int,
@@ -515,6 +541,11 @@ def prospectar(
     buscar_global: bool = False,
 ) -> dict:
     import os
+
+    # El timer ya evita el domingo; esto corta también un start manual o Persistent=true.
+    if not simulado and not es_dia_busqueda():
+        print("Buscador: domingo en Santo Domingo — no hay búsqueda (lunes a sábado).", file=sys.stderr)
+        return _stats_domingo()
 
     if not simulado:
         return _prospectar(pais_cli, max_leads, inbox, simulado, solo_listar, tipo_filtro, buscar_global)

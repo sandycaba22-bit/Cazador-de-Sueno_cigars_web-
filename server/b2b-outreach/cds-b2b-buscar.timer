@@ -1,9 +1,10 @@
 [Unit]
-Description=Buscador B2B en dos tandas diarias (09:00 y 15:00, hasta 15 búsquedas Google cada una)
+Description=Buscador B2B lunes a sábado (09:00 y 15:00, hasta 15 búsquedas Google cada una; domingo no)
 
 [Timer]
-OnCalendar=*-*-* 09:00:00 America/Santo_Domingo
-OnCalendar=*-*-* 15:00:00 America/Santo_Domingo
+# Correos siguen lunes–viernes (b2b/zonas.py). La búsqueda sí incluye sábado.
+OnCalendar=Mon..Sat *-*-* 09:00:00 America/Santo_Domingo
+OnCalendar=Mon..Sat *-*-* 15:00:00 America/Santo_Domingo
 Persistent=true
 RandomizedDelaySec=300
 
