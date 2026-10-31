@@ -173,6 +173,8 @@ def _editar_tarjeta(token: str, chat_id: str, message_id, texto: str, markup: di
     }
     if markup is not None:
         payload["reply_markup"] = markup
+    if "<pre>" in (texto or "") or "<code>" in (texto or ""):
+        payload["parse_mode"] = "HTML"
     _telegram_post(token, "editMessageText", payload)
 
 
@@ -216,7 +218,10 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
     cid = str((cb.get("message") or {}).get("chat", {}).get("id", ""))
     if cid != str(chat_id):
         return None
-    tok = data.split(":", 1)[-1] if ":" in data else ""
+    if data.startswith("b2bq:") and data.count(":") >= 2:
+        tok = data.split(":")[-1]
+    else:
+        tok = data.split(":", 1)[-1] if ":" in data else ""
     if not tok:
         return None
     pend = resolver_pendiente(tok) or {}
@@ -224,26 +229,67 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
     msg_id = (cb.get("message") or {}).get("message_id") or pend.get("message_id")
     base = pend.get("texto_tarjeta") or ""
 
+    if data.startswith("b2bm:"):
+        from b2b.envio_correo import preparar_cuerpo
+        from b2b.tarjeta import teclado_preview
+
+        cuenta = ""
+        try:
+            from b2b.envio_correo import elegir_cuenta
+
+            elegida = elegir_cuenta()
+            if elegida:
+                cuenta = elegida["correo"]
+        except Exception:
+            cuenta = ""
+        try:
+            asunto, cuerpo, _variante = preparar_cuerpo(lead, cuenta)
+        except Exception as exc:
+            _answer(token, cb, "No pude armar el correo")
+            return f"⚠️ No pude armar el correo: {exc}"
+        preview = (
+            f"Para: {lead.get('correo') or '—'}\n"
+            f"De: {cuenta or '(sin cuenta configurada)'}\n"
+            f"Asunto: {asunto}\n\n"
+            f"{cuerpo}"
+        )
+        _answer(token, cb, "Vista previa")
+        _telegram_post(token, "sendMessage", {
+            "chat_id": chat_id,
+            "text": preview[:4096],
+            "reply_markup": teclado_preview(tok),
+        })
+        actualizar_pendiente(tok, asunto=asunto, cuerpo=cuerpo, espera="")
+        return None
+
+    if data.startswith("b2bn:"):
+        cancelar_envio(tok)
+        _answer(token, cb, "Cancelado")
+        actualizar_pendiente(tok, estado_envio="", espera="")
+        return "Cancelado. No se envió el correo."
+
     if data.startswith("b2bs:"):
         if pend.get("estado_envio") in ("en_cola", "enviado"):
             _answer(token, cb, "Ya está en cola")
-            return None
-        ok, motivo = puede_enviar_correo(lead)
-        if not ok:
-            _answer(token, cb, motivo or "No se puede enviar")
-            return None
-        item = encolar_envio(lead, tok)
-        if not item:
-            _answer(token, cb, "No se encoló")
-            return None
-        _answer(token, cb, "En cola")
-        texto = texto_con_estado(base or lead.get("nombre") or "—", "⏳ En cola")
-        _editar_tarjeta(token, chat_id, msg_id, texto, teclado_en_cola(lead, tok))
-        actualizar_pendiente(tok, estado_envio="en_cola", texto_tarjeta=texto, cuerpo=item.get("cuerpo") or "")
-        guardar_estado_lead(lead, "aprobado")
-        anotar_decision(lead, "aprobadas")
-        cerrar_tarjeta(tok)
-        return None
+            return "Ya está en cola o enviado."
+        from b2b.envio_correo import enviar_confirmado
+
+        resultado = enviar_confirmado(lead, tok)
+        _answer(token, cb, (resultado or "Listo")[:180])
+        if resultado.startswith("✅") or resultado.startswith("⏳") or "B2B_ENVIO_REAL=0" in resultado:
+            texto = texto_con_estado(base or lead.get("nombre") or "—", resultado.split("\n", 1)[0][:180])
+            markup = teclado_en_cola(lead, tok) if resultado.startswith("⏳") else teclado_cerrado()
+            _editar_tarjeta(token, chat_id, msg_id, texto, markup)
+            estado = "en_cola" if resultado.startswith("⏳") else "enviado"
+            actualizar_pendiente(tok, estado_envio=estado, texto_tarjeta=texto)
+            if estado == "enviado":
+                guardar_estado_lead(lead, "enviado", canal="correo")
+                from b2b.seguimiento import registrar_enviado
+
+                registrar_enviado(lead, "correo")
+                anotar_decision(lead, "aprobadas")
+                cerrar_tarjeta(tok)
+        return resultado
 
     if data.startswith("b2bt:"):
         _answer(token, cb, "Respóndeme a este mensaje con el cuerpo nuevo")
@@ -261,7 +307,44 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
         actualizar_pendiente(tok, estado_envio="despues", texto_tarjeta=texto)
         return None
 
+    if data.startswith("b2bq:"):
+        from b2b.telegram_dudosos import MOTIVOS, avanzar, guardar_motivo
+
+        partes = data.split(":")
+        codigo = partes[1] if len(partes) > 2 else ""
+        motivo = guardar_motivo(lead, codigo)
+        _answer(token, cb, motivo)
+        _editar_tarjeta(
+            token, chat_id, msg_id,
+            texto_con_estado(base or (lead.get("nombre") or "—"), f"🗑 {motivo}"),
+            teclado_cerrado(),
+        )
+        from b2b.telegram_dudosos import _load as _load_dudosos
+
+        if tok in (_load_dudosos().get("pendientes") or []):
+            siguiente_tok, siguiente = avanzar()
+            if siguiente_tok and siguiente:
+                _enviar_dudoso(token, chat_id, siguiente_tok, siguiente)
+        return f"Motivo guardado: {MOTIVOS.get(codigo, motivo)}"
+
+    if data.startswith("b2bu:"):
+        from b2b.telegram_dudosos import avanzar, aprobar
+
+        nombre = aprobar(lead)
+        _answer(token, cb, "Aprobado")
+        _editar_tarjeta(
+            token, chat_id, msg_id,
+            texto_con_estado(base or nombre, "✅ Aprobado, pasa a la cola"),
+            teclado_cerrado(),
+        )
+        siguiente_tok, siguiente = avanzar()
+        if siguiente_tok and siguiente:
+            _enviar_dudoso(token, chat_id, siguiente_tok, siguiente)
+        return f"Aprobado: {nombre}. Entra en la cola normal."
+
     if data.startswith("b2bd:"):
+        from b2b.tarjeta import teclado_motivo
+
         marcar_gestionado_telegram(lead, "descartado")
         agregar_no_contactar(lead.get("nombre") or "", lead.get("web") or "", motivo="telegram_descartar")
         guardar_estado_lead(lead, "descartado")
@@ -270,17 +353,41 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
         _answer(token, cb, "Descartado")
         texto = texto_con_estado(base or (lead.get("nombre") or "—"), "🗑 Descartado")
         _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
+        _telegram_post(token, "sendMessage", {
+            "chat_id": chat_id,
+            "text": f"¿Por qué descartamos {lead.get('nombre') or 'este negocio'}?",
+            "reply_markup": teclado_motivo(tok),
+        })
         return f"🗑 Descartado: {lead.get('nombre') or '—'}"
 
     if data.startswith("b2be:"):
+        from b2b.seguimiento import registrar_enviado
+
         marcar_gestionado_telegram(lead, "enviado")
-        guardar_estado_lead(lead, "enviado")
+        canal = "correo" if pend.get("estado_envio") == "enviado" else (
+            "whatsapp" if (lead.get("telefono") or lead.get("whatsapp")) else "manual"
+        )
+        guardar_estado_lead(lead, "enviado", canal=canal)
+        registrar_enviado(lead, canal)
         cerrar_tarjeta(tok)
         _answer(token, cb, "Marcado enviado")
-        texto = texto_con_estado(base or (lead.get("nombre") or "—"), "📤 Marcado enviado (manual)")
+        texto = texto_con_estado(base or (lead.get("nombre") or "—"), f"📤 Enviado por {canal}")
         _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
-        return f"✅ Enviado: {lead.get('nombre') or '—'}"
+        return f"✅ Enviado: {lead.get('nombre') or '—'} ({canal})"
     return None
+
+
+def _enviar_dudoso(token: str, chat_id: str, tok: str, lead: dict) -> None:
+    from b2b.tarjeta import construir_tarjeta, teclado_dudoso
+
+    datos = dict(lead)
+    datos["token"] = tok
+    _telegram_post(token, "sendMessage", {
+        "chat_id": chat_id,
+        "text": construir_tarjeta(datos)[:4096],
+        "parse_mode": "HTML",
+        "reply_markup": teclado_dudoso(datos),
+    })
 
 
 def _manejar_respuesta(token: str, chat_id: str, message_id, texto: str) -> str | None:
@@ -383,8 +490,29 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
             forzar_siguiente()
             acks.append("Sale la siguiente tarjeta.")
         elif text == "/pendientes":
+            from b2b.despachador_tarjetas import forzar_siguiente
+
             pend = _pendientes_activos()
-            acks.append(f"📋 Tienes {len(pend)} leads pendientes (mercados retirados excluidos).")
+            forzar_siguiente()
+            acks.append(
+                f"📋 Tienes {len(pend)} leads pendientes (mercados retirados excluidos). "
+                "La siguiente tarjeta sale con los mismos botones."
+            )
+        elif text == "/dudosos":
+            from b2b.telegram_dudosos import actual, preparar_tanda
+
+            data_d = preparar_tanda()
+            tok_d, lead_d = actual(data_d)
+            total = len(data_d.get("pendientes") or [])
+            if not tok_d or not lead_d:
+                acks.append("No hay dudosos en la carpeta de la cola.")
+            else:
+                _enviar_dudoso(token, chat_id, tok_d, lead_d)
+                acks.append(f"Dudosos: {total} en esta tanda. Sale el primero; el siguiente, al aprobar o descartar.")
+        elif text in ("/prueba_correo", "/prueba-correo"):
+            from b2b.envio_correo import prueba_correo_cuentas
+
+            acks.append(prueba_correo_cuentas())
         elif text == "/stats":
             pend = _pendientes_activos()
             stats = {}

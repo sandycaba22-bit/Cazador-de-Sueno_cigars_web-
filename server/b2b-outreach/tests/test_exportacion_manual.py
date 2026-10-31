@@ -79,13 +79,18 @@ class TestPlantillas(unittest.TestCase):
                 self.assertNotRegex(texto, PROHIBIDO_RE)
             self.assertNotIn("STOP", corto)
             self.assertIn(marca, corto)
-            self.assertIn("BAJA" if idioma == "es" else "STOP", correo)
+            if idioma == "es":
+                self.assertIn("BAJA", correo)
+            elif idioma == "en":
+                self.assertIn("unsubscribe", correo)
+            else:
+                self.assertIn("STOP", correo)
             for ajena in ("Davidoff", "Arturo Fuente", "Plasencia", "La Aurora", "Cohiba"):
                 self.assertNotIn(ajena, correo)
 
     def test_correo_ingles_conserva_el_cierre(self):
         correo = borrador_correo("Cigar House", "en", "tienda")
-        self.assertIn("reply STOP", correo)
+        self.assertIn("unsubscribe", correo)
         self.assertIn("free sample", correo.lower())
         self.assertIn("your cigar shop", borrador_corto("Cigar House", "en", "tienda"))
 

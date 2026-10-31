@@ -90,7 +90,7 @@ class TestRedactor(unittest.TestCase):
     def test_sin_precios_y_baja(self):
         draft = borrador_prospecto("en", "Test Shop", "tienda")
         self.assertNotRegex(draft, PROHIBIDO_RE)
-        self.assertIn("STOP", draft)
+        self.assertIn("unsubscribe", draft)
         self.assertIn("six vitolas", draft.lower())
         self.assertIn("The Sultan", draft)
         self.assertNotIn("El Sultán", draft)
@@ -111,7 +111,9 @@ class TestRedactor(unittest.TestCase):
             "",
             {"sin_correo_publico": True, "tipo": "tienda", "dificultad_aduana": 2},
         )
-        self.assertIn("sin correo publicado", paquete["texto"])
+        self.assertIn("Sin teléfono ni correo", paquete["texto"])
+        self.assertIn("Borrador sugerido", paquete["texto"])
+        self.assertIn("✅ Enviado", str(paquete.get("reply_markup")))
         self.assertIn("Yaniris Agustina Ureña", paquete["texto"])
 
 

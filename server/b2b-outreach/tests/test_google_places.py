@@ -657,7 +657,7 @@ class TestMensajeTelegram(unittest.TestCase):
         for esperado in (
             "La Casa del Habano Miami",
             "Shop · Miami",
-            "Sin correo público",
+            "Solo teléfono",
         ):
             self.assertIn(esperado, msg)
         self.assertIn("Brickell Mall", lead["direccion"])
@@ -667,11 +667,18 @@ class TestMensajeTelegram(unittest.TestCase):
         self.assertEqual(lead["telefono_internacional"], "+13055550222")
         self.assertEqual(lead["instagram"], "https://www.instagram.com/casadelhabanomiami/")
         self.assertEqual(lead["web"], "")
+        from b2b.telefono import clasificar_linea
+
         botones = teclado_prospecto(lead, "Florida", "test")
         urls = [b.get("url", "") for fila in botones["inline_keyboard"] for b in fila]
-        self.assertTrue(any(url.startswith(
-            "https://wa.me/13055550222?text=Hello%20La%20Casa%20del%20Habano%20Miami"
-        ) for url in urls))
+        textos = [b.get("text") for fila in botones["inline_keyboard"] for b in fila]
+        if clasificar_linea(lead["telefono_internacional"], "Florida") == "movil":
+            self.assertTrue(any(url.startswith("https://wa.me/13055550222") for url in urls))
+        else:
+            self.assertNotIn("📲 WhatsApp", textos)
+            self.assertIn("Posible fijo: llamar", msg)
+        self.assertIn("✅ Enviado", textos)
+        self.assertIn("🗑 Descartar", textos)
         self.assertIn(lead["maps_url"], urls)
         self.assertIn("query_place_id=ChIJ-casa-habano-miami-test", lead["maps_url"])
         self.assertNotIn("🌐 Web:", msg)
@@ -686,7 +693,7 @@ class TestMensajeTelegram(unittest.TestCase):
         msg = mensaje_prospecto_completo(lead, "Florida")
         botones = teclado_prospecto(lead, "Florida", "test")
         self.assertIn("info@casadelhabano.aw", msg)
-        self.assertIn("reply STOP", msg)
+        self.assertIn("unsubscribe", msg)
 
     def test_sin_telefono_ni_web_entra_y_lo_dice_en_el_aviso(self):
         lead = places._normalizar_place(json.loads(FIXTURE.read_text(encoding="utf-8"))["places"][3], "Aruba")
@@ -694,7 +701,7 @@ class TestMensajeTelegram(unittest.TestCase):
         self.assertFalse(lead.get("telefono"))
         self.assertFalse(lead.get("web"))
         msg = mensaje_prospecto_completo(lead, "Florida")
-        self.assertIn("Sin correo público", msg)
+        self.assertIn("Sin teléfono ni correo", msg)
         botones = teclado_prospecto(lead, "Florida", "test")
         urls = [b.get("url", "") for fila in botones["inline_keyboard"] for b in fila]
         self.assertIn(lead["maps_url"], urls)
@@ -740,7 +747,7 @@ class TestIdiomaYPlantillas(unittest.TestCase):
         correo = borrador_correo("Cigar House", "en", "tienda")
         self.assertIn("your cigar shop", corto)
         self.assertNotIn("STOP", corto)
-        self.assertIn("reply STOP", correo)
+        self.assertIn("unsubscribe", correo)
         for texto in (corto, correo):
             self.assertIn("free sample", texto.lower())
             self.assertIn("Cazador de Sueño Cigars SRL", texto)

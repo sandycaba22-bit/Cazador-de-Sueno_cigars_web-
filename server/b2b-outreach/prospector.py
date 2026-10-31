@@ -272,6 +272,9 @@ def encolar(
             res[categoria].append({"nombre": nombre, "archivo": path.name})
             if marcar:
                 marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
+                from b2b.leads_store import registrar_contacto
+
+                registrar_contacto(payload)
                 if not simulado:
                     try:
                         from b2b.supabase_client import guardar_lead_b2b

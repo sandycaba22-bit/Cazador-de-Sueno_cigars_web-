@@ -88,6 +88,34 @@ def _pdf_remoto_disponible(url: str) -> bool:
         return False
 
 
+def catalogo_listo_para_envio(idioma: str = "en") -> tuple[bool, str]:
+    """True solo si el PDF local existe o la URL responde exactamente 200."""
+    try:
+        cat = resolver_catalogo_pdf(idioma or "en")
+    except CatalogoError as exc:
+        return False, str(exc)
+    sufijo = _suffix(cat.idioma_pdf)
+    if _pdf_local(sufijo) is not None:
+        return True, cat.url
+    if os.getenv("B2B_SKIP_PDF_HEAD", "").strip().lower() in ("1", "true", "yes"):
+        return True, cat.url
+    codigo, detalle = _estado_http(cat.url)
+    if codigo == 200:
+        return True, cat.url
+    return False, f"El catálogo no respondió 200 ({codigo or detalle}): {cat.url}"
+
+
+def _estado_http(url: str) -> tuple[int, str]:
+    request = urllib.request.Request(url, method="HEAD")
+    try:
+        with urllib.request.urlopen(request, timeout=8) as response:
+            return int(response.status), ""
+    except urllib.error.HTTPError as exc:
+        return int(exc.code), str(exc.reason)
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return 0, str(exc)[:200]
+
+
 def pdf_disponible(idioma: str) -> bool:
     if (idioma or "en") not in IDIOMA_A_SUFIJO:
         return False

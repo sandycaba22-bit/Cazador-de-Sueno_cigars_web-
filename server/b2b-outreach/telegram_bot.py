@@ -527,13 +527,19 @@ def enviar_texto_telegram(texto: str) -> None:
     enviar_mensaje_telegram(texto)
 
 
-def enviar_mensaje_telegram(texto: str, reply_markup: dict | None = None) -> int | None:
+def enviar_mensaje_telegram(
+    texto: str,
+    reply_markup: dict | None = None,
+    parse_mode: str | None = None,
+) -> int | None:
     _, chat_id = telegram_credentials()
     payload = {
         "chat_id": chat_id,
         "text": (texto or "")[:4096],
         "disable_web_page_preview": True,
     }
+    if parse_mode:
+        payload["parse_mode"] = parse_mode
     if reply_markup:
         payload["reply_markup"] = reply_markup
     body = _enviar_payload(payload)
@@ -543,7 +549,12 @@ def enviar_mensaje_telegram(texto: str, reply_markup: dict | None = None) -> int
     return None
 
 
-def editar_mensaje_telegram(message_id: int, texto: str, reply_markup: dict | None = None) -> None:
+def editar_mensaje_telegram(
+    message_id: int,
+    texto: str,
+    reply_markup: dict | None = None,
+    parse_mode: str | None = None,
+) -> None:
     _, chat_id = telegram_credentials()
     payload = {
         "chat_id": chat_id,
@@ -551,21 +562,36 @@ def editar_mensaje_telegram(message_id: int, texto: str, reply_markup: dict | No
         "text": (texto or "")[:4096],
         "disable_web_page_preview": True,
     }
+    if parse_mode:
+        payload["parse_mode"] = parse_mode
     if reply_markup is not None:
         payload["reply_markup"] = reply_markup
     _enviar_payload(payload, "editMessageText")
 
 
 def enviar_alerta_telegram(paquete):
+    """Manda la tarjeta unificada con sus botones. Si el HTML falla, reintenta en texto plano."""
     token, chat_id = telegram_credentials()
+    _ = token
+    markup = paquete.get("reply_markup") or {"inline_keyboard": []}
+    if not markup.get("inline_keyboard"):
+        markup = {
+            "inline_keyboard": [[
+                {"text": "✅ Enviado", "callback_data": "b2be:manual"},
+                {"text": "🗑 Descartar", "callback_data": "b2bd:manual"},
+            ]]
+        }
     base = {
         "chat_id": chat_id,
         "disable_web_page_preview": True,
+        "reply_markup": markup,
     }
+    html = paquete.get("texto") or paquete.get("markdown") or ""
     try:
-        return _enviar_payload({**base, "text": paquete["markdown"], "parse_mode": "MarkdownV2"})
+        return _enviar_payload({**base, "text": html[:4096], "parse_mode": "HTML"})
     except TelegramFormatError:
-        return _enviar_payload({**base, "text": paquete["texto"]})
+        plano = paquete.get("texto_plano") or html
+        return _enviar_payload({**base, "text": plano[:4096]})
 
 
 def validar_prospecto(nombre, pais, web, correo):
@@ -642,6 +668,20 @@ def normalizar_lead_cola(data):
         "idioma_fuente": (data.get("idioma_fuente") or "").strip(),
         "fuente_correo": (data.get("fuente_correo") or "").strip(),
         "sin_correo_publico": bool(data.get("sin_correo_publico")),
+        "telefono_internacional": (data.get("telefono_internacional") or "").strip(),
+        "whatsapp": (data.get("whatsapp") or "").strip(),
+        "ciudad": (data.get("ciudad") or "").strip(),
+        "estado": (data.get("estado") or "").strip(),
+        "rating": data.get("rating"),
+        "user_rating_count": data.get("user_rating_count"),
+        "instagram": (data.get("instagram") or "").strip(),
+        "facebook": (data.get("facebook") or "").strip(),
+        "place_id": (data.get("place_id") or "").strip(),
+        "lat": data.get("lat"),
+        "lon": data.get("lon"),
+        "maps_url": (data.get("maps_url") or "").strip(),
+        "resumen_verificacion": (data.get("resumen_verificacion") or "").strip(),
+        "puntaje": data.get("puntaje"),
         "dificultad_pais": data.get("dificultad_aduana", data.get("dificultad_pais")),
         "dificultad_aduana": data.get("dificultad_aduana", data.get("dificultad_pais")),
         "estado_aduanero": data.get("estado_reglas", data.get("estado_aduanero")),
@@ -857,6 +897,15 @@ def vigilar(queue_dir, imprimir=False, una_pasada=False):
         try:
             despachar(queue_dir)
             procesar_outbox()
+            from b2b.envio_correo import revisar_unsubscribe
+            from b2b.seguimiento import textos_recordatorio
+
+            for aviso in textos_recordatorio():
+                if imprimir:
+                    print(aviso)
+                else:
+                    enviar_texto_telegram(aviso)
+            revisar_unsubscribe()
             resumen = resumen_si_toca(queue_dir)
             if resumen:
                 if imprimir:

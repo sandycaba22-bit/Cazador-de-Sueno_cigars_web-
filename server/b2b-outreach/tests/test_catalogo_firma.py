@@ -46,7 +46,7 @@ class TestFirma(unittest.TestCase):
         self.assertEqual(CARGO_VP["pt"], "Vice-presidente, Vendas")
         bloque, ok = _firma("en")
         self.assertTrue(ok)
-        self.assertIn("Vice President, Sales", bloque)
+        self.assertIn("VP of Sales", bloque)
         self.assertIn("Yaniris Agustina Ureña", bloque)
 
     def test_sin_contacto_no_lineas_vacias(self):

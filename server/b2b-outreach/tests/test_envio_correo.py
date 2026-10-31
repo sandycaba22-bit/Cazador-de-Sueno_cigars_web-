@@ -116,7 +116,7 @@ class TestMensaje(unittest.TestCase):
             cuerpo = cuerpo_sin_asunto("Prime Cigar", "en", "lounge", cuenta="uno@gmail.com")
             self.assertIn("Dominican Republic", cuerpo)
             self.assertNotIn("República Dominicana", cuerpo)
-            self.assertIn("reply STOP", cuerpo)
+            self.assertIn("unsubscribe", cuerpo)
             self.assertNotIn("responda BAJA", cuerpo)
             self.assertEqual(cuerpo.count("https://"), 1)
             self.assertIn(WHOLESALE_URL, cuerpo)

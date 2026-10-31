@@ -183,9 +183,12 @@ def _claves_cruce(lead: dict) -> list[str]:
     dom = dominio_web(lead.get("web") or "")
     if dom:
         claves.append(f"dom:{dom}")
-    tel = re.sub(r"\D", "", lead.get("telefono_internacional") or lead.get("telefono") or "")[-8:]
-    if len(tel) >= 7:
+    tel = re.sub(r"\D", "", lead.get("telefono_internacional") or lead.get("telefono") or "")[-10:]
+    if len(tel) >= 8:
         claves.append(f"tel:{tel}")
+    correo = (lead.get("correo") or "").strip().lower()
+    if "@" in correo:
+        claves.append(f"mail:{correo}")
     nom = normalizar_nombre(lead.get("nombre") or "")
     if len(nom) >= 4:
         claves.append(f"nom:{nom}")
@@ -271,6 +274,13 @@ def archivo_en_cola(cola_dir: Path, sub: str, lead: dict) -> Path | None:
             return path
         if dom and dominio_web(data.get("web") or "") == dom:
             return path
+        correo = (lead.get("correo") or "").strip().lower()
+        if correo and (data.get("correo") or "").strip().lower() == correo:
+            return path
+        tel = re.sub(r"\D", "", lead.get("telefono_internacional") or lead.get("telefono") or "")[-10:]
+        otro = re.sub(r"\D", "", data.get("telefono_internacional") or data.get("telefono") or "")[-10:]
+        if len(tel) >= 8 and tel == otro:
+            return path
     return None
 
 
@@ -289,7 +299,7 @@ def duplicado_contra(lead: dict, cola_dir: Path | None) -> tuple[str, str] | Non
     Un archivo en failed no cuenta: el aviso de Telegram falló y se reintenta.
     """
     from b2b.descartes import _iso_desde_mtime
-    from b2b.leads_store import seen_path, ya_visto
+    from b2b.leads_store import contacto_visto, seen_path, ya_visto
 
     if cola_dir and cola_dir.is_dir():
         clave = clave_dedupe(lead)
@@ -301,7 +311,9 @@ def duplicado_contra(lead: dict, cola_dir: Path | None) -> tuple[str, str] | Non
             path = archivo_en_cola(cola_dir, sub, lead)
             if path is not None:
                 return sub, _iso_desde_mtime(path)
-    if ya_visto(lead.get("place_id", ""), lead.get("web", "")) and not solo_reintento_failed(lead, cola_dir):
+    if (
+        ya_visto(lead.get("place_id", ""), lead.get("web", "")) or contacto_visto(lead)
+    ) and not solo_reintento_failed(lead, cola_dir):
         reg = seen_path()
         fecha = _iso_desde_mtime(reg) if reg.is_file() else ""
         return "registro_leads", fecha

@@ -18,7 +18,7 @@ PROHIBIDO_RE = re.compile(
 
 OPT_OUT = {
     "es": "Si no desea recibir más mensajes, responda BAJA.",
-    "en": "If you prefer not to receive further messages, reply STOP.",
+    "en": "If you'd rather not receive further emails, just reply 'unsubscribe'.",
     "fr": "Si vous ne souhaitez plus recevoir de messages, répondez STOP.",
     "nl": "Als u geen berichten meer wilt ontvangen, antwoord met STOP.",
     "de": "Wenn Sie keine weiteren Nachrichten wünschen, antworten Sie STOP.",
@@ -47,7 +47,7 @@ def _resumen_entrenamiento() -> str:
 
 CARGO_VP = {
     "es": "Vicepresidenta de Ventas",
-    "en": "Vice President, Sales",
+    "en": "VP of Sales",
     "fr": "Vice-présidente, Ventes",
     "pt": "Vice-presidente, Vendas",
     "nl": "Vice President, Sales",
@@ -67,11 +67,15 @@ def _firma(idioma: str) -> tuple[str, bool]:
         EMPRESA_FIRMA,
     ]
     email = os.getenv("FIRMA_EMAIL", "cazadordesueno1@gmail.com").strip()
+    if email.lower() == "cazardordesuenol@gmail.com":
+        email = EMAIL_VP_VENTAS
     telefono = os.getenv("FIRMA_TELEFONO", "").strip()
     if email:
         lineas.append(email)
     if telefono:
-        lineas.append(telefono)
+        from b2b.telefono import formato_visible
+
+        lineas.append(formato_visible(telefono, "DO") or telefono)
     return "\n".join(lineas), True
 
 
@@ -342,12 +346,26 @@ SITIO_WEB = "www.cazadordesuenocigar.com"
 
 
 def whatsapp_empresa() -> str:
-    """Número de WhatsApp de la empresa; FIRMA_TELEFONO lo puede sobreescribir en el servidor."""
-    return os.getenv("FIRMA_TELEFONO", "").strip() or WHATSAPP_EMPRESA
+    """Número de WhatsApp de la empresa, siempre en formato internacional."""
+    from b2b.telefono import formato_visible
+
+    bruto = os.getenv("FIRMA_TELEFONO", "").strip() or WHATSAPP_EMPRESA
+    return formato_visible(bruto, "DO") or "+1 (809) 464-5016"
 
 
 def email_empresa() -> str:
-    return os.getenv("FIRMA_EMAIL", "").strip() or EMAIL_VP_VENTAS
+    """Correo de la firma. El typo cazardordesuenol no se usa aunque esté en el entorno."""
+    email = os.getenv("FIRMA_EMAIL", "").strip() or EMAIL_VP_VENTAS
+    if email.lower() == "cazardordesuenol@gmail.com":
+        return EMAIL_VP_VENTAS
+    return email
+
+
+def asunto_outreach(nombre_local: str) -> str:
+    """Asunto único del primer contacto."""
+    nombre = (nombre_local or "").strip() or "your shop"
+    plantilla = "Cazador de Sueño — premium handmade cigars for {nombre}"
+    return asunto_con_tope(plantilla, nombre, tope=120)
 
 
 def linea_contacto(idioma: str) -> str:
@@ -655,8 +673,8 @@ def borrador_correo(
             "We can send a free sample for your evaluation. "
             "Would a short call or email exchange work?\n\n"
             "Best regards,\n"
-            f"{NOMBRE_VP}\n"
-            f"{CARGO_VP['en']} · {EMPRESA_FIRMA}\n"
+            f"{NOMBRE_VP} - VP of Sales\n"
+            f"{EMPRESA_FIRMA}\n"
             f"{correo} · WhatsApp {wa}"
         )
     return _validar(cuerpo + "\n\n" + pie_correo(idioma))
@@ -687,7 +705,8 @@ def generar_tarjeta_telegram(
     correo: str,
     meta: dict | None = None,
 ) -> dict:
-    meta = meta or {}
+    """Misma tarjeta que el despachador. El teclado nunca lleva mailto:."""
+    meta = dict(meta or {})
     entry = buscar_pais(pais)
     idioma_web = (meta.get("idioma_web") or "").strip()
     idioma_fuente = (meta.get("idioma_fuente") or "").strip()
@@ -710,87 +729,36 @@ def generar_tarjeta_telegram(
     dificultad = meta.get("dificultad_aduana", meta.get("dificultad_pais"))
     if dificultad is None and entry:
         dificultad = entry.get("dificultad")
-    sem_nombre, sem_etiqueta = semaforo_aduana(dificultad)
+    sem_nombre, _sem_etiqueta = semaforo_aduana(dificultad)
     tipo = meta.get("tipo") or meta.get("tipo_negocio") or "tienda"
-    sin_correo = bool(meta.get("sin_correo_publico")) or not (correo or "").strip()
-    
-    # Requerimiento 1: Redacción B2B Corta y Directa
+    lead = {
+        "nombre": nombre_local,
+        "pais": pais,
+        "web": web if web.startswith(("http://", "https://")) else "",
+        "correo": (correo or "").strip(),
+        "idioma": idioma,
+        "idioma_web": idioma_web,
+        "tipo": tipo,
+        "tipo_negocio": tipo,
+    }
+    for clave in (
+        "telefono", "telefono_internacional", "whatsapp", "direccion", "ciudad", "estado",
+        "rating", "user_rating_count", "instagram", "facebook", "place_id", "lat", "lon",
+        "maps_url", "resumen_verificacion", "puntaje", "numero_tarjeta", "tanda_total",
+        "tanda_etiqueta", "token",
+    ):
+        if meta.get(clave) not in (None, ""):
+            lead[clave] = meta[clave]
+    from b2b.tarjeta import construir_tarjeta, construir_teclado, texto_plano
+
     draft = borrador_corto(nombre_local, idioma, tipo)
-    
-    correo_txt = (correo or "").strip()
-    telefono = (meta.get("telefono") or "").strip()
-    ciudad = (meta.get("ciudad") or pais.strip()).strip()
-    direccion = (meta.get("direccion") or "").strip()
-    
-    estado_contacto = []
-    if telefono:
-        estado_contacto.append("📞 Teléfono OK")
-    if correo_txt:
-        estado_contacto.append("✉️ Correo OK")
-    if not estado_contacto:
-        estado_contacto.append("⚠️ Sin contacto directo")
-    estado_contacto_str = " | ".join(estado_contacto)
-
-    # Requerimiento 3: Tarjeta Limpia
-    texto = (
-        "Cazador de Sueño Cigars SRL · Prospecto B2B\n"
-        f"Negocio: {nombre_local.strip()}\n"
-        f"Tipo: {tipo.title()}\n"
-        f"Ciudad/País: {ciudad}\n"
-        f"Contacto: {estado_contacto_str}\n"
-    )
-    texto += "\nBorrador (3-4 líneas):\n" + draft
-    if sin_correo:
-        texto += "\nNota: sin correo publicado; confirmar otro canal de contacto."
-
-    markdown = (
-        "*Cazador de Sueño Cigars SRL · Prospecto B2B*\n"
-        f"*Negocio:* {md_escape(nombre_local.strip())}\n"
-        f"*Tipo:* {md_escape(tipo.title())}\n"
-        f"*Ciudad/País:* {md_escape(ciudad)}\n"
-        f"*Contacto:* {md_escape(estado_contacto_str)}\n"
-    )
-    markdown += "\n*Borrador sugerido:*\n```\n" + code_escape(draft) + "\n```"
-
-    # Requerimiento 2: Botones Interactivos de Acción (Inline Keyboards)
-    import urllib.parse
-    
-    botones = []
-    
-    if telefono:
-        # Limpiar número de teléfono (quitar espacios, guiones, paréntesis)
-        tel_limpio = __import__('re').sub(r"[^\d+]", "", telefono)
-        if not tel_limpio.startswith("+"):
-            tel_limpio = "+" + tel_limpio
-            
-        mensaje_wa = urllib.parse.quote(draft)
-        wa_url = f"https://wa.me/{tel_limpio}?text={mensaje_wa}"
-        botones.append([{"text": "📲 Enviar WhatsApp", "url": wa_url}])
-        
-    if correo_txt:
-        asunto = asunto_correo(nombre_local, idioma)
-        # Usar borrador_correo para el email que es más formal
-        draft_correo = borrador_correo(nombre_local, idioma, tipo)
-        asunto_q = urllib.parse.quote(asunto)
-        body_q = urllib.parse.quote(draft_correo)
-        mailto_url = f"mailto:{correo_txt}?subject={asunto_q}&body={body_q}"
-        botones.append([{"text": "✉️ Enviar Correo", "url": mailto_url}])
-        
-    if direccion or nombre_local:
-        query = urllib.parse.quote(f"{nombre_local} {ciudad}".strip())
-        maps_url = f"https://www.google.com/maps/search/?api=1&query={query}"
-        botones.append([{"text": "📍 Google Maps", "url": maps_url}])
-
-    reply_markup = {"inline_keyboard": botones} if botones else None
-
-    paquete = {
-        "markdown": markdown,
+    texto = construir_tarjeta(lead)
+    return {
+        "markdown": texto,
         "texto": texto,
+        "texto_plano": texto_plano(lead),
         "idioma": idioma,
         "semaforo": sem_nombre,
         "borrador": draft,
+        "reply_markup": construir_teclado(lead),
     }
-    if reply_markup:
-        paquete["reply_markup"] = reply_markup
-        
-    return paquete

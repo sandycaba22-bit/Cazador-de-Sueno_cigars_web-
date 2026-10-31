@@ -53,7 +53,7 @@ def ritmo_maximo() -> int:
         except (TypeError, ValueError):
             pass
     try:
-        return max(1, min(3, int(os.getenv("B2B_TARJETAS_ABIERTAS_MAX", "2") or "2")))
+        return max(1, min(3, int(os.getenv("B2B_TARJETAS_ABIERTAS_MAX", "1") or "1")))
     except ValueError:
         return 2
 
@@ -304,6 +304,46 @@ def texto_cola(inbox: Path) -> str:
     return f"📋 Por revisar: {faltan}. Abiertas: {abiertas}. En cola de correo: {en_correo}."
 
 
+def _cupo_tanda() -> int:
+    try:
+        return max(1, int(os.getenv("B2B_TARJETAS_POR_TANDA", "15") or "15"))
+    except ValueError:
+        return 15
+
+
+def _cupo_dia() -> int:
+    try:
+        return max(1, int(os.getenv("B2B_TARJETAS_POR_DIA", "30") or "30"))
+    except ValueError:
+        return 30
+
+
+def _bloque_dia(data: dict, ahora: datetime) -> tuple[dict, str]:
+    from b2b.zonas import tz
+
+    local = ahora.astimezone(tz("America/Santo_Domingo"))
+    dia = local.strftime("%Y-%m-%d")
+    bloque = dict(data.get("tarjetas_dia") or {})
+    if bloque.get("dia") != dia:
+        bloque = {"dia": dia, "manana": 0, "tarde": 0}
+    mitad = "manana" if local.hour < 12 else "tarde"
+    return bloque, mitad
+
+
+def _cabe_en_el_dia(ahora: datetime) -> bool:
+    bloque, mitad = _bloque_dia(_load(), ahora)
+    if int(bloque.get(mitad) or 0) >= _cupo_tanda():
+        return False
+    total = int(bloque.get("manana") or 0) + int(bloque.get("tarde") or 0)
+    return total < _cupo_dia()
+
+
+def _anotar_tarjeta_dia(data: dict, ahora: datetime) -> None:
+    bloque, mitad = _bloque_dia(data, ahora)
+    bloque[mitad] = int(bloque.get(mitad) or 0) + 1
+    data["tarjetas_dia"] = bloque
+
+
 def despachar(
     cola_dir: Path,
     *,
@@ -328,6 +368,8 @@ def despachar(
         if proxima and ahora < proxima:
             break
         if not puede_enviar_telegram():
+            break
+        if not _cabe_en_el_dia(ahora):
             break
         fila = _candidatos(inbox)
         if not fila:
@@ -364,6 +406,7 @@ def despachar(
             "caducidad_veces": int(lead.get("caducidad_veces") or 0),
         }
         data["proxima_en"] = ""
+        _anotar_tarjeta_dia(data, ahora)
         final = [n for n in data.get("al_final") or [] if n != path.name]
         data["al_final"] = final
         _save(data)

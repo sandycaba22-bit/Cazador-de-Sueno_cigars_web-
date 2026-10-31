@@ -41,7 +41,7 @@ class TestMensaje(unittest.TestCase):
     def test_trae_todos_los_datos_del_negocio(self):
         msg = mensaje_prospecto_completo(LEAD, "Florida")
         for esperado in (
-            "Miami Cigar Lounge", "⭐ 4.8 (120)", "+1 305-555-0100",
+            "Miami Cigar Lounge", "4.8 (120 reseñas)", "+1 (305) 555-0100",
             "info@miamicigar.com", "miamicigar.com", "@miamicigar",
         ):
             self.assertIn(esperado, msg)
@@ -59,20 +59,32 @@ class TestMensaje(unittest.TestCase):
     def test_borrador_lleva_contacto_de_la_empresa(self):
         for idioma in ("es", "en", "fr"):
             texto = borrador_corto("Miami Cigar Lounge", idioma, "lounge")
-            self.assertIn("+1 809-464-5016", texto)
+            self.assertIn("+1 (809) 464-5016", texto)
             self.assertIn("cazadordesueno1@gmail.com", texto)
             self.assertIn("https://www.cazadordesuenocigar.com/catalogo/", texto)
         correo = borrador_correo("Miami Cigar Lounge", "en", "lounge")
-        self.assertIn("WhatsApp +1 809-464-5016", correo)
+        self.assertIn("WhatsApp +1 (809) 464-5016", correo)
 
 
 class TestBotones(unittest.TestCase):
     def test_botones_de_contacto_y_mapas(self):
+        from b2b.telefono import clasificar_linea
+        from b2b.telegram_prospecto import teclado_prospecto as teclado
+
+        kb = teclado(LEAD, "Florida", "tok")
+        textos = [b["text"] for fila in kb["inline_keyboard"] for b in fila]
         urls = _urls(LEAD)
-        self.assertTrue(urls["📲 WhatsApp"].startswith("https://wa.me/13055550100?text="))
-        self.assertIn("+1 809-464-5016", unquote(urls["📲 WhatsApp"]))
-        self.assertIn("query_place_id=ChIJ-test", urls["📍 Mapa"])
-        self.assertEqual(urls["🌐 Web"], "https://miamicigar.com")
+        self.assertIn("✉️ Enviar correo", textos)
+        self.assertIn("Google Maps", urls)
+        self.assertIn("query_place_id=ChIJ-test", urls["Google Maps"])
+        self.assertIn("Apple Maps", urls)
+        self.assertIn("Waze", urls)
+        self.assertNotIn("mailto:", " ".join(urls.values()))
+        if clasificar_linea(LEAD["telefono_internacional"], "Florida") == "movil" or LEAD.get("whatsapp"):
+            self.assertTrue(urls["📲 WhatsApp"].startswith("https://wa.me/13055550100?text="))
+            self.assertIn("+1 (809) 464-5016", unquote(urls["📲 WhatsApp"]))
+        else:
+            self.assertNotIn("📲 WhatsApp", textos)
         self.assertIn("ll=25.761700,-80.191800", apple_maps_url(LEAD))
         self.assertIn("ll=25.761700,-80.191800", waze_url(LEAD))
 
@@ -97,8 +109,9 @@ class TestBotones(unittest.TestCase):
         kb = teclado_prospecto({"nombre": "Solo Nombre"}, "Florida", "tok")
         textos = [b["text"] for fila in kb["inline_keyboard"] for b in fila]
         self.assertIn("🗑 Descartar", textos)
-        self.assertEqual(kb["inline_keyboard"][-1][0]["text"], "Marcar enviado (manual)")
-        self.assertNotIn("✅ Aprobar y enviar correo", textos)
+        self.assertEqual(kb["inline_keyboard"][-1][0]["text"], "✅ Enviado")
+        self.assertEqual(kb["inline_keyboard"][-1][1]["text"], "🗑 Descartar")
+        self.assertNotIn("mailto:", str(kb))
 
 
 if __name__ == "__main__":

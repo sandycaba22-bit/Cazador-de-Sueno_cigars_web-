@@ -19,7 +19,7 @@ from b2b.redactor import (
     NOMBRE_VP,
     WHOLESALE_URL,
     asegurar_pie,
-    asunto_correo,
+    asunto_outreach,
     cuerpo_sin_asunto,
     direccion_postal,
 )
@@ -146,6 +146,11 @@ def tope_rampa(momento: datetime | None = None) -> int:
     return nums[2]
 
 
+def _tope_efectivo(momento: datetime | None = None) -> int:
+    """La rampa no puede pasar de CORREOS_MAX_DIA (techo diario)."""
+    return min(tope_rampa(momento), max(1, _int_env("CORREOS_MAX_DIA", 30)))
+
+
 def max_por_cuenta() -> int:
     return max(1, _int_env("B2B_ENVIO_MAX_POR_CUENTA", 15))
 
@@ -156,8 +161,14 @@ def cuentas_activas() -> list[dict]:
     activas = []
     omitidas = []
     for n in (1, 2):
-        correo = os.getenv(f"CORREO_REMITENTE_{n}", "").strip()
-        clave = os.getenv(f"CORREO_CLAVE_{n}", "").strip()
+        correo = (
+            os.getenv(f"CORREO_REMITENTE_{n}", "").strip()
+            or os.getenv(f"EMAIL_REMITENTE_{n}", "").strip()
+        )
+        clave = (
+            os.getenv(f"CORREO_CLAVE_{n}", "").strip()
+            or os.getenv(f"EMAIL_CLAVE_{n}", "").strip()
+        )
         if not correo:
             continue
         if real and not clave:
@@ -224,7 +235,7 @@ def _envios_recientes(data: dict, dias: int = 30) -> list[dict]:
 def _cupo_cuenta(n: int, activas: list[dict], momento: datetime) -> int:
     if not activas:
         return 0
-    total = tope_rampa(momento)
+    total = _tope_efectivo(momento)
     idx = next((i for i, c in enumerate(activas) if c["n"] == n), 0)
     base, resto = divmod(total, len(activas))
     parte = base + (1 if idx < resto else 0)
@@ -275,7 +286,7 @@ def elegir_cuenta(momento: datetime | None = None, *, excluir_token: str = "") -
     activas = _activas_sin_pausa(data)
     if not activas:
         return None
-    if _total_comprometido(data, momento, excluir_token=excluir_token) >= tope_rampa(momento):
+    if _total_comprometido(data, momento, excluir_token=excluir_token) >= _tope_efectivo(momento):
         return None
     inicio = int(data.get("turno") or 0)
     for salto in range(len(activas)):
@@ -333,6 +344,8 @@ def puede_enviar_correo(
     bajo = correo.lower()
     if bajo in {c.lower() for c in data.get("invalidos") or []}:
         return False, "correo inválido"
+    if esta_excluido(bajo):
+        return False, "en la lista de exclusión"
     dom = _dominio_correo(bajo)
     for previo in _envios_recientes(data, 30):
         if (previo.get("correo") or "").lower() == bajo:
@@ -390,7 +403,7 @@ def preparar_cuerpo(lead: dict, cuenta: str) -> tuple[str, str, str]:
     variante = (lead.get("asunto_variante") or "A").upper()
     if variante not in ("A", "B"):
         variante = "A"
-    asunto = (lead.get("asunto") or "").strip() or asunto_correo(lead.get("nombre") or "", idioma, variante)
+    asunto = (lead.get("asunto") or "").strip() or asunto_outreach(lead.get("nombre") or "")
     editado = (lead.get("cuerpo_editado") or "").strip()
     if editado:
         cuerpo = editado
@@ -398,9 +411,22 @@ def preparar_cuerpo(lead: dict, cuenta: str) -> tuple[str, str, str]:
             if otro != cuenta and otro in cuerpo:
                 cuerpo = cuerpo.replace(otro, cuenta)
         cuerpo = asegurar_pie(cuerpo, idioma)
-        return asunto, cuerpo, variante
+        return asunto, _limpiar_firma(cuerpo, cuenta), variante
     cuerpo = cuerpo_sin_asunto(lead.get("nombre") or "", idioma, tipo, cuenta=cuenta, variante=variante)
-    return asunto, cuerpo, variante
+    return asunto, _limpiar_firma(cuerpo, cuenta), variante
+
+
+def _limpiar_firma(cuerpo: str, cuenta: str) -> str:
+    """Quita el correo mal escrito y deja el de la cuenta que envía."""
+    texto = cuerpo or ""
+    correcto = (cuenta or "").strip()
+    texto = texto.replace("cazardordesuenol@gmail.com", correcto or "cazadordesueno1@gmail.com")
+    for bruto in ("8094645016", "+18094645016"):
+        if bruto in texto:
+            from b2b.redactor import whatsapp_empresa
+
+            texto = texto.replace(bruto, whatsapp_empresa())
+    return texto
 
 
 def _avisar_una_vez(clave: str, texto: str) -> None:
@@ -437,6 +463,17 @@ def marcar_correo_invalido(correo: str) -> None:
     _save(data)
 
 
+def _delta_pausa() -> timedelta:
+    """60–120 s si CORREOS_PAUSA_*_SEG está definido; si no, la pausa vieja en minutos."""
+    if os.getenv("CORREOS_PAUSA_MIN_SEG") or os.getenv("CORREOS_PAUSA_MAX_SEG"):
+        minimo = _int_env("CORREOS_PAUSA_MIN_SEG", 60)
+        maximo = _int_env("CORREOS_PAUSA_MAX_SEG", 120)
+        if maximo < minimo:
+            maximo = minimo
+        return timedelta(seconds=random.randint(minimo, maximo))
+    return timedelta(minutes=_pausa_minutos())
+
+
 def _pausa_minutos() -> int:
     minimo = _int_env("B2B_ENVIO_PAUSA_MIN", 2)
     maximo = _int_env("B2B_ENVIO_PAUSA_MAX", 5)
@@ -464,13 +501,13 @@ def programar_momento(lead: dict, ahora: datetime | None = None) -> datetime:
         marca = _parse_marca(item.get("enviar_despues_de") or "")
         if marca and marca > ultimo:
             ultimo = marca
-    previsto = ultimo + timedelta(minutes=_pausa_minutos())
+    previsto = ultimo + _delta_pausa()
     if not en_horario_laboral(previsto, lugar, inicio, fin):
         previsto = siguiente_habil(previsto, lugar, inicio, fin)
     data = _load()
-    if _total_comprometido(data, previsto) >= tope_rampa(previsto):
+    if _total_comprometido(data, previsto) >= _tope_efectivo(previsto):
         previsto = siguiente_habil(previsto + timedelta(hours=12), lugar, inicio, fin)
-        while _total_comprometido(data, previsto) >= tope_rampa(previsto):
+        while _total_comprometido(data, previsto) >= _tope_efectivo(previsto):
             previsto = siguiente_habil(previsto + timedelta(hours=12), lugar, inicio, fin)
     return previsto
 
@@ -502,7 +539,7 @@ def encolar_envio(lead: dict, token: str, *, ahora: datetime | None = None) -> d
         return None
     cuenta_correo = (preferida or activas[0])["correo"]
     asunto, cuerpo, variante = preparar_cuerpo(lead, cuenta_correo)
-    if not direccion_postal("es") or ("BAJA" not in cuerpo and "STOP" not in cuerpo):
+    if not direccion_postal("es") or not any(m in cuerpo for m in ("BAJA", "STOP", "unsubscribe")):
         _avisar_una_vez("sin_direccion", "⚠️ No envié: falta EMPRESA_DIRECCION_POSTAL.")
         return None
     cuando = programar_momento(lead, ahora)
@@ -571,6 +608,7 @@ def _registrar_ok(item: dict, momento: datetime, message_id: str) -> None:
         "message_id": message_id,
         "nombre": item.get("nombre") or "",
     })
+    data["ultimo_envio"] = momento.isoformat(timespec="seconds")
     _save(data)
     lead = item.get("lead") or {"nombre": item.get("nombre") or "", "correo": item.get("correo") or ""}
     guardar_estado_lead(
@@ -622,6 +660,11 @@ def _enviar_smtp(cuenta: dict, msg: EmailMessage) -> None:
     host = os.getenv("SMTP_HOST", "smtp.gmail.com").strip() or "smtp.gmail.com"
     port = _int_env("SMTP_PORT", 587)
     contexto = ssl.create_default_context()
+    if port == 465:
+        with smtplib.SMTP_SSL(host, port, timeout=30, context=contexto) as smtp:
+            smtp.login(cuenta["correo"], cuenta["clave"])
+            smtp.send_message(msg)
+        return
     with smtplib.SMTP(host, port, timeout=30) as smtp:
         smtp.ehlo()
         smtp.starttls(context=contexto)
@@ -721,7 +764,7 @@ def _elegir_cuenta_al_enviar(item: dict, momento: datetime) -> dict | None:
         if candidata is not None:
             cupo = _cupo_cuenta(candidata["n"], _activas_sin_pausa(data), momento)
             if _comprometidos_cuenta(data, candidata["n"], momento, excluir_token=token) < cupo:
-                if _total_comprometido(data, momento, excluir_token=token) < tope_rampa(momento):
+                if _total_comprometido(data, momento, excluir_token=token) < _tope_efectivo(momento):
                     return candidata
     return elegir_cuenta(momento, excluir_token=token)
 
@@ -771,6 +814,16 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
         item["cuerpo"] = cuerpo
         item["variante"] = variante
         msg = construir_mensaje(lead, cuenta["correo"], cuerpo, asunto)
+        listo, error_catalogo = _catalogo_ok(lead.get("idioma") or "en")
+        if not listo:
+            item["estado"] = "fallo"
+            item["motivo_fallo"] = error_catalogo
+            _archivar_item(path, item)
+            _avisar_una_vez(
+                f"catalogo_{item.get('token') or path.stem}",
+                f"⚠️ No envié a {item.get('nombre') or item.get('correo')}: {error_catalogo}",
+            )
+            continue
         try:
             if not envio_real():
                 _escribir_eml(msg, item.get("token") or path.stem)
@@ -841,3 +894,217 @@ def probar_envio(destino: str) -> list[str]:
         except Exception as exc:
             notas.append(f"Cuenta {cuenta['n']}: {_error(exc)}")
     return notas
+
+
+def _ruta_exclusiones() -> Path:
+    return _state_file("exclusiones_correo.json")
+
+
+def _cargar_exclusiones() -> list[str]:
+    path = _ruta_exclusiones()
+    if not path.is_file():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    return [str(c).strip().lower() for c in (data.get("correos") or []) if str(c).strip()]
+
+
+def esta_excluido(correo: str) -> bool:
+    return (correo or "").strip().lower() in set(_cargar_exclusiones())
+
+
+def excluir_correo(correo: str, motivo: str = "unsubscribe") -> None:
+    bajo = (correo or "").strip().lower()
+    if "@" not in bajo:
+        return
+    path = _ruta_exclusiones()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            data = {}
+    else:
+        data = {}
+    correos = list(data.get("correos") or [])
+    if bajo not in {c.lower() for c in correos}:
+        correos.append(bajo)
+    data["correos"] = correos
+    motivos = dict(data.get("motivos") or {})
+    motivos[bajo] = motivo
+    data["motivos"] = motivos
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    registrar_evento({"evento": "exclusion_correo", "correo": bajo, "motivo": motivo})
+
+
+def _catalogo_ok(idioma: str) -> tuple[bool, str]:
+    from b2b.catalogo_check import catalogo_listo_para_envio
+
+    return catalogo_listo_para_envio(idioma)
+
+
+def _resultado_envio(token: str, correo: str) -> str:
+    path = outbox_dir() / f"{token}.json"
+    arch = archivo_dir() / f"{token}.json"
+    if arch.is_file():
+        try:
+            item = json.loads(arch.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            item = {}
+        if item.get("estado") == "enviado":
+            if not envio_real():
+                return (
+                    f"⚠️ No envié por SMTP: B2B_ENVIO_REAL=0. "
+                    f"El borrador quedó guardado y no salió a {item.get('correo') or correo}."
+                )
+            return f"✅ Enviado a {item.get('correo') or correo}"
+        motivo = item.get("motivo_fallo") or item.get("estado") or "error"
+        return f"⚠️ No envié: {motivo}"
+    if path.is_file():
+        try:
+            item = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            item = {}
+        if item.get("motivo_fallo"):
+            return f"⚠️ No envié: {item['motivo_fallo']}"
+        cuando = item.get("enviar_despues_de") or ""
+        return f"⏳ Quedó en cola. Sale después de {cuando}"
+    return f"⚠️ No envié: no hubo confirmación para {correo}"
+
+
+def _espera_pausa_manual(ahora: datetime) -> int:
+    if not (os.getenv("CORREOS_PAUSA_MIN_SEG") or os.getenv("CORREOS_PAUSA_MAX_SEG")):
+        return 0
+    ultimo = _parse_marca((_load().get("ultimo_envio") or ""))
+    if not ultimo:
+        return 0
+    minimo = _int_env("CORREOS_PAUSA_MIN_SEG", 60)
+    falta = minimo - (ahora - ultimo).total_seconds()
+    return max(0, int(falta))
+
+
+def enviar_confirmado(lead: dict, token: str, ahora: datetime | None = None) -> str:
+    """Confirma y envía. Siempre devuelve el resultado, nunca silencio."""
+    ahora = ahora or _ahora()
+    correo = (lead.get("correo") or "").strip()
+    ok, motivo = puede_enviar_correo(lead, ahora)
+    if not ok:
+        return f"⚠️ No envié: {motivo}"
+    listo, error_catalogo = _catalogo_ok(lead.get("idioma") or "en")
+    if not listo:
+        return f"⚠️ No envié: {error_catalogo}"
+    espera = _espera_pausa_manual(ahora)
+    item = encolar_envio(lead, token, ahora=ahora)
+    if not item:
+        return "⚠️ No envié: no se pudo preparar el correo (dirección postal, baja o cupo)"
+    path = outbox_dir() / f"{token}.json"
+    if espera > 0 and path.is_file():
+        cuando = (ahora + timedelta(seconds=espera)).isoformat(timespec="seconds")
+        try:
+            guardado = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            guardado = {}
+        guardado["enviar_despues_de"] = cuando
+        path.write_text(json.dumps(guardado, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        return f"⚠️ No envié todavía: pausa entre envíos, faltan {espera} s. Quedó en cola."
+    if path.is_file():
+        try:
+            guardado = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            guardado = {}
+        guardado["enviar_despues_de"] = (ahora - timedelta(seconds=1)).isoformat(timespec="seconds")
+        path.write_text(json.dumps(guardado, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    procesar_outbox(ahora)
+    return _resultado_envio(token, correo)
+
+
+def prueba_correo_cuentas() -> str:
+    """Login SMTP de las dos cuentas y un correo de prueba a ellas mismas."""
+    notas = []
+    vistos = False
+    for n in (1, 2):
+        correo = (
+            os.getenv(f"CORREO_REMITENTE_{n}", "").strip()
+            or os.getenv(f"EMAIL_REMITENTE_{n}", "").strip()
+        )
+        clave = (
+            os.getenv(f"CORREO_CLAVE_{n}", "").strip()
+            or os.getenv(f"EMAIL_CLAVE_{n}", "").strip()
+        )
+        if not correo and not clave:
+            continue
+        vistos = True
+        if not correo:
+            notas.append(f"Cuenta {n}: falta EMAIL_REMITENTE_{n}")
+            continue
+        if not clave:
+            notas.append(f"Cuenta {n}: falta la clave de aplicación (EMAIL_CLAVE_{n})")
+            continue
+        lead = {
+            "nombre": "Cazador de Sueño",
+            "correo": correo,
+            "idioma": "es",
+            "tipo": "tienda",
+            "pais": "República Dominicana",
+        }
+        try:
+            asunto, cuerpo, _variante = preparar_cuerpo(lead, correo)
+            asunto = "Prueba SMTP Cazador de Sueño"
+            msg = construir_mensaje(lead, correo, "Prueba de login SMTP del bot B2B.\n\n" + cuerpo, asunto)
+            _enviar_smtp({"n": n, "correo": correo, "clave": clave}, msg)
+            notas.append(f"OK {correo}")
+        except Exception as exc:
+            texto = _error(exc).replace(clave, "[clave]")
+            notas.append(f"ERROR {correo}: {texto}")
+    if not vistos:
+        return "No hay cuentas. Define EMAIL_REMITENTE_1 y EMAIL_REMITENTE_2 en el .env del servidor."
+    return "\n".join(notas)
+
+
+def revisar_unsubscribe() -> list[str]:
+    """Lee respuestas IMAP. 'unsubscribe' entra en la lista de exclusión."""
+    if os.getenv("B2B_ENVIO_REAL", "0").strip() != "1":
+        return []
+    import imaplib
+
+    host = os.getenv("IMAP_HOST", "imap.gmail.com").strip() or "imap.gmail.com"
+    bajados = []
+    for n in (1, 2):
+        correo = (
+            os.getenv(f"CORREO_REMITENTE_{n}", "").strip()
+            or os.getenv(f"EMAIL_REMITENTE_{n}", "").strip()
+        )
+        clave = (
+            os.getenv(f"CORREO_CLAVE_{n}", "").strip()
+            or os.getenv(f"EMAIL_CLAVE_{n}", "").strip()
+        )
+        if not correo or not clave:
+            continue
+        try:
+            imap = imaplib.IMAP4_SSL(host, 993)
+            imap.login(correo, clave)
+            imap.select("INBOX")
+            _tipo, datos = imap.search(None, "UNSEEN")
+            ids = (datos[0] or b"").split() if datos else []
+            for num in ids[-30:]:
+                _t, msg_data = imap.fetch(num, "(BODY.PEEK[TEXT] BODY.PEEK[HEADER.FIELDS (FROM SUBJECT)])")
+                crudo = b""
+                for parte in msg_data or []:
+                    if isinstance(parte, tuple) and len(parte) > 1:
+                        crudo += parte[1] or b""
+                texto = crudo.decode("utf-8", errors="replace")
+                if not re.search(r"\bunsubscribe\b|\bBAJA\b", texto, re.I):
+                    continue
+                origen = ""
+                hallado = re.search(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", texto)
+                if hallado:
+                    origen = hallado.group(0).lower()
+                if origen and origen != correo.lower():
+                    excluir_correo(origen, "unsubscribe")
+                    bajados.append(origen)
+            imap.logout()
+        except Exception as exc:
+            registrar_evento({"evento": "imap_bajas_fallo", "cuenta": n, "error": _error(exc).replace(clave, "[clave]")})
+    return bajados

@@ -88,8 +88,10 @@ class TestAprobar(unittest.TestCase):
     def test_aprobar_dos_veces_es_un_solo_correo(self):
         tc._manejar_callback("t", "42", self._cb(f"b2bs:{self.tok}"))
         tc._manejar_callback("t", "42", self._cb(f"b2bs:{self.tok}"))
-        cola = list(Path(os.environ["B2B_QUEUE_DIR"]).glob("outbox/*.json"))
-        self.assertEqual(len(cola), 1)
+        raiz = Path(os.environ["B2B_QUEUE_DIR"])
+        cola = list(raiz.glob("outbox/*.json"))
+        archivo = list((raiz / "outbox" / "archivo").glob("*.json"))
+        self.assertEqual(len(cola) + len(archivo), 1)
 
     def test_cancelar_saca_el_correo(self):
         tc._manejar_callback("t", "42", self._cb(f"b2bs:{self.tok}"))
@@ -101,7 +103,7 @@ class TestAprobar(unittest.TestCase):
         tok = tg.token_callback(lead)
         tg.registrar_pendiente(tok, {**lead, "message_id": 15, "texto_tarjeta": "Tarjeta\nSin correo público"})
         textos = [b["text"] for fila in teclado_prospecto(lead, "Florida", tok)["inline_keyboard"] for b in fila]
-        self.assertNotIn("✅ Aprobar y enviar correo", textos)
+        self.assertNotIn("✉️ Enviar correo", textos)
         ack = tc._manejar_respuesta("t", "42", 15, "ventas@primecigar.example")
         self.assertIn("ventas@primecigar.example", ack)
         guardado = tg.resolver_pendiente(tok)
@@ -111,7 +113,7 @@ class TestAprobar(unittest.TestCase):
             for fila in teclado_prospecto(guardado, "Florida", tok)["inline_keyboard"]
             for b in fila
         ]
-        self.assertIn("✅ Aprobar y enviar correo", textos)
+        self.assertIn("✉️ Enviar correo", textos)
 
     def test_pendiente_guarda_el_lead_y_caduca_a_las_48h(self):
         guardado = tg.resolver_pendiente(self.tok)
@@ -128,7 +130,7 @@ class TestAprobar(unittest.TestCase):
         tg.actualizar_pendiente(self.tok, message_id=9, espera="cuerpo", idioma="en")
         tc._manejar_respuesta("t", "42", 9, "Hello team, we can talk tomorrow.")
         cuerpo = tg.resolver_pendiente(self.tok)["cuerpo"]
-        self.assertIn("reply STOP", cuerpo)
+        self.assertIn("unsubscribe", cuerpo)
         self.assertIn("Dominican Republic", cuerpo)
 
 

@@ -189,6 +189,76 @@ def vende_cigarros(web: str) -> bool | None:
     return bool(CIGARROS_RE.search(_texto_visible(html)))
 
 
+_RUTAS_CORREO = ("/contact", "/contact-us", "/contacto", "/about", "/about-us")
+_RE_CORREO_SUELTO = re.compile(r"\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b")
+
+
+def _origen(web: str) -> str:
+    partes = urllib.parse.urlparse(web)
+    if not partes.scheme or not partes.netloc:
+        return ""
+    return f"{partes.scheme}://{partes.netloc}"
+
+
+def _correo_util(email: str) -> bool:
+    bajo = (email or "").strip().lower()
+    if "@" not in bajo or bajo.startswith("@") or "noreply" in bajo or "no-reply" in bajo:
+        return False
+    dominio = bajo.split("@", 1)[1]
+    return dominio not in {"facebook.com", "instagram.com", "fb.com", "example.com"}
+
+
+def _correos_de_url(url: str, web_negocio: str) -> str:
+    html = obtener_html(url)
+    if not html:
+        return ""
+    if tipo_url(web_negocio) == "web":
+        propios = _emails_en_html(html, web_negocio)
+        if propios:
+            return propios[0]
+    for match in _RE_CORREO_SUELTO.finditer(html):
+        if _correo_util(match.group(1)):
+            return match.group(1).lower()
+    return ""
+
+
+def completar_correo(lead: dict) -> dict:
+    """Rellena el correo desde la web (/contact, /about, footer) y desde Facebook o Instagram."""
+    if (lead.get("correo") or "").strip():
+        return lead
+    web = (lead.get("web") or "").strip()
+    try:
+        if tipo_url(web) == "web":
+            info = extraer_contactos(web)
+            if info.get("correo"):
+                lead["correo"] = info["correo"]
+                lead["fuente_correo"] = info.get("fuente_correo") or web
+            for campo in ("instagram", "facebook", "whatsapp", "telefono"):
+                if info.get(campo) and not (lead.get(campo) or "").strip():
+                    lead[campo] = info[campo]
+            if not (lead.get("correo") or "").strip():
+                origen = _origen(web)
+                for ruta in _RUTAS_CORREO:
+                    hallado = _correos_de_url(origen + ruta, web)
+                    if hallado:
+                        lead["correo"] = hallado
+                        lead["fuente_correo"] = origen + ruta
+                        break
+        if not (lead.get("correo") or "").strip():
+            for campo in ("facebook", "instagram"):
+                enlace = (lead.get(campo) or "").strip()
+                if not enlace.startswith(("http://", "https://")):
+                    continue
+                hallado = _correos_de_url(enlace, enlace)
+                if hallado:
+                    lead["correo"] = hallado
+                    lead["fuente_correo"] = enlace
+                    break
+    except Exception:
+        return lead
+    return lead
+
+
 def numero_whatsapp(lead: dict) -> str:
     """Dígitos para wa.me: WhatsApp publicado o teléfono internacional. '' si no es fiable."""
     wa = re.sub(r"\D", "", lead.get("whatsapp") or "")

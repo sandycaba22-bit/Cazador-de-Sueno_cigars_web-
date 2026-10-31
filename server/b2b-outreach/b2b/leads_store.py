@@ -45,10 +45,17 @@ def _load_seen() -> dict:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return {"place_ids": [], "dominios": []}
-    return {
+    out = {
         "place_ids": [p for p in data.get("place_ids", []) if _place_id_valido(p)],
         "dominios": [d for d in data.get("dominios", []) if _dominio_valido(d)],
     }
+    telefonos = [t for t in data.get("telefonos") or [] if t]
+    correos = [c for c in data.get("correos") or [] if c]
+    if telefonos:
+        out["telefonos"] = telefonos
+    if correos:
+        out["correos"] = correos
+    return out
 
 
 def _save_seen(data: dict) -> None:
@@ -148,6 +155,22 @@ def estado_de_lead(lead: dict) -> str:
     return item.get("estado") or "nuevo"
 
 
+def _guardar_seen(ids: set[str], doms: set[str], telefonos: set[str] | None = None, correos: set[str] | None = None) -> None:
+    payload = {"place_ids": sorted(ids), "dominios": sorted(doms)}
+    if telefonos:
+        payload["telefonos"] = sorted(telefonos)
+    if correos:
+        payload["correos"] = sorted(correos)
+    _save_seen(payload)
+
+
+def _tel_clave(lead: dict) -> str:
+    import re
+
+    digitos = re.sub(r"\D", "", (lead.get("telefono_internacional") or lead.get("telefono") or lead.get("whatsapp") or ""))
+    return digitos[-10:] if len(digitos) >= 8 else ""
+
+
 def marcar_visto(place_id: str = "", web: str = "") -> None:
     data = _load_seen()
     ids = set(data.get("place_ids", []))
@@ -157,4 +180,34 @@ def marcar_visto(place_id: str = "", web: str = "") -> None:
     dom = _dominio(web)
     if _dominio_valido(dom):
         doms.add(dom)
-    _save_seen({"place_ids": sorted(ids), "dominios": sorted(doms)})
+    _guardar_seen(ids, doms, set(data.get("telefonos") or []), set(data.get("correos") or []))
+
+
+def registrar_contacto(lead: dict) -> None:
+    """Guarda teléfono y correo para no volver a contactar el mismo negocio."""
+    data = _load_seen()
+    telefonos = set(data.get("telefonos") or [])
+    correos = set(data.get("correos") or [])
+    tel = _tel_clave(lead)
+    correo = (lead.get("correo") or "").strip().lower()
+    if tel:
+        telefonos.add(tel)
+    if "@" in correo and not correo.endswith(("@example.com", "@example.org", "@example.net")) and not correo.endswith(".test"):
+        correos.add(correo)
+    _guardar_seen(
+        set(data.get("place_ids") or []),
+        set(data.get("dominios") or []),
+        telefonos,
+        correos,
+    )
+
+
+def contacto_visto(lead: dict) -> bool:
+    data = _load_seen()
+    tel = _tel_clave(lead)
+    correo = (lead.get("correo") or "").strip().lower()
+    if tel and tel in set(data.get("telefonos") or []):
+        return True
+    if correo and correo in set(data.get("correos") or []):
+        return True
+    return False

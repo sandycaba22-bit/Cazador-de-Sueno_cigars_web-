@@ -60,8 +60,9 @@ class TestTelegramProspecto(unittest.TestCase):
         msg = mensaje_prospecto_completo(lead, "Florida")
         self.assertIn("Test Shop", msg)
         self.assertIn("Yaniris Agustina Ureña", msg)
-        self.assertIn("reply STOP", msg)
-        botones = teclado_prospecto(lead, "Florida", token_callback(lead))
+        self.assertIn("unsubscribe", msg)
+        lead_wa = {**lead, "whatsapp": "13055550100"}
+        botones = teclado_prospecto(lead_wa, "Florida", token_callback(lead))
         urls = [b.get("url", "") for fila in botones["inline_keyboard"] for b in fila]
         self.assertTrue(any(url.startswith("https://wa.me/13055550100?") for url in urls))
 
@@ -71,7 +72,7 @@ class TestTelegramProspecto(unittest.TestCase):
     def test_presentacion_firma_vp(self):
         t = presentacion_prospecto_telegram("Cigar House", "en", "tienda")
         self.assertIn("Yaniris", t)
-        self.assertIn("Vice President", t)
+        self.assertIn("VP of Sales", t)
         self.assertIn(EMAIL_VP_VENTAS, t)
 
     def test_token_callback_estable(self):
