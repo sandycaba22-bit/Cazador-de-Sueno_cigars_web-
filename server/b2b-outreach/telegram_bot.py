@@ -759,6 +759,7 @@ def procesar_archivo(path, sent, failed, imprimir=False):
             print(
                 f"Alerta enviada ({paquete['idioma']}, {paquete['mercado']['prioridad']}): {path.name}"
             )
+        # Solo archivar en sent/ si el aviso salió (o es --imprimir).
         _archivar(path, sent)
         return paquete
     except Exception as error:
@@ -770,6 +771,7 @@ def procesar_archivo(path, sent, failed, imprimir=False):
             registrar_evento(
                 {"evento": "telegram_alerta_fallo", "archivo": path.name, "error": nota}
             )
+            # Queda en inbox: no marcar enviado ni mover a sent/.
             return {"telegram_error": nota}
         if path.exists():
             _archivar(path, failed, nota)
@@ -906,6 +908,14 @@ def vigilar(queue_dir, imprimir=False, una_pasada=False):
                 else:
                     enviar_texto_telegram(aviso)
             revisar_unsubscribe()
+            from b2b.embudo import emitir_si_toca
+
+            embudo = emitir_si_toca()
+            if embudo:
+                if imprimir:
+                    print(embudo)
+                else:
+                    enviar_texto_telegram(embudo)
             resumen = resumen_si_toca(queue_dir)
             if resumen:
                 if imprimir:

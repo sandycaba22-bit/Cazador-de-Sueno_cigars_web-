@@ -81,7 +81,7 @@ def motivo_rechazo_generico(lead: dict) -> str | None:
     tags = lead.get("_osm_tags") or {}
     if tags and descartar_lead_osm(nombre, tags):
         return motivo_descarte_osm(nombre, tags) or "filtro OSM"
-    if bucket in ("aceptado", "dudoso"):
+    if bucket in ("aceptado", "dudoso", "revisar"):
         return None
     return motivo or "sin señal tabaco/cigarro"
 

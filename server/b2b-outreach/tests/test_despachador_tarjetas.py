@@ -98,15 +98,17 @@ class TestDespachador(unittest.TestCase):
         self.assertEqual(ritmo_maximo(), 1)
         self.assertEqual(despachar(self.cola, ahora=AHORA + timedelta(seconds=20), enviar=self.enviar), 0)
 
-    def test_caducada_se_reencola_una_vez_y_sin_envio_no_marca(self):
+    def test_caducada_se_reencola_dos_veces_y_vencida_no_bloquea(self):
         path = _escribir(self.inbox, 1, 5)
-        sellar_tanda(self.inbox, 1)
+        otro = _escribir(self.inbox, 2, 4)
+        sellar_tanda(self.inbox, 2)
         os.environ["B2B_TARJETAS_ABIERTAS_MAX"] = "1"
         despachar(self.cola, ahora=AHORA, enviar=self.enviar)
         data = json.loads(path.read_text(encoding="utf-8"))
         self.assertTrue(data["telegram_notificado"])
         from b2b.despachador_tarjetas import _load, _save
 
+        # 1.er vencimiento → reenvío (veces=1)
         estado = _load()
         tok = next(iter(estado["abiertas"]))
         estado["abiertas"][tok]["enviada_en"] = (AHORA - timedelta(hours=49)).isoformat()
@@ -116,15 +118,30 @@ class TestDespachador(unittest.TestCase):
         self.assertGreater(len(self.enviados), antes)
         data = json.loads(path.read_text(encoding="utf-8"))
         self.assertEqual(data["caducidad_veces"], 1)
+        # 2.º vencimiento → segundo reenvío (veces=2)
         estado = _load()
         tok = next(iter(estado["abiertas"]))
         estado["abiertas"][tok]["enviada_en"] = (AHORA - timedelta(hours=49)).isoformat()
         _save(estado)
         antes = len(self.enviados)
         despachar(self.cola, ahora=AHORA, enviar=self.enviar)
-        self.assertEqual(len(self.enviados), antes)
+        self.assertGreaterEqual(len(self.enviados), antes)
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(data["caducidad_veces"], 2)
+        # 3.er vencimiento → vencido, no bloquea: debe salir la otra tarjeta
+        estado = _load()
+        if estado.get("abiertas"):
+            tok = next(iter(estado["abiertas"]))
+            estado["abiertas"][tok]["enviada_en"] = (AHORA - timedelta(hours=49)).isoformat()
+            _save(estado)
+        self.enviados.clear()
+        despachar(self.cola, ahora=AHORA, enviar=self.enviar)
         data = json.loads(path.read_text(encoding="utf-8"))
         self.assertTrue(data["caducada_final"])
+        self.assertEqual(data.get("estado_tarjeta"), "vencido")
+        self.assertFalse(data.get("telegram_notificado"))
+        # La vencida no atasca: sale Cigar Shop 02
+        self.assertTrue(any(e["nombre"] == "Cigar Shop 02" for e in self.enviados) or otro.exists())
 
     def test_fallo_de_envio_no_marca_notificado(self):
         path = _escribir(self.inbox, 7, 4)

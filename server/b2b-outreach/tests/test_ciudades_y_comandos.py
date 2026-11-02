@@ -42,6 +42,7 @@ class TestCiudadesYPaginacion(unittest.TestCase):
         for parche in (
             patch.object(budget, "BUDGET_PATH", self.tmp / "budget.json"),
             patch.object(places, "cache_path", return_value=self.tmp / "cache.json"),
+            patch("b2b.busqueda_cursor._ruta", return_value=self.tmp / "busqueda_cursor.json"),
             patch.object(places, "registrar_evento"),
             patch.object(places, "_notificar"),
             patch.dict(os.environ, {"GOOGLE_PLACES_API_KEY": "clave-ficticia",

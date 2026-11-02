@@ -1,4 +1,4 @@
-"""Suelta tarjetas de a una o dos. Si nadie toca un botón, no sale la siguiente."""
+"""Cola global de tarjetas: hasta N abiertas; al resolver una sale la siguiente."""
 from __future__ import annotations
 
 import json
@@ -12,6 +12,8 @@ from b2b.paths import state_file
 from b2b.telegram_control import esta_pausado, puede_enviar_telegram
 
 _CADUCIDAD = timedelta(hours=48)
+# Original + 2 reenvíos; al 3.er vencimiento queda "vencido" y no bloquea.
+_MAX_REENVIOS = 2
 
 
 def _ahora() -> datetime:
@@ -53,7 +55,7 @@ def ritmo_maximo() -> int:
         except (TypeError, ValueError):
             pass
     try:
-        return max(1, min(3, int(os.getenv("B2B_TARJETAS_ABIERTAS_MAX", "1") or "1")))
+        return max(1, min(3, int(os.getenv("B2B_TARJETAS_ABIERTAS_MAX", "2") or "2")))
     except ValueError:
         return 2
 
@@ -91,23 +93,32 @@ def _guardar(path: Path, data: dict) -> None:
 
 
 def _orden(lead: dict) -> tuple:
-    mail = 0 if (lead.get("correo") or "").strip() else 1
+    """Cola global por puntaje (mayor primero). Sin ordenar por tanda ni por nombre primero."""
+    try:
+        puntaje = -float(lead.get("puntaje") or 0)
+    except (TypeError, ValueError):
+        puntaje = 0.0
     try:
         rating = -float(lead.get("rating") or 0)
     except (TypeError, ValueError):
-        rating = 0
+        rating = 0.0
     try:
         resenas = -int(lead.get("user_rating_count") or 0)
     except (TypeError, ValueError):
         resenas = 0
-    return (mail, rating, resenas, (lead.get("nombre") or "").lower())
+    mail = 0 if (lead.get("correo") or "").strip() else 1
+    return (puntaje, mail, rating, resenas, (lead.get("nombre") or "").lower())
 
 
 def _candidatos(inbox: Path) -> list[tuple[Path, dict]]:
     filas = []
     for path in inbox.glob("*.json"):
         data = _leer(path)
-        if not data or data.get("telegram_notificado") or data.get("caducada_final"):
+        if not data:
+            continue
+        if data.get("telegram_notificado") or data.get("caducada_final"):
+            continue
+        if (data.get("estado_tarjeta") or "").strip().lower() == "vencido":
             continue
         filas.append((path, data))
     data = _load()
@@ -153,19 +164,30 @@ def _liberar_caducadas(inbox: Path, ahora: datetime) -> None:
         path = Path(info.get("inbox") or "")
         lead = _leer(path) if path.is_file() else None
         veces = int((lead or {}).get("caducidad_veces") or info.get("caducidad_veces") or 0)
-        if veces >= 1:
+        if veces >= _MAX_REENVIOS:
+            # Vencida definitiva: sale de abiertas y no bloquea la cola.
             if lead is not None:
                 lead["caducada_final"] = True
-                lead["telegram_notificado"] = True
+                lead["estado_tarjeta"] = "vencido"
+                # No marcar como enviada/gestionada: nunca llegó a resolverse.
+                lead["telegram_notificado"] = False
                 _guardar(path, lead)
+            registrar_evento({
+                "evento": "tarjeta_vencida",
+                "token": token,
+                "nombre": (lead or {}).get("nombre") or "",
+                "reenvios": veces,
+            })
         else:
             if lead is not None:
                 lead["telegram_notificado"] = False
                 lead["caducidad_veces"] = veces + 1
+                lead["estado_tarjeta"] = "reencolada"
                 _guardar(path, lead)
         data["abiertas"].pop(token, None)
         cambio = True
     if cambio:
+        data["proxima_en"] = ""
         _save(data)
 
 
@@ -191,11 +213,12 @@ def _enviar_default(lead: dict, pais: str, inbox_path: str) -> bool:
 
 
 def cerrar_tarjeta(token: str, *, ahora: datetime | None = None, espera_seg: int | None = None) -> None:
+    """Al resolver (enviar/omitir) la siguiente sale de inmediato (espera 0 por defecto)."""
     ahora = ahora or _ahora()
     data = _load()
     data["abiertas"].pop(token, None)
     if espera_seg is None:
-        espera_seg = random.randint(3, 8)
+        espera_seg = 0
     data["proxima_en"] = (ahora + timedelta(seconds=int(espera_seg))).isoformat(timespec="seconds")
     _save(data)
 
@@ -219,7 +242,7 @@ def posponer(token: str, inbox_path: str, *, ahora: datetime | None = None) -> s
     lead["telegram_notificado"] = False
     _guardar(path, lead)
     data["abiertas"].pop(token, None)
-    data["proxima_en"] = (ahora + timedelta(seconds=random.randint(3, 8))).isoformat(timespec="seconds")
+    data["proxima_en"] = ahora.isoformat(timespec="seconds")
     _anotar(data, lead, "despues")
     _save(data)
     return "pospuesto"
@@ -305,10 +328,15 @@ def texto_cola(inbox: Path) -> str:
 
 
 def _cupo_tanda() -> int:
-    try:
-        return max(1, int(os.getenv("B2B_TARJETAS_POR_TANDA", "15") or "15"))
-    except ValueError:
-        return 15
+    for nombre in ("TANDA_OBJETIVO", "B2B_TARJETAS_POR_TANDA", "B2B_LEADS_POR_TANDA"):
+        raw = (os.getenv(nombre) or "").strip()
+        if not raw:
+            continue
+        try:
+            return max(1, int(raw))
+        except ValueError:
+            continue
+    return 15
 
 
 def _cupo_dia() -> int:
@@ -358,6 +386,7 @@ def despachar(
         return 0
     enviar = enviar or _enviar_default
     enviados = 0
+    intentados: set[str] = set()
     while True:
         data = _load()
         abiertas = abiertas_ahora(ahora)
@@ -371,10 +400,11 @@ def despachar(
             break
         if not _cabe_en_el_dia(ahora):
             break
-        fila = _candidatos(inbox)
+        fila = [(p, lead) for p, lead in _candidatos(inbox) if p.name not in intentados]
         if not fila:
             break
         path, lead = fila[0]
+        intentados.add(path.name)
         from b2b.telegram_gestion import puede_avisar_prospecto, tiene_medio_contacto, ya_gestionado_telegram
 
         if ya_gestionado_telegram(lead) or not (puede_avisar_prospecto(lead) or tiene_medio_contacto(lead)):
@@ -390,11 +420,19 @@ def despachar(
         try:
             ok = bool(enviar(lead, pais, str(path)))
         except Exception as exc:
-            registrar_evento({"evento": "despacho_fallo", "error": str(exc)[:400]})
+            registrar_evento({"evento": "despacho_fallo", "error": str(exc)[:400], "nombre": lead.get("nombre") or ""})
             ok = False
         if not ok:
-            break
+            # No marcar notificado ni archivar: la tarjeta sigue pendiente.
+            # Al final de la cola; no se reintenta en esta misma pasada.
+            data = _load()
+            final = [n for n in data.get("al_final") or [] if n != path.name]
+            final.append(path.name)
+            data["al_final"] = final
+            _save(data)
+            continue
         lead["telegram_notificado"] = True
+        lead["estado_tarjeta"] = "abierta"
         _guardar(path, lead)
         from b2b.telegram_gestion import token_callback
 
@@ -420,10 +458,7 @@ def resumen_si_toca(cola_dir: Path) -> str:
 
 def sellar_tanda(inbox: Path, objetivo: int | None = None) -> int:
     if objetivo is None:
-        try:
-            objetivo = max(1, int(os.getenv("B2B_LEADS_POR_TANDA", "15") or "15"))
-        except ValueError:
-            objetivo = 15
+        objetivo = _cupo_tanda()
     from b2b.zonas import tz
 
     ahora = datetime.now(tz("America/Santo_Domingo"))

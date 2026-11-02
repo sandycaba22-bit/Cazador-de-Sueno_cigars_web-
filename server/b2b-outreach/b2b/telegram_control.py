@@ -248,7 +248,7 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
             _answer(token, cb, "No pude armar el correo")
             return f"⚠️ No pude armar el correo: {exc}"
         preview = (
-            f"Para: {lead.get('correo') or '—'}\n"
+            f"Para: {(lead.get('correo') or lead.get('formulario') or lead.get('instagram') or lead.get('whatsapp') or lead.get('web') or 'sin canal').strip()}\n"
             f"De: {cuenta or '(sin cuenta configurada)'}\n"
             f"Asunto: {asunto}\n\n"
             f"{cuerpo}"
@@ -509,6 +509,10 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
             else:
                 _enviar_dudoso(token, chat_id, tok_d, lead_d)
                 acks.append(f"Dudosos: {total} en esta tanda. Sale el primero; el siguiente, al aprobar o descartar.")
+        elif text in ("/embudo", "/funnel"):
+            from b2b.embudo import texto_embudo
+
+            acks.append(texto_embudo())
         elif text in ("/prueba_correo", "/prueba-correo"):
             from b2b.envio_correo import prueba_correo_cuentas
 

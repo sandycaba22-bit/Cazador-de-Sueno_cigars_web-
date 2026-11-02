@@ -184,15 +184,25 @@ def construir_tarjeta(prospecto: dict) -> str:
         pais = (datos.get("pais") or datos.get("estado") or "").strip()
         lineas.append(f"📲 {_esc(formato_visible(publicado, pais) or ('+' + publicado))}")
     correo = (datos.get("correo") or "").strip()
-    if correo:
-        lineas.append(f"✉️ <code>{_esc(correo)}</code>")
-    else:
-        if telefono:
-            lineas.append("Solo teléfono")
-        else:
-            lineas.append("Sin teléfono ni correo")
+    formulario = (datos.get("formulario") or "").strip()
     web = _web_corta(datos)
     insta = _instagram(datos)
+    # "Para:" nunca vacío: correo, o el canal alternativo disponible.
+    if correo:
+        lineas.append(f"Para: <code>{_esc(correo)}</code>")
+        lineas.append(f"✉️ <code>{_esc(correo)}</code>")
+    else:
+        canal = formulario or (datos.get("whatsapp") and "WhatsApp") or insta or web or "sin canal público"
+        if canal == "WhatsApp":
+            lineas.append("Para: WhatsApp del negocio")
+        else:
+            lineas.append(f"Para: {_esc(str(canal))}")
+        if telefono:
+            lineas.append("Solo teléfono")
+        elif not formulario and not insta and not web:
+            lineas.append("Sin teléfono ni correo")
+    if formulario and not correo:
+        lineas.append(f"📝 Formulario: {_esc(formulario)}")
     if web:
         lineas.append(f"🌐 {_esc(web)}")
     if insta:
@@ -218,7 +228,9 @@ def texto_plano(prospecto: dict) -> str:
 
 
 def construir_teclado(prospecto: dict) -> dict:
-    """Fila de correo/WhatsApp, fila de mapas, y Enviado + Descartar siempre."""
+    """Fila de correo/WhatsApp/canales, fila de mapas, y Enviado + Descartar siempre."""
+    from b2b.telegram_urls import filtrar_teclado, url_boton_valida
+
     datos = dict(prospecto or {})
     token = _token(datos)
     filas: list[list[dict]] = []
@@ -241,8 +253,22 @@ def construir_teclado(prospecto: dict) -> dict:
         except Exception:
             corto = ""
         url = link_whatsapp(datos, corto)
-        if url:
+        if url and url_boton_valida(url):
             contacto.append({"text": "📲 WhatsApp", "url": url})
+    if not (datos.get("correo") or "").strip():
+        formulario = (datos.get("formulario") or "").strip()
+        if formulario and url_boton_valida(formulario):
+            contacto.append({"text": "📝 Formulario", "url": formulario})
+        insta = (datos.get("instagram") or "").strip()
+        if insta:
+            if not insta.startswith("http"):
+                handle = insta.lstrip("@")
+                insta = f"https://www.instagram.com/{handle}/"
+            if url_boton_valida(insta):
+                contacto.append({"text": "📷 Instagram", "url": insta})
+        web = (datos.get("web") or "").strip()
+        if web.startswith(("http://", "https://")) and url_boton_valida(web):
+            contacto.append({"text": "🌐 Web", "url": web})
     if contacto:
         filas.append(contacto)
     mapas: list[dict] = []
@@ -251,7 +277,7 @@ def construir_teclado(prospecto: dict) -> dict:
         ("Apple Maps", apple_maps_url(datos)),
         ("Waze", waze_url(datos)),
     ):
-        if url:
+        if url and url_boton_valida(url):
             mapas.append({"text": texto, "url": url})
     if mapas:
         filas.append(mapas)
@@ -261,7 +287,7 @@ def construir_teclado(prospecto: dict) -> dict:
             {"text": "🗑 Descartar", "callback_data": f"b2bd:{token}"},
         ]
     )
-    return {"inline_keyboard": filas}
+    return filtrar_teclado({"inline_keyboard": filas})
 
 
 def teclado_dudoso(prospecto: dict) -> dict:

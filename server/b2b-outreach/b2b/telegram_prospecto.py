@@ -355,8 +355,10 @@ def enviar_prospecto_telegram(
     from telegram_bot import TelegramFormatError, enviar_mensaje_telegram, load_local_env
 
     load_local_env()
-    registrar_pendiente(token, lead, inbox_path)
-    teclado = teclado_prospecto(lead, pais, token)
+    from b2b.telegram_urls import es_error_url_boton, filtrar_teclado, teclado_solo_callbacks
+
+    teclado = filtrar_teclado(teclado_prospecto(lead, pais, token))
+    # Registrar pendiente solo tras un envío exitoso evita "gestionado" fantasma.
     try:
         try:
             message_id = enviar_mensaje_telegram(texto, reply_markup=teclado, parse_mode="HTML")
@@ -365,8 +367,25 @@ def enviar_prospecto_telegram(
 
             message_id = enviar_mensaje_telegram(_sin_html(texto), reply_markup=teclado)
     except Exception as exc:
-        _registrar_fallo_telegram(lead, exc)
+        if es_error_url_boton(exc):
+            try:
+                teclado2 = teclado_solo_callbacks(teclado)
+                try:
+                    message_id = enviar_mensaje_telegram(texto, reply_markup=teclado2, parse_mode="HTML")
+                except TelegramFormatError:
+                    from b2b.tarjeta import _sin_html
+
+                    message_id = enviar_mensaje_telegram(_sin_html(texto), reply_markup=teclado2)
+            except Exception as exc2:
+                _registrar_fallo_telegram(lead, exc2)
+                return False
+        else:
+            _registrar_fallo_telegram(lead, exc)
+            return False
+    if not message_id:
+        _registrar_fallo_telegram(lead, RuntimeError("Telegram no devolvió message_id"))
         return False
+    registrar_pendiente(token, lead, inbox_path)
     from b2b.telegram_gestion import actualizar_pendiente
 
     actualizar_pendiente(token, message_id=message_id, texto_tarjeta=texto, cuerpo=lead.get("cuerpo") or "", asunto=lead.get("asunto") or "")

@@ -41,6 +41,16 @@ def evaluar_senal_cigarro(lead: dict) -> ResultadoCalidad:
                 "etapa": "calidad_nombre",
             },
         )
+    if bucket == "revisar":
+        return ResultadoCalidad(
+            bucket="revisar",
+            motivo=motivo,
+            descarte={
+                "nombre": lead.get("nombre") or "—",
+                "motivo": motivo,
+                "etapa": "calidad_revisar",
+            },
+        )
     if bucket == "dudoso":
         return ResultadoCalidad(
             bucket="dudoso",
@@ -101,7 +111,7 @@ def aplicar_reglas_web(lead: dict, web_info: dict, *, simulado: bool = False) ->
 
 def confirmar_cigarros_google(lead: dict, base: ResultadoCalidad, *, simulado: bool = False) -> ResultadoCalidad:
     """Google: la web propia decide si un nombre ambiguo vende cigarros."""
-    if simulado or "google" not in (lead.get("fuente") or "").lower() or base.bucket == "descartado":
+    if simulado or "google" not in (lead.get("fuente") or "").lower() or base.bucket in ("descartado", "revisar"):
         return base
     from b2b.contacto_web import vende_cigarros
 
@@ -123,7 +133,7 @@ def confirmar_cigarros_google(lead: dict, base: ResultadoCalidad, *, simulado: b
 
 def evaluar_lead_completo(lead: dict, *, simulado: bool = False) -> ResultadoCalidad:
     base = confirmar_cigarros_google(lead, evaluar_senal_cigarro(lead), simulado=simulado)
-    if base.bucket in ("descartado", "dudoso"):
+    if base.bucket in ("descartado", "dudoso", "revisar"):
         return base
 
     web = (lead.get("web") or "").strip()
@@ -167,8 +177,8 @@ def clasificar_lote(
             else:
                 stats.descartados_tipo += 1
             continue
-        if res.bucket == "dudoso":
-            lead["calidad_bucket"] = "dudoso"
+        if res.bucket in ("dudoso", "revisar"):
+            lead["calidad_bucket"] = res.bucket
             lead["calidad_motivo"] = res.motivo
             dudosos.append(lead)
             stats.dudosos += 1

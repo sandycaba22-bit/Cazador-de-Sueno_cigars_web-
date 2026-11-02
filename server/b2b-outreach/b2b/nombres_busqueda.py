@@ -9,6 +9,10 @@ from b2b.buscar_filtros import dominio_web
 from b2b.paths import data_file
 
 WEB_CIGAR_RE = re.compile(r"\bcigars?\b|\bcigarros?\b|\bcigares?\b|\bhumidor\b|\btabaquer", re.I)
+SENAL_CIGARRO_RE = re.compile(
+    r"\bcigars?\b|\bcigarros?\b|\bhabanos?\b|\btobaccos?\b|\bhumidor\b|\btabaquer",
+    re.I,
+)
 
 
 def _escape_phrase(phrase: str) -> str:
@@ -156,20 +160,28 @@ def senal_extra(lead: dict) -> bool:
     return False
 
 
+def _tiene_senal_cigarro(texto: str) -> bool:
+    return bool(SENAL_CIGARRO_RE.search(texto or ""))
+
+
 def clasificar_aceptacion(lead: dict) -> tuple[str, str]:
     """
-    Devuelve (bucket, motivo): aceptado | dudoso | excluido.
-    Reglas (a) OSM shop tobacco/cigar, (b) fuerte sin excluir, (c) débil + extra.
+    Devuelve (bucket, motivo): aceptado | dudoso | excluido | revisar.
+    Si hay cigar/tobacco/habano/humidor no se aplica excluir_siempre a ciegas: va a 'revisar'.
     """
     web = lead.get("web") or ""
     if osm_shop_tabaco(lead):
         texto = texto_nombre_web(lead)
         if contiene_excluir(texto, web) and not contiene_fuerte(texto):
+            if _tiene_senal_cigarro(texto):
+                return "revisar", "excluir+senal_cigarro (shop OSM)"
             return "excluido", "excluir_siempre (a pesar de shop OSM)"
         return "aceptado", "osm shop=tobacco/cigar"
 
     texto = texto_nombre_web(lead)
     if contiene_excluir(texto, web):
+        if _tiene_senal_cigarro(texto) or contiene_fuerte(texto):
+            return "revisar", "excluir+senal_cigarro"
         return "excluido", "excluir_siempre"
 
     if contiene_fuerte(texto):

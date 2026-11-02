@@ -79,6 +79,7 @@ class GoogleBase(unittest.TestCase):
         self.patches = [
             mock.patch.object(budget, "BUDGET_PATH", self.tmp / "places_budget.json"),
             mock.patch.object(places, "cache_path", return_value=self.tmp / "google_places_cache.json"),
+            mock.patch("b2b.busqueda_cursor._ruta", return_value=self.tmp / "busqueda_cursor.json"),
             mock.patch.dict(os.environ, {"GOOGLE_PLACES_API_KEY": CLAVE_FALSA}),
             mock.patch.object(places, "registrar_presupuesto_agotado"),
         ]

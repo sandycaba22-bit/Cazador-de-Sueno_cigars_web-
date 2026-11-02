@@ -610,6 +610,7 @@ def _registrar_ok(item: dict, momento: datetime, message_id: str) -> None:
     })
     data["ultimo_envio"] = momento.isoformat(timespec="seconds")
     _save(data)
+    registrar_message_id_enviado(message_id)
     lead = item.get("lead") or {"nombre": item.get("nombre") or "", "correo": item.get("correo") or ""}
     guardar_estado_lead(
         lead,
@@ -1063,14 +1064,126 @@ def prueba_correo_cuentas() -> str:
     return "\n".join(notas)
 
 
+_NO_REPLY_RE = re.compile(
+    r"^(no[-_]?reply|noreply|donotreply|mailer-daemon|notification|notifications|"
+    r"notify|bounce|bounces|auto[-_]?reply)@",
+    re.I,
+)
+
+
+def _ruta_imap_estado() -> Path:
+    return _state_file("imap_bajas_estado.json")
+
+
+def _cargar_imap_estado() -> dict:
+    path = _ruta_imap_estado()
+    if not path.is_file():
+        return {"procesados": [], "message_ids_nuestros": [], "ultimo_check": "", "backoff_hasta": ""}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"procesados": [], "message_ids_nuestros": [], "ultimo_check": "", "backoff_hasta": ""}
+    data.setdefault("procesados", [])
+    data.setdefault("message_ids_nuestros", [])
+    return data
+
+
+def _guardar_imap_estado(data: dict) -> None:
+    path = _ruta_imap_estado()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # Conserva como máximo 5000 ids procesados.
+    data["procesados"] = list(data.get("procesados") or [])[-5000:]
+    data["message_ids_nuestros"] = list(data.get("message_ids_nuestros") or [])[-2000:]
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def registrar_message_id_enviado(message_id: str) -> None:
+    mid = (message_id or "").strip()
+    if not mid:
+        return
+    data = _cargar_imap_estado()
+    if mid not in data["message_ids_nuestros"]:
+        data["message_ids_nuestros"].append(mid)
+        _guardar_imap_estado(data)
+
+
+def _correos_contactados() -> set[str]:
+    vistos: set[str] = set()
+    arch = archivo_dir()
+    if arch.is_dir():
+        for path in arch.glob("*.json"):
+            try:
+                item = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if isinstance(item, dict):
+                c = (item.get("correo") or "").strip().lower()
+                if c:
+                    vistos.add(c)
+    path = _state_file("registro_leads.json")
+    if path.is_file():
+        try:
+            reg = json.loads(path.read_text(encoding="utf-8"))
+            for c in reg.get("correos") or []:
+                if c:
+                    vistos.add(str(c).strip().lower())
+        except (OSError, json.JSONDecodeError):
+            pass
+    return vistos
+
+
+def _es_remitente_ruido(direccion: str) -> bool:
+    d = (direccion or "").strip().lower()
+    if not d or "@" not in d:
+        return True
+    if _NO_REPLY_RE.search(d):
+        return True
+    host = d.split("@", 1)[-1]
+    if host.endswith((".metamail.com", "priority.instagram.com", "facebookmail.com", "mail.instagram.com")):
+        return True
+    return False
+
+
+def _imap_intervalo_seg() -> int:
+    try:
+        return max(60, int(os.getenv("B2B_IMAP_INTERVALO_SEG", "900") or "900"))
+    except ValueError:
+        return 900
+
+
 def revisar_unsubscribe() -> list[str]:
-    """Lee respuestas IMAP. 'unsubscribe' entra en la lista de exclusión."""
+    """Lee IMAP solo para respuestas a nuestros envíos. Ignora no-reply y no repite UIDs."""
     if os.getenv("B2B_ENVIO_REAL", "0").strip() != "1":
         return []
+    import email
     import imaplib
+    from email.header import decode_header
+    from email.utils import parseaddr
+
+    estado = _cargar_imap_estado()
+    ahora = _ahora()
+    backoff = _parse_marca(estado.get("backoff_hasta") or "")
+    if backoff and ahora < backoff:
+        return []
+    ultimo = _parse_marca(estado.get("ultimo_check") or "")
+    if ultimo and (ahora - ultimo).total_seconds() < _imap_intervalo_seg():
+        return []
 
     host = os.getenv("IMAP_HOST", "imap.gmail.com").strip() or "imap.gmail.com"
-    bajados = []
+    bajados: list[str] = []
+    nuestros = {m.strip() for m in estado.get("message_ids_nuestros") or [] if m}
+    contactados = _correos_contactados()
+    procesados = set(estado.get("procesados") or [])
+
+    def _decodificar(valor: str) -> str:
+        partes = []
+        for texto, enc in decode_header(valor or ""):
+            if isinstance(texto, bytes):
+                partes.append(texto.decode(enc or "utf-8", errors="replace"))
+            else:
+                partes.append(texto)
+        return "".join(partes)
+
     for n in (1, 2):
         correo = (
             os.getenv(f"CORREO_REMITENTE_{n}", "").strip()
@@ -1088,23 +1201,57 @@ def revisar_unsubscribe() -> list[str]:
             imap.select("INBOX")
             _tipo, datos = imap.search(None, "UNSEEN")
             ids = (datos[0] or b"").split() if datos else []
-            for num in ids[-30:]:
-                _t, msg_data = imap.fetch(num, "(BODY.PEEK[TEXT] BODY.PEEK[HEADER.FIELDS (FROM SUBJECT)])")
+            for num in ids[-40:]:
+                clave_uid = f"{n}:{num.decode() if isinstance(num, bytes) else num}"
+                if clave_uid in procesados:
+                    continue
+                _t, msg_data = imap.fetch(num, "(RFC822.HEADER BODY.PEEK[TEXT])")
                 crudo = b""
                 for parte in msg_data or []:
                     if isinstance(parte, tuple) and len(parte) > 1:
                         crudo += parte[1] or b""
-                texto = crudo.decode("utf-8", errors="replace")
-                if not re.search(r"\bunsubscribe\b|\bBAJA\b", texto, re.I):
+                msg = email.message_from_bytes(crudo)
+                mid = (msg.get("Message-ID") or "").strip()
+                if mid and mid in procesados:
+                    procesados.add(clave_uid)
                     continue
-                origen = ""
-                hallado = re.search(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", texto)
-                if hallado:
-                    origen = hallado.group(0).lower()
-                if origen and origen != correo.lower():
-                    excluir_correo(origen, "unsubscribe")
-                    bajados.append(origen)
+                from_hdr = _decodificar(msg.get("From") or "")
+                _, origen = parseaddr(from_hdr)
+                origen = (origen or "").strip().lower()
+                in_reply = (msg.get("In-Reply-To") or "") + " " + (msg.get("References") or "")
+                es_respuesta = any(m and m in in_reply for m in nuestros)
+                es_contactado = origen in contactados
+                procesados.add(clave_uid)
+                if mid:
+                    procesados.add(mid)
+                if _es_remitente_ruido(origen) or origen == correo.lower():
+                    continue
+                cuerpo = ""
+                if msg.is_multipart():
+                    for part in msg.walk():
+                        if part.get_content_type() == "text/plain":
+                            payload = part.get_payload(decode=True) or b""
+                            cuerpo += payload.decode(part.get_content_charset() or "utf-8", errors="replace")
+                else:
+                    payload = msg.get_payload(decode=True) or b""
+                    if isinstance(payload, bytes):
+                        cuerpo = payload.decode(msg.get_content_charset() or "utf-8", errors="replace")
+                    else:
+                        cuerpo = str(payload)
+                if not re.search(r"\bunsubscribe\b|\bBAJA\b", cuerpo + " " + _decodificar(msg.get("Subject") or ""), re.I):
+                    continue
+                if not (es_respuesta or es_contactado):
+                    continue
+                excluir_correo(origen, "unsubscribe")
+                bajados.append(origen)
+                registrar_evento({"evento": "exclusion_correo", "correo": origen, "cuenta": n})
             imap.logout()
         except Exception as exc:
-            registrar_evento({"evento": "imap_bajas_fallo", "cuenta": n, "error": _error(exc).replace(clave, "[clave]")})
+            estado["backoff_hasta"] = (ahora + timedelta(minutes=30)).isoformat(timespec="seconds")
+            registrar_evento(
+                {"evento": "imap_bajas_fallo", "cuenta": n, "error": _error(exc).replace(clave, "[clave]")}
+            )
+    estado["procesados"] = list(procesados)[-5000:]
+    estado["ultimo_check"] = ahora.isoformat(timespec="seconds")
+    _guardar_imap_estado(estado)
     return bajados

@@ -435,13 +435,30 @@ def _orden_calidad(lead: dict) -> tuple:
 
 
 def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, dict]:
-    """Google Places (New) por isla y tipo. Devuelve leads OPERATIONAL ordenados, llamadas, stats."""
+    """Google Places (New) por isla y tipo. Avanza el cursor de consultas en cada tanda."""
+    from b2b.busqueda_cursor import tomar_consultas
+    from b2b.leads_store import ya_visto
+
     cache = _load_cache()
     stats: dict = {"google": 0, "google_llamadas": 0, "google_cache": 0, "descartes": []}
     vistos: dict[str, tuple[dict, str]] = {}
     llamadas = 0
     crudo_logueado = False
-    for tipo, idioma, consulta in consultas_google(pais, tipos):
+    todas = consultas_google(pais, tipos)
+    motivo_previo = budget.motivo_bloqueo()
+    if motivo_previo:
+        stats["presupuesto_agotado"] = motivo_previo
+        _avisar_tope(motivo_previo)
+        return [], 0, stats
+    # Una tanda: tantas consultas como cupo de tanda restante.
+    resto_tanda = max(0, budget.max_calls_tanda() - int(budget.estado().get("tanda_llamadas") or 0))
+    if resto_tanda <= 0:
+        stats["presupuesto_agotado"] = "tanda"
+        _avisar_tope("tanda")
+        return [], 0, stats
+    lote = tomar_consultas(pais, todas, resto_tanda)
+    stats["consultas_cursor"] = [c[2] for c in lote]
+    for tipo, idioma, consulta in lote:
         clave = _clave_busqueda(pais, consulta)
         hit = cache["busquedas"].get(clave)
         if hit is not None:
@@ -456,6 +473,8 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
                 stats["presupuesto_agotado"] = motivo
                 _avisar_tope(motivo)
                 break
+            # Antes de gastar cuota: si todos los place_id del cache global ya están en registro, igual llamamos
+            # la consulta nueva (no conocemos ids aún). Tras la respuesta filtramos por place_id.
             try:
                 raws = _post_search(consulta, idioma)
             except PresupuestoPlacesAgotado as error:
@@ -483,8 +502,28 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
                 _log_place_crudo(raw)
                 crudo_logueado = True
             pid = raw.get("id") or raw.get("place_id") or ""
-            if pid and pid not in vistos:
-                vistos[pid] = (raw, tipo)
+            if not pid or pid in vistos:
+                continue
+            # Dedupe contra registro y cache ya conocida como vista.
+            web = (raw.get("websiteUri") or "") if isinstance(raw, dict) else ""
+            if ya_visto(pid, web):
+                nombre_raw = ""
+                if isinstance(raw, dict):
+                    dn = raw.get("displayName")
+                    if isinstance(dn, dict):
+                        nombre_raw = dn.get("text") or ""
+                    elif isinstance(dn, str):
+                        nombre_raw = dn
+                stats["descartes"].append(
+                    {
+                        "nombre": nombre_raw or pid,
+                        "motivo": "ya_en_registro_leads",
+                        "etapa": "dedupe_place_id",
+                        "fuente": "google_places",
+                    }
+                )
+                continue
+            vistos[pid] = (raw, tipo)
 
     leads: list[dict] = []
     for raw, tipo in vistos.values():
@@ -501,6 +540,12 @@ def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, di
     leads.sort(key=_orden_calidad)
     stats["google"] = len(leads)
     stats["google_llamadas"] = llamadas
+    if "presupuesto_agotado" not in stats:
+        motivo_fin = budget.motivo_bloqueo()
+        if motivo_fin:
+            stats["presupuesto_agotado"] = motivo_fin
+            if llamadas:
+                _avisar_tope(motivo_fin)
     return leads, llamadas, stats
 
 

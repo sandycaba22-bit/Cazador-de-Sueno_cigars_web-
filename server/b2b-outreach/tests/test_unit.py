@@ -111,10 +111,11 @@ class TestRedactor(unittest.TestCase):
             "",
             {"sin_correo_publico": True, "tipo": "tienda", "dificultad_aduana": 2},
         )
-        self.assertIn("Sin teléfono ni correo", paquete["texto"])
+        self.assertIn("Para:", paquete["texto"])
         self.assertIn("Borrador sugerido", paquete["texto"])
         self.assertIn("✅ Enviado", str(paquete.get("reply_markup")))
         self.assertIn("Yaniris Agustina Ureña", paquete["texto"])
+        self.assertIn("Hello Demo team", paquete["texto"])
 
 
 class TestProspectarSimulado(unittest.TestCase):

@@ -176,8 +176,35 @@ def _payload_tiene_contacto(payload: dict) -> bool:
     return tiene_medio_contacto(payload)
 
 
-def _escribir_lead_cola(carpeta: Path, payload: dict) -> Path:
+def _escribir_lead_cola(carpeta: Path, payload: dict, *, unico_por_place_id: bool = False) -> Path:
+    """Escribe el JSON. En dudoso/, un solo archivo por place_id (actualiza motivo, conserva primera_fecha)."""
     carpeta.mkdir(parents=True, exist_ok=True)
+    pid = (payload.get("place_id") or "").strip()
+    if unico_por_place_id and pid:
+        for path in carpeta.glob("*.json"):
+            try:
+                prev = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(prev, dict):
+                continue
+            if (prev.get("place_id") or "").strip() != pid:
+                continue
+            merged = dict(prev)
+            merged.update(payload)
+            merged["place_id"] = pid
+            merged["primera_fecha"] = prev.get("primera_fecha") or prev.get("fecha_alta") or ""
+            if not merged["primera_fecha"]:
+                from datetime import datetime, timezone
+
+                merged["primera_fecha"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            merged["motivo"] = payload.get("calidad_motivo") or prev.get("motivo") or payload.get("motivo") or ""
+            path.write_text(json.dumps(merged, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            return path
+        from datetime import datetime, timezone
+
+        payload = dict(payload)
+        payload.setdefault("primera_fecha", datetime.now(timezone.utc).isoformat(timespec="seconds"))
     path = carpeta / f"{int(time.time())}-{_slug(payload['nombre'])[:40]}.json"
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return path
@@ -223,7 +250,14 @@ def encolar(
     con_contacto = 0
     web_enriquecidos = 0
 
-    def _procesar_bucket(items: list[dict], carpeta: Path, marcar: bool, categoria: str) -> None:
+    def _procesar_bucket(
+        items: list[dict],
+        carpeta: Path,
+        marcar: bool,
+        categoria: str,
+        *,
+        unico_por_place_id: bool = False,
+    ) -> None:
         nonlocal con_contacto, web_enriquecidos
         for lead in items:
             nombre = lead.get("nombre") or "—"
@@ -269,7 +303,7 @@ def encolar(
                     continue
                 enriquecido["resumen_verificacion"] = resumen
             payload = lead_a_inbox(enriquecido)
-            path = _escribir_lead_cola(carpeta, payload)
+            path = _escribir_lead_cola(carpeta, payload, unico_por_place_id=unico_por_place_id)
             res[categoria].append({"nombre": nombre, "archivo": path.name})
             if marcar:
                 marcar_visto(payload.get("place_id", ""), payload.get("web", ""))
@@ -297,7 +331,9 @@ def encolar(
     for lead in dudosos:
         if pais and not simulado:
             append_dudoso_diario(pais, lead, lead.get("calidad_motivo") or "dudoso")
-    _procesar_bucket(dudosos, dudoso_dir, marcar=False, categoria="dudosos")
+    _procesar_bucket(
+        dudosos, dudoso_dir, marcar=False, categoria="dudosos", unico_por_place_id=True
+    )
     _procesar_bucket(solo_tel, solo_tel_dir, marcar=False, categoria="solo_telefono")
     if pais:
         append_sin_contacto_diario(pais, res["sin_contacto"])

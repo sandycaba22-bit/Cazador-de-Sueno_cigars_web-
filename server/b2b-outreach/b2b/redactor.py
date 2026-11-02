@@ -513,7 +513,7 @@ def asegurar_pie(cuerpo: str, idioma: str) -> str:
 
 def borrador_corto(nombre_local: str, idioma: str, tipo: str = "tienda") -> str:
     """WhatsApp / Instagram: presentación breve, catálogo PDF y muestra."""
-    nombre = (nombre_local or "").strip() or "there"
+    nombre = (nombre_local or "").strip() or "your shop"
     catalogo, aviso = _catalogo(idioma)
     t = tipo_en_idioma(tipo, idioma)
 
@@ -641,7 +641,7 @@ def borrador_correo(
     variante: str = "A",
 ) -> str:
     """Primer contacto: corto, un solo enlace, pie del idioma. El resto de idiomas cae a EN."""
-    nombre = (nombre_local or "").strip() or "there"
+    nombre = (nombre_local or "").strip() or "your shop"
     idioma_cuerpo = "es" if idioma == "es" else "en"
     t = tipo_en_idioma(tipo, idioma_cuerpo)
     correo = (cuenta or "").strip() or email_empresa()
