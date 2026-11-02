@@ -860,6 +860,20 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
         item["estado"] = "enviado"
         item["message_id_correo"] = msg["Message-ID"]
         _editar_estado(item, f"📤 {modo} {hora} desde cuenta {cuenta['n']}")
+        try:
+            from b2b.despachador_tarjetas import cerrar_tarjeta
+            from b2b.seguimiento import registrar_enviado
+
+            tok = item.get("token") or ""
+            if tok:
+                cerrar_tarjeta(tok, ahora=ahora, espera_seg=0)
+            lead_seg = dict(item.get("lead") or {})
+            lead_seg.setdefault("correo", item.get("correo") or "")
+            lead_seg.setdefault("nombre", item.get("nombre") or "")
+            lead_seg.setdefault("web", (item.get("lead") or {}).get("web") or "")
+            registrar_enviado(lead_seg, "correo", cuando=ahora)
+        except Exception as exc:
+            registrar_evento({"evento": "cierre_tras_smtp_fallo", "error": str(exc)[:200]})
         _archivar_item(path, item)
         hechos += 1
     return hechos

@@ -164,19 +164,25 @@ def _liberar_caducadas(inbox: Path, ahora: datetime) -> None:
         path = Path(info.get("inbox") or "")
         lead = _leer(path) if path.is_file() else None
         veces = int((lead or {}).get("caducidad_veces") or info.get("caducidad_veces") or 0)
-        if veces >= _MAX_REENVIOS:
-            # Vencida definitiva: sale de abiertas y no bloquea la cola.
+        from b2b.contacto_previo import motivo_ya_contactado
+
+        ya = motivo_ya_contactado(lead or {}) if lead else ""
+        if ya or veces >= _MAX_REENVIOS:
+            # Ya contactado o vencida definitiva: sale de abiertas y no bloquea la cola.
             if lead is not None:
                 lead["caducada_final"] = True
-                lead["estado_tarjeta"] = "vencido"
-                # No marcar como enviada/gestionada: nunca llegó a resolverse.
-                lead["telegram_notificado"] = False
+                lead["estado_tarjeta"] = "ya_contactado" if ya else "vencido"
+                # Si ya hubo correo, no reabrir; si solo venció sin contacto, tampoco reenviar.
+                lead["telegram_notificado"] = True if ya else False
+                if ya:
+                    lead["omitido_motivo"] = ya
                 _guardar(path, lead)
             registrar_evento({
-                "evento": "tarjeta_vencida",
+                "evento": "tarjeta_vencida" if not ya else "tarjeta_cerrada_ya_contactado",
                 "token": token,
                 "nombre": (lead or {}).get("nombre") or "",
                 "reenvios": veces,
+                "motivo": ya or "vencido",
             })
         else:
             if lead is not None:
@@ -405,12 +411,30 @@ def despachar(
             break
         path, lead = fila[0]
         intentados.add(path.name)
+        from b2b.contacto_previo import motivo_ya_contactado
         from b2b.telegram_gestion import puede_avisar_prospecto, tiene_medio_contacto, ya_gestionado_telegram
 
         if ya_gestionado_telegram(lead) or not (puede_avisar_prospecto(lead) or tiene_medio_contacto(lead)):
             lead["telegram_notificado"] = True
             lead["omitido_motivo"] = "omitido"
             _guardar(path, lead)
+            continue
+        motivo_contacto = motivo_ya_contactado(lead)
+        if motivo_contacto:
+            # Ya hubo correo/seguimiento: no reabrir tarjeta; libera cupo si estaba abierta.
+            lead["telegram_notificado"] = True
+            lead["omitido_motivo"] = motivo_contacto
+            lead["estado_tarjeta"] = "ya_contactado"
+            _guardar(path, lead)
+            from b2b.telegram_gestion import token_callback
+
+            cerrar_tarjeta(token_callback(lead), ahora=ahora, espera_seg=0)
+            registrar_evento({
+                "evento": "tarjeta_omitida_ya_contactado",
+                "nombre": lead.get("nombre") or "",
+                "correo": lead.get("correo") or "",
+                "motivo": motivo_contacto,
+            })
             continue
         if int(data.get("forzar") or 0):
             data["forzar"] = 0
@@ -481,6 +505,22 @@ def sellar_tanda(inbox: Path, objetivo: int | None = None) -> int:
         data["tanda_total"] = total
         data["tanda_aviso"] = aviso
         _guardar(path, data)
+    # Deja rastro en resumenes aunque aún no se haya despachado ninguna tarjeta.
+    estado = _load()
+    resumenes = estado.setdefault("resumenes", {})
+    if tanda_id not in resumenes:
+        resumenes[tanda_id] = {
+            "etiqueta": etiqueta,
+            "total": total,
+            "objetivo": objetivo,
+            "aviso": aviso,
+            "aprobadas": 0,
+            "descartadas": 0,
+            "despues": 0,
+            "claves": {},
+            "enviado": False,
+        }
+        _save(estado)
     return total
 
 

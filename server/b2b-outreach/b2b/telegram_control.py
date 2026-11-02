@@ -7,6 +7,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from pathlib import Path
 
 from b2b.paths import state_file
 
@@ -282,13 +283,27 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
             _editar_tarjeta(token, chat_id, msg_id, texto, markup)
             estado = "en_cola" if resultado.startswith("⏳") else "enviado"
             actualizar_pendiente(tok, estado_envio=estado, texto_tarjeta=texto)
-            if estado == "enviado":
-                guardar_estado_lead(lead, "enviado", canal="correo")
-                from b2b.seguimiento import registrar_enviado
+            # Libera el cupo ya: si queda en cola SMTP no debe bloquear la tanda de la mañana.
+            from b2b.seguimiento import registrar_enviado
 
+            if estado == "enviado" or resultado.startswith("⏳"):
+                guardar_estado_lead(lead, "enviado" if estado == "enviado" else "en_cola", canal="correo")
                 registrar_enviado(lead, "correo")
                 anotar_decision(lead, "aprobadas")
                 cerrar_tarjeta(tok)
+                # Evita que caducidad_veces reabra la tarjeta tras un correo ya encolado/enviado.
+                inbox_path = Path(pend.get("inbox_path") or "")
+                if inbox_path.is_file():
+                    try:
+                        lead_disk = json.loads(inbox_path.read_text(encoding="utf-8"))
+                    except (OSError, json.JSONDecodeError):
+                        lead_disk = {}
+                    if isinstance(lead_disk, dict):
+                        lead_disk["telegram_notificado"] = True
+                        lead_disk["estado_tarjeta"] = "correo_en_curso" if estado == "en_cola" else "correo_enviado"
+                        inbox_path.write_text(
+                            json.dumps(lead_disk, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+                        )
         return resultado
 
     if data.startswith("b2bt:"):
