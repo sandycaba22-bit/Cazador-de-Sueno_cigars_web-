@@ -690,6 +690,75 @@ def _archivar_item(path: Path, item: dict) -> None:
         pass
 
 
+def _recuperar_tras_fallo_correo(item: dict, motivo: str) -> None:
+    """Tras ⏳ el cupo ya se cerró: si SMTP falla, reabre el lead y avisa por Telegram."""
+    nombre = item.get("nombre") or item.get("correo") or "el local"
+    motivo_limpio = (motivo or "error SMTP").strip()[:300]
+    _avisar_una_vez(
+        f"smtp_recupera_{item.get('token') or nombre}",
+        f"⚠️ Correo falló después de encolar a {nombre}: {motivo_limpio}. Reabrí la tarjeta.",
+    )
+    lead = dict(item.get("lead") or {})
+    lead.setdefault("nombre", item.get("nombre") or "")
+    lead.setdefault("correo", item.get("correo") or "")
+    lead.setdefault("web", (item.get("lead") or {}).get("web") or "")
+    lead["telegram_notificado"] = False
+    lead.pop("caducada_final", None)
+    lead["estado_tarjeta"] = "smtp_fallo"
+    lead["omitido_motivo"] = ""
+    lead["motivo_smtp_fallo"] = motivo_limpio
+    try:
+        guardar_estado_lead(lead, "aprobado", motivo_smtp_fallo=motivo_limpio)
+    except Exception as exc:
+        registrar_evento({"evento": "recupera_smtp_estado_fallo", "error": _error(exc)})
+    inbox_path = ""
+    try:
+        from b2b.telegram_gestion import resolver_pendiente
+
+        pend = resolver_pendiente(item.get("token") or "") or {}
+        inbox_path = (pend.get("inbox_path") or "").strip()
+    except Exception:
+        inbox_path = ""
+    from b2b.paths import queue_dir
+
+    cola = queue_dir()
+    dest: Path | None = None
+    if inbox_path:
+        candidato = Path(inbox_path)
+        if candidato.is_file() or candidato.parent.is_dir():
+            dest = candidato
+    if dest is None and cola is not None:
+        slug = re.sub(r"[^a-z0-9]+", "-", (lead.get("nombre") or "lead").casefold()).strip("-")[:50] or "lead"
+        dest = cola / "inbox" / f"smtp-fallo-{slug}.json"
+    if dest is None:
+        registrar_evento({
+            "evento": "recupera_smtp_sin_inbox",
+            "nombre": nombre,
+            "motivo": motivo_limpio,
+        })
+        return
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    previo = {}
+    if dest.is_file():
+        try:
+            previo = json.loads(dest.read_text(encoding="utf-8"))
+            if not isinstance(previo, dict):
+                previo = {}
+        except (OSError, json.JSONDecodeError):
+            previo = {}
+    previo.update(lead)
+    previo["telegram_notificado"] = False
+    previo.pop("caducada_final", None)
+    previo["estado_tarjeta"] = "smtp_fallo"
+    dest.write_text(json.dumps(previo, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    registrar_evento({
+        "evento": "tarjeta_reabierta_smtp_fallo",
+        "nombre": nombre,
+        "motivo": motivo_limpio,
+        "inbox": str(dest),
+    })
+
+
 def _editar_estado(item: dict, linea: str) -> None:
     try:
         from b2b.telegram_gestion import actualizar_pendiente, resolver_pendiente
@@ -739,12 +808,8 @@ def _fallo_temporal(item: dict, path: Path, momento: datetime, exc: BaseExceptio
         motivo = _error(exc)
         item["motivo_fallo"] = motivo
         _archivar_item(path, item)
-        nombre = item.get("nombre") or item.get("correo") or "el local"
-        _avisar_una_vez(
-            f"fallo_{item.get('token') or path.stem}",
-            f"⚠️ No pude enviar a {nombre}: {motivo}",
-        )
         registrar_evento({"evento": "smtp_fallo", "error": motivo, "cuenta": item.get("cuenta")})
+        _recuperar_tras_fallo_correo(item, motivo)
         return
     espera = timedelta(minutes=2 ** intentos)
     item["enviar_despues_de"] = (momento + espera).isoformat(timespec="seconds")
@@ -820,10 +885,7 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
             item["estado"] = "fallo"
             item["motivo_fallo"] = error_catalogo
             _archivar_item(path, item)
-            _avisar_una_vez(
-                f"catalogo_{item.get('token') or path.stem}",
-                f"⚠️ No envié a {item.get('nombre') or item.get('correo')}: {error_catalogo}",
-            )
+            _recuperar_tras_fallo_correo(item, error_catalogo)
             continue
         try:
             if not envio_real():
@@ -843,9 +905,11 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
             if codigo in (550, 553) or nombre_exc == "SMTPRecipientsRefused":
                 marcar_correo_invalido(item.get("correo") or "")
                 item["estado"] = "reboto"
+                item["motivo_fallo"] = _error(exc)
                 guardar_estado_lead(lead, "reboto")
                 _editar_estado(item, "⚠️ Rebotó al enviar")
                 _archivar_item(path, item)
+                _recuperar_tras_fallo_correo(item, item["motivo_fallo"])
                 continue
             _fallo_temporal(item, path, ahora, exc)
             continue

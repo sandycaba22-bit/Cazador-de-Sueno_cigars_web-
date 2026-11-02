@@ -443,7 +443,66 @@ class TestTopes(_Base):
                 procesar_outbox(LUNES + timedelta(minutes=5 + i * 30))
         archivo = Path(os.environ["B2B_QUEUE_DIR"]) / "outbox" / "archivo"
         self.assertTrue((archivo / "tok-fallo.json").is_file())
-        self.assertEqual(len([a for a in avisos if "No pude enviar" in a]), 1)
+        self.assertEqual(len([a for a in avisos if "Correo falló después de encolar" in a]), 1)
+
+    def test_fallo_tras_encolar_reabre_tarjeta_y_avisa(self):
+        """Cierre en ⏳ no debe perder el lead si SMTP falla después."""
+        from b2b.telegram_gestion import registrar_pendiente, token_callback
+
+        os.environ["B2B_ENVIO_REAL"] = "1"
+        cola = Path(os.environ["B2B_QUEUE_DIR"])
+        inbox = cola / "inbox"
+        inbox.mkdir(parents=True, exist_ok=True)
+        lead = _lead("reabre@shop.example", nombre="Reabre Cigar Co")
+        lead_path = inbox / "reabre.json"
+        lead["telegram_notificado"] = True
+        lead["estado_tarjeta"] = "correo_en_curso"
+        lead_path.write_text(json.dumps(lead), encoding="utf-8")
+        tok = token_callback(lead)
+        registrar_pendiente(tok, lead, inbox_path=str(lead_path))
+        encolar_envio(lead, tok, ahora=LUNES)
+        # Simula el cierre de cupo que hace telegram_control en ⏳.
+        from b2b.despachador_tarjetas import _load, _save, cerrar_tarjeta
+
+        estado = _load()
+        estado["abiertas"] = {tok: {"enviada_en": LUNES.isoformat(), "inbox": str(lead_path)}}
+        _save(estado)
+        cerrar_tarjeta(tok, ahora=LUNES, espera_seg=0)
+        self.assertNotIn(tok, _load().get("abiertas") or {})
+
+        avisos = []
+
+        class _SMTP:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def ehlo(self):
+                pass
+
+            def starttls(self, context=None):
+                pass
+
+            def login(self, user, password):
+                pass
+
+            def send_message(self, msg):
+                raise TimeoutError("smtp timeout")
+
+        with patch("smtplib.SMTP", _SMTP), patch("telegram_bot.enviar_texto_telegram", side_effect=avisos.append), patch(
+            "b2b.envio_correo.random.randint", return_value=2
+        ):
+            for i in range(3):
+                procesar_outbox(LUNES + timedelta(minutes=5 + i * 30))
+        reabierto = json.loads(lead_path.read_text(encoding="utf-8"))
+        self.assertFalse(reabierto.get("telegram_notificado"))
+        self.assertEqual(reabierto.get("estado_tarjeta"), "smtp_fallo")
+        self.assertTrue(any("Correo falló después de encolar" in a and "Reabre Cigar" in a for a in avisos))
 
 
 if __name__ == "__main__":

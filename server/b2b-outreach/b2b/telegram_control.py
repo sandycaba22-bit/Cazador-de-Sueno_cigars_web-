@@ -284,14 +284,16 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
             estado = "en_cola" if resultado.startswith("⏳") else "enviado"
             actualizar_pendiente(tok, estado_envio=estado, texto_tarjeta=texto)
             # Libera el cupo ya: si queda en cola SMTP no debe bloquear la tanda de la mañana.
-            from b2b.seguimiento import registrar_enviado
-
+            # No registrar_enviado en ⏳: si SMTP falla después, aún se puede reabrir.
             if estado == "enviado" or resultado.startswith("⏳"):
+                from b2b.seguimiento import registrar_enviado
+
                 guardar_estado_lead(lead, "enviado" if estado == "enviado" else "en_cola", canal="correo")
-                registrar_enviado(lead, "correo")
+                if estado == "enviado":
+                    registrar_enviado(lead, "correo")
                 anotar_decision(lead, "aprobadas")
                 cerrar_tarjeta(tok)
-                # Evita que caducidad_veces reabra la tarjeta tras un correo ya encolado/enviado.
+                # Evita que caducidad_veces reabra mientras el correo sigue en cola SMTP.
                 inbox_path = Path(pend.get("inbox_path") or "")
                 if inbox_path.is_file():
                     try:
