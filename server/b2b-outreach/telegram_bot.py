@@ -226,9 +226,15 @@ class TelegramFormatError(RuntimeError):
     pass
 
 
+_DIR_REAL = Path(__file__).resolve().parent
+
+
 def load_local_env():
     """Lee el .env junto al script. No pisa variables con valor que ya vengan del servicio,
     pero sí rellena las que llegan vacías (p. ej. GOOGLE_PLACES_API_KEY= en /etc)."""
+    # En tests no se lee el .env real. Un test puede apuntar HERE a una carpeta temporal.
+    if os.getenv("B2B_UNDER_TEST") == "1" and HERE == _DIR_REAL:
+        return
     env_path = HERE / ".env"
     if not env_path.is_file():
         return
@@ -499,6 +505,11 @@ def _post_requests(url, payload, token):
 
 
 def _enviar_payload(payload, metodo="sendMessage"):
+    if os.getenv("B2B_UNDER_TEST") == "1":
+        from b2b.cortafuegos_tests import simular_envio
+
+        simular_envio(str(payload.get("text") or ""))
+        return {"ok": True, "result": {"message_id": 0}}
     token, _chat_id = telegram_credentials()
     url = f"https://api.telegram.org/bot{token}/{metodo}"
     ultimo = "Telegram no respondió."

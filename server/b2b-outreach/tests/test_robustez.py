@@ -227,6 +227,16 @@ class TestSalud(unittest.TestCase):
         self.assertFalse(toca_noche(local, "2026-11-02"))
 
 
+class TestCortafuegos(unittest.TestCase):
+    def test_api_telegram_falla_el_test(self):
+        import urllib.request
+
+        from b2b.cortafuegos_tests import LlamadaRealProhibida
+
+        with self.assertRaises(LlamadaRealProhibida):
+            urllib.request.urlopen("https://api.telegram.org/botx/getMe", timeout=1)
+
+
 class TestGetUpdates409(unittest.TestCase):
     def test_409_avisa_sin_abrir_socket_real(self):
         avisos = []

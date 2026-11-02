@@ -56,6 +56,11 @@ def alertar(clave: str, texto: str, *, cooldown_seg: int = 3600, enviar=None) ->
 
 
 def _enviar(token: str, chat: str, texto: str) -> None:
+    if os.getenv("B2B_UNDER_TEST") == "1":
+        from b2b.cortafuegos_tests import simular_envio
+
+        simular_envio(texto)
+        return
     import json as _json
     import urllib.request
 

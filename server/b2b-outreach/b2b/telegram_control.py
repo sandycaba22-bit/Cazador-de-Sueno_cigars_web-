@@ -110,6 +110,11 @@ def registrar_envio_telegram() -> None:
 
 
 def _telegram_post(token: str, method: str, payload: dict) -> dict | None:
+    if os.getenv("B2B_UNDER_TEST") == "1":
+        from b2b.cortafuegos_tests import simular_envio
+
+        simular_envio(str(payload.get("text") or method))
+        return {"ok": True, "result": {"message_id": 0}}
     url = f"https://api.telegram.org/bot{token}/{method}"
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(

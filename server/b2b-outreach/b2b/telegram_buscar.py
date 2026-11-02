@@ -20,7 +20,10 @@ def notificar_buscar(texto: str, simulado: bool = False) -> None:
     """Envía texto al chat B2B; no lanza excepción (el barrido sigue)."""
     if not (texto or "").strip():
         return
-    if simulado:
+    if simulado or os.getenv("B2B_UNDER_TEST") == "1":
+        from b2b.cortafuegos_tests import simular_envio
+
+        simular_envio(texto.strip())
         print(f"[Telegram simulado] {texto.strip()}", file=sys.stderr)
         return
     try:

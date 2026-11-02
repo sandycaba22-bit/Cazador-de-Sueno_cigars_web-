@@ -30,8 +30,12 @@ def sin_red_ni_credenciales_reales(monkeypatch):
             original()
 
     monkeypatch.setattr(telegram_bot, "load_local_env", cargar_solo_env_de_prueba)
-    for nombre in ("GOOGLE_PLACES_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"):
-        monkeypatch.setenv(nombre, "")
+    monkeypatch.setenv("B2B_UNDER_TEST", "1")
+    monkeypatch.setenv("B2B_ENVIO_REAL", "0")
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "000000000:TEST_TOKEN_NO_REAL_DO_NOT_SEND")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "1")
+    monkeypatch.setenv("TELEGRAM_ALERTAS_CHAT_ID", "2")
+    monkeypatch.setenv("GOOGLE_PLACES_API_KEY", "")
     # Los transportes simulados sustituyen esta barrera dentro de cada test.
     with patch("socket.socket.connect", side_effect=OSError("Red deshabilitada en tests")):
         yield
