@@ -1,0 +1,11 @@
+[Unit]
+Description=Cada 5 min, otro proceso revisa si --vigilar sigue escribiendo el latido
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

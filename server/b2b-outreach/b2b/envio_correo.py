@@ -79,9 +79,9 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
-    path = _ruta_envios()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    from b2b.io_atomico import escribir_json
+
+    escribir_json(_ruta_envios(), data)
 
 
 def envio_real() -> bool:
@@ -694,7 +694,9 @@ def _recuperar_tras_fallo_correo(item: dict, motivo: str) -> None:
     """Tras ⏳ el cupo ya se cerró: si SMTP falla, reabre el lead y avisa por Telegram."""
     nombre = item.get("nombre") or item.get("correo") or "el local"
     motivo_limpio = (motivo or "error SMTP").strip()[:300]
-    _avisar_una_vez(
+    from b2b.alertas_operador import alertar
+
+    alertar(
         f"smtp_recupera_{item.get('token') or nombre}",
         f"⚠️ Correo falló después de encolar a {nombre}: {motivo_limpio}. Reabrí la tarjeta.",
     )
@@ -808,7 +810,14 @@ def _fallo_temporal(item: dict, path: Path, momento: datetime, exc: BaseExceptio
         motivo = _error(exc)
         item["motivo_fallo"] = motivo
         _archivar_item(path, item)
+        nombre = item.get("nombre") or item.get("correo") or "el local"
         registrar_evento({"evento": "smtp_fallo", "error": motivo, "cuenta": item.get("cuenta")})
+        from b2b.alertas_operador import alertar
+
+        alertar(
+            f"smtp_{item.get('token') or nombre}",
+            f"⚠️ Fallo SMTP a {nombre}: {motivo[:240]}",
+        )
         _recuperar_tras_fallo_correo(item, motivo)
         return
     espera = timedelta(minutes=2 ** intentos)
@@ -1167,12 +1176,11 @@ def _cargar_imap_estado() -> dict:
 
 
 def _guardar_imap_estado(data: dict) -> None:
-    path = _ruta_imap_estado()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    # Conserva como máximo 5000 ids procesados.
+    from b2b.io_atomico import escribir_json
+
     data["procesados"] = list(data.get("procesados") or [])[-5000:]
     data["message_ids_nuestros"] = list(data.get("message_ids_nuestros") or [])[-2000:]
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    escribir_json(_ruta_imap_estado(), data)
 
 
 def registrar_message_id_enviado(message_id: str) -> None:
@@ -1208,6 +1216,61 @@ def _correos_contactados() -> set[str]:
         except (OSError, json.JSONDecodeError):
             pass
     return vistos
+
+
+_RE_FINAL = re.compile(r"final-recipient:\s*rfc822;\s*([^\s<>]+@[^\s<>]+)", re.I)
+_RE_FAILED = re.compile(r"[\w.+\-]+@[\w.\-]+\.[a-z]{2,}", re.I)
+
+
+def correo_de_rebote(from_hdr: str, subject: str, cuerpo: str) -> str:
+    """Si el mensaje es un rebote de Mail Delivery Subsystem, devuelve el correo inválido."""
+    texto = f"{from_hdr}\n{subject}\n{cuerpo}"
+    bajo = texto.lower()
+    if "mail delivery subsystem" not in bajo and "mailer-daemon" not in bajo:
+        return ""
+    m = _RE_FINAL.search(texto)
+    if m:
+        return m.group(1).strip().lower().rstrip(".,;")
+    for candidato in _RE_FAILED.findall(texto):
+        c = candidato.strip().lower()
+        if c.endswith(("@gmail.com",)) and "cazadordesueno" in c:
+            continue
+        if "mailer-daemon" in c or c.startswith("mailer-daemon"):
+            continue
+        return c
+    return ""
+
+
+def aplicar_rebote(correo: str, lead: dict | None = None) -> str:
+    """Marca el correo inválido y deja el lead en WhatsApp o formulario."""
+    correo = (correo or "").strip().lower()
+    if not correo:
+        return ""
+    marcar_correo_invalido(correo)
+    datos = dict(lead or {})
+    datos["correo"] = correo
+    datos["correo_invalido"] = correo
+    datos["sin_correo_publico"] = True
+    tiene_tel = bool((datos.get("telefono") or datos.get("whatsapp") or datos.get("telefono_internacional") or "").strip())
+    canal = "whatsapp" if tiene_tel else "formulario"
+    datos["canal_siguiente"] = canal
+    datos.pop("correo", None)
+    try:
+        guardar_estado_lead(
+            {"nombre": datos.get("nombre") or correo, "correo": correo, "web": datos.get("web") or ""},
+            "reboto",
+            canal_siguiente=canal,
+        )
+    except Exception as exc:
+        registrar_evento({"evento": "rebote_estado_fallo", "error": _error(exc)})
+    from b2b.alertas_operador import alertar
+
+    alertar(
+        f"rebote_{correo}",
+        f"⚠️ Rebote (Mail Delivery Subsystem) de {correo}. Lo marqué inválido y el lead pasa a {canal}.",
+    )
+    registrar_evento({"evento": "rebote_correo", "correo": correo, "canal": canal})
+    return canal
 
 
 def _es_remitente_ruido(direccion: str) -> bool:
@@ -1302,8 +1365,6 @@ def revisar_unsubscribe() -> list[str]:
                 procesados.add(clave_uid)
                 if mid:
                     procesados.add(mid)
-                if _es_remitente_ruido(origen) or origen == correo.lower():
-                    continue
                 cuerpo = ""
                 if msg.is_multipart():
                     for part in msg.walk():
@@ -1316,7 +1377,14 @@ def revisar_unsubscribe() -> list[str]:
                         cuerpo = payload.decode(msg.get_content_charset() or "utf-8", errors="replace")
                     else:
                         cuerpo = str(payload)
-                if not re.search(r"\bunsubscribe\b|\bBAJA\b", cuerpo + " " + _decodificar(msg.get("Subject") or ""), re.I):
+                asunto = _decodificar(msg.get("Subject") or "")
+                fallido = correo_de_rebote(from_hdr, asunto, cuerpo)
+                if fallido:
+                    aplicar_rebote(fallido, {"correo": fallido, "nombre": fallido})
+                    continue
+                if _es_remitente_ruido(origen) or origen == correo.lower():
+                    continue
+                if not re.search(r"\bunsubscribe\b|\bBAJA\b", cuerpo + " " + asunto, re.I):
                     continue
                 if not (es_respuesta or es_contactado):
                     continue
@@ -1326,9 +1394,11 @@ def revisar_unsubscribe() -> list[str]:
             imap.logout()
         except Exception as exc:
             estado["backoff_hasta"] = (ahora + timedelta(minutes=30)).isoformat(timespec="seconds")
-            registrar_evento(
-                {"evento": "imap_bajas_fallo", "cuenta": n, "error": _error(exc).replace(clave, "[clave]")}
-            )
+            detalle = _error(exc).replace(clave, "[clave]")
+            registrar_evento({"evento": "imap_bajas_fallo", "cuenta": n, "error": detalle})
+            from b2b.alertas_operador import alertar
+
+            alertar(f"imap_{n}", f"⚠️ Fallo IMAP en la cuenta {n}: {detalle[:240]}")
     estado["procesados"] = list(procesados)[-5000:]
     estado["ultimo_check"] = ahora.isoformat(timespec="seconds")
     _guardar_imap_estado(estado)

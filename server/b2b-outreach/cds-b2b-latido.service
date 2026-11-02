@@ -1,0 +1,17 @@
+[Unit]
+Description=Comprueba el latido del bot B2B (proceso distinto a --vigilar)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/html/server/b2b-outreach
+EnvironmentFile=-/etc/cazador-de-suenos/b2b-outreach.env
+Environment=B2B_QUEUE_DIR=/var/lib/cazador-de-suenos/b2b-outreach
+ExecStart=/usr/bin/python3 /var/www/html/server/b2b-outreach/scripts/comprobar_latido.py
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/cazador-de-suenos/b2b-outreach

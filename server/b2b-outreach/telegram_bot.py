@@ -889,16 +889,61 @@ def _poll_comandos_buscar():
 
 
 def vigilar(queue_dir, imprimir=False, una_pasada=False):
+    if not imprimir and os.getenv("B2B_SIMULADO", "").strip() != "1":
+        from b2b.arranque import advertencias_arranque, errores_arranque
+        from b2b.logging_ops import registrar_evento
+
+        fallos = errores_arranque()
+        if fallos:
+            aviso = "No arranco:\n" + "\n".join(f"- {f}" for f in fallos)
+            print(aviso, file=sys.stderr)
+            registrar_evento({"evento": "arranque_abortado", "texto": aviso[:500]})
+            try:
+                from b2b.alertas_operador import alertar
+
+                alertar("arranque", aviso, cooldown_seg=0)
+            except Exception:
+                pass
+            return
+        for aviso in advertencias_arranque():
+            print(f"ADVERTENCIA: {aviso}", file=sys.stderr)
+            registrar_evento({"evento": "arranque_advertencia", "texto": aviso[:500]})
     if not tomar_candado_lector():
         return
     from b2b.despachador_tarjetas import despachar, hay_trabajo, intervalo_poll, resumen_si_toca
     from b2b.envio_correo import procesar_outbox
+    from b2b.salud import latido
 
+    # El latido solo se escribe aquí. Lo lee otro proceso (scripts/comprobar_latido.py).
     while True:
+        latido()
         _poll_comandos_buscar()
         try:
             despachar(queue_dir)
             procesar_outbox()
+            from b2b.alertas_operador import alertar
+            from b2b.salud import avisos_periodicos
+
+            for clave, texto in avisos_periodicos(queue_dir):
+                alertar(clave, texto)
+            from b2b.reconciliar import reconciliar, toca_noche
+            from b2b.respaldo import respaldar_si_toca
+            from b2b.zonas import tz
+
+            local = __import__("datetime").datetime.now(tz("America/Santo_Domingo"))
+            from b2b.paths import state_file
+
+            marca_noche = state_file("reconciliar_dia.txt")
+            hecho = marca_noche.read_text(encoding="utf-8").strip() if marca_noche.is_file() else ""
+            if toca_noche(local, hecho):
+                lineas = reconciliar(queue_dir, ahora=local)
+                respaldar_si_toca(local)
+                marca_noche.parent.mkdir(parents=True, exist_ok=True)
+                marca_noche.write_text(local.strftime("%Y-%m-%d"), encoding="utf-8")
+                if lineas:
+                    alertar("reconciliar", "Reconciliación nocturna:\n" + "\n".join(lineas[:30]), cooldown_seg=0)
+            else:
+                respaldar_si_toca(local)
             from b2b.envio_correo import revisar_unsubscribe
             from b2b.seguimiento import textos_recordatorio
 
@@ -925,7 +970,14 @@ def vigilar(queue_dir, imprimir=False, una_pasada=False):
         except Exception as exc:
             from b2b.logging_ops import registrar_evento
 
-            registrar_evento({"evento": "vigilar_fallo", "error": sanitizar_error(exc)})
+            detalle = sanitizar_error(exc)
+            registrar_evento({"evento": "vigilar_fallo", "error": detalle})
+            try:
+                from b2b.alertas_operador import alertar
+
+                alertar("vigilar_fallo", f"⚠️ El lazo del servicio falló: {detalle[:300]}")
+            except Exception:
+                pass
         if una_pasada:
             return
         time.sleep(intervalo_poll(hay_trabajo(queue_dir / "inbox")))

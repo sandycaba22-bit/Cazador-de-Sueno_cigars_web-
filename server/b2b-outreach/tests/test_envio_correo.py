@@ -436,7 +436,11 @@ class TestTopes(_Base):
             def send_message(self, msg):
                 raise TimeoutError("smtp timeout")
 
-        with patch("smtplib.SMTP", _SMTP), patch("telegram_bot.enviar_texto_telegram", side_effect=avisos.append), patch(
+        def _cap(_clave, texto, **_kw):
+            avisos.append(texto)
+            return True
+
+        with patch("smtplib.SMTP", _SMTP), patch("b2b.alertas_operador.alertar", side_effect=_cap), patch(
             "b2b.envio_correo.random.randint", return_value=2
         ):
             for i in range(3):
@@ -494,7 +498,11 @@ class TestTopes(_Base):
             def send_message(self, msg):
                 raise TimeoutError("smtp timeout")
 
-        with patch("smtplib.SMTP", _SMTP), patch("telegram_bot.enviar_texto_telegram", side_effect=avisos.append), patch(
+        def _cap(_clave, texto, **_kw):
+            avisos.append(texto)
+            return True
+
+        with patch("smtplib.SMTP", _SMTP), patch("b2b.alertas_operador.alertar", side_effect=_cap), patch(
             "b2b.envio_correo.random.randint", return_value=2
         ):
             for i in range(3):

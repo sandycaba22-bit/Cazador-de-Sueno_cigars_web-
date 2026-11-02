@@ -59,9 +59,9 @@ def _load_seen() -> dict:
 
 
 def _save_seen(data: dict) -> None:
-    path = seen_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    from b2b.io_atomico import escribir_json
+
+    escribir_json(seen_path(), data)
 
 
 def en_lista_no_contactar(nombre: str, web: str = "") -> bool:
@@ -127,9 +127,9 @@ def _load_estados() -> dict:
 
 
 def _save_estados(data: dict) -> None:
-    path = _estado_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    from b2b.io_atomico import escribir_json
+
+    escribir_json(_estado_path(), data)
 
 
 def guardar_estado_lead(lead: dict, estado: str, **extra) -> None:

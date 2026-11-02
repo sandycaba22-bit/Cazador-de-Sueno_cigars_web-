@@ -213,9 +213,9 @@ def _save_cache(data: dict) -> None:
     data["busquedas"] = {k: v for k, v in data["busquedas"].items() if k.startswith(mes + "|")}
     vivos = {pid for v in data["busquedas"].values() for pid in v.get("ids", [])}
     data["places"] = {pid: raw for pid, raw in data["places"].items() if pid in vivos}
-    path = cache_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    from b2b.io_atomico import escribir_json
+
+    escribir_json(cache_path(), data, indent=1)
 
 
 def _clave_busqueda(pais: str, consulta: str) -> str:
@@ -417,7 +417,12 @@ def _avisar_error(error: GooglePlacesError) -> None:
         sigue = "En esta corrida sigo solo con OpenStreetMap."
     else:
         sigue = "En esta corrida no consulto OpenStreetMap."
-    _notificar(f"⚠️ Google Places {etiqueta} ({explicacion}). {sigue}")
+    texto = f"⚠️ Google Places {etiqueta} ({explicacion}). {sigue}"
+    _notificar(texto)
+    if codigo in (403, 429):
+        from b2b.alertas_operador import alertar
+
+        alertar(f"google_{codigo}", texto)
 
 
 def _orden_calidad(lead: dict) -> tuple:

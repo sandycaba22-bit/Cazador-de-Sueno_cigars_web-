@@ -368,6 +368,12 @@ def enviar_prospecto_telegram(
             message_id = enviar_mensaje_telegram(_sin_html(texto), reply_markup=teclado)
     except Exception as exc:
         if es_error_url_boton(exc):
+            from b2b.alertas_operador import alertar
+
+            alertar(
+                "button_url_invalid",
+                f"⚠️ BUTTON_URL_INVALID al enviar la tarjeta de {lead.get('nombre') or 'un lead'}. Reintento sin enlaces.",
+            )
             try:
                 teclado2 = teclado_solo_callbacks(teclado)
                 try:

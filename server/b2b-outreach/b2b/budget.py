@@ -93,9 +93,9 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
-    path = budget_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    from b2b.io_atomico import escribir_json
+
+    escribir_json(budget_path(), data)
 
 
 def motivo_bloqueo() -> str:

@@ -24,9 +24,9 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
-    path = _ruta()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    from b2b.io_atomico import escribir_json
+
+    escribir_json(_ruta(), data)
 
 
 def tomar_consultas(pais: str, todas: list, max_n: int) -> list:

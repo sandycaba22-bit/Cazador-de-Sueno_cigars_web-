@@ -93,6 +93,13 @@ class TestAprobar(unittest.TestCase):
         archivo = list((raiz / "outbox" / "archivo").glob("*.json"))
         self.assertEqual(len(cola) + len(archivo), 1)
 
+    def test_fallo_edita_la_tarjeta_y_quita_botones(self):
+        with patch("b2b.envio_correo.enviar_confirmado", return_value="⚠️ No envié: tope diario"):
+            tc._manejar_callback("t", "42", self._cb(f"b2bs:{self.tok}"))
+        payload = tc._telegram_post.call_args[0][2]
+        self.assertEqual(payload["reply_markup"]["inline_keyboard"], [])
+        self.assertIn("No envié", payload["text"])
+
     def test_cancelar_saca_el_correo(self):
         tc._manejar_callback("t", "42", self._cb(f"b2bs:{self.tok}"))
         tc._manejar_callback("t", "42", self._cb(f"b2bx:{self.tok}"))

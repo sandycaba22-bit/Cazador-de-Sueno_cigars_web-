@@ -57,8 +57,9 @@ def _load() -> dict:
 
 
 def _save(data: dict) -> None:
-    CONTROL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CONTROL_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    from b2b.io_atomico import escribir_json
+
+    escribir_json(CONTROL_PATH, data)
 
 
 def esta_pausado() -> bool:
@@ -266,7 +267,9 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
     if data.startswith("b2bn:"):
         cancelar_envio(tok)
         _answer(token, cb, "Cancelado")
-        actualizar_pendiente(tok, estado_envio="", espera="")
+        texto = texto_con_estado(base or lead.get("nombre") or "—", "Cancelado. No se envió el correo.")
+        _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
+        actualizar_pendiente(tok, estado_envio="omitido", texto_tarjeta=texto, espera="")
         return "Cancelado. No se envió el correo."
 
     if data.startswith("b2bs:"):
@@ -277,6 +280,11 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
 
         resultado = enviar_confirmado(lead, tok)
         _answer(token, cb, (resultado or "Listo")[:180])
+        if not (resultado.startswith("✅") or resultado.startswith("⏳") or "B2B_ENVIO_REAL=0" in resultado):
+            texto = texto_con_estado(base or lead.get("nombre") or "—", (resultado or "⚠️ No envié").split("\n", 1)[0][:180])
+            _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
+            actualizar_pendiente(tok, estado_envio="fallo", texto_tarjeta=texto)
+            return resultado
         if resultado.startswith("✅") or resultado.startswith("⏳") or "B2B_ENVIO_REAL=0" in resultado:
             texto = texto_con_estado(base or lead.get("nombre") or "—", resultado.split("\n", 1)[0][:180])
             markup = teclado_en_cola(lead, tok) if resultado.startswith("⏳") else teclado_cerrado()
@@ -455,7 +463,16 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
     try:
         with urllib.request.urlopen(url, timeout=8) as resp:
             body = json.loads(resp.read().decode("utf-8"))
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError):
+    except urllib.error.HTTPError as exc:
+        if getattr(exc, "code", None) == 409:
+            from b2b.alertas_operador import alertar
+
+            alertar(
+                "getupdates_409",
+                "⚠️ getUpdates devolvió 409 Conflict: otro proceso está leyendo este bot.",
+            )
+        return acks
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
         return acks
     for upd in body.get("result") or []:
         uid = int(upd.get("update_id") or 0)
@@ -526,6 +543,11 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
             else:
                 _enviar_dudoso(token, chat_id, tok_d, lead_d)
                 acks.append(f"Dudosos: {total} en esta tanda. Sale el primero; el siguiente, al aprobar o descartar.")
+        elif text in ("/salud", "/health"):
+            from b2b.paths import queue_dir
+            from b2b.salud import texto_salud
+
+            acks.append(texto_salud(queue_dir()))
         elif text in ("/embudo", "/funnel"):
             from b2b.embudo import texto_embudo
 
