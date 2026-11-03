@@ -278,30 +278,32 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
         return "Cancelado. No se envió el correo."
 
     if data.startswith("b2bs:"):
-        if pend.get("estado_envio") in ("en_cola", "enviado"):
+        if pend.get("estado_envio") in ("en_cola", "programado", "enviado"):
             _answer(token, cb, "Ya está en cola")
             return "Ya está en cola o enviado."
         from b2b.envio_correo import enviar_confirmado
 
         resultado = enviar_confirmado(lead, tok)
         _answer(token, cb, (resultado or "Listo")[:180])
-        if not (resultado.startswith("✅") or resultado.startswith("⏳") or "B2B_ENVIO_REAL=0" in resultado):
+        programado = resultado.startswith("Se enviará") or resultado.startswith("⏳")
+        exito = resultado.startswith("✅") or programado or "B2B_ENVIO_REAL=0" in resultado
+        if not exito:
             texto = texto_con_estado(base or lead.get("nombre") or "—", (resultado or "⚠️ No envié").split("\n", 1)[0][:180])
             _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
             actualizar_pendiente(tok, estado_envio="fallo", texto_tarjeta=texto)
             return resultado
-        if resultado.startswith("✅") or resultado.startswith("⏳") or "B2B_ENVIO_REAL=0" in resultado:
+        if exito:
             texto = texto_con_estado(base or lead.get("nombre") or "—", resultado.split("\n", 1)[0][:180])
-            markup = teclado_en_cola(lead, tok) if resultado.startswith("⏳") else teclado_cerrado()
+            markup = teclado_en_cola(lead, tok) if programado else teclado_cerrado()
             _editar_tarjeta(token, chat_id, msg_id, texto, markup)
-            estado = "en_cola" if resultado.startswith("⏳") else "enviado"
+            estado = "programado" if programado else "enviado"
             actualizar_pendiente(tok, estado_envio=estado, texto_tarjeta=texto)
-            # Libera el cupo ya: si queda en cola SMTP no debe bloquear la tanda de la mañana.
-            # No registrar_enviado en ⏳: si SMTP falla después, aún se puede reabrir.
-            if estado == "enviado" or resultado.startswith("⏳"):
+            # Aprobar no envía: el planificador suelta el correo dentro de la ventana local.
+            # Libera el cupo de tarjetas ya, para no frenar la tanda.
+            if estado in ("enviado", "programado"):
                 from b2b.seguimiento import registrar_enviado
 
-                guardar_estado_lead(lead, "enviado" if estado == "enviado" else "en_cola", canal="correo")
+                guardar_estado_lead(lead, "enviado" if estado == "enviado" else "programado", canal="correo")
                 if estado == "enviado":
                     registrar_enviado(lead, "correo")
                 anotar_decision(lead, "aprobadas")
@@ -315,7 +317,7 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
                         lead_disk = {}
                     if isinstance(lead_disk, dict):
                         lead_disk["telegram_notificado"] = True
-                        lead_disk["estado_tarjeta"] = "correo_en_curso" if estado == "en_cola" else "correo_enviado"
+                        lead_disk["estado_tarjeta"] = "correo_en_curso" if estado == "programado" else "correo_enviado"
                         inbox_path.write_text(
                             json.dumps(lead_disk, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
                         )
@@ -510,10 +512,12 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
             acks.append("▶️ Tarjetas y envíos reanudados.")
         elif text in ("/cola",):
             from b2b.despachador_tarjetas import texto_cola
+            from b2b.envio_correo import texto_cola_programada
             from b2b.paths import queue_dir
 
             cola = queue_dir() or state_file("x").parent
             acks.append(texto_cola(cola))
+            acks.append(texto_cola_programada())
         elif text.startswith("/ritmo"):
             from b2b.despachador_tarjetas import set_ritmo
 

@@ -1,0 +1,18 @@
+{
+  "paises": {
+    "Jamaica": {
+      "zona": "America/Jamaica",
+      "dias": [1, 2, 3, 4, 5],
+      "prioridad": [2, 3, 4],
+      "descanso": [],
+      "feriados": []
+    },
+    "Puerto Rico": {
+      "zona": "America/Puerto_Rico",
+      "dias": [1, 2, 3, 4, 5],
+      "prioridad": [2, 3, 4],
+      "descanso": [],
+      "feriados": []
+    }
+  }
+}

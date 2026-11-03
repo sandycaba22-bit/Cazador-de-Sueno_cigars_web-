@@ -255,7 +255,7 @@ def texto_con_estado(texto: str, linea: str) -> str:
     partes = (texto or "").split("\n", 1)
     resto = partes[1] if len(partes) > 1 else ""
     # Quita un estado previo pegado en la segunda línea.
-    if resto.startswith(("⏳", "📤", "⚠️", "🗑", "⏭")):
+    if resto.startswith(("⏳", "📤", "⚠️", "🗑", "⏭", "Se enviará", "✅")):
         resto = resto.split("\n", 1)[1] if "\n" in resto else ""
     return partes[0] + "\n" + linea + ("\n" + resto if resto else "")
 

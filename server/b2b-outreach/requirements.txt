@@ -1,3 +1,7 @@
 python-dotenv==1.2.4
 requests==2.34.2
 phonenumbers==9.0.22
+tzdata==2026.6
+# Opcional y offline. Sin este paquete la zona sale de lat/lon solo en el panhandle
+# de Florida, El Paso y Arizona; el resto usa la tabla estado/país.
+# timezonefinder==6.5.9

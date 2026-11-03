@@ -114,7 +114,7 @@ def _reparar_estados(*, aplicar: bool, pref: str) -> list[str]:
                 leads[clave] = item
                 tocado = True
             cambios.append(f"{pref}Reparé {item.get('nombre') or correo}: figuraba enviado y no está en envios_correo.")
-        if estado == "en_cola" and correo and not _en_outbox(correo):
+        if estado in ("en_cola", "programado") and correo and not _en_outbox(correo):
             if aplicar:
                 item["estado"] = "aprobado"
                 item["reparado"] = "en_cola_sin_outbox"
@@ -148,7 +148,7 @@ def _en_outbox(correo: str) -> bool:
         return False
     for path in carpeta.glob("*.json"):
         item = _leer(path) or {}
-        if (item.get("correo") or "").strip().lower() == correo and item.get("estado") == "en_cola":
+        if (item.get("correo") or "").strip().lower() == correo and item.get("estado") in ("en_cola", "programado"):
             return True
     return False
 

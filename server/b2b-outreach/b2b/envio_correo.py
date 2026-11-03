@@ -23,7 +23,13 @@ from b2b.redactor import (
     cuerpo_sin_asunto,
     direccion_postal,
 )
-from b2b.zonas import en_horario_laboral, siguiente_habil
+from b2b.zona_horaria import (
+    aplicar_zona,
+    en_ventana,
+    frase_programado,
+    ordenar_ola,
+    primer_hueco,
+)
 
 _RE_CORREO = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _RE_ENLACE = re.compile(r"https?://", re.I)
@@ -190,11 +196,12 @@ def cuentas_activas() -> list[dict]:
 
 
 def _dia_rd(momento: datetime) -> str:
-    from b2b.zonas import tz
+    """Día del operador (por defecto Santo Domingo). Solo para la rampa y las tandas, no para el tope de 24 h."""
+    from b2b.zona_horaria import zona_operador
 
     if momento.tzinfo is None:
         momento = momento.replace(tzinfo=timezone.utc)
-    return momento.astimezone(tz("America/Santo_Domingo")).strftime("%Y-%m-%d")
+    return momento.astimezone(zona_operador()).strftime("%Y-%m-%d")
 
 
 def _parse_marca(valor: str) -> datetime | None:
@@ -216,7 +223,7 @@ def items_en_cola() -> list[tuple[Path, dict]]:
             item = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
-        if item.get("estado") not in (None, "en_cola"):
+        if item.get("estado") not in (None, "en_cola", "programado"):
             continue
         filas.append((path, item))
     return filas
@@ -242,17 +249,32 @@ def _cupo_cuenta(n: int, activas: list[dict], momento: datetime) -> int:
     return max(0, min(max_por_cuenta(), parte))
 
 
-def _enviados_hoy(data: dict, n: int, momento: datetime) -> int:
+def _tope_24h() -> int:
+    """Techo duro en 24 horas corridas. Si la variable falta o no es un número, 30."""
+    return max(1, _int_env("CORREOS_MAX_DIA", 30))
+
+
+def _dia_de_envio(envio: dict, momento_campo: str = "cuando") -> str:
+    marca = _parse_marca(envio.get(momento_campo) or "")
+    if marca is not None:
+        return _dia_rd(marca)
+    return str(envio.get("dia") or "")
+
+
+def _enviados_dia(data: dict, n: int | None, momento: datetime) -> int:
     dia = _dia_rd(momento)
-    return sum(1 for e in data.get("envios") or [] if e.get("cuenta") == n and e.get("dia") == dia and e.get("ok"))
+    total = 0
+    for envio in data.get("envios") or []:
+        if not envio.get("ok"):
+            continue
+        if n is not None and envio.get("cuenta") != n:
+            continue
+        if _dia_de_envio(envio) == dia:
+            total += 1
+    return total
 
 
-def _total_hoy(data: dict, momento: datetime) -> int:
-    dia = _dia_rd(momento)
-    return sum(1 for e in data.get("envios") or [] if e.get("dia") == dia and e.get("ok"))
-
-
-def _en_cola_hoy(n: int | None, momento: datetime, *, excluir_token: str = "") -> int:
+def _en_cola_dia(n: int | None, momento: datetime, *, excluir_token: str = "") -> int:
     dia = _dia_rd(momento)
     total = 0
     for _path, item in items_en_cola():
@@ -261,9 +283,83 @@ def _en_cola_hoy(n: int | None, momento: datetime, *, excluir_token: str = "") -
         if n is not None and item.get("cuenta") != n:
             continue
         cuando = _parse_marca(item.get("enviar_despues_de") or "")
-        if cuando and _dia_rd(cuando) == dia:
+        if cuando is not None and _dia_rd(cuando) == dia:
             total += 1
     return total
+
+
+def _alinear(marca: datetime | None, ancla: datetime) -> tuple[datetime, datetime] | None:
+    if marca is None:
+        return None
+    if ancla.tzinfo is None:
+        ancla = ancla.replace(tzinfo=timezone.utc)
+    if marca.tzinfo is None:
+        marca = marca.replace(tzinfo=timezone.utc)
+    return marca, ancla
+
+
+def _dentro_de_24h(marca: datetime | None, ancla: datetime) -> bool:
+    """Envíos ya hechos: (ancla-24h, ancla]. No es el día calendario."""
+    par = _alinear(marca, ancla)
+    if par is None:
+        return False
+    marca, ancla = par
+    return ancla - timedelta(hours=24) < marca <= ancla
+
+
+def _solapa_24h(marca: datetime | None, ancla: datetime) -> bool:
+    """Cola: cuenta lo programado hasta 24 h antes o después, para no amontonar."""
+    par = _alinear(marca, ancla)
+    if par is None:
+        return False
+    marca, ancla = par
+    return abs((marca - ancla).total_seconds()) <= 24 * 3600
+
+
+def _enviados_hoy(data: dict, n: int, momento: datetime) -> int:
+    return sum(
+        1
+        for e in data.get("envios") or []
+        if e.get("cuenta") == n and e.get("ok") and _dentro_de_24h(_parse_marca(e.get("cuando") or ""), momento)
+    )
+
+
+def _total_hoy(data: dict, momento: datetime) -> int:
+    return sum(
+        1
+        for e in data.get("envios") or []
+        if e.get("ok") and _dentro_de_24h(_parse_marca(e.get("cuando") or ""), momento)
+    )
+
+
+def _en_cola_hoy(n: int | None, momento: datetime, *, excluir_token: str = "") -> int:
+    total = 0
+    for _path, item in items_en_cola():
+        if excluir_token and item.get("token") == excluir_token:
+            continue
+        if n is not None and item.get("cuenta") != n:
+            continue
+        cuando = _parse_marca(item.get("enviar_despues_de") or "")
+        if _solapa_24h(cuando, momento):
+            total += 1
+    return total
+
+
+def _marcas_comprometidas(data: dict, ancla: datetime, *, excluir_token: str = "") -> list[datetime]:
+    marcas: list[datetime] = []
+    for envio in data.get("envios") or []:
+        if not envio.get("ok"):
+            continue
+        marca = _parse_marca(envio.get("cuando") or "")
+        if _dentro_de_24h(marca, ancla):
+            marcas.append(marca)
+    for _path, item in items_en_cola():
+        if excluir_token and item.get("token") == excluir_token:
+            continue
+        marca = _parse_marca(item.get("enviar_despues_de") or "")
+        if _solapa_24h(marca, ancla):
+            marcas.append(marca)
+    return marcas
 
 
 def _comprometidos_cuenta(data: dict, n: int, momento: datetime, *, excluir_token: str = "") -> int:
@@ -280,21 +376,49 @@ def _activas_sin_pausa(data: dict | None = None) -> list[dict]:
     return [c for c in cuentas_activas() if str(c["n"]) not in pausadas]
 
 
+def _cuenta_cabe(data: dict, cuenta: dict, activas: list[dict], momento: datetime, *, excluir_token: str = "") -> bool:
+    n = cuenta["n"]
+    if _comprometidos_cuenta(data, n, momento, excluir_token=excluir_token) >= max_por_cuenta():
+        return False
+    cupo = _cupo_cuenta(n, activas, momento)
+    dia = _enviados_dia(data, n, momento) + _en_cola_dia(n, momento, excluir_token=excluir_token)
+    return dia < cupo
+
+
+def _total_cabe(data: dict, momento: datetime, *, excluir_token: str = "") -> bool:
+    if _total_comprometido(data, momento, excluir_token=excluir_token) >= _tope_24h():
+        return False
+    dia = _enviados_dia(data, None, momento) + _en_cola_dia(None, momento, excluir_token=excluir_token)
+    return dia < _tope_efectivo(momento)
+
+
+def _al_dia_siguiente(momento: datetime, lead: dict) -> datetime:
+    from b2b.zonas import tz as tz_lugar
+
+    zona = tz_lugar(str(lead.get("zona_iana") or "America/New_York"))
+    local = momento.astimezone(zona)
+    manana = datetime(local.year, local.month, local.day, tzinfo=zona) + timedelta(days=1)
+    return primer_hueco(manana.astimezone(timezone.utc), lead)
+
+
 def elegir_cuenta(momento: datetime | None = None, *, excluir_token: str = "") -> dict | None:
     momento = momento or _ahora()
     data = _load()
     activas = _activas_sin_pausa(data)
     if not activas:
         return None
-    if _total_comprometido(data, momento, excluir_token=excluir_token) >= _tope_efectivo(momento):
+    if not _total_cabe(data, momento, excluir_token=excluir_token):
         return None
-    inicio = int(data.get("turno") or 0)
-    for salto in range(len(activas)):
-        cuenta = activas[(inicio + salto) % len(activas)]
-        cupo = _cupo_cuenta(cuenta["n"], activas, momento)
-        if _comprometidos_cuenta(data, cuenta["n"], momento, excluir_token=excluir_token) < cupo:
-            return cuenta
-    return None
+    inicio = int(data.get("turno") or 0) % len(activas)
+    candidatos = []
+    for i, cuenta in enumerate(activas):
+        if _cuenta_cabe(data, cuenta, activas, momento, excluir_token=excluir_token):
+            carga = _comprometidos_cuenta(data, cuenta["n"], momento, excluir_token=excluir_token)
+            candidatos.append(((carga, (i - inicio) % len(activas)), cuenta))
+    if not candidatos:
+        return None
+    candidatos.sort(key=lambda fila: fila[0])
+    return candidatos[0][1]
 
 
 def _avanzar_turno(cuenta: dict) -> None:
@@ -331,6 +455,7 @@ def puede_enviar_correo(
     momento: datetime | None = None,
     *,
     solo_si_hay_cupo_hoy: bool = False,
+    es_seguimiento: bool = False,
 ) -> tuple[bool, str]:
     momento = momento or _ahora()
     correo = (lead.get("correo") or "").strip()
@@ -347,11 +472,12 @@ def puede_enviar_correo(
     if esta_excluido(bajo):
         return False, "en la lista de exclusión"
     dom = _dominio_correo(bajo)
-    for previo in _envios_recientes(data, 30):
-        if (previo.get("correo") or "").lower() == bajo:
-            return False, "ese correo ya recibió un mensaje"
-        if _dominio_bloquea_30d(dom) and previo.get("dominio") == dom:
-            return False, "ese dominio ya recibió un mensaje"
+    if not es_seguimiento:
+        for previo in _envios_recientes(data, 30):
+            if (previo.get("correo") or "").lower() == bajo:
+                return False, "ese correo ya recibió un mensaje"
+            if _dominio_bloquea_30d(dom) and previo.get("dominio") == dom:
+                return False, "ese dominio ya recibió un mensaje"
     activas = _activas_sin_pausa(data)
     if not activas:
         return False, "sin cuenta de correo activa"
@@ -491,39 +617,51 @@ def lugar_del_lead(lead: dict) -> str:
 
 
 def programar_momento(lead: dict, ahora: datetime | None = None) -> datetime:
+    """Primer hueco local del negocio. Si el cupo de 24 h está lleno, el siguiente hueco libre."""
     ahora = ahora or _ahora()
     if ahora.tzinfo is None:
         ahora = ahora.replace(tzinfo=timezone.utc)
-    lugar = lugar_del_lead(lead)
-    inicio, fin = _horas()
+    aplicar_zona(lead)
     ultimo = ahora
+    hay_cola = False
     for _path, item in items_en_cola():
         marca = _parse_marca(item.get("enviar_despues_de") or "")
-        if marca and marca > ultimo:
+        if not marca:
+            continue
+        hay_cola = True
+        if marca > ultimo:
             ultimo = marca
-    previsto = ultimo + _delta_pausa()
-    if not en_horario_laboral(previsto, lugar, inicio, fin):
-        previsto = siguiente_habil(previsto, lugar, inicio, fin)
+    previsto = (ultimo + _delta_pausa()) if hay_cola else ahora
+    if previsto < ahora:
+        previsto = ahora
+    previsto = primer_hueco(previsto, lead)
     data = _load()
-    if _total_comprometido(data, previsto) >= _tope_efectivo(previsto):
-        previsto = siguiente_habil(previsto + timedelta(hours=12), lugar, inicio, fin)
-        while _total_comprometido(data, previsto) >= _tope_efectivo(previsto):
-            previsto = siguiente_habil(previsto + timedelta(hours=12), lugar, inicio, fin)
+    if not _activas_sin_pausa(data):
+        return previsto
+    for _ in range(21):
+        if elegir_cuenta(previsto) is not None:
+            return previsto
+        lleno_24h = _total_comprometido(data, previsto) >= _tope_24h()
+        activas = _activas_sin_pausa(data)
+        cuentas_24h = bool(activas) and all(
+            _comprometidos_cuenta(data, c["n"], previsto) >= max_por_cuenta() for c in activas
+        )
+        if lleno_24h or cuentas_24h:
+            marcas = _marcas_comprometidas(data, previsto)
+            if not marcas:
+                return previsto
+            previsto = primer_hueco(min(marcas) + timedelta(hours=24, seconds=1), lead)
+        else:
+            previsto = _al_dia_siguiente(previsto, lead)
     return previsto
 
 
 def texto_ventana(lead: dict, ahora: datetime | None = None) -> str:
     ahora = ahora or _ahora()
-    lugar = lugar_del_lead(lead)
-    inicio, fin = _horas()
-    previsto = programar_momento(lead, ahora)
-    from b2b.zonas import ahora_local
-
-    local = ahora_local(previsto, lugar)
-    hora_fin = (local + timedelta(minutes=max(1, _int_env("B2B_ENVIO_PAUSA_MAX", 5) - _int_env("B2B_ENVIO_PAUSA_MIN", 2)))).strftime("%H:%M")
-    if local.date() == ahora_local(ahora, lugar).date() and en_horario_laboral(previsto, lugar, inicio, fin):
-        return f"Sale hoy entre {local.strftime('%H:%M')} y {hora_fin} (hora del local)"
-    return f"Sale el {local.strftime('%Y-%m-%d')} a las {local.strftime('%H:%M')} (hora del local)"
+    if ahora.tzinfo is None:
+        ahora = ahora.replace(tzinfo=timezone.utc)
+    aplicar_zona(lead)
+    return frase_programado(programar_momento(lead, ahora), lead, ahora)
 
 
 def encolar_envio(lead: dict, token: str, *, ahora: datetime | None = None) -> dict | None:
@@ -554,10 +692,12 @@ def encolar_envio(lead: dict, token: str, *, ahora: datetime | None = None) -> d
         "cuerpo": cuerpo,
         "enviar_despues_de": cuando.isoformat(timespec="seconds"),
         "lugar": lugar_del_lead(lead),
+        "zona_iana": lead.get("zona_iana") or "",
+        "puntaje": lead.get("puntaje"),
         "nombre": lead.get("nombre") or "",
         "message_id": lead.get("message_id"),
         "intentos": 0,
-        "estado": "en_cola",
+        "estado": "programado",
         "lead": {
             "nombre": lead.get("nombre") or "",
             "correo": lead.get("correo") or "",
@@ -565,7 +705,14 @@ def encolar_envio(lead: dict, token: str, *, ahora: datetime | None = None) -> d
             "idioma": lead.get("idioma") or "en",
             "pais": lead.get("pais") or "",
             "estado": lead.get("estado") or lead.get("pais") or "",
+            "ciudad": lead.get("ciudad") or "",
+            "lat": lead.get("lat"),
+            "lon": lead.get("lon"),
             "tipo": lead.get("tipo") or "",
+            "puntaje": lead.get("puntaje"),
+            "zona_iana": lead.get("zona_iana") or "",
+            "zona_fuente": lead.get("zona_fuente") or "",
+            "zona_exacta": bool(lead.get("zona_exacta")),
             "asunto_variante": variante,
             "cuerpo_editado": lead.get("cuerpo_editado") or "",
             "asunto": asunto,
@@ -780,26 +927,26 @@ def _editar_estado(item: dict, linea: str) -> None:
 
         from b2b.telegram_prospecto import teclado_en_cola, teclado_cerrado
 
-        markup = teclado_en_cola(pend, token) if item.get("estado") == "en_cola" else teclado_cerrado()
+        markup = teclado_en_cola(pend, token) if item.get("estado") in ("en_cola", "programado") else teclado_cerrado()
         editar_mensaje_telegram(int(message_id), texto, markup)
     except Exception as exc:
         registrar_evento({"evento": "editar_tarjeta_fallo", "error": _error(exc)})
 
 
 def _reprogramar_por_tope(item: dict, path: Path, momento: datetime) -> None:
-    lugar = item.get("lugar") or "Florida"
-    inicio, fin = _horas()
-    siguiente = siguiente_habil(momento + timedelta(hours=12), lugar, inicio, fin)
+    lead = dict(item.get("lead") or {})
+    lead.setdefault("estado", item.get("lugar") or "")
+    lead.setdefault("pais", item.get("lugar") or "")
+    aplicar_zona(lead)
+    marcas = _marcas_comprometidas(_load(), momento, excluir_token=item.get("token") or "")
+    base = (min(marcas) + timedelta(hours=24, seconds=1)) if marcas else (momento + timedelta(hours=24))
+    siguiente = primer_hueco(base, lead)
     item["enviar_despues_de"] = siguiente.isoformat(timespec="seconds")
-    item["estado"] = "en_cola"
+    item["estado"] = "programado"
+    item["zona_iana"] = lead.get("zona_iana") or ""
+    item["lead"] = {**(item.get("lead") or {}), **{k: lead.get(k) for k in ("zona_iana", "zona_fuente", "zona_exacta")}}
     path.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    from b2b.zonas import ahora_local
-
-    local = ahora_local(siguiente, lugar)
-    _editar_estado(
-        item,
-        f"⏳ En cola · sale el {local.strftime('%Y-%m-%d')} a las {local.strftime('%H:%M')} (hora del local)",
-    )
+    _editar_estado(item, frase_programado(siguiente, lead, momento))
 
 
 def _fallo_temporal(item: dict, path: Path, momento: datetime, exc: BaseException) -> None:
@@ -836,12 +983,103 @@ def _elegir_cuenta_al_enviar(item: dict, momento: datetime) -> dict | None:
             preferida_n = None
     if preferida_n is not None:
         candidata = _cuenta_por_numero(preferida_n)
-        if candidata is not None:
-            cupo = _cupo_cuenta(candidata["n"], _activas_sin_pausa(data), momento)
-            if _comprometidos_cuenta(data, candidata["n"], momento, excluir_token=token) < cupo:
-                if _total_comprometido(data, momento, excluir_token=token) < _tope_efectivo(momento):
-                    return candidata
+        activas = _activas_sin_pausa(data)
+        if candidata is not None and _total_cabe(data, momento, excluir_token=token):
+            if _cuenta_cabe(data, candidata, activas, momento, excluir_token=token):
+                return candidata
     return elegir_cuenta(momento, excluir_token=token)
+
+
+def _cuerpo_seguimiento(nombre: str, idioma: str, paso: int, cuenta: str) -> str:
+    from b2b.redactor import WHOLESALE_URL, asegurar_pie
+
+    if idioma == "es":
+        texto = (
+            f"Hola, equipo de {nombre}:\n\n"
+            f"Les escribo de nuevo, {paso} días después, por si pudieron ver la línea. "
+            f"El catálogo sigue aquí: {WHOLESALE_URL}\n"
+        )
+    else:
+        texto = (
+            f"Hello {nombre} team,\n\n"
+            f"I'm writing again, {paso} days later, in case you had a chance to look at the line. "
+            f"The catalog is still here: {WHOLESALE_URL}\n"
+        )
+    if cuenta:
+        texto += f"\n{cuenta}\n"
+    return asegurar_pie(texto, "es" if idioma == "es" else "en")
+
+
+def _materializar_seguimientos(ahora: datetime) -> None:
+    """Pasa a la cola los seguimientos (días 4 y 10) cuyo hueco local ya llegó."""
+    from b2b.redactor import asunto_correo
+    from b2b.seguimiento import marcar_plan, planes_listos
+
+    for clave, seg, plan in planes_listos(ahora):
+        lead = dict(seg.get("lead") or {})
+        lead.setdefault("correo", seg.get("correo") or "")
+        lead.setdefault("nombre", seg.get("nombre") or "")
+        dia = int(plan.get("dia") or 0)
+        ok, motivo = puede_enviar_correo(lead, ahora, es_seguimiento=True)
+        if not ok:
+            marcar_plan(clave, dia, "cancelado", motivo)
+            continue
+        token = "seg-" + re.sub(r"[^a-z0-9]+", "-", clave.lower()).strip("-")[:40] + f"-{dia}"
+        path = outbox_dir() / f"{token}.json"
+        if path.is_file() or (archivo_dir() / f"{token}.json").is_file():
+            marcar_plan(clave, dia, "programado", "", materializado=True)
+            continue
+        aplicar_zona(lead)
+        idioma = lead.get("idioma") or "en"
+        elegida = elegir_cuenta(ahora)
+        cuenta = (elegida or {}).get("correo") or ""
+        cuando = _parse_marca(plan.get("enviar_despues_de") or "") or ahora
+        item = {
+            "token": token,
+            "tipo": "seguimiento",
+            "paso": dia,
+            "correo": (lead.get("correo") or "").strip(),
+            "dominio": _dominio_correo(lead.get("correo") or ""),
+            "cuenta": (elegida or {}).get("n"),
+            "cuenta_correo": cuenta,
+            "asunto": "Re: " + asunto_correo(lead.get("nombre") or "", idioma),
+            "variante": "A",
+            "cuerpo": _cuerpo_seguimiento(lead.get("nombre") or "your shop", idioma, dia, cuenta),
+            "enviar_despues_de": cuando.isoformat(timespec="seconds"),
+            "lugar": lugar_del_lead(lead),
+            "zona_iana": lead.get("zona_iana") or "",
+            "puntaje": lead.get("puntaje"),
+            "nombre": lead.get("nombre") or "",
+            "intentos": 0,
+            "estado": "programado",
+            "lead": lead,
+        }
+        path.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        marcar_plan(clave, dia, "programado", "", materializado=True)
+
+
+def texto_cola_programada(limite: int = 20) -> str:
+    filas = []
+    for _path, item in items_en_cola():
+        cuando = _parse_marca(item.get("enviar_despues_de") or "")
+        if cuando is None:
+            continue
+        lead = dict(item.get("lead") or {})
+        lead.setdefault("ciudad", "")
+        lead.setdefault("estado", item.get("lugar") or "")
+        lead.setdefault("zona_iana", item.get("zona_iana") or "")
+        filas.append((cuando, item, lead))
+    filas.sort(key=lambda fila: fila[0])
+    if not filas:
+        return "📧 No hay correos programados."
+    from b2b.zona_horaria import linea_horario
+
+    lineas = [f"📧 Programados: {len(filas)}"]
+    for cuando, item, lead in filas[:limite]:
+        lineas.append(f"• {item.get('nombre') or '—'} — {linea_horario(cuando, lead)}")
+    if len(filas) > limite:
+        lineas.append(f"… y {len(filas) - limite} más.")
+    return "\n".join(lineas)
 
 
 def procesar_outbox(ahora: datetime | None = None) -> int:
@@ -852,25 +1090,42 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
     ahora = ahora or _ahora()
     if ahora.tzinfo is None:
         ahora = ahora.replace(tzinfo=timezone.utc)
+    _materializar_seguimientos(ahora)
     hechos = 0
-    inicio, fin = _horas()
+    listos = []
     for path, item in items_en_cola():
         cuando = _parse_marca(item.get("enviar_despues_de") or "")
         if not cuando or cuando > ahora:
             continue
-        lugar = item.get("lugar") or "Florida"
-        if not en_horario_laboral(ahora, lugar, inicio, fin):
-            siguiente = siguiente_habil(ahora, lugar, inicio, fin)
+        fila = dict(item)
+        fila["_path"] = path
+        fila["_cuando_orden"] = cuando
+        listos.append(fila)
+    for item in ordenar_ola(listos):
+        path = item.pop("_path")
+        item.pop("_cuando_orden", None)
+        lead = dict(item.get("lead") or {})
+        lead["correo"] = item.get("correo") or lead.get("correo")
+        lead["nombre"] = item.get("nombre") or lead.get("nombre")
+        lead.setdefault("estado", item.get("lugar") or lead.get("estado") or "")
+        lead.setdefault("pais", lead.get("pais") or item.get("lugar") or "")
+        aplicar_zona(lead)
+        item["zona_iana"] = lead.get("zona_iana") or ""
+        item["lead"] = lead
+        if not en_ventana(ahora, lead):
+            siguiente = primer_hueco(ahora, lead)
             item["enviar_despues_de"] = siguiente.isoformat(timespec="seconds")
-            item["estado"] = "en_cola"
+            item["estado"] = "programado"
             path.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            from b2b.zonas import ahora_local
-
-            local = ahora_local(siguiente, lugar)
-            _editar_estado(
-                item,
-                f"⏳ En cola · sale el {local.strftime('%Y-%m-%d')} a las {local.strftime('%H:%M')} (hora del local)",
-            )
+            _editar_estado(item, frase_programado(siguiente, lead, ahora))
+            continue
+        es_seguimiento = item.get("tipo") == "seguimiento"
+        ok_envio, motivo_envio = puede_enviar_correo(lead, ahora, es_seguimiento=es_seguimiento)
+        if not ok_envio:
+            item["estado"] = "omitido"
+            item["motivo_fallo"] = motivo_envio
+            _editar_estado(item, f"⚠️ No envié: {motivo_envio}")
+            _archivar_item(path, item)
             continue
         cuenta = _elegir_cuenta_al_enviar(item, ahora)
         if cuenta is None:
@@ -882,7 +1137,10 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
         lead["asunto_variante"] = item.get("variante") or lead.get("asunto_variante") or "A"
         if item.get("asunto"):
             lead["asunto"] = item["asunto"]
-        asunto, cuerpo, variante = preparar_cuerpo(lead, cuenta["correo"])
+        if es_seguimiento and item.get("cuerpo"):
+            asunto, cuerpo, variante = item.get("asunto") or "", item["cuerpo"], item.get("variante") or "A"
+        else:
+            asunto, cuerpo, variante = preparar_cuerpo(lead, cuenta["correo"])
         item["cuenta"] = cuenta["n"]
         item["cuenta_correo"] = cuenta["correo"]
         item["asunto"] = asunto
@@ -927,9 +1185,9 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
         else:
             _registrar_simulado(item, ahora, msg["Message-ID"])
         _avanzar_turno(cuenta)
-        from b2b.zonas import ahora_local
+        from b2b.zonas import tz as tz_lugar
 
-        hora = ahora_local(ahora, lugar).strftime("%H:%M")
+        hora = ahora.astimezone(tz_lugar(str(lead.get("zona_iana") or "America/New_York"))).strftime("%H:%M")
         item["estado"] = "enviado"
         item["message_id_correo"] = msg["Message-ID"]
         _editar_estado(item, f"📤 {modo} {hora} desde cuenta {cuenta['n']}")
@@ -945,6 +1203,10 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
             lead_seg.setdefault("nombre", item.get("nombre") or "")
             lead_seg.setdefault("web", (item.get("lead") or {}).get("web") or "")
             registrar_enviado(lead_seg, "correo", cuando=ahora)
+            if not es_seguimiento:
+                from b2b.seguimiento import anotar_planes_correo
+
+                anotar_planes_correo(lead_seg, ahora)
         except Exception as exc:
             registrar_evento({"evento": "cierre_tras_smtp_fallo", "error": str(exc)[:200]})
         _archivar_item(path, item)
@@ -1083,29 +1345,13 @@ def enviar_confirmado(lead: dict, token: str, ahora: datetime | None = None) -> 
     listo, error_catalogo = _catalogo_ok(lead.get("idioma") or "en")
     if not listo:
         return f"⚠️ No envié: {error_catalogo}"
-    espera = _espera_pausa_manual(ahora)
     item = encolar_envio(lead, token, ahora=ahora)
     if not item:
         return "⚠️ No envié: no se pudo preparar el correo (dirección postal, baja o cupo)"
-    path = outbox_dir() / f"{token}.json"
-    if espera > 0 and path.is_file():
-        cuando = (ahora + timedelta(seconds=espera)).isoformat(timespec="seconds")
-        try:
-            guardado = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            guardado = {}
-        guardado["enviar_despues_de"] = cuando
-        path.write_text(json.dumps(guardado, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        return f"⚠️ No envié todavía: pausa entre envíos, faltan {espera} s. Quedó en cola."
-    if path.is_file():
-        try:
-            guardado = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            guardado = {}
-        guardado["enviar_despues_de"] = (ahora - timedelta(seconds=1)).isoformat(timespec="seconds")
-        path.write_text(json.dumps(guardado, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    procesar_outbox(ahora)
-    return _resultado_envio(token, correo)
+    cuando = _parse_marca(item.get("enviar_despues_de") or "") or ahora
+    datos = dict(item.get("lead") or lead)
+    datos.setdefault("zona_iana", item.get("zona_iana") or "")
+    return frase_programado(cuando, datos, ahora)
 
 
 def prueba_correo_cuentas() -> str:

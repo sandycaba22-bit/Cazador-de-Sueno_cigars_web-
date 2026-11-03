@@ -926,12 +926,19 @@ def vigilar(queue_dir, imprimir=False, una_pasada=False):
     from b2b.salud import latido
 
     # El latido solo se escribe aquí. Lo lee otro proceso (scripts/comprobar_latido.py).
+    from b2b.zona_horaria import segundos_planificador
+
+    ultimo_plan = 0.0
     while True:
         latido()
         _poll_comandos_buscar()
         try:
             despachar(queue_dir)
-            procesar_outbox()
+            # El correo sale en su propia pasada, como mucho cada 60 s.
+            ahora_mono = time.monotonic()
+            if ahora_mono - ultimo_plan >= segundos_planificador():
+                procesar_outbox()
+                ultimo_plan = ahora_mono
             from b2b.alertas_operador import alertar
             from b2b.salud import avisos_periodicos
 

@@ -353,9 +353,9 @@ def _cupo_dia() -> int:
 
 
 def _bloque_dia(data: dict, ahora: datetime) -> tuple[dict, str]:
-    from b2b.zonas import tz
+    from b2b.zona_horaria import zona_operador
 
-    local = ahora.astimezone(tz("America/Santo_Domingo"))
+    local = ahora.astimezone(zona_operador())
     dia = local.strftime("%Y-%m-%d")
     bloque = dict(data.get("tarjetas_dia") or {})
     if bloque.get("dia") != dia:
@@ -483,9 +483,9 @@ def resumen_si_toca(cola_dir: Path) -> str:
 def sellar_tanda(inbox: Path, objetivo: int | None = None) -> int:
     if objetivo is None:
         objetivo = _cupo_tanda()
-    from b2b.zonas import tz
+    from b2b.zona_horaria import zona_operador
 
-    ahora = datetime.now(tz("America/Santo_Domingo"))
+    ahora = datetime.now(zona_operador())
     etiqueta = "Tanda mañana" if ahora.hour < 12 else "Tanda tarde"
     tanda_id = ahora.strftime("%Y%m%d-%H%M%S")
     pendientes = []

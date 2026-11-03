@@ -246,7 +246,7 @@ class TestTopes(_Base):
         path.write_text(json.dumps(item), encoding="utf-8")
         procesar_outbox(DOMINGO)
         item = json.loads(path.read_text(encoding="utf-8"))
-        self.assertEqual(item["estado"], "en_cola")
+        self.assertEqual(item["estado"], "programado")
         self.assertFalse(en_horario_laboral(DOMINGO, "Florida", 9, 17))
         nuevo = datetime.fromisoformat(item["enviar_despues_de"])
         self.assertEqual(siguiente_habil(DOMINGO, "Florida", 9, 17).hour, 9)
@@ -444,7 +444,7 @@ class TestTopes(_Base):
             "b2b.envio_correo.random.randint", return_value=2
         ):
             for i in range(3):
-                procesar_outbox(LUNES + timedelta(minutes=5 + i * 30))
+                procesar_outbox(LUNES + timedelta(minutes=5 + i * 7))
         archivo = Path(os.environ["B2B_QUEUE_DIR"]) / "outbox" / "archivo"
         self.assertTrue((archivo / "tok-fallo.json").is_file())
         self.assertEqual(len([a for a in avisos if "Correo falló después de encolar" in a]), 1)
@@ -506,7 +506,7 @@ class TestTopes(_Base):
             "b2b.envio_correo.random.randint", return_value=2
         ):
             for i in range(3):
-                procesar_outbox(LUNES + timedelta(minutes=5 + i * 30))
+                procesar_outbox(LUNES + timedelta(minutes=5 + i * 7))
         reabierto = json.loads(lead_path.read_text(encoding="utf-8"))
         self.assertFalse(reabierto.get("telegram_notificado"))
         self.assertEqual(reabierto.get("estado_tarjeta"), "smtp_fallo")

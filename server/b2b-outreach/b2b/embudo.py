@@ -11,7 +11,9 @@ from b2b.zonas import tz
 
 
 def _hoy_rd(ahora: datetime | None = None) -> str:
-    zona = tz("America/Santo_Domingo")
+    from b2b.zona_horaria import zona_operador
+
+    zona = zona_operador()
     momento = ahora or datetime.now(timezone.utc)
     if momento.tzinfo is None:
         momento = momento.replace(tzinfo=timezone.utc)
@@ -109,8 +111,10 @@ def _ruta_aviso() -> Path:
 
 
 def emitir_si_toca(ahora: datetime | None = None) -> str:
-    """A las 20:00 RD manda el resumen una vez al día. Devuelve el texto o ''."""
-    zona = tz("America/Santo_Domingo")
+    """A las 20:00 hora del operador manda el resumen una vez al día. Devuelve el texto o ''."""
+    from b2b.zona_horaria import zona_operador
+
+    zona = zona_operador()
     momento = ahora or datetime.now(timezone.utc)
     if momento.tzinfo is None:
         momento = momento.replace(tzinfo=timezone.utc)
