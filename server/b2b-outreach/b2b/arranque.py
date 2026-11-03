@@ -41,10 +41,21 @@ def advertencias_arranque() -> list[str]:
     chat = os.getenv("TELEGRAM_CHAT_ID", "").strip()
     alertas = os.getenv("TELEGRAM_ALERTAS_CHAT_ID", "").strip()
     if not alertas or not _CHAT_RE.match(alertas):
-        avisos.append(
-            "TELEGRAM_ALERTAS_CHAT_ID falta o no es numérico. "
-            "El servicio arranca, pero las alertas no salen a tu chat."
-        )
+        if os.getenv("B2B_ALERTAS_EN_CHAT_TARJETAS", "0").strip() == "1":
+            avisos.append(
+                "TELEGRAM_ALERTAS_CHAT_ID falta. El servicio arranca y las alertas "
+                "salen al chat de las tarjetas con el prefijo ALERTA, sin botones."
+            )
+        elif (os.getenv("B2B_ALERTAS_CORREO", "") or "").strip():
+            avisos.append(
+                "TELEGRAM_ALERTAS_CHAT_ID falta. El servicio arranca y las alertas "
+                "salen por correo a B2B_ALERTAS_CORREO."
+            )
+        else:
+            avisos.append(
+                "TELEGRAM_ALERTAS_CHAT_ID falta o no es numérico. "
+                "El servicio arranca, pero las alertas no salen a tu chat."
+            )
     elif alertas == chat:
         avisos.append(
             "TELEGRAM_ALERTAS_CHAT_ID es el mismo que TELEGRAM_CHAT_ID. "
