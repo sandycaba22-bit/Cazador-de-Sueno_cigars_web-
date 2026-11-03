@@ -59,8 +59,10 @@ class _Base(unittest.TestCase):
                 "EMPRESA_DIRECCION_POSTAL": DIR,
                 "CORREO_REMITENTE_1": "uno@gmail.com",
                 "CORREO_CLAVE_1": "clave-1",
-                "CORREO_REMITENTE_2": "dos@gmail.com",
-                "CORREO_CLAVE_2": "clave-2",
+                "CORREO_REMITENTE_2": "",
+                "CORREO_CLAVE_2": "",
+                "EMAIL_REMITENTE_2": "",
+                "EMAIL_CLAVE_2": "",
                 "B2B_ENVIO_RAMPA": "30,30,30",
                 "B2B_ENVIO_FECHA_INICIO": "2026-01-01",
                 "B2B_ENVIO_MAX_POR_CUENTA": "15",
@@ -244,8 +246,14 @@ class TestCupo(_Base):
         self.assertGreaterEqual(cuando, datetime.fromisoformat(antiguo) + timedelta(hours=24))
         self.assertNotEqual(cuando, ahora)
 
-    def test_reparto_entre_dos_cuentas(self):
+    def test_una_sola_cuenta_aunque_la_segunda_este_vacia(self):
+        from b2b.envio_correo import cuentas_activas
+
         ahora = datetime(2026, 11, 4, 15, 0, tzinfo=timezone.utc)
+        os.environ["B2B_ENVIO_MAX_POR_CUENTA"] = "15"
+        os.environ["CORREO_REMITENTE_2"] = ""
+        os.environ["EMAIL_REMITENTE_2"] = "   "
+        self.assertEqual([c["n"] for c in cuentas_activas()], [1])
         with patch("b2b.envio_correo.random.randint", return_value=2), patch("smtplib.SMTP") as smtp:
             os.environ["B2B_ENVIO_REAL"] = "1"
             for i in range(4):
@@ -260,7 +268,7 @@ class TestCupo(_Base):
         archivo = Path(self.tmp.name) / "outbox" / "archivo"
         for path in sorted(archivo.glob("*.json")):
             cuentas.append(json.loads(path.read_text(encoding="utf-8")).get("cuenta"))
-        self.assertEqual(sorted(cuentas), [1, 1, 2, 2])
+        self.assertEqual(cuentas, [1, 1, 1, 1])
 
     def test_ola_este_centro_pacifico(self):
         ahora = datetime(2026, 11, 4, 16, 0, tzinfo=timezone.utc)

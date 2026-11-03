@@ -86,8 +86,10 @@ class _Base(unittest.TestCase):
                 "EMPRESA_DIRECCION_POSTAL_EN": "",
                 "CORREO_REMITENTE_1": "uno@gmail.com",
                 "CORREO_CLAVE_1": "clave-1",
-                "CORREO_REMITENTE_2": "dos@gmail.com",
-                "CORREO_CLAVE_2": "clave-2",
+                "CORREO_REMITENTE_2": "",
+                "CORREO_CLAVE_2": "",
+                "EMAIL_REMITENTE_2": "",
+                "EMAIL_CLAVE_2": "",
                 "B2B_ENVIO_RAMPA": "10,20,30",
                 "B2B_ENVIO_FECHA_INICIO": "2026-10-26",
                 "B2B_ENVIO_MAX_POR_CUENTA": "15",
@@ -151,7 +153,7 @@ class TestMensaje(unittest.TestCase):
 
 
 class TestTopes(_Base):
-    def test_alterna_cuentas_y_no_repite_dominio(self):
+    def test_una_cuenta_no_alterna_y_no_repite_dominio(self):
         os.environ["B2B_ENVIO_REAL"] = "1"
         uno = elegir_cuenta(LUNES)
         self.assertEqual(uno["n"], 1)
@@ -159,8 +161,9 @@ class TestTopes(_Base):
         self.assertIsNotNone(item)
         with patch("smtplib.SMTP", _smtp_ok()), patch("b2b.envio_correo.random.randint", return_value=2):
             procesar_outbox(LUNES + timedelta(minutes=5))
-        dos = elegir_cuenta(LUNES)
-        self.assertEqual(dos["n"], 2)
+        otra = elegir_cuenta(LUNES)
+        self.assertEqual(otra["n"], 1)
+        self.assertEqual(otra["correo"], "uno@gmail.com")
         ok, motivo = puede_enviar_correo(_lead("ventas@primecigar.example"), LUNES)
         self.assertFalse(ok)
         self.assertIn("dominio", motivo)
@@ -168,19 +171,33 @@ class TestTopes(_Base):
     def test_rampa_semana_1_es_10(self):
         self.assertEqual(tope_rampa(LUNES), 10)
 
-    def test_una_cuenta_no_se_lleva_toda_la_rampa(self):
-        os.environ["CORREO_REMITENTE_2"] = ""
+    def test_una_cuenta_usa_las_30_aunque_el_entorno_diga_15(self):
+        os.environ.pop("B2B_ENVIO_MAX_POR_CUENTA", None)
+        os.environ["CORREO_REMITENTE_2"] = "   "
         os.environ["CORREO_CLAVE_2"] = ""
+        os.environ["EMAIL_REMITENTE_2"] = ""
         os.environ["B2B_ENVIO_RAMPA"] = "30,30,30"
         os.environ["B2B_ENVIO_FECHA_INICIO"] = "2026-09-01"
-        os.environ["B2B_ENVIO_MAX_POR_CUENTA"] = "15"
-        cuenta = elegir_cuenta(LUNES)
-        self.assertEqual(cuenta["n"], 1)
-        from b2b.envio_correo import _cupo_cuenta, cuentas_activas
+        os.environ["CORREOS_MAX_DIA"] = "30"
+        from b2b.envio_correo import _cupo_cuenta, cuentas_activas, max_por_cuenta
 
+        self.assertEqual(max_por_cuenta(), 30)
+        os.environ["B2B_ENVIO_MAX_POR_CUENTA"] = "15"
         activas = cuentas_activas()
-        self.assertEqual(len(activas), 1)
-        self.assertEqual(_cupo_cuenta(1, activas, LUNES), 15)
+        self.assertEqual([c["n"] for c in activas], [1])
+        self.assertEqual(_cupo_cuenta(1, activas, LUNES), 30)
+
+    def test_cuenta_2_vacia_o_vieja_no_es_cuenta(self):
+        from b2b.envio_correo import cuentas_activas
+
+        os.environ["CORREO_REMITENTE_2"] = ""
+        os.environ["CORREO_CLAVE_2"] = "clave-vieja"
+        os.environ["EMAIL_REMITENTE_2"] = "cazadordesueno2024@gmail.com"
+        os.environ["EMAIL_CLAVE_2"] = "clave-2"
+        self.assertEqual([c["correo"] for c in cuentas_activas()], ["uno@gmail.com"])
+        os.environ["EMAIL_REMITENTE_2"] = ""
+        os.environ["CORREO_REMITENTE_2"] = "cazadordesueno2024@gmail.com"
+        self.assertEqual(len(cuentas_activas()), 1)
 
     def test_no_contactar(self):
         agregar_no_contactar("Prime Cigar", "https://primecigar.example", "test")
@@ -256,9 +273,8 @@ class TestTopes(_Base):
         from b2b.envio_correo import cuentas_activas
 
         os.environ["CORREO_CLAVE_1"] = ""
-        os.environ["CORREO_CLAVE_2"] = ""
         os.environ["B2B_ENVIO_REAL"] = "0"
-        self.assertEqual(len(cuentas_activas()), 2)
+        self.assertEqual(len(cuentas_activas()), 1)
         ok, motivo = puede_enviar_correo(_lead("x@shop-sinclave.example"), LUNES)
         self.assertTrue(ok)
         os.environ["B2B_ENVIO_REAL"] = "1"
@@ -349,8 +365,7 @@ class TestTopes(_Base):
         archivo = Path(os.environ["B2B_QUEUE_DIR"]) / "outbox" / "archivo"
         for path in sorted(archivo.glob("*.json")):
             cuentas.append(json.loads(path.read_text(encoding="utf-8")).get("cuenta"))
-        self.assertEqual(cuentas.count(1), 5)
-        self.assertEqual(cuentas.count(2), 5)
+        self.assertEqual(cuentas, [1] * 10)
         martes = LUNES + timedelta(days=1)
         for _path, item in items_en_cola():
             item["enviar_despues_de"] = martes.isoformat()

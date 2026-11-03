@@ -158,15 +158,23 @@ def _tope_efectivo(momento: datetime | None = None) -> int:
 
 
 def max_por_cuenta() -> int:
-    return max(1, _int_env("B2B_ENVIO_MAX_POR_CUENTA", 15))
+    """El 15 era el reparto de dos cuentas. Con una sola, el defecto es el techo de 24 h."""
+    return max(1, _int_env("B2B_ENVIO_MAX_POR_CUENTA", 30))
+
+
+def _techo_cuenta(activas: list[dict]) -> int:
+    """Una cuenta usa las 30 de CORREOS_MAX_DIA. Un 15 viejo en el entorno no la parte a la mitad."""
+    if len(activas) <= 1:
+        return _tope_24h()
+    return max_por_cuenta()
 
 
 def cuentas_activas() -> list[dict]:
-    """Con REAL=0 basta el remitente. Con REAL=1 sin clave la cuenta se omite."""
+    """Solo la cuenta 1. Una cuenta 2 vacía, o con la dirección vieja, no es una cuenta."""
     real = envio_real()
     activas = []
     omitidas = []
-    for n in (1, 2):
+    for n in (1,):
         correo = (
             os.getenv(f"CORREO_REMITENTE_{n}", "").strip()
             or os.getenv(f"EMAIL_REMITENTE_{n}", "").strip()
@@ -175,7 +183,7 @@ def cuentas_activas() -> list[dict]:
             os.getenv(f"CORREO_CLAVE_{n}", "").strip()
             or os.getenv(f"EMAIL_CLAVE_{n}", "").strip()
         )
-        if not correo:
+        if not correo or "@" not in correo:
             continue
         if real and not clave:
             omitidas.append(n)
@@ -243,6 +251,8 @@ def _cupo_cuenta(n: int, activas: list[dict], momento: datetime) -> int:
     if not activas:
         return 0
     total = _tope_efectivo(momento)
+    if len(activas) <= 1:
+        return total
     idx = next((i for i, c in enumerate(activas) if c["n"] == n), 0)
     base, resto = divmod(total, len(activas))
     parte = base + (1 if idx < resto else 0)
@@ -378,7 +388,7 @@ def _activas_sin_pausa(data: dict | None = None) -> list[dict]:
 
 def _cuenta_cabe(data: dict, cuenta: dict, activas: list[dict], momento: datetime, *, excluir_token: str = "") -> bool:
     n = cuenta["n"]
-    if _comprometidos_cuenta(data, n, momento, excluir_token=excluir_token) >= max_por_cuenta():
+    if _comprometidos_cuenta(data, n, momento, excluir_token=excluir_token) >= _techo_cuenta(activas):
         return False
     cupo = _cupo_cuenta(n, activas, momento)
     dia = _enviados_dia(data, n, momento) + _en_cola_dia(n, momento, excluir_token=excluir_token)
@@ -1355,10 +1365,10 @@ def enviar_confirmado(lead: dict, token: str, ahora: datetime | None = None) -> 
 
 
 def prueba_correo_cuentas() -> str:
-    """Login SMTP de las dos cuentas y un correo de prueba a ellas mismas."""
+    """Login SMTP de la cuenta 1 y un correo de prueba a ella misma."""
     notas = []
     vistos = False
-    for n in (1, 2):
+    for n in (1,):
         correo = (
             os.getenv(f"CORREO_REMITENTE_{n}", "").strip()
             or os.getenv(f"EMAIL_REMITENTE_{n}", "").strip()
@@ -1393,7 +1403,7 @@ def prueba_correo_cuentas() -> str:
             texto = _error(exc).replace(clave, "[clave]")
             notas.append(f"ERROR {correo}: {texto}")
     if not vistos:
-        return "No hay cuentas. Define EMAIL_REMITENTE_1 y EMAIL_REMITENTE_2 en el .env del servidor."
+        return "No hay cuentas. Define EMAIL_REMITENTE_1 en el .env del servidor."
     return "\n".join(notas)
 
 
@@ -1571,7 +1581,7 @@ def revisar_unsubscribe() -> list[str]:
                 partes.append(texto)
         return "".join(partes)
 
-    for n in (1, 2):
+    for n in (1,):
         correo = (
             os.getenv(f"CORREO_REMITENTE_{n}", "").strip()
             or os.getenv(f"EMAIL_REMITENTE_{n}", "").strip()

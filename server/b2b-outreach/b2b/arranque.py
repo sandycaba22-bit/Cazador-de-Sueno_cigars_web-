@@ -52,7 +52,7 @@ def advertencias_arranque() -> list[str]:
         )
     if os.getenv("B2B_ENVIO_REAL", "0").strip() == "1":
         tiene = False
-        for n in (1, 2):
+        for n in (1,):
             correo = _valor(f"CORREO_REMITENTE_{n}", f"EMAIL_REMITENTE_{n}")
             clave = _valor(f"CORREO_CLAVE_{n}", f"EMAIL_CLAVE_{n}")
             if correo and "@" in correo and clave and len(clave) >= 8:

@@ -140,8 +140,6 @@ _add_if_missing SMTP_HOST smtp.gmail.com
 _add_if_missing SMTP_PORT 587
 _add_if_missing CORREO_REMITENTE_1 cazadordesueno1@gmail.com
 _add_if_missing CORREO_CLAVE_1 ""
-_add_if_missing CORREO_REMITENTE_2 cazadordesueno2024@gmail.com
-_add_if_missing CORREO_CLAVE_2 ""
 _add_if_missing IMAP_HOST imap.gmail.com
 _add_if_missing EMPRESA_NOMBRE_LEGAL "Cazador de Sueño Cigars SRL"
 _add_if_missing EMPRESA_DIRECCION_POSTAL "Calle La Barranquita, Sector Las Minas, Calle 3, Edificio 3, Santiago de los Caballeros, República Dominicana"
@@ -152,7 +150,7 @@ _add_if_missing B2B_ENVIO_HORA_INICIO 9
 _add_if_missing B2B_ENVIO_HORA_FIN 17
 _add_if_missing B2B_ENVIO_PAUSA_MIN 2
 _add_if_missing B2B_ENVIO_PAUSA_MAX 5
-_add_if_missing B2B_ENVIO_MAX_POR_CUENTA 15
+_add_if_missing B2B_ENVIO_MAX_POR_CUENTA 30
 _add_if_missing B2B_LEADS_POR_TANDA 15
 _add_if_missing B2B_SEGUIMIENTO_DIAS 4,10
 _add_if_missing B2B_TARJETAS_ABIERTAS_MAX 2
