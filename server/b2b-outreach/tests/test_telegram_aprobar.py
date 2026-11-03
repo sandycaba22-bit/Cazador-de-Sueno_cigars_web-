@@ -98,7 +98,32 @@ class TestAprobar(unittest.TestCase):
             tc._manejar_callback("t", "42", self._cb(f"b2bs:{self.tok}"))
         payload = tc._telegram_post.call_args[0][2]
         self.assertEqual(payload["reply_markup"]["inline_keyboard"], [])
-        self.assertIn("No envié", payload["text"])
+        self.assertIn("Falló: tope diario", payload["text"])
+
+    def test_omitir_edita_la_tarjeta_sin_botones(self):
+        tc._manejar_callback("t", "42", self._cb(f"b2bd:{self.tok}"))
+        ediciones = [c[0][2] for c in tc._telegram_post.call_args_list if c[0][1] == "editMessageText"]
+        self.assertTrue(ediciones)
+        self.assertEqual(ediciones[0]["reply_markup"]["inline_keyboard"], [])
+        self.assertIn("Omitida", ediciones[0]["text"])
+
+    def test_al_enviar_la_tarjeta_dice_la_hora_y_quita_botones(self):
+        from b2b.envio_correo import _editar_estado
+
+        tg.actualizar_pendiente(self.tok, message_id=9)
+        vistos = []
+
+        def _editar(message_id, texto, markup=None):
+            vistos.append((message_id, texto, markup))
+
+        with patch("telegram_bot.editar_mensaje_telegram", _editar):
+            _editar_estado(
+                {"token": self.tok, "estado": "enviado", "lead": self.lead, "nombre": "Prime Cigar"},
+                "Enviado a Prime Cigar a las 10:42",
+            )
+        self.assertEqual(vistos[0][0], 9)
+        self.assertIn("Enviado a Prime Cigar a las 10:42", vistos[0][1])
+        self.assertEqual(vistos[0][2]["inline_keyboard"], [])
 
     def test_cancelar_saca_el_correo(self):
         tc._manejar_callback("t", "42", self._cb(f"b2bs:{self.tok}"))

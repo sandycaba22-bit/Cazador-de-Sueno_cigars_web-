@@ -939,10 +939,9 @@ def _editar_estado(item: dict, linea: str) -> None:
         actualizar_pendiente(token, texto_tarjeta=texto, estado_envio=item.get("estado"))
         from telegram_bot import editar_mensaje_telegram
 
-        from b2b.telegram_prospecto import teclado_en_cola, teclado_cerrado
+        from b2b.telegram_prospecto import teclado_cerrado
 
-        markup = teclado_en_cola(pend, token) if item.get("estado") in ("en_cola", "programado") else teclado_cerrado()
-        editar_mensaje_telegram(int(message_id), texto, markup)
+        editar_mensaje_telegram(int(message_id), texto, teclado_cerrado())
     except Exception as exc:
         registrar_evento({"evento": "editar_tarjeta_fallo", "error": _error(exc)})
 
@@ -979,6 +978,7 @@ def _fallo_temporal(item: dict, path: Path, momento: datetime, exc: BaseExceptio
             f"smtp_{item.get('token') or nombre}",
             f"⚠️ Fallo SMTP a {nombre}: {motivo[:240]}",
         )
+        _editar_estado(item, f"Falló: {motivo[:180]}")
         _recuperar_tras_fallo_correo(item, motivo)
         return
     espera = timedelta(minutes=2 ** intentos)
@@ -1138,7 +1138,7 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
         if not ok_envio:
             item["estado"] = "omitido"
             item["motivo_fallo"] = motivo_envio
-            _editar_estado(item, f"⚠️ No envié: {motivo_envio}")
+            _editar_estado(item, "Omitida")
             _archivar_item(path, item)
             continue
         cuenta = _elegir_cuenta_al_enviar(item, ahora)
@@ -1204,7 +1204,8 @@ def procesar_outbox(ahora: datetime | None = None) -> int:
         hora = ahora.astimezone(tz_lugar(str(lead.get("zona_iana") or "America/New_York"))).strftime("%H:%M")
         item["estado"] = "enviado"
         item["message_id_correo"] = msg["Message-ID"]
-        _editar_estado(item, f"📤 {modo} {hora} desde cuenta {cuenta['n']}")
+        nombre = lead.get("nombre") or item.get("correo") or "el negocio"
+        _editar_estado(item, f"Enviado a {nombre} a las {hora}")
         try:
             from b2b.despachador_tarjetas import cerrar_tarjeta
             from b2b.seguimiento import registrar_enviado

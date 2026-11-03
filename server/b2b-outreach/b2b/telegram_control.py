@@ -203,7 +203,7 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
         marcar_gestionado_telegram,
         resolver_pendiente,
     )
-    from b2b.telegram_prospecto import teclado_cerrado, teclado_en_cola, teclado_prospecto, texto_con_estado
+    from b2b.telegram_prospecto import teclado_cerrado, teclado_prospecto, texto_con_estado
 
     data = (cb.get("data") or "").strip()
     if data.startswith("b2ba:"):
@@ -288,14 +288,16 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
         programado = resultado.startswith("Se enviará") or resultado.startswith("⏳")
         exito = resultado.startswith("✅") or programado or "B2B_ENVIO_REAL=0" in resultado
         if not exito:
-            texto = texto_con_estado(base or lead.get("nombre") or "—", (resultado or "⚠️ No envié").split("\n", 1)[0][:180])
+            motivo = (resultado or "no se pudo enviar").split("\n", 1)[0]
+            if ":" in motivo:
+                motivo = motivo.split(":", 1)[1].strip()
+            texto = texto_con_estado(base or lead.get("nombre") or "—", f"Falló: {motivo[:160]}")
             _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
             actualizar_pendiente(tok, estado_envio="fallo", texto_tarjeta=texto)
             return resultado
         if exito:
             texto = texto_con_estado(base or lead.get("nombre") or "—", resultado.split("\n", 1)[0][:180])
-            markup = teclado_en_cola(lead, tok) if programado else teclado_cerrado()
-            _editar_tarjeta(token, chat_id, msg_id, texto, markup)
+            _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
             estado = "programado" if programado else "enviado"
             actualizar_pendiente(tok, estado_envio=estado, texto_tarjeta=texto)
             # Aprobar no envía: el planificador suelta el correo dentro de la ventana local.
@@ -383,7 +385,7 @@ def _manejar_callback(token: str, chat_id: str, cb: dict) -> str | None:
         anotar_decision(lead, "descartadas")
         cerrar_tarjeta(tok)
         _answer(token, cb, "Descartado")
-        texto = texto_con_estado(base or (lead.get("nombre") or "—"), "🗑 Descartado")
+        texto = texto_con_estado(base or (lead.get("nombre") or "—"), "Omitida")
         _editar_tarjeta(token, chat_id, msg_id, texto, teclado_cerrado())
         _telegram_post(token, "sendMessage", {
             "chat_id": chat_id,
