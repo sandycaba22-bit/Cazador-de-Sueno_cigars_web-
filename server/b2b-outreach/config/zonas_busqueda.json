@@ -1,0 +1,652 @@
+{
+  "zonas": [
+    {
+      "id": "AL",
+      "pais": "United States",
+      "zona": "Alabama",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "AK",
+      "pais": "United States",
+      "zona": "Alaska",
+      "zona_iana": "America/Anchorage",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "AZ",
+      "pais": "United States",
+      "zona": "Arizona",
+      "zona_iana": "America/Phoenix",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "AR",
+      "pais": "United States",
+      "zona": "Arkansas",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "CA",
+      "pais": "United States",
+      "zona": "California",
+      "zona_iana": "America/Los_Angeles",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "CO",
+      "pais": "United States",
+      "zona": "Colorado",
+      "zona_iana": "America/Denver",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "CT",
+      "pais": "United States",
+      "zona": "Connecticut",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "DE",
+      "pais": "United States",
+      "zona": "Delaware",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "DC",
+      "pais": "United States",
+      "zona": "District of Columbia",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "FL",
+      "pais": "United States",
+      "zona": "Florida",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "GA",
+      "pais": "United States",
+      "zona": "Georgia",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "HI",
+      "pais": "United States",
+      "zona": "Hawaii",
+      "zona_iana": "Pacific/Honolulu",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "ID",
+      "pais": "United States",
+      "zona": "Idaho",
+      "zona_iana": "America/Denver",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "IL",
+      "pais": "United States",
+      "zona": "Illinois",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "IN",
+      "pais": "United States",
+      "zona": "Indiana",
+      "zona_iana": "America/Indiana/Indianapolis",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "IA",
+      "pais": "United States",
+      "zona": "Iowa",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "KS",
+      "pais": "United States",
+      "zona": "Kansas",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "KY",
+      "pais": "United States",
+      "zona": "Kentucky",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "LA",
+      "pais": "United States",
+      "zona": "Louisiana",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "ME",
+      "pais": "United States",
+      "zona": "Maine",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "MD",
+      "pais": "United States",
+      "zona": "Maryland",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "MA",
+      "pais": "United States",
+      "zona": "Massachusetts",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "MI",
+      "pais": "United States",
+      "zona": "Michigan",
+      "zona_iana": "America/Detroit",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "MN",
+      "pais": "United States",
+      "zona": "Minnesota",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "MS",
+      "pais": "United States",
+      "zona": "Mississippi",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "MO",
+      "pais": "United States",
+      "zona": "Missouri",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "MT",
+      "pais": "United States",
+      "zona": "Montana",
+      "zona_iana": "America/Denver",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "NE",
+      "pais": "United States",
+      "zona": "Nebraska",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "NV",
+      "pais": "United States",
+      "zona": "Nevada",
+      "zona_iana": "America/Los_Angeles",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "NH",
+      "pais": "United States",
+      "zona": "New Hampshire",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "NJ",
+      "pais": "United States",
+      "zona": "New Jersey",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "NM",
+      "pais": "United States",
+      "zona": "New Mexico",
+      "zona_iana": "America/Denver",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "NY",
+      "pais": "United States",
+      "zona": "New York",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "NC",
+      "pais": "United States",
+      "zona": "North Carolina",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "ND",
+      "pais": "United States",
+      "zona": "North Dakota",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "OH",
+      "pais": "United States",
+      "zona": "Ohio",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "OK",
+      "pais": "United States",
+      "zona": "Oklahoma",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "OR",
+      "pais": "United States",
+      "zona": "Oregon",
+      "zona_iana": "America/Los_Angeles",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "PA",
+      "pais": "United States",
+      "zona": "Pennsylvania",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "RI",
+      "pais": "United States",
+      "zona": "Rhode Island",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "SC",
+      "pais": "United States",
+      "zona": "South Carolina",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "SD",
+      "pais": "United States",
+      "zona": "South Dakota",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "TN",
+      "pais": "United States",
+      "zona": "Tennessee",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "TX",
+      "pais": "United States",
+      "zona": "Texas",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "UT",
+      "pais": "United States",
+      "zona": "Utah",
+      "zona_iana": "America/Denver",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "VT",
+      "pais": "United States",
+      "zona": "Vermont",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "VA",
+      "pais": "United States",
+      "zona": "Virginia",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "WA",
+      "pais": "United States",
+      "zona": "Washington",
+      "zona_iana": "America/Los_Angeles",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "WV",
+      "pais": "United States",
+      "zona": "West Virginia",
+      "zona_iana": "America/New_York",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "WI",
+      "pais": "United States",
+      "zona": "Wisconsin",
+      "zona_iana": "America/Chicago",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "WY",
+      "pais": "United States",
+      "zona": "Wyoming",
+      "zona_iana": "America/Denver",
+      "activa": true,
+      "peso": 5
+    },
+    {
+      "id": "CA-AB",
+      "pais": "Canada",
+      "zona": "Alberta",
+      "zona_iana": "America/Edmonton",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-BC",
+      "pais": "Canada",
+      "zona": "British Columbia",
+      "zona_iana": "America/Vancouver",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-MB",
+      "pais": "Canada",
+      "zona": "Manitoba",
+      "zona_iana": "America/Winnipeg",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-NB",
+      "pais": "Canada",
+      "zona": "New Brunswick",
+      "zona_iana": "America/Moncton",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-NL",
+      "pais": "Canada",
+      "zona": "Newfoundland and Labrador",
+      "zona_iana": "America/St_Johns",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-NS",
+      "pais": "Canada",
+      "zona": "Nova Scotia",
+      "zona_iana": "America/Halifax",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-NT",
+      "pais": "Canada",
+      "zona": "Northwest Territories",
+      "zona_iana": "America/Yellowknife",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-NU",
+      "pais": "Canada",
+      "zona": "Nunavut",
+      "zona_iana": "America/Iqaluit",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-ON",
+      "pais": "Canada",
+      "zona": "Ontario",
+      "zona_iana": "America/Toronto",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-PE",
+      "pais": "Canada",
+      "zona": "Prince Edward Island",
+      "zona_iana": "America/Halifax",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-QC",
+      "pais": "Canada",
+      "zona": "Quebec",
+      "zona_iana": "America/Toronto",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-SK",
+      "pais": "Canada",
+      "zona": "Saskatchewan",
+      "zona_iana": "America/Regina",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "CA-YT",
+      "pais": "Canada",
+      "zona": "Yukon",
+      "zona_iana": "America/Whitehorse",
+      "activa": true,
+      "peso": 2
+    },
+    {
+      "id": "PR",
+      "pais": "Puerto Rico",
+      "zona": "Puerto Rico",
+      "zona_iana": "America/Puerto_Rico",
+      "activa": true,
+      "peso": 1
+    },
+    {
+      "id": "JM",
+      "pais": "Jamaica",
+      "zona": "Jamaica",
+      "zona_iana": "America/Jamaica",
+      "activa": true,
+      "peso": 1
+    },
+    {
+      "id": "BS",
+      "pais": "Bahamas",
+      "zona": "Bahamas",
+      "zona_iana": "America/Nassau",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "HT",
+      "pais": "Haiti",
+      "zona": "Haiti",
+      "zona_iana": "America/Port-au-Prince",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "CU",
+      "pais": "Cuba",
+      "zona": "Cuba",
+      "zona_iana": "America/Havana",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "MX",
+      "pais": "Mexico",
+      "zona": "Mexico",
+      "zona_iana": "America/Mexico_City",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "DO",
+      "pais": "Dominican Republic",
+      "zona": "Dominican Republic",
+      "zona_iana": "America/Santo_Domingo",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "ES",
+      "pais": "Spain",
+      "zona": "Spain",
+      "zona_iana": "Europe/Madrid",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "FR",
+      "pais": "France",
+      "zona": "France",
+      "zona_iana": "Europe/Paris",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "DE",
+      "pais": "Germany",
+      "zona": "Germany",
+      "zona_iana": "Europe/Berlin",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "GB",
+      "pais": "United Kingdom",
+      "zona": "United Kingdom",
+      "zona_iana": "Europe/London",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "IT",
+      "pais": "Italy",
+      "zona": "Italy",
+      "zona_iana": "Europe/Rome",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "NL",
+      "pais": "Netherlands",
+      "zona": "Netherlands",
+      "zona_iana": "Europe/Amsterdam",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "AW",
+      "pais": "Aruba",
+      "zona": "Aruba",
+      "zona_iana": "America/Aruba",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "CW",
+      "pais": "Curacao",
+      "zona": "Curacao",
+      "zona_iana": "America/Curacao",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "TT",
+      "pais": "Trinidad and Tobago",
+      "zona": "Trinidad and Tobago",
+      "zona_iana": "America/Port_of_Spain",
+      "activa": false,
+      "peso": 1
+    },
+    {
+      "id": "BB",
+      "pais": "Barbados",
+      "zona": "Barbados",
+      "zona_iana": "America/Barbados",
+      "activa": false,
+      "peso": 1
+    }
+  ]
+}

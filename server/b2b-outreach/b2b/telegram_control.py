@@ -561,6 +561,10 @@ def procesar_comandos_chat(token: str, chat_id: str) -> list[str]:
             from b2b.embudo import texto_embudo
 
             acks.append(texto_embudo())
+        elif text in ("/zonas",):
+            from b2b.zonas_busqueda import texto_zonas
+
+            acks.append(texto_zonas())
         elif text in ("/prueba_correo", "/prueba-correo"):
             from b2b.envio_correo import prueba_correo_cuentas
 

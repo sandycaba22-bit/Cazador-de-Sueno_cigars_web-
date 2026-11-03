@@ -764,6 +764,10 @@ def _registrar_ok(item: dict, momento: datetime, message_id: str) -> None:
         "ok": True,
         "message_id": message_id,
         "nombre": item.get("nombre") or "",
+        "zona": ((item.get("lead") or {}).get("zona_busqueda")
+                 or (item.get("lead") or {}).get("estado")
+                 or item.get("lugar")
+                 or ""),
     })
     data["ultimo_envio"] = momento.isoformat(timespec="seconds")
     _save(data)

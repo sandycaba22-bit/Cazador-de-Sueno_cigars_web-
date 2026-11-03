@@ -727,6 +727,112 @@ def _max_paises_por_pasada() -> int:
         return 18
 
 
+def _prospectar_zonas(
+    max_leads: int,
+    inbox: Path,
+    simulado: bool,
+    solo_listar: bool,
+    fuente: str,
+) -> dict:
+    """Una consulta por zona y, como mucho, dos negocios. El cursor avanza aunque no haya red."""
+    from b2b.budget import estado as estado_budget
+    from b2b.budget import max_calls_tanda
+    from b2b.lead_score import puntuar_lead
+    from b2b.logging_ops import registrar_evento
+    from b2b.places import buscar_google_zona
+    from b2b.zonas_busqueda import (
+        consulta_de,
+        elegir_zonas,
+        negocios_por_zona,
+        registrar_zonas,
+        termino_de,
+    )
+
+    if not fuente:
+        fuente = "simulado" if simulado else resolver_fuente_leads()
+    resto = max(0, max_calls_tanda() - int(estado_budget().get("tanda_llamadas") or 0))
+    ahora = datetime.now(timezone.utc)
+    if resto <= 0:
+        return {
+            "pais": "zonas",
+            "modo": "zonas",
+            "encolados": 0,
+            "leads": 0,
+            "llamadas": 0,
+            "zonas": [],
+            "fuente": fuente,
+            "presupuesto_agotado": True,
+        }
+    plan = elegir_zonas(max(1, resto or 1), ahora)
+    total_encolados = 0
+    total_leads = 0
+    llamadas = 0
+    for zona in plan:
+        if not solo_listar and total_encolados >= max_leads:
+            break
+        termino = termino_de(zona)
+        consulta = consulta_de(zona, termino)
+        if simulado or solo_listar or fuente == "osm":
+            leads, hechas, stats = [], 0, {"descartes": []}
+        else:
+            leads, hechas, stats = buscar_google_zona(consulta, zona["zona"], "lounge" if "lounge" in termino else "tienda")
+        llamadas += hechas
+        mejores = leads[: negocios_por_zona()]
+        for lead in mejores:
+            score, detalle = puntuar_lead(lead)
+            lead["puntaje"] = score
+            lead["puntaje_detalle"] = detalle
+            lead["estado"] = zona["zona"]
+            lead["zona_busqueda"] = zona["id"]
+            lead["zona_iana"] = zona["zona_iana"]
+            lead["pais"] = zona["zona"] if zona["pais"] == "United States" else zona["pais"]
+        encolados = 0
+        if mejores and not solo_listar:
+            reglas = {"pais": lead_pais(zona), "idiomas": ["en"], "dificultad": 2, "estado": "activo"}
+            paths, _contacto, _web, _cal, _desc = encolar(
+                mejores,
+                inbox,
+                reglas,
+                simulado=simulado,
+                pais=reglas["pais"],
+                notificar_telegram_buscar=False,
+                max_encolar=max(0, max_leads - total_encolados),
+            )
+            encolados = len(paths)
+        total_encolados += encolados
+        total_leads += len(mejores)
+        registrar_zonas([zona], ahora, termino=termino)
+        registrar_evento({
+            "evento": "busqueda_zona",
+            "zona": zona["zona"],
+            "pais": zona["pais"],
+            "consulta": consulta,
+            "encontradas": len(mejores),
+            "tarjetas": encolados,
+            "descartes": len(stats.get("descartes") or []),
+        })
+    if not solo_listar:
+        from b2b.despachador_tarjetas import sellar_tanda
+
+        sellar_tanda(inbox, max_leads)
+    return {
+        "pais": "zonas",
+        "modo": "zonas",
+        "encolados": total_encolados,
+        "leads": total_leads,
+        "llamadas": llamadas,
+        "zonas": [z["id"] for z in plan],
+        "fuente": fuente,
+        "paises_recorridos": len({z["pais"] for z in plan}),
+    }
+
+
+def lead_pais(zona: dict) -> str:
+    if zona["pais"] == "United States":
+        return zona["zona"]
+    return zona["pais"]
+
+
 def prospectar_prioridad_inicial(
     max_leads: int,
     inbox: Path,
@@ -736,6 +842,12 @@ def prospectar_prioridad_inicial(
     fuente: str = "",
     zona: str | None = None,
 ) -> dict:
+    from b2b.zonas_busqueda import hay_zonas
+
+    if not fuente:
+        fuente = "simulado" if simulado else resolver_fuente_leads()
+    if hay_zonas() and fuente != "osm":
+        return _prospectar_zonas(max_leads, inbox, simulado, solo_listar, fuente)
     paises = paises_prioridad_busqueda(zona)
     if not paises:
         raise ValueError("Lista de países vacía para la zona de búsqueda (country_rules.json)")

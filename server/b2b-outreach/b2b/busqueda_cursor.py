@@ -57,3 +57,15 @@ def tomar_consultas(pais: str, todas: list, max_n: int) -> list:
 
 def indice_actual(pais: str) -> int:
     return int((_load().get("paises") or {}).get(pais, {}).get("indice") or 0)
+
+
+def estado_zonas() -> dict:
+    zonas = _load().get("zonas") or {}
+    return dict(zonas) if isinstance(zonas, dict) else {}
+
+
+def guardar_zonas(zonas: dict) -> None:
+    """Reescribe el cursor completo. No toca el índice viejo por país."""
+    data = _load()
+    data["zonas"] = zonas
+    _save(data)

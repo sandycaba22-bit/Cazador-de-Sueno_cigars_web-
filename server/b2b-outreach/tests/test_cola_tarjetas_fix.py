@@ -42,7 +42,8 @@ class TestColaDosAbiertas(unittest.TestCase):
                 for i in range(4):
                     lead = {
                         "nombre": f"Shop {i}",
-                        "pais": "Florida",
+                        "pais": f"Estado {i}",
+                        "estado": f"Estado {i}",
                         "web": f"https://s{i}.example",
                         "correo": f"a{i}@s.example",
                         "puntaje": 10 - i,

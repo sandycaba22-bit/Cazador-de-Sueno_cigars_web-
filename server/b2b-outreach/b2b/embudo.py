@@ -103,6 +103,9 @@ def texto_embudo(ahora: datetime | None = None) -> str:
         f"Bajas: {estados.get('baja', 0) + ev.get('exclusion_correo', 0)}",
         f"Fallos Telegram: {ev.get('telegram_prospecto_fallo', 0) + ev.get('telegram_alerta_fallo', 0)}",
     ]
+    from b2b.zonas_busqueda import resumen_por_zona
+
+    lineas.extend(resumen_por_zona(dia))
     return "\n".join(lineas)
 
 

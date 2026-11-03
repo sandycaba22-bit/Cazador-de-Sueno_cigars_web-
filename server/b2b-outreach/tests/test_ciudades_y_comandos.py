@@ -59,7 +59,7 @@ class TestCiudadesYPaginacion(unittest.TestCase):
         reglas = cargar_reglas()
         for mercado in reglas["paises"]:
             consultas = places.consultas_google(mercado["pais"], [])
-            self.assertEqual(len(consultas), len(mercado["ciudades"]) * 12)
+            self.assertEqual(len(consultas), len(mercado["ciudades"]) * 5)
             for ciudad in mercado["ciudades"]:
                 self.assertIn(("tienda", "en", f"cigar shop in {ciudad}, {mercado['pais']}"), consultas)
             self.assertTrue(all(idioma == "en" for _, idioma, _ in consultas))

@@ -40,19 +40,14 @@ _TIPOS_BAR = {"bar", "night_club", "cafe", "restaurant"}
 _TIPOS_LICOR = {"liquor_store"}
 
 # (tipo de negocio, idioma, término). Todos los términos en EN.
+# Tienda, lounge y distribuidor. Sin bar, restaurante, hotel, casino ni licorería:
+# esas consultas devolvían locales que luego se descartaban.
 TERMINOS_GOOGLE: tuple[tuple[str, str, str], ...] = (
     ("tienda", "en", "cigar shop"),
     ("lounge", "en", "cigar lounge"),
-    ("lounge", "en", "cigar bar"),
     ("tienda", "en", "tobacconist"),
     ("tienda", "en", "cigar distributor"),
     ("tienda", "en", "tobacco wholesaler"),
-    ("tienda", "en", "humidor"),
-    ("lounge", "en", "hotel resort cigar lounge"),
-    ("lounge", "en", "steakhouse humidor"),
-    ("lounge", "en", "casino cigar room"),
-    ("lounge", "en", "golf club cigar lounge"),
-    ("tienda", "en", "liquor store humidor"),
 )
 
 QUERIES_BASE = {
@@ -236,7 +231,7 @@ def islas_agotadas_google(paises: list[str]) -> bool:
 # --- Llamada a la API -------------------------------------------------------------------
 
 
-def _post_search(text_query: str, idioma: str = "") -> list[dict]:
+def _post_search(text_query: str, idioma: str = "", *, una_pagina: bool = False) -> list[dict]:
     """Text Search con paginación completa (sin Place Details)."""
     motivo = budget.motivo_bloqueo()
     if motivo:
@@ -275,7 +270,7 @@ def _post_search(text_query: str, idioma: str = "") -> list[dict]:
             raise GooglePlacesError(0, f"Google Places sin respuesta: {_sin_clave(str(error))[:200]}") from None
         resultados.extend(body.get("places") or [])
         token = body.get("nextPageToken") or ""
-        if not token:
+        if una_pagina or not token:
             break
     return resultados
 
@@ -437,6 +432,39 @@ def _orden_calidad(lead: dict) -> tuple:
     mail = 1 if (lead.get("correo") or "").strip() else 0
     tel = 1 if (lead.get("telefono") or "").strip() else 0
     return (0 if (mail or tel) else 1, -mail, -tel, -rating, -reviews, lead.get("nombre") or "")
+
+
+def buscar_google_zona(consulta: str, pais: str, tipo: str = "tienda") -> tuple[list[dict], int, dict]:
+    """Una consulta, una página. El llamador se queda con los 1 o 2 mejores."""
+    stats: dict = {"google": 0, "google_llamadas": 0, "descartes": []}
+    if _GOOGLE_DESACTIVADO:
+        stats["google_omitido"] = _GOOGLE_DESACTIVADO.get("motivo", "")
+        return [], 0, stats
+    motivo = budget.motivo_bloqueo()
+    if motivo:
+        stats["presupuesto_agotado"] = motivo
+        return [], 0, stats
+    try:
+        raws = _post_search(consulta, "en", una_pagina=True)
+    except PresupuestoPlacesAgotado as error:
+        stats["presupuesto_agotado"] = str(error)
+        return [], 0, stats
+    except GooglePlacesError as error:
+        stats["google_error"] = _sin_clave(str(error))[:300]
+        _avisar_error(error)
+        return [], 0, stats
+    stats["google_llamadas"] = 1
+    leads: list[dict] = []
+    for raw in raws:
+        lead = _normalizar_place(raw, pais, tipo)
+        porque = motivo_descarte_google(raw, lead)
+        if porque:
+            stats["descartes"].append({"nombre": lead.get("nombre") or "", "motivo": porque})
+            continue
+        leads.append(lead)
+    leads.sort(key=_orden_calidad)
+    stats["google"] = len(leads)
+    return leads, 1, stats
 
 
 def buscar_google_pais(pais: str, tipos: list[str]) -> tuple[list[dict], int, dict]:

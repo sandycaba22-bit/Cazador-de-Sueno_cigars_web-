@@ -92,8 +92,54 @@ def _guardar(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def _zona_lead(lead: dict) -> str:
+    return (lead.get("zona_busqueda") or lead.get("estado") or lead.get("pais") or "sin zona").strip() or "sin zona"
+
+
+def _bloque_tanda(ahora: datetime) -> str:
+    from b2b.zona_horaria import zona_operador
+
+    local = ahora.astimezone(zona_operador())
+    return local.strftime("%Y-%m-%d") + ("-m" if local.hour < 12 else "-t")
+
+
+def _tope_zona() -> int:
+    from b2b.zonas_busqueda import tarjetas_por_zona
+
+    return tarjetas_por_zona()
+
+
+def _conteo_zona(inbox: Path, ahora: datetime) -> dict[str, int]:
+    bloque = _bloque_tanda(ahora)
+    conteo: dict[str, int] = {}
+    for path in inbox.glob("*.json"):
+        data = _leer(path)
+        if not data or not data.get("telegram_notificado"):
+            continue
+        if data.get("despacho_bloque") != bloque:
+            continue
+        zona = _zona_lead(data)
+        conteo[zona] = conteo.get(zona, 0) + 1
+    return conteo
+
+
+def _zonas_ya_contactadas() -> set[str]:
+    """Zonas que ya tuvieron un correo. Si el archivo no existe, ninguna."""
+    try:
+        from b2b.envio_correo import _load
+    except Exception:
+        return set()
+    vistas: set[str] = set()
+    for envio in _load().get("envios") or []:
+        zona = str(envio.get("zona") or "").strip()
+        if envio.get("ok") and zona:
+            vistas.add(zona)
+    return vistas
+
+
 def _orden(lead: dict) -> tuple:
-    """Cola global por puntaje (mayor primero). Sin ordenar por tanda ni por nombre primero."""
+    """Zonas sin contactar primero; dentro, el puntaje. Como máximo 2 tarjetas por zona y tanda."""
+    contactada = 1 if _zona_lead(lead) in _zonas_ya_contactadas() else 0
     try:
         puntaje = -float(lead.get("puntaje") or 0)
     except (TypeError, ValueError):
@@ -107,7 +153,7 @@ def _orden(lead: dict) -> tuple:
     except (TypeError, ValueError):
         resenas = 0
     mail = 0 if (lead.get("correo") or "").strip() else 1
-    return (puntaje, mail, rating, resenas, (lead.get("nombre") or "").lower())
+    return (contactada, puntaje, mail, rating, resenas, (lead.get("nombre") or "").lower())
 
 
 def _candidatos(inbox: Path) -> list[tuple[Path, dict]]:
@@ -409,7 +455,16 @@ def despachar(
         fila = [(p, lead) for p, lead in _candidatos(inbox) if p.name not in intentados]
         if not fila:
             break
-        path, lead = fila[0]
+        conteo = _conteo_zona(inbox, ahora)
+        elegido = None
+        for candidato, lead_c in fila:
+            if conteo.get(_zona_lead(lead_c), 0) >= _tope_zona():
+                continue
+            elegido = (candidato, lead_c)
+            break
+        if elegido is None:
+            break
+        path, lead = elegido
         intentados.add(path.name)
         from b2b.contacto_previo import motivo_ya_contactado
         from b2b.telegram_gestion import puede_avisar_prospecto, tiene_medio_contacto, ya_gestionado_telegram
@@ -457,6 +512,7 @@ def despachar(
             continue
         lead["telegram_notificado"] = True
         lead["estado_tarjeta"] = "abierta"
+        lead["despacho_bloque"] = _bloque_tanda(ahora)
         _guardar(path, lead)
         from b2b.telegram_gestion import token_callback
 

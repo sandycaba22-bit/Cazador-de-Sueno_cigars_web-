@@ -19,10 +19,10 @@ from b2b.telegram_gestion import token_callback
 AHORA = datetime(2026, 10, 29, 15, 0, tzinfo=timezone.utc)
 
 
-def _escribir(inbox: Path, i: int, rating: float) -> Path:
+def _escribir(inbox: Path, i: int, rating: float, pais: str = "Florida") -> Path:
     lead = {
         "nombre": f"Cigar Shop {i:02d}",
-        "pais": "Florida",
+        "pais": pais,
         "web": f"https://shop{i}.example",
         "correo": f"info@shop{i}.example",
         "tipo": "tienda",
@@ -72,7 +72,7 @@ class TestDespachador(unittest.TestCase):
 
     def test_salen_solo_dos_y_la_siguiente_espera(self):
         for i in range(15):
-            _escribir(self.inbox, i, 5 - i / 100)
+            _escribir(self.inbox, i, 5 - i / 100, pais=f"Zona {i}")
         sellar_tanda(self.inbox, 15)
         self.assertEqual(despachar(self.cola, ahora=AHORA, enviar=self.enviar), 2)
         self.assertEqual(len(self.enviados), 2)
