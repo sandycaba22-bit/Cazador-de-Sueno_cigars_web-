@@ -255,6 +255,21 @@ def _tabla_paises() -> dict:
     return {str(k).casefold(): v for k, v in paises.items() if isinstance(v, dict)}
 
 
+# El JSON guarda una sola lista. Estos nombres, y cualquier estado o provincia, la heredan.
+_ALIAS_FERIADOS = {
+    "united states": "united states",
+    "united states of america": "united states",
+    "usa": "united states",
+    "us": "united states",
+    "estados unidos": "united states",
+    "ee.uu.": "united states",
+    "eeuu": "united states",
+    "ee. uu.": "united states",
+    "canada": "canada",
+    "canadá": "canada",
+}
+
+
 def _bloque_pais(lead: dict) -> dict:
     tabla = _tabla_paises()
     for campo in ("pais", "estado"):
@@ -262,6 +277,29 @@ def _bloque_pais(lead: dict) -> dict:
         if clave and clave in tabla:
             return tabla[clave]
     return {}
+
+
+def _pais_de_feriados(lead: dict) -> str:
+    """EE.UU. o Canadá aunque el lead diga Florida u Ontario, no el nombre del país."""
+    for campo in ("pais", "estado"):
+        clave = str(lead.get(campo) or "").strip().casefold()
+        if clave in _ALIAS_FERIADOS:
+            return _ALIAS_FERIADOS[clave]
+    abbr, tipo = _abbr(str(lead.get("estado") or lead.get("pais") or ""))
+    if tipo == "estado" and abbr != "JM":
+        return "united states"
+    if tipo == "provincia":
+        return "canada"
+    return ""
+
+
+def _fechas(bloque: dict) -> set[str]:
+    fechas: set[str] = set()
+    for dia in (bloque or {}).get("feriados") or []:
+        texto = str(dia).strip()
+        if len(texto) == 10 and texto[4] == "-" and texto[7] == "-":
+            fechas.add(texto)
+    return fechas
 
 
 def _parse_hora(texto: str) -> time | None:
@@ -329,11 +367,10 @@ def reglas_de(lead: dict) -> dict:
     if not prioridad:
         prioridad = set(_PRIORIDAD_DEFECTO)
     descanso = _parse_dias(",".join(str(d) for d in (bloque.get("descanso") or [])))
-    feriados: set[str] = set()
-    for dia in bloque.get("feriados") or []:
-        texto = str(dia).strip()
-        if len(texto) == 10 and texto[4] == "-" and texto[7] == "-":
-            feriados.add(texto)
+    feriados = _fechas(bloque)
+    canon = _pais_de_feriados(lead)
+    if canon:
+        feriados |= _fechas(_tabla_paises().get(canon) or {})
     return {
         "ventanas": ventanas,
         "dias": dias - descanso,

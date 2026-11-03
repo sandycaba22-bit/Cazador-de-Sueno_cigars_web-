@@ -223,6 +223,18 @@ class TestVentanas(_Base):
         self.assertFalse(en_ventana(martes, _lead()))
         self.assertEqual(primer_hueco(martes, _lead()).astimezone(NY).date().isoformat(), "2026-11-04")
 
+    def test_accion_de_gracias_pasa_al_viernes(self):
+        os.environ.pop("B2B_VENTANAS_PATH", None)
+        gracias = datetime(2026, 11, 26, 15, 0, tzinfo=timezone.utc)
+        self.assertFalse(en_ventana(gracias, _lead()))
+        hueco = primer_hueco(gracias, _lead()).astimezone(NY)
+        self.assertEqual(hueco.date().isoformat(), "2026-11-27")
+        self.assertEqual(hueco.strftime("%H:%M"), "09:00")
+        canada = datetime(2026, 7, 1, 15, 0, tzinfo=timezone.utc)
+        lead_ca = _lead(pais="Ontario", estado="Ontario", ciudad="Toronto", lat=43.65, lon=-79.38)
+        self.assertFalse(en_ventana(canada, lead_ca))
+        self.assertEqual(primer_hueco(canada, lead_ca).astimezone(ZoneInfo("America/Toronto")).date().isoformat(), "2026-07-02")
+
 
 class TestCupo(_Base):
     def test_tope_de_30_en_24_horas_corridas(self):
